@@ -1,0 +1,59 @@
+"use client";
+
+import { cn } from "@/lib/utils";
+
+import {
+    DataTableButtonPagination,
+    type DataTableButtonPaginationProps,
+} from "./data-table-button-pagination";
+import { DataTablePageCounter } from "./data-table-page-counter";
+import { DataTableSizeSelector } from "./data-table-size-selector";
+
+type DataTablePaginationProps = {
+    showButtons?: boolean;
+    showSelector?: boolean;
+    showCounter?: boolean;
+} & Omit<React.ComponentProps<"div">, "children"> &
+    DataTableButtonPaginationProps;
+
+export function DataTablePagination({
+    className,
+    showButtons = true,
+    showSelector = true,
+    showCounter = true,
+    onNextPage,
+    onPrevPage,
+    onFirstPage,
+    onLastPage,
+    ...props
+}: DataTablePaginationProps) {
+    return (
+        <div
+            {...props}
+            className={cn(
+                "flex flex-wrap items-center justify-end gap-4 sm:gap-8",
+                className,
+            )}
+        >
+            {showSelector && (
+                <div className="flex items-center gap-2">
+                    <p className="text-sm text-zinc-200">Rows per page</p>
+                    <DataTableSizeSelector />
+                </div>
+            )}
+            {showButtons && (
+                <div className="flex items-center gap-4 sm:gap-8">
+                    {showCounter && (
+                        <DataTablePageCounter className="text-sm" />
+                    )}
+                    <DataTableButtonPagination
+                        onNextPage={onNextPage}
+                        onPrevPage={onPrevPage}
+                        onFirstPage={onFirstPage}
+                        onLastPage={onLastPage}
+                    />
+                </div>
+            )}
+        </div>
+    );
+}

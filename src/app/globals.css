@@ -1,0 +1,163 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@plugin "@tailwindcss/typography";
+
+@theme {
+    --breakpoint-2lg: 72.625rem;
+}
+
+@theme inline {
+    --color-zinc-925: oklch(0.175 0.0055 285.85);
+    --scrollbar-size: 11px;
+}
+
+html {
+    color-scheme: dark;
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-zinc-700) transparent;
+}
+
+[data-sonner-toast][data-styled="true"] {
+    --normal-bg: var(--color-zinc-900);
+    --normal-text: var(--color-zinc-50);
+    --normal-border: var(--color-zinc-800);
+    --border-radius: var(--radius-xl);
+}
+
+[data-sonner-toast][data-rich-colors="true"][data-type="error"] {
+    --error-bg: var(--color-rose-950);
+    --error-border: var(--color-rose-900);
+    --error-text: var(--color-rose-50);
+}
+
+[data-sonner-toast][data-rich-colors="true"][data-type="success"] {
+    --success-bg: var(--color-emerald-950);
+    --success-border: var(--color-emerald-900);
+    --success-text: var(--color-emerald-50);
+}
+
+.prose {
+    --tw-prose-pre-bg: var(--color-zinc-950);
+}
+
+@utility loader-bounce {
+    width: 60px;
+    aspect-ratio: 3;
+    --_g: no-repeat
+        radial-gradient(circle closest-side, currentColor 90%, transparent 100%);
+    background:
+        var(--_g) 0% 50%,
+        var(--_g) 50% 50%,
+        var(--_g) 100% 50%;
+    background-size: calc(100% / 2.5) 50%;
+    animation: loader-bounce 1s infinite linear;
+}
+
+@layer utilities {
+    .scrollbar-none::-webkit-scrollbar {
+        display: none !important;
+    }
+    .scrollbar-none {
+        -ms-overflow-style: none !important;
+        scrollbar-width: none !important;
+    }
+}
+
+@utility prose {
+    code {
+        &::before,
+        &::after {
+            content: none;
+        }
+    }
+}
+
+@custom-variant prose-inline-code {
+    &.prose :where(:not(pre) > code):not(:where([class~="not-prose"] *)) {
+        @slot;
+    }
+}
+
+.hljs {
+    color: #f7f7f7;
+}
+
+.hljs-comment {
+    color: #ffffff80;
+}
+.hljs-meta {
+    color: #fff9;
+}
+.hljs-built_in,
+.hljs-class .hljs-title {
+    color: #e9950c;
+}
+.hljs-doctag,
+.hljs-formula,
+.hljs-keyword,
+.hljs-literal {
+    color: #2e95d3;
+}
+.hljs-addition,
+.hljs-attribute,
+.hljs-meta-string,
+.hljs-regexp,
+.hljs-string {
+    color: #00a67d;
+}
+.hljs-attr,
+.hljs-number,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-pseudo,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable {
+    color: #df3079;
+}
+.hljs-bullet,
+.hljs-link,
+.hljs-selector-id,
+.hljs-symbol,
+.hljs-title {
+    color: #f22c3d;
+}
+
+@keyframes loader-bounce {
+    20% {
+        background-position:
+            0% 20%,
+            50% 50%,
+            100% 50%;
+    }
+    40% {
+        background-position:
+            0% 80%,
+            50% 20%,
+            100% 50%;
+    }
+    60% {
+        background-position:
+            0% 50%,
+            50% 80%,
+            100% 20%;
+    }
+    80% {
+        background-position:
+            0% 50%,
+            50% 50%,
+            100% 80%;
+    }
+}
+
+@keyframes animate-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
