@@ -95,6 +95,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         jwt: async ({ token, user }) => {
+            console.log("[jwt]", { token, user });
+
             if (user) {
                 token.id = user.id;
                 // @ts-expect-error role exists on DBUser but not on NextAuth User type
@@ -103,6 +105,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return token;
         },
         signIn: async ({ user, account }) => {
+            console.log("[signIn]", {
+                provider: account?.provider,
+                user,
+                account,
+            });
+
             try {
                 if (
                     account?.provider === AUTH_PROVIDER.GUEST ||
@@ -135,6 +143,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
         },
         session: async ({ session, token }) => {
+            console.log("[session]", { session, token });
+
             if (token?.id && token?.role) {
                 // @ts-expect-error when casting to DBUserId typescript complains that the type is a never
                 session.user.id = token.id as undefined as DBUserId;
