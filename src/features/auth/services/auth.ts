@@ -25,7 +25,7 @@ declare module "next-auth" {
         };
     }
 }
-//
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
         Google({
@@ -49,14 +49,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
             authorize: async credentials => {
                 try {
-                    console.log("credentials", credentials);
+                    console.log("[Credentials] credentials", credentials);
                     const validatedData = signinSchema.parse(credentials);
 
                     const user = await getUserByEmail({
                         email: validatedData.email,
                     });
 
-                    console.log("user", user);
+                    console.log("[Credentials] user", user);
 
                     if (!user || !user.password) {
                         return null;
@@ -78,7 +78,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         image: user.image,
                         role: user.role,
                     };
-                } catch {
+                } catch (error) {
+                    console.log("[Credentials] error", error);
                     return null;
                 }
             },
