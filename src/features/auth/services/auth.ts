@@ -49,11 +49,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
             authorize: async credentials => {
                 try {
+                    console.log("credentials", credentials);
                     const validatedData = signinSchema.parse(credentials);
 
                     const user = await getUserByEmail({
                         email: validatedData.email,
                     });
+
+                    console.log("user", user);
 
                     if (!user || !user.password) {
                         return null;
