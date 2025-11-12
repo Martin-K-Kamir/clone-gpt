@@ -1,4 +1,5 @@
 import { IconDots, IconShare2 } from "@tabler/icons-react";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -23,13 +24,15 @@ export function ChatViewHeaderSkeleton({
             )}
             {...props}
         >
-            <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-5">
+            <div className="flex w-full items-center gap-0.5 px-3 lg:gap-2 lg:px-5">
                 <SidebarTrigger className="-ml-1" />
                 <Separator
                     orientation="vertical"
-                    className="mx-2 data-[orientation=vertical]:h-4"
+                    className="mx-1 data-[orientation=vertical]:h-4 sm:mx-2"
                 />
-                <h1 className="text-base font-medium">CloneGPT</h1>
+                <h1 className="ml-2.5 text-base font-medium">
+                    <Link href="/">CloneGPT</Link>
+                </h1>
 
                 {showActions && (
                     <div className="ml-auto flex items-center gap-2">
