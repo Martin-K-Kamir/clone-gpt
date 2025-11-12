@@ -2,7 +2,7 @@
 
 import { IconAlertCircle, IconLoader2 } from "@tabler/icons-react";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+// import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -29,16 +29,27 @@ export function LazyImage({
     isError: initialIsError,
     ...props
 }: LazyImageProps) {
-    const [isLoaded, setIsLoaded] = useState(() => initialIsLoaded ?? false);
-    const [isError, setIsError] = useState(() => initialIsError ?? false);
+    // const [isLoaded, setIsLoaded] = useState(() => initialIsLoaded ?? false);
+    // const [isError, setIsError] = useState(() => initialIsError ?? false);
 
-    useEffect(() => {
-        setIsLoaded(initialIsLoaded ?? false);
-    }, [initialIsLoaded]);
+    // useEffect(() => {
+    //     setIsLoaded(initialIsLoaded ?? false);
+    // }, [initialIsLoaded]);
 
-    useEffect(() => {
-        setIsError(initialIsError ?? false);
-    }, [initialIsError]);
+    // useEffect(() => {
+    //     setIsError(initialIsError ?? false);
+    // }, [initialIsError]);
+
+    const isLoaded = false;
+    const isError = false;
+    const setIsLoaded = (value: boolean) => {
+        console.log(initialIsLoaded);
+        console.log(initialIsError);
+        console.log("setIsLoaded", value);
+    };
+    const setIsError = (value: boolean) => {
+        console.log("setIsError", value);
+    };
 
     return (
         <span className={cn("relative", classNameWrapper)}>

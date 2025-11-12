@@ -5,7 +5,7 @@ import Google from "next-auth/providers/google";
 
 import { AUTH_PROVIDER } from "@/features/auth/lib/constants";
 import { signinSchema } from "@/features/auth/lib/schemas";
-import { comparePassword } from "@/features/auth/lib/utils";
+import { comparePassword } from "@/features/auth/lib/utils/compare-password";
 import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { DBUserId, DBUserRole } from "@/features/user/lib/types";
 import {

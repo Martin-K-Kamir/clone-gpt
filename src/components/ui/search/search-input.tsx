@@ -27,7 +27,7 @@ export function SearchInput({
             <CommandPrimitive.Input
                 data-slot="search-input"
                 className={cn(
-                    "outline-hidden flex h-10 w-full rounded-md bg-transparent py-4 text-sm placeholder:text-zinc-400/95 disabled:cursor-not-allowed disabled:opacity-50",
+                    "outline-hidden text-base flex h-10 w-full rounded-md bg-transparent py-4 sm:text-sm placeholder:text-zinc-400/95 disabled:cursor-not-allowed disabled:opacity-50",
                     className,
                 )}
                 {...props}

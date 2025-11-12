@@ -5,7 +5,7 @@ import { AuthError } from "next-auth";
 import { AUTH_PROVIDER } from "@/features/auth/lib/constants";
 import { signupSchema } from "@/features/auth/lib/schemas";
 import type { AuthExternalProvider } from "@/features/auth/lib/types";
-import { hashPassword } from "@/features/auth/lib/utils";
+import { hashPassword } from "@/features/auth/lib/utils/hash-password";
 import {
     signIn as _signIn,
     signOut as _signOut,

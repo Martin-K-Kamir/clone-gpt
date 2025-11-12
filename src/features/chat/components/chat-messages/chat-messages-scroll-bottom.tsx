@@ -42,6 +42,7 @@ export function ChatMessagesScrollBottom({
                     });
                 }}
             >
+                <span className="sr-only">Scroll to bottom</span>
                 <IconArrowDown />
             </Button>
         </div>

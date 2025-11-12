@@ -32,14 +32,26 @@ export function useUserInitialChatsSearch(
                 ...chat,
                 href: `/chat/${chat.id}`,
             }));
+
             const sortedResults = results.sort((a, b) => {
                 return (
                     new Date(b.updatedAt).getTime() -
                     new Date(a.updatedAt).getTime()
                 );
             });
+
+            const seenChatIds = new Set<UIChat["id"]>();
+
+            const dedupedResults = sortedResults.filter(chat => {
+                if (seenChatIds.has(chat.id)) {
+                    return false;
+                }
+                seenChatIds.add(chat.id);
+                return true;
+            });
+
             return groupByTimePastPeriods(
-                sortedResults,
+                dedupedResults,
                 chat => chat.updatedAt,
             );
         },

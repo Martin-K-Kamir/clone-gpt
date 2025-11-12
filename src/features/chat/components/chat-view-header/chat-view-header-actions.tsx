@@ -55,7 +55,10 @@ export function ChatViewHeaderActions({
     });
 
     return (
-        <div className={cn("flex items-center gap-2", className)} {...props}>
+        <div
+            className={cn("flex items-center gap-0.5 sm:gap-2", className)}
+            {...props}
+        >
             {userRole === USER_ROLE.GUEST && (
                 <AuthLoginDialog>
                     <AuthLoginDialogTrigger asChild>

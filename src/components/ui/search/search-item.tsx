@@ -37,7 +37,7 @@ export function SearchItem({
         <CommandPrimitive.Item
             data-slot="search-item"
             className={cn(
-                "outline-hidden group/search-item relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-2 text-sm data-[selected=true]:bg-zinc-700/60 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-zinc-400 [&_svg]:shrink-0",
+                "outline-hidden min-h-10 sm:min-h-9 group/search-item relative flex cursor-pointer select-none items-center gap-2 rounded-lg px-2.5 py-2 text-sm data-[selected=true]:bg-zinc-700/60 [&_svg:not([class*='size-'])]:size-4 [&_svg:not([class*='text-'])]:text-zinc-400 [&_svg]:shrink-0",
                 className,
             )}
             value={itemId}
