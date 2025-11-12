@@ -35,7 +35,7 @@ export function ChatViewHeaderSkeleton({
                 </h1>
 
                 {showActions && (
-                    <div className="ml-auto flex items-center gap-2">
+                    <div className="ml-auto flex items-center gap-0.5 sm:gap-2">
                         <Button variant="ghost" size="sm">
                             <IconShare2 />
                             Share

@@ -40,9 +40,9 @@ export async function ChatViewHeader({
                 <SidebarTrigger className="-ml-1" />
                 <Separator
                     orientation="vertical"
-                    className="mx-1 sm:mx-2 data-[orientation=vertical]:h-4"
+                    className="mx-1 data-[orientation=vertical]:h-4 sm:mx-2"
                 />
-                <h1 className="text-base font-medium ml-2.5">
+                <h1 className="ml-2.5 text-base font-medium">
                     <Link href="/">CloneGPT</Link>
                 </h1>
 
