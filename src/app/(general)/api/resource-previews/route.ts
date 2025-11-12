@@ -1,6 +1,8 @@
 import * as cheerio from "cheerio";
 import { NextRequest, NextResponse } from "next/server";
 
+export const preferredRegion = "fra1";
+
 function resolveUrl(base: string, path: string) {
     try {
         return new URL(path, base).toString();

@@ -57,7 +57,8 @@ import { api } from "@/lib/api-response";
 import { removePunctuation } from "@/lib/utils";
 import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
-export const maxDuration = 30;
+export const preferredRegion = "fra1";
+export const maxDuration = 180;
 
 const MODEL: Parameters<typeof openai>[0] = "gpt-4o";
 

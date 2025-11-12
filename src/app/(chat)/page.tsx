@@ -7,6 +7,8 @@ import { assertIsDBChatId } from "@/features/chat/lib/asserts";
 
 import { getUserChatPreferences } from "@/features/user/services/db";
 
+export const preferredRegion = "fra1";
+
 export default async function Page() {
     const session = await auth();
     assertSessionExists(session);

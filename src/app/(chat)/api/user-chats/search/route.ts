@@ -8,6 +8,8 @@ import { searchUserChats } from "@/features/chat/services/db";
 import { api } from "@/lib/api-response";
 import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
+export const preferredRegion = "fra1";
+
 export async function GET(req: NextRequest) {
     try {
         const session = await auth();

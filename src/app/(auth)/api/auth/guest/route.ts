@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 
 import { signIn } from "@/features/auth/services/auth";
 
+export const preferredRegion = "fra1";
+
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const redirectUrl = searchParams.get("redirectUrl") || "/";

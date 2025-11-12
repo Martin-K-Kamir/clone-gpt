@@ -8,6 +8,8 @@ import {
     ChatSidebarSkeleton,
 } from "@/features/chat/components/chat-sidebar";
 
+export const preferredRegion = "fra1";
+
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <SidebarProvider

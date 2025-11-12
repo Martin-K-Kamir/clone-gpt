@@ -12,6 +12,8 @@ import { deleteUserFile } from "@/features/chat/services/storage";
 import { api } from "@/lib/api-response";
 import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
+export const preferredRegion = "fra1";
+
 export async function POST(request: NextRequest) {
     const [body, session] = await Promise.all([request.json(), await auth()]);
     const { files, chatId } = body;

@@ -9,6 +9,8 @@ import { api } from "@/lib/api-response";
 import { PLURAL } from "@/lib/constants";
 import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
+export const preferredRegion = "fra1";
+
 export async function GET(req: NextRequest) {
     try {
         const session = await auth();
