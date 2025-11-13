@@ -38,7 +38,7 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         console.error(error);
     }
 
-    return { title: " as" };
+    return { title: "CloneGPT" };
 }
 
 export default async function Page(props: Props) {
