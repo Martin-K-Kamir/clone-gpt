@@ -208,7 +208,7 @@ export const Markdown = ({ content, disableImageRendering }: MarkdownProps) => {
                     </th>
                 ),
                 td: ({ children }) => (
-                    <td className="border border-zinc-700 !p-3 text-zinc-200">
+                    <td className="border border-zinc-700 !p-3 text-zinc-200 [&>*]:text-zinc-50">
                         {children}
                     </td>
                 ),
