@@ -212,6 +212,7 @@ export async function updateUserChat({
 
     revalidateTag(tag.userChats(userId));
 
+    console.log("[chat db] updated user chat:", updatedData);
     return updatedData as DBChat;
 }
 

@@ -59,7 +59,7 @@ import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
 export const preferredRegion = "fra1";
 export const runtime = "nodejs";
-export const maxDuration = 180;
+export const maxDuration = 360;
 
 const MODEL: Parameters<typeof openai>[0] = "gpt-4o";
 
@@ -154,7 +154,9 @@ export async function POST(request: NextRequest) {
                     regeneratedMessageRole: body?.regeneratedMessageRole,
                 });
 
-                updateUserChat({
+                console.log("[chat] updating user chat:");
+
+                await updateUserChat({
                     chatId: resolvedChatId,
                     userId: session.user.id,
                     data: {
@@ -162,7 +164,8 @@ export async function POST(request: NextRequest) {
                     },
                 });
 
-                updateRateLimits({
+                console.log("[chat] updating rate limits:");
+                await updateRateLimits({
                     userId: session.user.id,
                     responseMessage: responseMessage,
                     filesCount: filesCountInMessage,
@@ -369,7 +372,7 @@ async function handleMessageStorage({
 }) {
     if (trigger === CHAT_TRIGGER.SUBMIT_MESSAGE) {
         console.log("[chat] storing user chat messages:");
-        storeUserChatMessages({
+        await storeUserChatMessages({
             chatId,
             userId,
             messages: [userMessage, responseMessage],
@@ -383,11 +386,15 @@ async function handleMessageStorage({
         );
         await deleteUserChatMessagesFromMessage({ messageId, chatId, userId });
         console.log("[chat] storing user chat message:", responseMessage);
-        storeUserChatMessage({ chatId, userId, message: responseMessage });
+        await storeUserChatMessage({
+            chatId,
+            userId,
+            message: responseMessage,
+        });
 
         if (regeneratedMessageRole === CHAT_ROLE.USER) {
             console.log("[chat] updating user chat message:", userMessage);
-            updateUserChatMessage({
+            await updateUserChatMessage({
                 chatId,
                 userId,
                 message: userMessage,
@@ -407,7 +414,7 @@ async function updateRateLimits({
 }) {
     if (responseMessage.metadata?.role === "assistant") {
         console.log("[chat] incrementing user messages rate limit:");
-        incrementUserMessagesRateLimit({
+        await incrementUserMessagesRateLimit({
             userId,
             increments: {
                 messages: 1,
@@ -418,7 +425,7 @@ async function updateRateLimits({
 
     if (filesCount > 0) {
         console.log("[chat] incrementing user files rate limit:");
-        incrementUserFilesRateLimit({
+        await incrementUserFilesRateLimit({
             userId,
             increments: {
                 files: filesCount,
