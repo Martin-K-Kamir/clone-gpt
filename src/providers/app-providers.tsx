@@ -16,7 +16,7 @@ import { UserCacheSyncProvider } from "@/features/user/providers";
 export function AppProviders({ children }: { children: React.ReactNode }) {
     return (
         <QueryProvider>
-            <SessionProvider>
+            <SessionProvider refetchOnWindowFocus={false}>
                 <SessionSyncProvider>
                     <ChatOffsetProvider>
                         <UserCacheSyncProvider>
