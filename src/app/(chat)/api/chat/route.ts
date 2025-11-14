@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-// import { geolocation } from "@vercel/functions";
+import { geolocation } from "@vercel/functions";
 import {
     convertToModelMessages,
     smoothStream,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
             message,
             userId: session.user.id,
         });
-        const userGeolocation = getUserGeolocation();
+        const userGeolocation = getUserGeolocation(request);
 
         const result = streamText({
             model: openai(MODEL),
@@ -319,18 +319,22 @@ async function prepareMessages({
     });
 }
 
-function getUserGeolocation() {
-    // TODO: Uncomment when ready to use real geolocation
-    // const userGeolocation = geolocation(request);
+function getUserGeolocation(request: NextRequest) {
+    if (process.env.NODE_ENV === "production") {
+        const userGeolocation = geolocation(request);
+
+        return {
+            city: userGeolocation.city,
+            country: userGeolocation.country,
+            latitude: userGeolocation.latitude,
+            longitude: userGeolocation.longitude,
+        };
+    }
     return {
         city: "Prague",
         country: "Czech Republic",
         latitude: "50.0755",
         longitude: "14.4378",
-        // city: "New York",
-        // country: "United States",
-        // latitude: "40.7128",
-        // longitude: "-74.0060",
     };
 }
 
