@@ -226,6 +226,7 @@ export const Markdown = ({ content, disableImageRendering }: MarkdownProps) => {
 
                         return (
                             <a
+                                className="text-zinc-50"
                                 href={`${href}?download=${filename}.${extension}`}
                                 download={`${filename}.${extension}`}
                             >
@@ -236,6 +237,7 @@ export const Markdown = ({ content, disableImageRendering }: MarkdownProps) => {
 
                     return (
                         <a
+                            className="text-zinc-50"
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
