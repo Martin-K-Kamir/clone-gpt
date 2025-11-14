@@ -1,4 +1,10 @@
+import { Metadata } from "next";
+
 import { AuthSignupForm } from "@/features/auth/components/auth-signup-form";
+
+export const metadata: Metadata = {
+    title: "Sign up",
+};
 
 export default function Page() {
     return (

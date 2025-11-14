@@ -1,4 +1,10 @@
+import { Metadata } from "next";
+
 import { AuthSigninForm } from "@/features/auth/components/auth-signin-form";
+
+export const metadata: Metadata = {
+    title: "Sign in",
+};
 
 export default function Page() {
     return (

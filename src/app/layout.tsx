@@ -1,7 +1,9 @@
 import { AppProviders } from "@/providers/app-providers";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 
+import { PageTitleManager } from "@/components/ui/page-title-manager";
 import { Toaster } from "@/components/ui/sonner";
 
 import { cn } from "@/lib/utils";
@@ -21,7 +23,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "CloneGPT",
+    title: {
+        default: "CloneGPT",
+        template: "%s | CloneGPT",
+    },
     description: "CloneGPT is a chatbot that can help you with your questions.",
 };
 
@@ -39,7 +44,12 @@ export default function RootLayout({
                     geistMono.variable,
                 )}
             >
-                <AppProviders>{children}</AppProviders>
+                <AppProviders>
+                    <Suspense>
+                        <PageTitleManager />
+                    </Suspense>
+                    {children}
+                </AppProviders>
                 <Toaster richColors position="top-right" duration={6_000} />
             </body>
         </html>

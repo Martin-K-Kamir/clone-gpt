@@ -32,13 +32,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         });
 
         if (chat?.title) {
-            return { title: `${chat.title} · CloneGPT` };
+            return { title: chat.title };
         }
     } catch (error) {
         console.error(error);
     }
 
-    return { title: "CloneGPT" };
+    return {};
 }
 
 export default async function Page(props: Props) {
