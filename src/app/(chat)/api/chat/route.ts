@@ -59,7 +59,7 @@ import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
 export const preferredRegion = "fra1";
 export const runtime = "nodejs";
-export const maxDuration = 360;
+export const maxDuration = 280;
 
 const MODEL: Parameters<typeof openai>[0] = "gpt-4o";
 
