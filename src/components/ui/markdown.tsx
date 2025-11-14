@@ -63,6 +63,7 @@ function MarkdownCodeBlock({
                     {extension}
                 </span>
                 <Button
+                    key={copied ? "copied" : "copy"}
                     variant="ghost"
                     size="xs"
                     className="!h-auto !bg-transparent !p-0 font-mono !text-zinc-200 disabled:opacity-70"
