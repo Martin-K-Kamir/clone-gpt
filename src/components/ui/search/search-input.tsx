@@ -20,14 +20,14 @@ export function SearchInput({
         <div
             data-slot="search-input-wrapper"
             className={cn(
-                "flex h-14 items-center gap-2 border-zinc-700 px-5 group-has-[[cmdk-list-sizer]:not(:empty)]/search:border-b",
+                "flex h-14 items-center gap-2 border-zinc-700 px-5 group-has-[[cmdk-list-sizer]:not(:empty)]/search:border-b max-lg:border-b",
             )}
         >
             <IconSearch className="size-4 shrink-0 opacity-50" />
             <CommandPrimitive.Input
                 data-slot="search-input"
                 className={cn(
-                    "outline-hidden text-base flex h-10 w-full rounded-md bg-transparent py-4 sm:text-sm placeholder:text-zinc-400/95 disabled:cursor-not-allowed disabled:opacity-50",
+                    "outline-hidden flex h-10 w-full rounded-md bg-transparent py-4 text-base placeholder:text-zinc-400/95 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm",
                     className,
                 )}
                 {...props}

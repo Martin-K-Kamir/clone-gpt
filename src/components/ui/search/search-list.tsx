@@ -26,7 +26,7 @@ export function SearchList({
         <CommandPrimitive.List
             data-slot="search-list"
             className={cn(
-                "h-[345px] max-h-[345px] scroll-py-2.5 overflow-y-auto overflow-x-hidden p-0 [&:has([cmdk-list-sizer]:not(:empty))]:p-2.5 [&>div]:space-y-2",
+                "h-full max-h-full scroll-py-2.5 overflow-y-auto overflow-x-hidden p-0 lg:h-[345px] lg:max-h-[345px] lg:[&:has([cmdk-list-sizer]:empty)]:h-0 [&:has([cmdk-list-sizer]:not(:empty))]:p-2.5 [&>div]:space-y-2",
                 isFullscreen && "h-full max-h-full",
                 isFullscreenXs && "max-xs:h-full max-xs:max-h-full",
                 isFullscreenSm && "max-sm:h-full max-sm:max-h-full",
