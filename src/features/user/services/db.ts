@@ -479,6 +479,12 @@ export async function incrementUserMessagesRateLimit({
                 currentRateLimit.tokensCounter + (increments.tokens || 0),
         },
     });
+
+    console.log("[user db] incremented user messages rate limit:", {
+        userId,
+        increments,
+        currentRateLimit,
+    });
 }
 
 export async function getUserFilesRateLimit({ userId }: WithUserId) {
@@ -664,5 +670,10 @@ export async function incrementUserFilesRateLimit({
             filesCounter:
                 currentRateLimit.filesCounter + (increments.files || 0),
         },
+    });
+    console.log("[user db] incremented user files rate limit:", {
+        userId,
+        increments,
+        currentRateLimit,
     });
 }

@@ -58,6 +58,7 @@ import { removePunctuation } from "@/lib/utils";
 import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
 export const preferredRegion = "fra1";
+export const runtime = "nodejs";
 export const maxDuration = 180;
 
 const MODEL: Parameters<typeof openai>[0] = "gpt-4o";
@@ -71,6 +72,9 @@ export async function POST(request: NextRequest) {
         assertIsChatRequestBodyValid(requestBody);
         assertSessionExists(session);
 
+        console.log("[chat] request body:", requestBody);
+        console.log("[chat] session:", session);
+
         const {
             message,
             userChatPreferences,
@@ -83,11 +87,15 @@ export async function POST(request: NextRequest) {
         const filesCountInMessage = countFilesInMessage(message);
         const hasFilesInMessage = checkForFilesInMessage(message);
 
+        console.log("[chat] files count in message:", filesCountInMessage);
+        console.log("[chat] has files in message:", hasFilesInMessage);
+
         const rateLimitError = await checkRateLimits({
             userId: session.user.id,
             userRole: session.user.role,
             checkFiles: hasFilesInMessage,
         });
+        console.log("[chat] rate limit error:", rateLimitError);
         if (rateLimitError) return rateLimitError;
 
         const { chatId: resolvedChatId, error: chatAccessError } =
@@ -98,6 +106,7 @@ export async function POST(request: NextRequest) {
                 message,
                 userId: session.user.id,
             });
+        console.log("[chat] chat access error:", chatAccessError);
         if (chatAccessError) return chatAccessError;
 
         const validatedMessages = await prepareMessages({
@@ -105,7 +114,9 @@ export async function POST(request: NextRequest) {
             message,
             userId: session.user.id,
         });
+        console.log("[chat] validated messages:", validatedMessages);
         const userGeolocation = getUserGeolocation(request);
+        console.log("[chat] user geolocation:", userGeolocation);
 
         const result = streamText({
             model: openai(MODEL),
@@ -132,6 +143,7 @@ export async function POST(request: NextRequest) {
             generateMessageId: () => crypto.randomUUID(),
 
             onFinish: async ({ responseMessage }) => {
+                console.log("[chat] response message:", responseMessage);
                 await handleMessageStorage({
                     chatId: resolvedChatId,
                     messageId,
@@ -356,6 +368,7 @@ async function handleMessageStorage({
     regeneratedMessageRole: string | undefined;
 }) {
     if (trigger === CHAT_TRIGGER.SUBMIT_MESSAGE) {
+        console.log("[chat] storing user chat messages:");
         storeUserChatMessages({
             chatId,
             userId,
@@ -364,10 +377,16 @@ async function handleMessageStorage({
     }
 
     if (trigger === CHAT_TRIGGER.REGENERATE_MESSAGE && messageId) {
+        console.log(
+            "[chat] deleting user chat messages from message:",
+            messageId,
+        );
         await deleteUserChatMessagesFromMessage({ messageId, chatId, userId });
+        console.log("[chat] storing user chat message:", responseMessage);
         storeUserChatMessage({ chatId, userId, message: responseMessage });
 
         if (regeneratedMessageRole === CHAT_ROLE.USER) {
+            console.log("[chat] updating user chat message:", userMessage);
             updateUserChatMessage({
                 chatId,
                 userId,
@@ -387,6 +406,7 @@ async function updateRateLimits({
     filesCount: number;
 }) {
     if (responseMessage.metadata?.role === "assistant") {
+        console.log("[chat] incrementing user messages rate limit:");
         incrementUserMessagesRateLimit({
             userId,
             increments: {
@@ -397,6 +417,7 @@ async function updateRateLimits({
     }
 
     if (filesCount > 0) {
+        console.log("[chat] incrementing user files rate limit:");
         incrementUserFilesRateLimit({
             userId,
             increments: {

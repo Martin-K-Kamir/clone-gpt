@@ -455,6 +455,7 @@ export async function storeUserChatMessage({
     revalidateTag(tag.chatMessages(chatId));
     revalidateTag(tag.userChat(chatId));
     revalidateTag(tag.userChatsSearch(userId));
+    console.log("[chat db] stored user chat message:", message);
 }
 
 export async function storeUserChatMessages({
@@ -486,6 +487,7 @@ export async function storeUserChatMessages({
     revalidateTag(tag.chatMessages(chatId));
     revalidateTag(tag.userChat(chatId));
     revalidateTag(tag.userChatsSearch(userId));
+    console.log("[chat db] stored user chat messages:", messages);
 }
 
 export async function updateUserChatMessage({
@@ -514,6 +516,7 @@ export async function updateUserChatMessage({
     revalidateTag(tag.chatMessages(chatId));
     revalidateTag(tag.userChat(chatId));
     revalidateTag(tag.userChatsSearch(userId));
+    console.log("[chat db] updated user chat message:", message);
 }
 
 export async function deleteUserChatMessagesFromMessage({
@@ -547,6 +550,10 @@ export async function deleteUserChatMessagesFromMessage({
     revalidateTag(tag.chatMessages(chatId));
     revalidateTag(tag.userChat(chatId));
     revalidateTag(tag.userChatsSearch(userId));
+    console.log(
+        "[chat db] deleted user chat messages from message:",
+        messageId,
+    );
 }
 
 export async function deleteAllUserChats({ userId }: WithUserId) {
