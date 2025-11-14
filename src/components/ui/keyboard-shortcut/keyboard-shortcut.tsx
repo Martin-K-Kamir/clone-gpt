@@ -39,6 +39,8 @@ export function KeyboardShortcut({
 
     useEventListener("keydown", event => {
         if (shouldTriggerShortcut(event, parsedShortcuts)) {
+            event.preventDefault();
+            event.stopPropagation();
             onShortcut?.(event, os, os ? (shortcuts[os] ?? null) : null);
         }
     });
