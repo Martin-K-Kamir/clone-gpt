@@ -38,8 +38,8 @@ import {
     deleteUserChatMessagesFromMessage,
     duplicateUserChat,
     getUserChatById,
-    storeUserAndResponseChatMessages,
     storeUserChatMessage,
+    storeUserChatMessages,
     uncachedGetUserChatMessages,
     updateUserChat,
     updateUserChatMessage,
@@ -372,11 +372,10 @@ async function handleMessageStorage({
 }) {
     if (trigger === CHAT_TRIGGER.SUBMIT_MESSAGE) {
         console.log("[chat] storing user chat messages:");
-        await storeUserAndResponseChatMessages({
+        await storeUserChatMessages({
             chatId,
             userId,
-            userMessage,
-            responseMessage,
+            messages: [userMessage, responseMessage],
         });
     }
 

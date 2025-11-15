@@ -472,7 +472,6 @@ export async function storeUserChatMessages({
             chatId,
             userId,
             id: message.id,
-            createdAt: message.metadata?.createdAt ?? new Date().toISOString(),
             role: message.role as DBChatMessageRole,
             metadata: message.metadata as Json,
             parts: message.parts as Json[],
