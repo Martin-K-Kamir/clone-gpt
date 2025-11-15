@@ -467,12 +467,16 @@ export async function storeUserChatMessages({
     assertIsDBChatId(chatId);
     assertIsDBUserId(userId);
 
-    const { error } = await supabase.from("messages").insert(
-        messages.map(message => ({
+    const baseTimestamp = Date.now();
+
+    const rowsToInsert = messages.map((message, index) => {
+        const fallbackCreatedAt = new Date(baseTimestamp + index).toISOString();
+
+        return {
             chatId,
             userId,
             id: message.id,
-            createdAt: message.metadata?.createdAt ?? new Date().toISOString(),
+            createdAt: message.metadata?.createdAt ?? fallbackCreatedAt,
             role: message.role as DBChatMessageRole,
             metadata: message.metadata as Json,
             parts: message.parts as Json[],
@@ -480,8 +484,10 @@ export async function storeUserChatMessages({
                 .filter(part => part.type === "text")
                 .map(part => part.text)
                 .join(""),
-        })),
-    );
+        };
+    });
+
+    const { error } = await supabase.from("messages").insert(rowsToInsert);
 
     if (error) throw new Error("Failed to store chat message");
 
