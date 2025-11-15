@@ -10,11 +10,7 @@ import type {
     DBChatVisibility,
     UIChatMessage,
 } from "@/features/chat/lib/types";
-import {
-    ChatProvider,
-    // useChatMessagesContext,
-    // useChatStatusContext,
-} from "@/features/chat/providers";
+import { ChatProvider } from "@/features/chat/providers";
 
 import type {
     DBUserChatPreferences,
@@ -27,15 +23,6 @@ export function ChatViewBodyContent({
     className,
     ...props
 }: Omit<React.ComponentProps<"div">, "children">) {
-    // const { messages } = useChatMessagesContext();
-    // const { status, error } = useChatStatusContext();
-
-    // console.log({
-    //     messages,
-    //     status,
-    //     error,
-    // });
-
     return (
         <ChatDragAndDrop
             className={cn(

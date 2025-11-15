@@ -1,7 +1,7 @@
 import { assertSessionExists } from "@/features/auth/lib/asserts";
 import { auth } from "@/features/auth/services/auth";
 
-import { ChatViewBody } from "@/features/chat/components/chat-view-body/chat-view-body";
+import { ChatViewBodyWrapper as ChatViewBody } from "@/features/chat/components/chat-view-body";
 import { ChatViewHeader } from "@/features/chat/components/chat-view-header";
 import { assertIsDBChatId } from "@/features/chat/lib/asserts";
 
@@ -24,8 +24,8 @@ export default async function Page() {
         <>
             <ChatViewHeader />
             <ChatViewBody
+                key={`chat-view-body-wrapper-${chatId}`}
                 isNewChat
-                key={chatId}
                 userId={session.user.id}
                 chatId={chatId}
                 userChatPreferences={userChatPreferences}
