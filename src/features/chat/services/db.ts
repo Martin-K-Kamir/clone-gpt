@@ -467,16 +467,12 @@ export async function storeUserChatMessages({
     assertIsDBChatId(chatId);
     assertIsDBUserId(userId);
 
-    const baseTimestamp = Date.now();
-
-    const rowsToInsert = messages.map((message, index) => {
-        const fallbackCreatedAt = new Date(baseTimestamp + index).toISOString();
-
-        return {
+    const { error } = await supabase.from("messages").insert(
+        messages.map(message => ({
             chatId,
             userId,
             id: message.id,
-            createdAt: message.metadata?.createdAt ?? fallbackCreatedAt,
+            createdAt: message.metadata?.createdAt ?? new Date().toISOString(),
             role: message.role as DBChatMessageRole,
             metadata: message.metadata as Json,
             parts: message.parts as Json[],
@@ -484,10 +480,8 @@ export async function storeUserChatMessages({
                 .filter(part => part.type === "text")
                 .map(part => part.text)
                 .join(""),
-        };
-    });
-
-    const { error } = await supabase.from("messages").insert(rowsToInsert);
+        })),
+    );
 
     if (error) throw new Error("Failed to store chat message");
 
@@ -495,6 +489,64 @@ export async function storeUserChatMessages({
     revalidateTag(tag.userChat(chatId));
     revalidateTag(tag.userChatsSearch(userId));
     console.log("[chat db] stored user chat messages:", messages);
+}
+
+export async function storeUserAndResponseChatMessages({
+    userMessage,
+    responseMessage,
+    chatId,
+    userId,
+}: WithChatId &
+    WithUserId & {
+        userMessage: UIChatMessage;
+        responseMessage: UIChatMessage;
+    }) {
+    assertIsDBChatId(chatId);
+    assertIsDBUserId(userId);
+
+    const { error: userMessageError } = await supabase.from("messages").insert({
+        chatId,
+        userId,
+        id: userMessage.id,
+        createdAt: userMessage.metadata?.createdAt ?? new Date().toISOString(),
+        role: userMessage.role as DBChatMessageRole,
+        metadata: userMessage.metadata as Json,
+        parts: userMessage.parts as Json[],
+        content: userMessage.parts
+            .filter(part => part.type === "text")
+            .map(part => part.text)
+            .join(""),
+    });
+
+    if (userMessageError) throw new Error("Failed to store user chat message");
+
+    const { error: responseMessageError } = await supabase
+        .from("messages")
+        .insert({
+            chatId,
+            userId,
+            id: responseMessage.id,
+            createdAt:
+                responseMessage.metadata?.createdAt ?? new Date().toISOString(),
+            role: responseMessage.role as DBChatMessageRole,
+            metadata: responseMessage.metadata as Json,
+            parts: responseMessage.parts as Json[],
+            content: responseMessage.parts
+                .filter(part => part.type === "text")
+                .map(part => part.text)
+                .join(""),
+        });
+
+    if (responseMessageError)
+        throw new Error("Failed to store response chat message");
+
+    revalidateTag(tag.chatMessages(chatId));
+    revalidateTag(tag.userChat(chatId));
+    revalidateTag(tag.userChatsSearch(userId));
+    console.log("[chat db] stored user and assistant chat messages:", {
+        userMessage,
+        responseMessage,
+    });
 }
 
 export async function updateUserChatMessage({
