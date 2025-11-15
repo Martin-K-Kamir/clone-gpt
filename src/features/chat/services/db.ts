@@ -508,7 +508,6 @@ export async function storeUserAndResponseChatMessages({
         chatId,
         userId,
         id: userMessage.id,
-        createdAt: userMessage.metadata?.createdAt ?? new Date().toISOString(),
         role: userMessage.role as DBChatMessageRole,
         metadata: userMessage.metadata as Json,
         parts: userMessage.parts as Json[],
@@ -526,8 +525,6 @@ export async function storeUserAndResponseChatMessages({
             chatId,
             userId,
             id: responseMessage.id,
-            createdAt:
-                responseMessage.metadata?.createdAt ?? new Date().toISOString(),
             role: responseMessage.role as DBChatMessageRole,
             metadata: responseMessage.metadata as Json,
             parts: responseMessage.parts as Json[],
