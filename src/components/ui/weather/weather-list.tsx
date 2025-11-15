@@ -3,7 +3,8 @@
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { TEMPERATURE_SYSTEM, WEATHER_PERIODS } from "@/lib/constants";
+
+import { TEMPERATURE_SYSTEM, WEATHER_PERIOD } from "@/lib/constants";
 import type {
     TemperatureSystem,
     TimeFormat,
@@ -31,13 +32,13 @@ export function WeatherList({
     timeFormat,
     className,
     classNameWrapper,
-    initialItemsCount = period === WEATHER_PERIODS.UPCOMING ? 7 : 8,
+    initialItemsCount = period === WEATHER_PERIOD.UPCOMING ? 7 : 8,
     initialTemperatureSystem = TEMPERATURE_SYSTEM.CELSIUS,
     ...props
 }: WeatherListProps) {
     const [showMore, setShowMore] = useState(false);
     const groupedForecasts =
-        period === WEATHER_PERIODS.UPCOMING
+        period === WEATHER_PERIOD.UPCOMING
             ? groupForecastsByDay(forecasts)
             : forecasts;
     const displayedForecasts = showMore

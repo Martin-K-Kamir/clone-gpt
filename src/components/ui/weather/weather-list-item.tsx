@@ -1,6 +1,6 @@
 "use client";
 
-import { TEMPERATURE_SYSTEM, WEATHER_PERIODS } from "@/lib/constants";
+import { TEMPERATURE_SYSTEM, WEATHER_PERIOD } from "@/lib/constants";
 import type {
     TemperatureSystem,
     TimeFormat,
@@ -72,7 +72,7 @@ export function WeatherListItem({
                 />
 
                 <div>
-                    {period === WEATHER_PERIODS.CURRENT && (
+                    {period === WEATHER_PERIOD.CURRENT && (
                         <WeatherTemperature
                             item={item}
                             temperatureSystem={temperatureSystem}
@@ -81,7 +81,7 @@ export function WeatherListItem({
                         />
                     )}
 
-                    {period === WEATHER_PERIODS.UPCOMING && (
+                    {period === WEATHER_PERIOD.UPCOMING && (
                         <>
                             <WeatherTemperature
                                 item={item}

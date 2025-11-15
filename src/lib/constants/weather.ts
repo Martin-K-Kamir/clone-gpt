@@ -10,12 +10,12 @@ export const TEMPERATURE_SYSTEM = {
 
 export const TEMPERATURE_SYSTEM_LIST = objectValuesToTuple(TEMPERATURE_SYSTEM);
 
-export const WEATHER_PERIODS = {
+export const WEATHER_PERIOD = {
     CURRENT: "current",
     UPCOMING: "upcoming",
 } as const;
 
-export const WEATHER_PERIODS_LIST = objectValuesToTuple(WEATHER_PERIODS);
+export const WEATHER_PERIODS_LIST = objectValuesToTuple(WEATHER_PERIOD);
 
 export const WEATHER_ICON_BASE_CODES = [
     "01",

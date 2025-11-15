@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 
-import { TIME_OF_DAY, WEATHER_PERIODS } from "@/lib/constants";
+import { TIME_OF_DAY, WEATHER_PERIOD } from "@/lib/constants";
 import type {
     TemperatureSystem,
     UIWeatherItem,
@@ -43,7 +43,7 @@ export function createWeatherDescription({
     });
 
     const weatherDescription =
-        period === WEATHER_PERIODS.CURRENT
+        period === WEATHER_PERIOD.CURRENT
             ? `Weather at ${timeLabel}: ${temp} degrees ${temperatureSystem}, ${condition}${isDay ? " during the day" : " at night"}`
             : `Weather for ${dayLabel}: ${tempMax} to ${tempMin} degrees ${temperatureSystem}, ${condition}`;
 

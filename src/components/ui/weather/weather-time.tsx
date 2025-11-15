@@ -2,7 +2,7 @@
 
 import { format } from "date-fns";
 
-import { TIME_FORMATS, WEATHER_PERIODS } from "@/lib/constants";
+import { TIME_FORMATS, WEATHER_PERIOD } from "@/lib/constants";
 import type { TimeFormat, UIWeatherItem, WeatherPeriod } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,10 @@ export function WeatherTime({
 }: WeatherTimeProps) {
     const date = new Date(item.date);
     const dayLabel = format(date, "M.d");
-    const timeLabel = format(date, "HH:mm");
+    const timeLabel = format(
+        date,
+        timeFormat === TIME_FORMATS.HOUR_24 ? "HH:mm" : "h:mm a",
+    );
 
     return (
         <time
@@ -35,7 +38,7 @@ export function WeatherTime({
             aria-label={`Time: ${dayLabel} ${timeLabel}`}
             {...props}
         >
-            {period === WEATHER_PERIODS.CURRENT ? timeLabel : dayLabel}
+            {period === WEATHER_PERIOD.CURRENT ? timeLabel : dayLabel}
         </time>
     );
 }

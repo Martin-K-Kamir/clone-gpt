@@ -1,6 +1,6 @@
 "use client";
 
-import { TEMPERATURE_SYSTEM, WEATHER_PERIODS } from "@/lib/constants";
+import { TEMPERATURE_SYSTEM, WEATHER_PERIOD } from "@/lib/constants";
 import type {
     TemperatureSystem,
     TimeFormat,
@@ -69,7 +69,7 @@ export function WeatherHeader({
                 <WeatherOptionsDropdown
                     temperatureSystem={temperatureSystem}
                     timeFormat={timeFormat}
-                    showTimeFormat={period === WEATHER_PERIODS.CURRENT}
+                    showTimeFormat={period === WEATHER_PERIOD.CURRENT}
                     onChangeTemperatureSystem={onChangeTemperatureSystem}
                     onChangeTimeFormat={onChangeTimeFormat}
                 />
