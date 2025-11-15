@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button";
 
-import { useSessionSync } from "@/features/auth/providers";
+import { useSessionSyncContext } from "@/features/auth/providers";
 
 export function AuthLogoutButton({
     onClick,
     asChild,
     ...props
 }: React.ComponentProps<typeof Button>) {
-    const { signOutWithSync } = useSessionSync();
+    const { signOutWithSync } = useSessionSyncContext();
 
     return (
         <Button

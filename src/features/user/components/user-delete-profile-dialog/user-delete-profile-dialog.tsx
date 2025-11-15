@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
-import { useSessionSync } from "@/features/auth/providers";
+import { useSessionSyncContext } from "@/features/auth/providers";
 
 import { deleteAllUserChats } from "@/features/chat/services/actions";
 
@@ -38,7 +38,7 @@ export function UserDeleteProfileDialog({
     onDeleteError,
     onDeleteSuccess,
 }: UserDeleteProfileDialogProps) {
-    const { signOutWithSync } = useSessionSync();
+    const { signOutWithSync } = useSessionSyncContext();
     const [open, setOpen] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
 

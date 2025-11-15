@@ -2,6 +2,7 @@
 
 import { IconDotsVertical } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -16,6 +17,7 @@ import {
 } from "@/features/user/components/user-sidebar-item-dropdown-menu";
 import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { UIUser } from "@/features/user/lib/types";
+import { useUserSessionContext } from "@/features/user/providers";
 import { getUser } from "@/features/user/services/api";
 
 import { tag } from "@/lib/cache-tags";
@@ -25,21 +27,29 @@ type UserSidebarItemClientProps = {
     user: UIUser;
 };
 
-export function UserSidebarItemClient({ user }: UserSidebarItemClientProps) {
-    const { data: userData } = useQuery({
-        queryKey: [tag.user(user.id)],
+export function UserSidebarItemClient({
+    user: initialUser,
+}: UserSidebarItemClientProps) {
+    const { setUser } = useUserSessionContext();
+
+    const { data: user } = useQuery({
+        queryKey: [tag.user(initialUser.id)],
         queryFn: getUser,
-        initialData: user,
-        enabled: !!user.id,
+        initialData: initialUser,
+        enabled: !!initialUser.id,
     });
 
-    const isGuest = userData.role === USER_ROLE.GUEST;
+    useEffect(() => {
+        setUser(user);
+    }, [user, setUser]);
+
+    const isGuest = user.role === USER_ROLE.GUEST;
     const isUserOrAdmin =
-        userData.role === USER_ROLE.ADMIN || userData.role === USER_ROLE.USER;
+        user.role === USER_ROLE.ADMIN || user.role === USER_ROLE.USER;
 
     return (
         <UserSidebarItemDropdownMenu
-            user={userData}
+            user={user}
             showSettings={!isGuest}
             showLogout={!isGuest}
             showLogin={!isUserOrAdmin}
@@ -49,23 +59,23 @@ export function UserSidebarItemClient({ user }: UserSidebarItemClientProps) {
                     <UserSidebarItemDropdownMenuTrigger asChild>
                         <SidebarMenuButton size="lg" className="gap-3">
                             <Avatar className="size-8 rounded-lg">
-                                {userData.image && (
+                                {user.image && (
                                     <AvatarImage
-                                        src={userData.image}
-                                        alt={userData.name}
+                                        src={user.image}
+                                        alt={user.name}
                                     />
                                 )}
                                 <AvatarFallback className="rounded-lg">
-                                    {getFirstTwoCapitalLetters(userData.name)}
+                                    {getFirstTwoCapitalLetters(user.name)}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-medium text-zinc-50">
-                                    {userData.name}
+                                    {user.name}
                                 </span>
                                 {!isGuest && (
                                     <span className="truncate text-xs text-zinc-200">
-                                        {userData.email}
+                                        {user.email}
                                     </span>
                                 )}
                             </div>

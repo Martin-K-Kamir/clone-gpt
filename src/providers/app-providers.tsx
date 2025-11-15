@@ -1,7 +1,6 @@
 "use client";
 
 import { QueryProvider } from "@/providers/query-provider";
-import { SessionProvider } from "next-auth/react";
 
 import { SessionSyncProvider } from "@/features/auth/providers";
 
@@ -11,12 +10,16 @@ import {
     ChatSidebarProvider,
 } from "@/features/chat/providers";
 
-import { UserCacheSyncProvider } from "@/features/user/providers";
+import {
+    UserCacheSyncProvider,
+    UserSessionProvider,
+} from "@/features/user/providers";
+import "@/features/user/providers";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
     return (
         <QueryProvider>
-            <SessionProvider refetchOnWindowFocus={false}>
+            <UserSessionProvider>
                 <SessionSyncProvider>
                     <ChatOffsetProvider>
                         <UserCacheSyncProvider>
@@ -28,7 +31,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
                         </UserCacheSyncProvider>
                     </ChatOffsetProvider>
                 </SessionSyncProvider>
-            </SessionProvider>
+            </UserSessionProvider>
         </QueryProvider>
     );
 }

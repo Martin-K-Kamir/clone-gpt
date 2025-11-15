@@ -1,19 +1,23 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useRef,
-} from "react";
-import { toast } from "sonner";
+import { createContext, useCallback, useContext, useMemo } from "react";
 
 import { signOut } from "@/features/auth/services/actions";
 
+import { useUserSessionContext } from "@/features/user/providers";
+
+import type { SyncActionProps } from "@/lib/types";
+import { tabScope } from "@/lib/utils";
+
+import { useBroadcastChannel } from "@/hooks";
+
+type LogoutAction = {
+    type: "LOGOUT";
+};
+
 type SessionSyncContextValue = {
-    signOutWithSync: () => Promise<void>;
+    signOutWithSync: (props?: SyncActionProps) => Promise<void>;
 };
 
 export const SessionSyncContext = createContext<SessionSyncContextValue | null>(
@@ -25,60 +29,54 @@ export function SessionSyncProvider({
 }: {
     children: React.ReactNode;
 }) {
-    const broadcastChannel = useRef<BroadcastChannel | null>(null);
     const queryClient = useQueryClient();
+    const { setUser } = useUserSessionContext();
 
-    useEffect(() => {
-        if (
-            typeof window !== "undefined" &&
-            typeof BroadcastChannel !== "undefined"
-        ) {
-            try {
-                broadcastChannel.current = new BroadcastChannel("auth-sync");
+    const { postMessage } = useBroadcastChannel<LogoutAction>({
+        channelName: "auth-sync",
+        onMessage: useCallback(
+            (message: LogoutAction) => {
+                if (message.type === "LOGOUT") {
+                    signOut();
+                    queryClient.clear();
+                    setUser(null);
+                }
+            },
+            [queryClient, setUser],
+        ),
+    });
 
-                broadcastChannel.current.onmessage = (event: MessageEvent) => {
-                    if (event.data.type === "LOGOUT") {
-                        signOut();
-                        queryClient.clear();
-                    }
-                };
-            } catch {
-                toast.error("Failed to initialize session sync");
-            }
-        }
-
-        return () => {
-            broadcastChannel.current?.close();
-        };
-    }, [queryClient]);
-
-    const signOutWithSync = useCallback(async () => {
-        if (
-            typeof window !== "undefined" &&
-            typeof BroadcastChannel !== "undefined"
-        ) {
-            try {
-                const channel = new BroadcastChannel("auth-sync");
-                channel.postMessage({ type: "LOGOUT" });
-                channel.close();
-            } catch (error) {
-                console.log("BroadcastChannel failed:", error);
-            }
-        }
-    }, []);
-
-    return (
-        <SessionSyncContext value={{ signOutWithSync }}>
-            {children}
-        </SessionSyncContext>
+    const signOutWithSync = useCallback(
+        async ({ scope }: SyncActionProps = {}) => {
+            tabScope(scope, {
+                thisTab: async () => {
+                    signOut();
+                    queryClient.clear();
+                    setUser(null);
+                },
+                otherTabs: () => {
+                    postMessage({ type: "LOGOUT" });
+                },
+            });
+        },
+        [queryClient, postMessage, setUser],
     );
+
+    const value = useMemo(
+        () => ({
+            signOutWithSync,
+        }),
+        [signOutWithSync],
+    );
+
+    return <SessionSyncContext value={value}>{children}</SessionSyncContext>;
 }
 
-export function useSessionSync() {
+export function useSessionSyncContext() {
     const context = useContext(SessionSyncContext);
     if (!context) {
         throw new Error(
-            "useSessionSync must be used within a SessionSyncProvider",
+            "useSessionSyncContext must be used within a SessionSyncProvider",
         );
     }
     return context;
