@@ -26,24 +26,37 @@ type ChatViewBodyWrapperProps = {
     userChatPreferences: DBUserChatPreferences | null;
 };
 
-export function ChatViewBodyWrapper(props: ChatViewBodyWrapperProps) {
+export function ChatViewBodyWrapper({
+    chatId,
+    ...props
+}: ChatViewBodyWrapperProps) {
     const pathname = usePathname();
     const [remountKey, setRemountKey] = useState(0);
+    const [newChatId, setNewChatId] = useState<DBChatId>(
+        () => crypto.randomUUID() as DBChatId,
+    );
     const prevPathnameRef = useRef(pathname);
-    const prevChatIdRef = useRef(props.chatId);
+    const prevChatIdRef = useRef(chatId);
 
     useEffect(() => {
         // Force remount when pathname changes to "/" or when chatId changes
         if (
             pathname === "/" &&
             (prevPathnameRef.current !== pathname ||
-                prevChatIdRef.current !== props.chatId)
+                prevChatIdRef.current !== chatId)
         ) {
             setRemountKey(prev => prev + 1);
+            setNewChatId(crypto.randomUUID() as DBChatId);
         }
         prevPathnameRef.current = pathname;
-        prevChatIdRef.current = props.chatId;
-    }, [pathname, props.chatId]);
+        prevChatIdRef.current = chatId;
+    }, [pathname, chatId]);
 
-    return <ChatViewBody key={`${props.chatId}-${remountKey}`} {...props} />;
+    return (
+        <ChatViewBody
+            key={`${chatId}-${remountKey}`}
+            chatId={newChatId}
+            {...props}
+        />
+    );
 }
