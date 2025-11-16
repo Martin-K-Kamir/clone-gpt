@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 import type { UIChat } from "@/features/chat/lib/types";
+import { getChatIdFromPathname } from "@/features/chat/lib/utils";
 import { useChatCacheSyncContext } from "@/features/chat/providers";
 import { deleteUserChatById } from "@/features/chat/services/actions";
 
@@ -31,9 +32,11 @@ export function ChatDeleteDialog({
     const chatCacheSync = useChatCacheSyncContext();
     const router = useRouter();
     const params = useParams();
+    const pathname = usePathname();
+    const chatIdFromPathname = getChatIdFromPathname(pathname);
 
     async function handleDelete() {
-        if (params.chatId === chat.id) {
+        if (chatIdFromPathname === chat.id || params.chatId === chat.id) {
             router.replace("/");
         }
 

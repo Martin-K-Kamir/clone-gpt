@@ -61,6 +61,7 @@ export function ChatDeleteUserChatsDialog({
         onDeleteSuccess?.(response.message);
         chatCacheSync.clearChats();
         chatCacheSync.clearInitialUserChatsSearch();
+        chatCacheSync.invalidateSharedChats();
         setIsDeleting(false);
         setOpen(false);
 
