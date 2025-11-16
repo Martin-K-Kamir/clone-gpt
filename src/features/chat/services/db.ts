@@ -135,6 +135,7 @@ export async function duplicateUserChat({
             userId,
             chatId: newChatId,
             messages: duplicatedMessages,
+            preserveCreatedAt: true,
         });
     }
 
@@ -463,24 +464,35 @@ export async function storeUserChatMessages({
     messages,
     chatId,
     userId,
-}: WithMessages & WithChatId & WithUserId) {
+    preserveCreatedAt = false,
+}: WithMessages &
+    WithChatId &
+    WithUserId & {
+        preserveCreatedAt?: boolean;
+    }) {
     assertIsDBChatId(chatId);
     assertIsDBUserId(userId);
 
     const { error } = await supabase.from("messages").insert(
-        messages.map((message, index) => ({
-            chatId,
-            userId,
-            createdAt: new Date(Date.now() + index * 1000).toISOString(),
-            id: message.id,
-            role: message.role as DBChatMessageRole,
-            metadata: message.metadata as Json,
-            parts: message.parts as Json[],
-            content: message.parts
-                .filter(part => part.type === "text")
-                .map(part => part.text)
-                .join(""),
-        })),
+        messages.map((message, index) => {
+            const createdAt = new Date(Date.now() + index * 1000).toISOString();
+
+            return {
+                chatId,
+                userId,
+                createdAt: preserveCreatedAt
+                    ? (message.metadata?.createdAt ?? createdAt)
+                    : createdAt,
+                id: message.id,
+                role: message.role as DBChatMessageRole,
+                metadata: message.metadata as Json,
+                parts: message.parts as Json[],
+                content: message.parts
+                    .filter(part => part.type === "text")
+                    .map(part => part.text)
+                    .join(""),
+            };
+        }),
     );
 
     if (error) throw new Error("Failed to store chat message");
