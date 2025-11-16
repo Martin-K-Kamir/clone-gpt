@@ -24,7 +24,6 @@ import type {
     WithDownvote,
     WithIsOwner,
     WithMessage,
-    WithMessages,
     WithNewChatId,
     WithOptionalVerifyChatAccess,
     WithUpvote,
@@ -465,24 +464,38 @@ export async function storeUserChatMessages({
     chatId,
     userId,
     preserveCreatedAt = false,
-}: WithMessages &
-    WithChatId &
+}: WithChatId &
     WithUserId & {
         preserveCreatedAt?: boolean;
+        messages: (UIChatMessage & { createdAt?: string })[];
     }) {
     assertIsDBChatId(chatId);
     assertIsDBUserId(userId);
 
+    console.log(
+        "[chat db] storing user chat messages --------------:",
+        JSON.stringify(messages, null, 2),
+    );
+
     const { error } = await supabase.from("messages").insert(
         messages.map((message, index) => {
-            const createdAt = new Date(Date.now() + index * 1000).toISOString();
+            const fallbackCreatedAt = new Date(
+                Date.now() + index * 1000,
+            ).toISOString();
+
+            const messageCreatedAt =
+                message.createdAt ??
+                message.metadata?.createdAt ??
+                fallbackCreatedAt;
+
+            const createdAt = preserveCreatedAt
+                ? messageCreatedAt
+                : fallbackCreatedAt;
 
             return {
                 chatId,
                 userId,
-                createdAt: preserveCreatedAt
-                    ? (message.metadata?.createdAt ?? createdAt)
-                    : createdAt,
+                createdAt,
                 id: message.id,
                 role: message.role as DBChatMessageRole,
                 metadata: message.metadata as Json,
