@@ -5,6 +5,12 @@ import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
     title: "Logged out",
+    description:
+        "You have been logged out of CloneGPT. You can log in again to continue using the application.",
+    robots: {
+        index: false,
+        follow: false,
+    },
 };
 
 export default function Page() {

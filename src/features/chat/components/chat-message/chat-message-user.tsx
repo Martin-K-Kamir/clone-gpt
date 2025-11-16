@@ -58,7 +58,7 @@ export function ChatMessageUser({
 
     return (
         <div {...props}>
-            <h5 className="sr-only">You said:</h5>
+            <p className="sr-only">You said:</p>
 
             <div
                 className={cn(

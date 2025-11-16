@@ -32,13 +32,19 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
         });
 
         if (chat?.title) {
-            return { title: chat.title };
+            return {
+                title: chat.title,
+                description: `Chat conversation: ${chat.title}. Continue your conversation with CloneGPT.`,
+            };
         }
     } catch (error) {
         console.error(error);
     }
 
-    return {};
+    return {
+        title: "Chat",
+        description: "Continue your conversation with CloneGPT.",
+    };
 }
 
 export default async function Page(props: Props) {

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 type ChatSidebarHistoryLabelProps = {
     animate?: boolean;
     children: React.ReactNode;
-} & React.ComponentProps<typeof motion.div>;
+} & React.ComponentProps<typeof motion.li>;
 
 export function ChatSidebarHistoryLabel({
     children,
@@ -26,8 +26,11 @@ export function ChatSidebarHistoryLabel({
     };
 
     return (
-        <motion.div
-            className={cn("not-first:mt-4 sticky top-0 bg-zinc-950", className)}
+        <motion.li
+            className={cn(
+                "not-first:mt-4 sticky top-0 list-none bg-zinc-950",
+                className,
+            )}
             layout
             variants={variants}
             initial={animate ? "hidden" : undefined}
@@ -37,6 +40,6 @@ export function ChatSidebarHistoryLabel({
             {...props}
         >
             <SidebarGroupLabel>{children}</SidebarGroupLabel>
-        </motion.div>
+        </motion.li>
     );
 }

@@ -51,7 +51,7 @@ export function ChatMessageAssistant({
 
     return (
         <div {...props}>
-            <h5 className="sr-only">Assistant response:</h5>
+            <p className="sr-only">Assistant response:</p>
 
             <div
                 className={cn(

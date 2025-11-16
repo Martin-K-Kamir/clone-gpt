@@ -101,6 +101,9 @@ export function ChatViewHeaderActions({
                                 size="sm"
                                 className="size-8"
                             >
+                                <span className="sr-only">
+                                    Open chat actions
+                                </span>
                                 <IconDots />
                             </Button>
                         </ChatItemDropdownMenuTrigger>

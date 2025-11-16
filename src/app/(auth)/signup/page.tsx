@@ -4,6 +4,8 @@ import { AuthSignupForm } from "@/features/auth/components/auth-signup-form";
 
 export const metadata: Metadata = {
     title: "Sign up",
+    description:
+        "Create a new CloneGPT account to start chatting with AI and get help with your questions.",
 };
 
 export default function Page() {

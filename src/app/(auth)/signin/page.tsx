@@ -4,6 +4,8 @@ import { AuthSigninForm } from "@/features/auth/components/auth-signin-form";
 
 export const metadata: Metadata = {
     title: "Sign in",
+    description:
+        "Sign in to CloneGPT to continue your conversations and access your chat history.",
 };
 
 export default function Page() {
