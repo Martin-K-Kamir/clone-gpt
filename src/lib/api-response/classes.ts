@@ -1,4 +1,4 @@
-import type { HttpErrorStatus, HttpSuccessStatus } from "@/lib/types/types";
+import type { HttpErrorStatus, HttpSuccessStatus } from "@/lib/types";
 
 export abstract class ApiResponseBase {
     abstract readonly success: boolean;

@@ -1,14 +1,15 @@
 "use client";
 
-/* eslint-disable @next/next/no-img-element */
 import { IconLink } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { SourceUrlUIPart } from "ai";
 import { useMemo } from "react";
 
 import { Skeleton } from "@/components/ui/skeleton";
+
 import type { ResourcePreview } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
 import { getResourcePreviews } from "@/services/resource";
 
 type ResourcePreviewsProps = {
