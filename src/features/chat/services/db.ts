@@ -468,9 +468,10 @@ export async function storeUserChatMessages({
     assertIsDBUserId(userId);
 
     const { error } = await supabase.from("messages").insert(
-        messages.map(message => ({
+        messages.map((message, index) => ({
             chatId,
             userId,
+            createdAt: new Date(Date.now() + index * 1000).toISOString(),
             id: message.id,
             role: message.role as DBChatMessageRole,
             metadata: message.metadata as Json,
