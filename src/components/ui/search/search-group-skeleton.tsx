@@ -1,22 +1,21 @@
-"use client";
-
 import { Command as CommandPrimitive } from "cmdk";
-import * as React from "react";
 
 import { SearchItemSkeleton } from "./search-item-skeleton";
 
-export function SearchGroupSkeleton({
-    length = 4,
-    showSkeletonIcon,
-    lengthSkeleton,
-    classNameSkeleton,
-    ...props
-}: React.ComponentProps<typeof CommandPrimitive.List> & {
+type SearchGroupSkeletonProps = {
     length?: number;
     showSkeletonIcon?: boolean;
     lengthSkeleton?: number;
     classNameSkeleton?: string;
-}) {
+} & React.ComponentProps<typeof CommandPrimitive.List>;
+
+export function SearchGroupSkeleton({
+    showSkeletonIcon,
+    lengthSkeleton,
+    classNameSkeleton,
+    length = 4,
+    ...props
+}: SearchGroupSkeletonProps) {
     return (
         <CommandPrimitive.Group data-slot="search-group-skeleton" {...props}>
             {Array.from({ length }).map((_, index) => (

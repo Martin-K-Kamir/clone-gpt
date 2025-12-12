@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { createContext, useId } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -8,12 +8,12 @@ type FormItemContextValue = {
     id: string;
 };
 
-export const FormItemContext = React.createContext<FormItemContextValue>(
+export const FormItemContext = createContext<FormItemContextValue>(
     {} as FormItemContextValue,
 );
 
 export function FormItem({ className, ...props }: React.ComponentProps<"div">) {
-    const id = React.useId();
+    const id = useId();
 
     return (
         <FormItemContext value={{ id }}>

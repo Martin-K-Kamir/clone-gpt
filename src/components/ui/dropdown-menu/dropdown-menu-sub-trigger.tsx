@@ -1,19 +1,18 @@
-"use client";
-
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { ChevronRightIcon } from "lucide-react";
-import * as React from "react";
 
 import { cn } from "@/lib/utils";
+
+type DropdownMenuSubTriggerProps = {
+    inset?: boolean;
+} & React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger>;
 
 export function DropdownMenuSubTrigger({
     className,
     inset,
     children,
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & {
-    inset?: boolean;
-}) {
+}: DropdownMenuSubTriggerProps) {
     return (
         <DropdownMenuPrimitive.SubTrigger
             data-slot="dropdown-menu-sub-trigger"

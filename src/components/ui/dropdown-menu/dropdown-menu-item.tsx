@@ -1,19 +1,18 @@
-"use client";
-
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import * as React from "react";
 
 import { cn } from "@/lib/utils";
+
+type DropdownMenuItemProps = {
+    inset?: boolean;
+    variant?: "default" | "destructive";
+} & React.ComponentProps<typeof DropdownMenuPrimitive.Item>;
 
 export function DropdownMenuItem({
     className,
     inset,
     variant = "default",
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
-    inset?: boolean;
-    variant?: "default" | "destructive";
-}) {
+}: DropdownMenuItemProps) {
     return (
         <DropdownMenuPrimitive.Item
             data-slot="dropdown-menu-item"

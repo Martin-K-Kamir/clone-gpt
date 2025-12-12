@@ -1,19 +1,17 @@
-"use client";
-
-import * as React from "react";
-
 import { cn } from "@/lib/utils";
+
+type SearchHighlightProps = {
+    content: string;
+    search: string;
+    classNameHighlight?: string;
+} & React.ComponentProps<"span">;
 
 export function SearchHighlight({
     content,
     search,
     classNameHighlight,
     ...props
-}: React.ComponentProps<"span"> & {
-    content: string;
-    search: string;
-    classNameHighlight?: string;
-}) {
+}: SearchHighlightProps) {
     if (!search || !content) return <span {...props}>{content}</span>;
 
     const escapedSearch = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -28,7 +26,7 @@ export function SearchHighlight({
                     {regex.test(part) ? (
                         <span
                             className={cn(
-                                "font-medium text-zinc-50",
+                                "font-medium text-yellow-400",
                                 classNameHighlight,
                             )}
                         >

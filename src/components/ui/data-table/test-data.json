@@ -1,0 +1,282 @@
+{
+  "bulkRequestsBlocks": [
+    {
+      "id": "EXPORTS_BLOCK",
+      "label": "Exporty",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "PODS",
+          "label": "Místa spotřeby",
+          "isExternal": true,
+          "downloadFileInfo": {
+            "fileName": "EXPORT_PODS",
+            "date": "2025-12-03 16:55:28"
+          },
+          "link": "/api/requests/export-pods-info",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": true,
+          "id": "BULK_READINGS",
+          "label": "Odečty",
+          "isExternal": false,
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true,
+          "dialogId": "EXPORT_SELF_METER_READING"
+        },
+        {
+          "isDialog": false,
+          "id": "PAYMENT_DETAILS",
+          "label": "Platební údaje",
+          "isExternal": true,
+          "downloadFileInfo": {
+            "fileName": "EXPORT_PAYMENT_DETAILS",
+            "date": "2025-12-03 16:55:28"
+          },
+          "link": "/api/requests/export-payment-info",
+          "showPodsDialog": false
+        }
+      ]
+    },
+    {
+      "id": "READINGS_IMPORTS_BLOCK",
+      "label": "Odečty",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "BULK_READING_NO_INVOICE",
+          "label": "Hromadný kontrolní odečet bez faktury",
+          "tooltip": "Jde pouze o kontrolní odečet, který není podkladem pro vyúčtování. Po schválení zadaných odečtů tedy nedostanete fakturu.",
+          "isExternal": false,
+          "link": "/pozadavky/hromadny-kontrolni-odecet/K/krok-1",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "BULK_READING_WITH_INVOICE",
+          "label": "Hromadný mimořádný odečet s fakturou",
+          "tooltip": "Jakmile Vám zadané odečty schválí distributor, dostanete fakturu s poplatkem obchodníka dle platného ceníku, pokud nemáme ve smlouvě sjednáno něco jiného. Mimořádná faktura k 31.  prosinci je bez obchodního i distribučního poplatku za vystavení.",
+          "isExternal": false,
+          "link": "/pozadavky/hromadny-kontrolni-odecet/MP/krok-1",
+          "showPodsDialog": false
+        }
+      ]
+    }
+  ],
+  "individualRequestsBlocks": [
+    {
+      "id": "PAYMENTS_BLOCK",
+      "label": "Platby",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "02_ADVANCE_PAYMENTS_CHANGE",
+          "label": "Změna výše záloh",
+          "isExternal": false,
+          "link": "/olf/zmena-zalohy",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        },
+        {
+          "isDialog": false,
+          "id": "11_PAYMENT_TYPE_CHANGE",
+          "label": "Změna způsobu plateb",
+          "isExternal": false,
+          "link": "/olf/zmena-zpusobu-plateb",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        },
+        {
+          "isDialog": false,
+          "id": "03_SELF_READING",
+          "label": "Samoodečet",
+          "isExternal": false,
+          "link": "/pozadavky/vyber-typu-samoodectu",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        },
+        {
+          "isDialog": false,
+          "id": "08_E_BILL",
+          "label": "Elektronická fakturace",
+          "isExternal": false,
+          "link": "/olf/ebill",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        }
+      ]
+    },
+    {
+      "id": "CONTRACT_BLOCK",
+      "label": "Smlouva",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "SUPPLY_POINT_TRANSFER_B2B",
+          "label": "Přepis odběrného místa",
+          "isExternal": true,
+          "link": "https://mojesmlouva-test.eon.cz/ext_link_transfer",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "podLinks": {
+            "859182400211876178": "https://mojesmlouva-test.eon.cz/portal/ext_link?YnBfaWQ9NTEwMDAwNTk4NCZwb2Q9ODU5MTgyNDAwMjExODc2MTc4JnNvdXJjZT1FMjQmcHJvY2Vzcz1QUyZwcm9jZXNzX3JlYXNvbj0wMSZjdXN0b21lcl90eXBlPTImaGFzaD00M2JjOGYxZGM5OGFjOTczNTM3ZTI2ZmNhZmUxYmNmZjU2ODEyMzAzYTFlNzkzNGEzMWY2NjA0MWZlOGU4YzVj",
+            "859182400200375606": "https://mojesmlouva-test.eon.cz/portal/ext_link?YnBfaWQ9NTEwMDAwNTk4NCZwb2Q9ODU5MTgyNDAwMjAwMzc1NjA2JnNvdXJjZT1FMjQmcHJvY2Vzcz1QUyZwcm9jZXNzX3JlYXNvbj0wMSZjdXN0b21lcl90eXBlPTImaGFzaD0yYmY5OGZlMDA3ZmE4MTE1YjIwMWZmYTQ2YzZhMmZmZWVjODU2YjhjZTI0ODFlMTIxOWRjMTJiZGUxY2RkYjdh"
+          },
+          "showPodsDialog": true
+        },
+        {
+          "isDialog": false,
+          "id": "CONTRACT_TERMINATION_B2B",
+          "label": "Žádost o ukončení smlouvy",
+          "isExternal": true,
+          "link": "https://www.eon.cz/zivnostnici/zakaznicka-pece/ukonceni-odberu/",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "TARIF_CHANGE_B2B",
+          "label": "Změna distribuční sazby",
+          "isExternal": true,
+          "link": "https://www.eon.cz/firemni-zakaznici/zivnostnici/zakaznicka-pece/zmeny-ve-smlouve/zmena-distribucni-sazby/",
+          "showPodsDialog": false
+        }
+      ]
+    },
+    {
+      "id": "BUSINESS_DATA_BLOCK",
+      "label": "Firemní údaje",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "06_NAME_CHANGE",
+          "label": "Změna příjmení / názvu firmy",
+          "isExternal": false,
+          "link": "/olf/zmena-prijmeni",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "06_ADDRESS_CHANGE",
+          "label": "Změna adresy",
+          "isExternal": false,
+          "link": "/olf/zmena-adresy",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        },
+        {
+          "isDialog": false,
+          "id": "04_CONTACT_CHANGE",
+          "label": "Změna kontaktních údajů",
+          "isExternal": false,
+          "link": "/olf/zmena-udaju",
+          "showPodsDialog": false
+        }
+      ]
+    },
+    {
+      "id": "EMAIL_COMMUNICATION_BLOCK",
+      "label": "Komunikace na e-mail",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "LOW_TARIF",
+          "label": "Oznamování časů nízkého tarifu",
+          "isExternal": false,
+          "link": "/olf/hdo",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        }
+      ]
+    },
+    {
+      "id": "OTHER_BLOCK",
+      "label": "Ostatní požadavky",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "UNSEALING_ELE_EON",
+          "label": "Žádost o zásah do rozvaděče (odplombování)",
+          "isExternal": true,
+          "link": "https://www.egd.cz/zadost/zadost-o-odplombovani",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "INVOICING_INFORMATION",
+          "label": "Poskytnutí informace o vyúčtování",
+          "isExternal": false,
+          "link": "/pozadavky/vyber-typu-informaci-o-vyuctovani",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        },
+        {
+          "isDialog": false,
+          "id": "FORM_DOWNLOAD_COMPANY",
+          "label": "Formuláře ke stažení",
+          "isExternal": true,
+          "link": "https://www.eon.cz/firemni-zakaznici/zakaznicka-pece/formulare-maloodber/",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "POWER_PURCHASE_B2B",
+          "label": "Sjednání smlouvy na výkup elektřiny",
+          "isExternal": true,
+          "link": "https://mojesmlouva.eon.cz/contract/new/welcome?commodity=01&customer_type=company&process=VRB&product=FVE_MOP_2025&source=E24B2B",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "10_RECLAMATION",
+          "label": "Reklamace",
+          "isExternal": false,
+          "link": "/olf/reklamace",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "NEW_ELECTRICITY_CONNECTION",
+          "label": "Nové připojení elektřiny",
+          "isExternal": true,
+          "link": "https://www.eon.cz/firemni-zakaznici/zivnostnici/zakaznicka-pece/nove-odberne-misto/",
+          "showPodsDialog": false
+        },
+        {
+          "isDialog": false,
+          "id": "BREAKER_CHANGE_B2B",
+          "label": "Změna hlavního jističe",
+          "isExternal": true,
+          "link": "https://www.eon.cz/firemni-zakaznici/zivnostnici/zakaznicka-pece/zmeny-ve-smlouve/zmena-hodnoty-jistice/",
+          "showPodsDialog": false
+        }
+      ]
+    },
+    {
+      "id": "ADDITIONAL_SERVICES_BLOCK",
+      "label": "Doplňkové služby",
+      "requestLinks": [
+        {
+          "isDialog": false,
+          "id": "OUTAGES_NOTIFICATIONS",
+          "label": "Oznamování plánovaných odstávek",
+          "isExternal": false,
+          "link": "/olf/shutdown-notifications",
+          "pods": ["859182400211876178", "859182400200375606"],
+          "showPodsDialog": true
+        }
+      ]
+    }
+  ],
+  "serviceLine": {
+    "distributorName": "EG.D, s.r.o.",
+    "distributorPhone": "800 22 55 77",
+    "notFound": false
+  },
+  "visibleBlocks": {
+    "bulkRequestsBlocks": true,
+    "individualRequestsBlocks": true,
+    "generalRequest": false,
+    "serviceLine": false
+  },
+  "appScope": "consumption"
+}

@@ -9,3 +9,4 @@ export * from "./data-table-prev-page-button";
 export * from "./data-table-size-selector";
 export * from "./data-table";
 export * from "./data-table-content";
+export * from "./use-data-table-context";

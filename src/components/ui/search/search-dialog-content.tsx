@@ -1,7 +1,5 @@
 "use client";
 
-import * as React from "react";
-
 import {
     DialogContent,
     DialogDescription,
@@ -14,19 +12,21 @@ import { cn } from "@/lib/utils";
 import { Search } from "./search";
 import { useSearchDialogContext } from "./search-dialog";
 
-export function SearchDialogContent({
-    title = "Search",
-    description = "Type to search...",
-    showCloseButton = false,
-    className,
-    children,
-}: React.ComponentProps<typeof DialogContent> & {
+type SearchDialogContentProps = {
     title?: string;
     description?: string;
     showCloseButton?: boolean;
     className?: string;
     children?: React.ReactNode;
-}) {
+} & React.ComponentProps<typeof DialogContent>;
+
+export function SearchDialogContent({
+    className,
+    children,
+    showCloseButton = false,
+    title = "Search",
+    description = "Type to search...",
+}: SearchDialogContentProps) {
     const {
         isFullscreen,
         isFullscreenXs,
@@ -41,7 +41,7 @@ export function SearchDialogContent({
     return (
         <DialogContent
             className={cn(
-                "overflow-hidden border border-zinc-700 p-0 sm:max-w-xl",
+                "overflow-hidden border border-zinc-700 !p-0 sm:max-w-xl",
                 isFullscreen &&
                     "!h-full !w-full !max-w-full rounded-none border-none",
                 isFullscreenXs &&

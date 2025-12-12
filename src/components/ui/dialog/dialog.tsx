@@ -1,17 +1,17 @@
 "use client";
 
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import * as React from "react";
+import { createContext, useContext } from "react";
 
 import { useDialogState } from "@/hooks";
 
-export const DialogContext = React.createContext<{
+export const DialogContext = createContext<{
     open: boolean | undefined;
     onOpenChange: (open: boolean) => void;
 } | null>(null);
 
 export function useDialogContext() {
-    const context = React.useContext(DialogContext);
+    const context = useContext(DialogContext);
     if (!context) {
         throw new Error(
             "useDialogContext must be used within a DialogProvider",

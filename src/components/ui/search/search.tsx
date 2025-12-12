@@ -1,14 +1,11 @@
-"use client";
-
 import { Command as CommandPrimitive } from "cmdk";
-import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
 export function Search({
     className,
     ...props
-}: React.ComponentProps<typeof CommandPrimitive> & {}) {
+}: React.ComponentProps<typeof CommandPrimitive>) {
     return (
         <CommandPrimitive
             shouldFilter={false}

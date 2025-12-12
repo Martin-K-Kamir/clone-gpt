@@ -4,7 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import React, { memo, useRef } from "react";
 
-import { useSidebar } from "@/components/ui/sidebar";
+import { useSidebarContext } from "@/components/ui/sidebar";
 
 import {
     ChatItemDropdownMenu,
@@ -40,7 +40,7 @@ export function ChatSidebarHistoryItem({
     ...props
 }: ChatSidebarHistoryItemProps) {
     const inputRef = useRef<HTMLInputElement>(null);
-    const { setOpenMobile, isMobile } = useSidebar();
+    const { setOpenMobile, isMobile } = useSidebarContext();
 
     const { data: chat } = useSuspenseQuery({
         initialData,

@@ -4,7 +4,7 @@ import { animate, stagger } from "framer-motion";
 import { useEffect, useRef } from "react";
 
 import { ChatMessageActionsAssistant } from "@/features/chat/components/chat-message-actions";
-import { ChatResourceDialog } from "@/features/chat/components/chat-resource-dialog";
+import { ChatSourceDialog } from "@/features/chat/components/chat-source-dialog";
 import type {
     AssistantChatMessageMetadata,
     DBChatId,
@@ -116,7 +116,7 @@ export function ChatMessageToolbarAssistant({
                 showDownvote={canShowDownvote}
             />
 
-            <ChatResourceDialog
+            <ChatSourceDialog
                 parts={parts}
                 disabled={disabled}
                 triggerRef={resourceTriggerRef}

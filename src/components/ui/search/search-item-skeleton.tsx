@@ -1,22 +1,20 @@
-"use client";
-
-import * as React from "react";
-
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { cn, generateSizePercentage } from "@/lib/utils";
 
-export function SearchItemSkeleton({
-    length = 2,
-    showIcon = true,
-    className,
-    classNameSkeleton,
-    ...props
-}: React.ComponentProps<"div"> & {
+type SearchItemSkeletonProps = {
     length?: number;
     showIcon?: boolean;
     classNameSkeleton?: string;
-}) {
+} & React.ComponentProps<"div">;
+
+export function SearchItemSkeleton({
+    className,
+    classNameSkeleton,
+    length = 2,
+    showIcon = true,
+    ...props
+}: SearchItemSkeletonProps) {
     return (
         <div
             data-slot="search-item-skeleton"

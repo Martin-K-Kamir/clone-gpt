@@ -1,5 +1,3 @@
-"use client";
-
 import { format } from "date-fns";
 
 import { TIME_FORMATS, WEATHER_PERIOD } from "@/lib/constants";
@@ -35,7 +33,6 @@ export function WeatherTime({
                 className,
             )}
             dateTime={date.toISOString()}
-            aria-label={`Time: ${dayLabel} ${timeLabel}`}
             {...props}
         >
             {period === WEATHER_PERIOD.CURRENT ? timeLabel : dayLabel}

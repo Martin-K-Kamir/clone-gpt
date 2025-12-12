@@ -1,21 +1,20 @@
-"use client";
-
 import { IconSearch } from "@tabler/icons-react";
 import { Command as CommandPrimitive } from "cmdk";
-import * as React from "react";
 
 import { DialogClose } from "@/components/ui/dialog";
 
 import { cn } from "@/lib/utils";
 
-export function SearchInput({
-    showCloseButton = false,
-    className,
-    ...props
-}: React.ComponentProps<typeof CommandPrimitive.Input> & {
+type SearchInputProps = {
     showCloseButton?: boolean;
     showBorder?: boolean;
-}) {
+} & React.ComponentProps<typeof CommandPrimitive.Input>;
+
+export function SearchInput({
+    className,
+    showCloseButton = false,
+    ...props
+}: SearchInputProps) {
     return (
         <div
             data-slot="search-input-wrapper"

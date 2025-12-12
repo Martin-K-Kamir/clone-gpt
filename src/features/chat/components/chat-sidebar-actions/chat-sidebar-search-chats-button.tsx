@@ -8,7 +8,7 @@ import {
     SidebarMenuBadge,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
+    useSidebarContext,
 } from "@/components/ui/sidebar";
 
 import { ChatSearchDialogTrigger } from "@/features/chat/components/chat-search-dialog";
@@ -36,7 +36,7 @@ export function ChatSidebarSearchChatsButton({
     ...props
 }: ChatSidebarSearchChatsButtonProps) {
     const { onOpenChange } = useDialogContext();
-    const { setOpenMobile, isMobile } = useSidebar();
+    const { setOpenMobile, isMobile } = useSidebarContext();
 
     return (
         <ChatSearchDialogTrigger asChild>

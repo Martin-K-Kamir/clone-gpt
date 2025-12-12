@@ -1,13 +1,12 @@
 "use client";
 
-import * as React from "react";
-import { useContext, useMemo } from "react";
+import { createContext, useContext, useMemo } from "react";
 
 import { Dialog } from "@/components/ui/dialog";
 
 import type { Size } from "@/lib/types";
 
-export const SearchDialogContext = React.createContext<{
+export const SearchDialogContext = createContext<{
     fullscreen: boolean | Size;
     isFullscreen: boolean;
     isFullscreenXs: boolean;
@@ -19,10 +18,14 @@ export const SearchDialogContext = React.createContext<{
     isFullscreen3xl: boolean;
 } | null>(null);
 
+type SearchDialogProps = {
+    fullscreen?: boolean | Size;
+} & React.ComponentProps<typeof Dialog>;
+
 export function SearchDialog({
     fullscreen = false,
     ...props
-}: React.ComponentProps<typeof Dialog> & { fullscreen?: boolean | Size }) {
+}: SearchDialogProps) {
     const value = useMemo(() => {
         return {
             fullscreen,
@@ -48,7 +51,7 @@ export function useSearchDialogContext() {
     const context = useContext(SearchDialogContext);
     if (!context) {
         throw new Error(
-            "useSearchDialogContext must be used within a SearchDialogContext",
+            "useSearchDialogContext must be used within a SearchDialog",
         );
     }
     return context;

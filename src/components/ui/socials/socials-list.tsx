@@ -43,6 +43,7 @@ export function SocialsList({
                         onClick={onClick}
                     >
                         <FaLinkedin />
+                        <span className="sr-only">Share on LinkedIn</span>
                     </SocialShareLink>
                 </Button>
             </li>
@@ -60,6 +61,7 @@ export function SocialsList({
                         onClick={onClick}
                     >
                         <FaXTwitter />
+                        <span className="sr-only">Share on Twitter</span>
                     </SocialShareLink>
                 </Button>
             </li>
@@ -77,6 +79,7 @@ export function SocialsList({
                         onClick={onClick}
                     >
                         <FaRedditAlien />
+                        <span className="sr-only">Share on Reddit</span>
                     </SocialShareLink>
                 </Button>
             </li>
@@ -84,6 +87,7 @@ export function SocialsList({
                 <li>
                     <Button variant="secondary" size="icon" onClick={share}>
                         <IconShare2 />
+                        <span className="sr-only">Share</span>
                     </Button>
                 </li>
             )}

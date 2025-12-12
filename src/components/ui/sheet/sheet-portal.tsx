@@ -1,18 +1,16 @@
 "use client";
 
-import * as React from "react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
 import { useSheetContext } from "./sheet";
 
-export function SheetPortal({
-    children,
-    container,
-}: {
+type SheetPortalProps = {
     children: React.ReactNode;
     container?: HTMLElement;
-}) {
+};
+
+export function SheetPortal({ children, container }: SheetPortalProps) {
     const { open } = useSheetContext();
     const [mountNode, setMountNode] = useState<HTMLElement | null>(null);
 

@@ -1,5 +1,4 @@
 import { IconMessageCircle } from "@tabler/icons-react";
-import React from "react";
 
 import { SearchHighlight, SearchItem } from "@/components/ui/search";
 

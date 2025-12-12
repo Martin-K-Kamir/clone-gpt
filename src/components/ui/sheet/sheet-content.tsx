@@ -1,7 +1,6 @@
 "use client";
 
 import { XIcon } from "lucide-react";
-import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,14 +11,16 @@ import { SheetOverlay } from "./sheet-overlay";
 import { SheetPortal } from "./sheet-portal";
 import type { SheetSide } from "./types";
 
+type SheetContentProps = {
+    side?: SheetSide;
+} & React.ComponentProps<"div">;
+
 export function SheetContent({
     className,
     children,
     side = SHEET_SIDE.RIGHT,
     ...props
-}: React.ComponentProps<"div"> & {
-    side?: SheetSide;
-}) {
+}: SheetContentProps) {
     const { view } = useSheetContext();
 
     return (
@@ -29,7 +30,7 @@ export function SheetContent({
                 data-slot="sheet-content"
                 data-state={view}
                 className={cn(
-                    "data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 bg-white shadow-lg transition data-[state=closed]:duration-300 data-[state=open]:duration-500 dark:bg-zinc-950",
+                    "data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 border-zinc-800 bg-zinc-950 shadow-lg transition data-[state=closed]:duration-300 data-[state=open]:duration-500",
                     side === "right" &&
                         "inset-y-0 right-0 h-full w-3/4 border-l transition-[right] data-[state=closed]:right-[-100%] sm:max-w-sm",
                     side === "left" &&
@@ -43,7 +44,11 @@ export function SheetContent({
                 {...props}
             >
                 {children}
-                <SheetClose className="rounded-xs focus:outline-hidden absolute right-4 top-4 opacity-70 ring-offset-white transition-opacity hover:opacity-100 focus:ring-2 focus:ring-zinc-950 focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-zinc-100 dark:ring-offset-zinc-950 dark:focus:ring-zinc-300 dark:data-[state=open]:bg-zinc-800">
+                <SheetClose
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-4 top-4 size-6 rounded-full text-zinc-400 hover:text-zinc-100"
+                >
                     <XIcon className="size-4" />
                     <span className="sr-only">Close</span>
                 </SheetClose>

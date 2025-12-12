@@ -8,14 +8,14 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
-import { useDataTable } from "./data-table";
+import { useDataTableContext } from "./use-data-table-context";
 
 export function DataTableSizeSelector({
     pageSizes = [10, 20, 30, 40, 50],
 }: {
     pageSizes?: number[];
 }) {
-    const { table } = useDataTable();
+    const { table } = useDataTableContext();
 
     return (
         <Select
@@ -24,7 +24,10 @@ export function DataTableSizeSelector({
                 table.setPageSize(Number(value));
             }}
         >
-            <SelectTrigger className="w-18 max-h-8">
+            <SelectTrigger
+                className="w-18 max-h-8"
+                aria-label="Select page size"
+            >
                 <SelectValue
                     placeholder={table.getState().pagination.pageSize}
                 />

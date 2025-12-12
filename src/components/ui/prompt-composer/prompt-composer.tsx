@@ -60,6 +60,7 @@ export function PromptComposer({
     textareaProps,
     acceptedFileTypes,
     maxFileSize,
+    defaultValue,
     variant = "submit",
     placeholder = "Send a message...",
     multipleFiles = false,
@@ -79,7 +80,7 @@ export function PromptComposer({
     onFilePaste,
     ...props
 }: PromptComposerProps) {
-    const [input, setInput] = useState(value ?? "");
+    const [input, setInput] = useState(value ?? defaultValue ?? "");
     const primaryButtonRef = useRef<HTMLButtonElement>(null);
     const fileButtonRef = useRef<HTMLButtonElement>(null);
     const secondaryButtonRef = useRef<HTMLButtonElement>(null);

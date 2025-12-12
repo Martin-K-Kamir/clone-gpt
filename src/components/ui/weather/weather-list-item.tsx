@@ -1,5 +1,3 @@
-"use client";
-
 import { TEMPERATURE_SYSTEM, WEATHER_PERIOD } from "@/lib/constants";
 import type {
     TemperatureSystem,

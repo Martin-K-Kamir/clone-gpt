@@ -1,10 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { useCallback } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { SHEET_VIEW_STATE } from "./constants";
 import { useSheetContext } from "./sheet";
 
 export function SheetOverlay({
@@ -12,7 +12,7 @@ export function SheetOverlay({
     onPointerDown,
     ...props
 }: React.ComponentProps<"div">) {
-    const { handleOpen, view } = useSheetContext();
+    const { handleOpen, handleViewChange, view } = useSheetContext();
 
     const handlePointerDown = useCallback(
         (e: React.PointerEvent<HTMLDivElement>) => {
@@ -23,10 +23,13 @@ export function SheetOverlay({
             }
 
             if (e.target === e.currentTarget) {
-                handleOpen(false);
+                handleViewChange(SHEET_VIEW_STATE.CLOSED);
+                setTimeout(() => {
+                    handleOpen(false);
+                }, 250);
             }
         },
-        [handleOpen, onPointerDown],
+        [handleOpen, handleViewChange, onPointerDown],
     );
 
     return (

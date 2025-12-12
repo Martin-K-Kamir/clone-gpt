@@ -1,12 +1,10 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 
 import { cn } from "@/lib/utils";
 
 export function DataTableButton({
-    variant = "outline",
     className,
+    variant = "outline",
     ...props
 }: React.ComponentProps<typeof Button>) {
     return (

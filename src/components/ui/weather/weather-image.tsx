@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 
 import { WEATHER_ICONS_MAP } from "@/lib/constants";

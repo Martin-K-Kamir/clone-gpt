@@ -1,5 +1,3 @@
-"use client";
-
 import type { UIWeatherItem } from "@/lib/types";
 import { cn, toTitleCase } from "@/lib/utils";
 
@@ -15,11 +13,7 @@ export function WeatherDescription({
     const description = toTitleCase(item.description);
 
     return (
-        <div
-            className={cn("ml-auto text-gray-300", className)}
-            aria-label={`Weather condition: ${description}`}
-            {...props}
-        >
+        <div className={cn("ml-auto text-gray-300", className)} {...props}>
             {description}
         </div>
     );

@@ -1,7 +1,6 @@
 "use client";
 
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import * as React from "react";
 
 import { useEventListener } from "@/hooks";
 

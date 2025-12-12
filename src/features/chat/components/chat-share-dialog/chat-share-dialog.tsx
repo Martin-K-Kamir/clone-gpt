@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { CopyUrl } from "@/components/ui/copy-url";
+import { CopyInput } from "@/components/ui/copy-input";
 import {
     Dialog,
     DialogContent,
@@ -130,7 +130,11 @@ export function ChatShareDialog({
                                 "pointer-events-none cursor-not-allowed select-none opacity-50",
                         )}
                     >
-                        <CopyUrl url={absoluteUrl(`/chat/${chat.id}`)} />
+                        <CopyInput
+                            value={absoluteUrl(`/chat/${chat.id}`)}
+                            label="Share this chat"
+                            copyText="Copy Link"
+                        />
                         <SocialsList
                             url={absoluteUrl(`/chat/${chat.id}`)}
                             text={chat.title}

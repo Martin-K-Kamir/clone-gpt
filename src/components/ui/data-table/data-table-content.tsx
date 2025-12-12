@@ -14,7 +14,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { useDataTable } from "./data-table";
+import { useDataTableContext } from "./use-data-table-context";
 
 export function DataTableContent({
     noResultsMessage = "No results",
@@ -35,7 +35,7 @@ export function DataTableContent({
     classNameError?: string;
     classNameNoResults?: string;
 }) {
-    const { table, columns, isLoading, options, error } = useDataTable();
+    const { table, columns, isLoading, options, error } = useDataTableContext();
 
     let bodyContent: React.ReactNode;
 

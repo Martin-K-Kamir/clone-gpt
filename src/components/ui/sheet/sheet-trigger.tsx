@@ -1,15 +1,14 @@
 "use client";
 
-import * as React from "react";
-
 import { Button } from "../button";
+import { SHEET_VIEW_STATE } from "./constants";
 import { useSheetContext } from "./sheet";
 
 export function SheetTrigger({
     onClick,
     ...props
 }: React.ComponentProps<typeof Button>) {
-    const { handleOpen } = useSheetContext();
+    const { handleOpen, handleViewChange } = useSheetContext();
 
     return (
         <Button
@@ -17,6 +16,9 @@ export function SheetTrigger({
             onClick={e => {
                 onClick?.(e);
                 handleOpen(true);
+                setTimeout(() => {
+                    handleViewChange(SHEET_VIEW_STATE.OPEN);
+                }, 50);
             }}
         />
     );

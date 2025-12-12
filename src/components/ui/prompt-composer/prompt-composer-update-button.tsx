@@ -3,6 +3,7 @@
 import { ChatStatus } from "ai";
 
 import { Button } from "@/components/ui/button";
+
 import { cn } from "@/lib/utils";
 
 import { PromptComposerVariants } from "./prompt-composer";
@@ -14,12 +15,12 @@ export type PromptComposerUpdateButtonProps = {
 } & Omit<React.ComponentProps<typeof Button>, "children">;
 
 export function PromptComposerUpdateButton({
-    type = "submit",
-    size = "sm",
     className,
     formVariant,
     disabled,
     isVisible,
+    type = "submit",
+    size = "sm",
     ...props
 }: PromptComposerUpdateButtonProps) {
     if (formVariant !== "update" || !isVisible) {

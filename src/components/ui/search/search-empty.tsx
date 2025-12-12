@@ -1,22 +1,23 @@
-"use client";
-
-import { Command as CommandPrimitive } from "cmdk";
-import * as React from "react";
-
 import { cn } from "@/lib/utils";
 
 export function SearchEmpty({
     className,
+    children,
     ...props
-}: React.ComponentProps<typeof CommandPrimitive.Empty>) {
+}: React.ComponentProps<"div">) {
     return (
-        <CommandPrimitive.Empty
+        <div
             data-slot="search-empty"
+            role="option"
+            aria-disabled="true"
+            aria-selected="false"
             className={cn(
                 "text-pretty py-6 text-center text-sm font-medium text-zinc-400",
                 className,
             )}
             {...props}
-        />
+        >
+            {children}
+        </div>
     );
 }

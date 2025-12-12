@@ -2,13 +2,13 @@
 
 import { cn } from "@/lib/utils";
 
-import { useDataTable } from "./data-table";
+import { useDataTableContext } from "./use-data-table-context";
 
 export function DataTablePageCounter({
     className,
     ...props
 }: Omit<React.ComponentProps<"div">, "children">) {
-    const { table } = useDataTable();
+    const { table } = useDataTableContext();
 
     return (
         <div {...props} className={cn("text-sm text-zinc-200", className)}>

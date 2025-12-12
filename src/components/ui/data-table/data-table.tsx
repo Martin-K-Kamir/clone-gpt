@@ -6,7 +6,7 @@ import {
     getPaginationRowModel,
     useReactTable,
 } from "@tanstack/react-table";
-import { createContext, useContext } from "react";
+import { createContext } from "react";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -30,21 +30,8 @@ type DataTableContextValue<TData> = {
     table: ReturnType<typeof useReactTable<TData>>;
 } & Omit<DataTableProps<TData, any>, "data" | "children">;
 
-const DataTableContext = createContext<DataTableContextValue<any> | null>(null);
-
-export const useDataTable = <TData,>() => {
-    const context = useContext(
-        DataTableContext,
-    ) as DataTableContextValue<TData> | null;
-
-    if (!context) {
-        throw new Error(
-            "useDataTable must be used within a <DataTableProvider/>",
-        );
-    }
-
-    return context;
-};
+export const DataTableContext =
+    createContext<DataTableContextValue<any> | null>(null);
 
 export function DataTable<TData extends Record<string, unknown>, TValue>({
     columns,

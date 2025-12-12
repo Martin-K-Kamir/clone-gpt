@@ -9,7 +9,7 @@ import {
     SidebarMenuBadge,
     SidebarMenuButton,
     SidebarMenuItem,
-    useSidebar,
+    useSidebarContext,
 } from "@/components/ui/sidebar";
 
 import type { OperatingSystem } from "@/lib/types";
@@ -34,7 +34,7 @@ export function ChatSidebarNewChatButton({
     ...props
 }: ChatSidebarNewChatButtonProps) {
     const router = useRouter();
-    const { setOpenMobile, isMobile } = useSidebar();
+    const { setOpenMobile, isMobile } = useSidebarContext();
 
     return (
         <SidebarMenuItem {...props}>

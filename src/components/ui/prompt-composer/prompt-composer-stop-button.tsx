@@ -4,6 +4,7 @@ import { IconPlayerStopFilled } from "@tabler/icons-react";
 import { ChatStatus } from "ai";
 
 import { Button } from "@/components/ui/button";
+
 import { cn } from "@/lib/utils";
 
 import { PromptComposerVariants } from "./prompt-composer";

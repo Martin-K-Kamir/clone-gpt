@@ -69,6 +69,7 @@ export function FilesPreviewItem({
                 onClick={() => onFileRemove?.(file)}
                 {...removeButtonProps}
             >
+                <span className="sr-only">remove file {file.name}</span>
                 <IconX className="size-3.5" strokeWidth={2.5} />
             </Button>
         </li>

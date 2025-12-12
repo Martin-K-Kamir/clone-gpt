@@ -5,7 +5,7 @@ export * from "./utils";
 export * from "./http";
 export * from "./pagination";
 export * from "./system";
-export * from "./resource-preview";
+export * from "./source-preview";
 export * from "./rate-limit";
 export * from "./query-params";
 export * from "./props";

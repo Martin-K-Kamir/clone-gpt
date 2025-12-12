@@ -1,7 +1,4 @@
-"use client";
-
 import * as DialogPrimitive from "@radix-ui/react-dialog";
-import * as React from "react";
 import { createContext, useState } from "react";
 
 export const DialogsContext = createContext<{

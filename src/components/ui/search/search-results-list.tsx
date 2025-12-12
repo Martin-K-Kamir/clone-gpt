@@ -14,13 +14,15 @@ type SearchResultsListProps<TResult extends SearchResultsItemResult> = {
     query?: string;
     nearEndRef?: React.RefObject<HTMLDivElement | null>;
     nearEndItemOffset?: number;
+    onSelect?: (result: TResult) => void;
 };
 
 export function SearchResultsList<TResult extends SearchResultsItemResult>({
-    nearEndItemOffset = 10,
     data,
     query,
     nearEndRef,
+    nearEndItemOffset = 10,
+    onSelect,
 }: SearchResultsListProps<TResult>) {
     if (Array.isArray(data)) {
         return data.map((result, index) => {
@@ -33,6 +35,7 @@ export function SearchResultsList<TResult extends SearchResultsItemResult>({
                     ref={isNearEnd ? nearEndRef : undefined}
                     query={query}
                     result={result}
+                    onSelect={() => onSelect?.(result)}
                 />
             );
         });

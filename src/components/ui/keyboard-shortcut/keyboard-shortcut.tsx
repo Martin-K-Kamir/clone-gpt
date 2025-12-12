@@ -24,9 +24,9 @@ export type KeyboardShortcutProps = {
 } & Omit<React.ComponentProps<typeof AnyComponent>, "children">;
 
 export function KeyboardShortcut({
+    shortcuts,
     platformDetection = "default",
     as: Comp = "span",
-    shortcuts,
     onShortcut,
     ...props
 }: KeyboardShortcutProps) {

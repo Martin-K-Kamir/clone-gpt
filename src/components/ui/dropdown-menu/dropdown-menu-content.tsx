@@ -1,18 +1,17 @@
-"use client";
-
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
-import * as React from "react";
 
 import { cn } from "@/lib/utils";
+
+type DropdownMenuContentProps = {
+    portalProps?: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>;
+} & React.ComponentProps<typeof DropdownMenuPrimitive.Content>;
 
 export function DropdownMenuContent({
     className,
     sideOffset = 4,
     portalProps,
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
-    portalProps?: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>;
-}) {
+}: DropdownMenuContentProps) {
     return (
         <DropdownMenuPrimitive.Portal {...portalProps}>
             <DropdownMenuPrimitive.Content

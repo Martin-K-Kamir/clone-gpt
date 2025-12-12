@@ -1,4 +1,5 @@
 import { FileBanner } from "@/components/ui/file-banner";
+
 import { cn, getFileExtension } from "@/lib/utils";
 
 export type FilesPreviewFileProps = {

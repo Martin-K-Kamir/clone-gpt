@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
     createContext,
     useCallback,
@@ -29,6 +28,18 @@ export function useSheetContext() {
     return context;
 }
 
+type SheetProps = {
+    control?: SheetControlMode;
+    open?: boolean;
+    defaultOpen?: boolean;
+    view?: SheetViewState;
+    defaultView?: SheetViewState;
+    children?: React.ReactNode;
+    onChange?: (open: boolean) => void;
+    onViewChange?: (view: SheetViewState) => void;
+    onOpenChange?: (open: boolean) => void;
+};
+
 export function Sheet({
     open,
     defaultOpen,
@@ -39,17 +50,7 @@ export function Sheet({
     onChange,
     onViewChange,
     onOpenChange,
-}: {
-    control?: SheetControlMode;
-    open?: boolean;
-    defaultOpen?: boolean;
-    view?: SheetViewState;
-    defaultView?: SheetViewState;
-    children: React.ReactNode;
-    onChange?: (open: boolean) => void;
-    onViewChange?: (view: SheetViewState) => void;
-    onOpenChange?: (open: boolean) => void;
-}) {
+}: SheetProps) {
     const [internalOpen, setInternalOpen] = useState(defaultOpen ?? false);
     const [internalView, setInternalView] = useState(
         defaultView ?? SHEET_VIEW_STATE.CLOSED,

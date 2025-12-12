@@ -1,6 +1,6 @@
 "use client";
 
-import * as React from "react";
+import { createContext, useContext } from "react";
 import {
     Controller,
     type ControllerProps,
@@ -19,7 +19,7 @@ type FormFieldContextValue<
     name: TName;
 };
 
-const FormFieldContext = React.createContext<FormFieldContextValue>(
+const FormFieldContext = createContext<FormFieldContextValue>(
     {} as FormFieldContextValue,
 );
 
@@ -37,8 +37,8 @@ export const FormField = <
 };
 
 export const useFormField = () => {
-    const fieldContext = React.useContext(FormFieldContext);
-    const itemContext = React.useContext(FormItemContext);
+    const fieldContext = useContext(FormFieldContext);
+    const itemContext = useContext(FormItemContext);
     const { getFieldState } = useFormContext();
     const formState = useFormState({ name: fieldContext.name });
     const fieldState = getFieldState(fieldContext.name, formState);

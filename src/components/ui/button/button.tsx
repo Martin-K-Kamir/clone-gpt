@@ -1,7 +1,6 @@
 import { Slot } from "@radix-ui/react-slot";
 import { IconLoader2 } from "@tabler/icons-react";
 import { type VariantProps } from "class-variance-authority";
-import * as React from "react";
 
 import {
     Tooltip,
@@ -11,7 +10,7 @@ import {
 
 import { cn } from "@/lib/utils";
 
-import { buttonVariants } from "./button-variants";
+import { buttonVariants } from "./button.variants";
 
 export type ButtonProps = React.ComponentProps<"button"> &
     VariantProps<typeof buttonVariants> & {

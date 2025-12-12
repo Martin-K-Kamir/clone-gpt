@@ -1,14 +1,14 @@
 "use client";
 
-import { useDataTable } from "./data-table";
 import { DataTableButton } from "./data-table-button";
+import { useDataTableContext } from "./use-data-table-context";
 
 export function DataTableNextPageButton({
     children,
     onClick,
     ...props
 }: React.ComponentProps<typeof DataTableButton>) {
-    const { table, isLoading } = useDataTable();
+    const { table, isLoading } = useDataTableContext();
 
     return (
         <DataTableButton

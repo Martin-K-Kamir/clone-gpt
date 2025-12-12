@@ -1,5 +1,3 @@
-"use client";
-
 import type { TemperatureSystem, UIWeatherItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { convertTemperature } from "@/lib/utils/convert-temperature";
