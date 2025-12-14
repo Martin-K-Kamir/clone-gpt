@@ -2,6 +2,7 @@ import { IconBrandGithub, IconBrandGoogleFilled } from "@tabler/icons-react";
 import { useEffect, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+
 import { AUTH_PROVIDER } from "@/features/auth/lib/constants";
 import type { AuthExternalProvider } from "@/features/auth/lib/types";
 import { signIn } from "@/features/auth/services/actions";
@@ -23,7 +24,7 @@ export function AuthLoginButton({
     variant = "outline",
     type = "button",
     onClick,
-    onLoggingInChange: onLoggingInChange,
+    onLoggingInChange,
     ...props
 }: AuthLoginButtonProps) {
     const [isLoggingIn, startTransition] = useTransition();
