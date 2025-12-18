@@ -13,7 +13,6 @@ const meta = preview.meta({
             <Input {...args} id="input" />
         </>
     ),
-    tags: ["autodocs"],
     args: {
         placeholder: "Enter text...",
         onChange: fn(),

@@ -7,7 +7,6 @@ import { BUTTON_SIZES, BUTTON_VARIANTS } from "./button.variants";
 
 const meta = preview.meta({
     component: Button,
-    tags: ["autodocs"],
     args: {
         children: "Button",
         onClick: fn(),

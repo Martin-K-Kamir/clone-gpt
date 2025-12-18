@@ -6,9 +6,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 
 import {
-    AuthLoginDialog,
-    AuthLoginDialogTrigger,
-} from "@/features/auth/components/auth-login-dialog";
+    AuthSignInDialog,
+    AuthSignInDialogTrigger,
+} from "@/features/auth/components/auth-signin-dialog";
 
 import {
     ChatItemDropdownMenu,
@@ -60,8 +60,8 @@ export function ChatViewHeaderActions({
             {...props}
         >
             {userRole === USER_ROLE.GUEST && (
-                <AuthLoginDialog>
-                    <AuthLoginDialogTrigger asChild>
+                <AuthSignInDialog>
+                    <AuthSignInDialogTrigger asChild>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -70,8 +70,8 @@ export function ChatViewHeaderActions({
                             <IconLogin />
                             Log in
                         </Button>
-                    </AuthLoginDialogTrigger>
-                </AuthLoginDialog>
+                    </AuthSignInDialogTrigger>
+                </AuthSignInDialog>
             )}
             {chat && chat.isOwner && (
                 <>

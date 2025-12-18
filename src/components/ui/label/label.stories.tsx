@@ -6,7 +6,6 @@ import { Label } from "./label";
 
 const meta = preview.meta({
     component: Label,
-    tags: ["autodocs"],
     argTypes: {
         htmlFor: {
             control: "text",

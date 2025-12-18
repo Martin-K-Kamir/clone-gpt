@@ -34,7 +34,6 @@ import {
 
 const meta = preview.meta({
     component: DropdownMenu,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

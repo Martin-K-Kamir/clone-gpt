@@ -19,12 +19,13 @@ import {
     FormSeparator,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { AuthLoginButton } from "@/features/auth/components/auth-login-button";
+
+import { AuthSignInButton } from "@/features/auth/components/auth-signin-button";
 import { AUTH_PROVIDER } from "@/features/auth/lib/constants";
 import { signupSchema } from "@/features/auth/lib/schemas";
 import { signUp } from "@/features/auth/services/actions";
 
-type AuthSignupFormProps = {
+type AuthSignUpFormProps = {
     switchToSignin?: boolean;
     onSwitchToSignin?: () => void;
     onSubmit?: (values: z.infer<typeof signupSchema>) => void;
@@ -32,15 +33,15 @@ type AuthSignupFormProps = {
     onError?: (error: Error) => void;
 };
 
-export function AuthSignupForm({
+export function AuthSignUpForm({
     switchToSignin,
     onSwitchToSignin,
     onSubmit,
     onSuccess,
     onError,
-}: AuthSignupFormProps) {
+}: AuthSignUpFormProps) {
     const router = useRouter();
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [isSigningIn, setIsSigningIn] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm<z.infer<typeof signupSchema>>({
         resolver: zodResolver(signupSchema),
@@ -62,11 +63,11 @@ export function AuthSignupForm({
     async function handleSubmit(values: z.infer<typeof signupSchema>) {
         onSubmit?.(values);
         setIsSubmitting(true);
-        setIsLoggingIn(true);
+        setIsSigningIn(true);
         const response = await signUp(values);
 
         setIsSubmitting(false);
-        setIsLoggingIn(false);
+        setIsSigningIn(false);
 
         if (!response.success) {
             toast.error(response.message);
@@ -162,7 +163,7 @@ export function AuthSignupForm({
                 <Button
                     type="submit"
                     className="w-full"
-                    disabled={isLoggingIn || isSubmitting}
+                    disabled={isSigningIn || isSubmitting}
                     isLoading={isSubmitting}
                 >
                     Create Account
@@ -171,22 +172,22 @@ export function AuthSignupForm({
                 <FormSeparator>or continue with</FormSeparator>
 
                 <div className="flex flex-col gap-3">
-                    <AuthLoginButton
+                    <AuthSignInButton
                         provider={AUTH_PROVIDER.GOOGLE}
                         className="bg-zinc-800"
-                        onLoggingInChange={setIsLoggingIn}
-                        disabled={isLoggingIn}
+                        onSigningInChange={setIsSigningIn}
+                        disabled={isSigningIn}
                     >
                         Sign up with Google
-                    </AuthLoginButton>
-                    <AuthLoginButton
+                    </AuthSignInButton>
+                    <AuthSignInButton
                         provider={AUTH_PROVIDER.GITHUB}
                         className="bg-zinc-800"
-                        onLoggingInChange={setIsLoggingIn}
-                        disabled={isLoggingIn}
+                        onSigningInChange={setIsSigningIn}
+                        disabled={isSigningIn}
                     >
                         Sign up with Github
-                    </AuthLoginButton>
+                    </AuthSignInButton>
                 </div>
 
                 <p className="text-center text-sm text-zinc-300">

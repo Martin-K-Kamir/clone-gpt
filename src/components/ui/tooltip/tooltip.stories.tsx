@@ -20,7 +20,6 @@ const meta = preview.meta({
             </Tooltip>
         </div>
     ),
-    tags: ["autodocs"],
     args: {
         delayDuration: 0,
         onOpenChange: fn(),

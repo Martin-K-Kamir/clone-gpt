@@ -8,7 +8,6 @@ import { SocialShareLink } from "./social-share-link";
 
 const meta = preview.meta({
     component: SocialShareLink,
-    tags: ["autodocs"],
     args: {
         platform: "twitter",
         url: "https://example.com/my-article",

@@ -4,7 +4,6 @@ import { TextShimmer } from "./text-shimmer";
 
 const meta = preview.meta({
     component: TextShimmer,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

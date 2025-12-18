@@ -6,7 +6,6 @@ import { TextSwitch } from "./text-switch";
 
 const meta = preview.meta({
     component: TextSwitch,
-    tags: ["autodocs"],
     args: {
         onChange: fn(),
     },

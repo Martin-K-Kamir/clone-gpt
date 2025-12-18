@@ -6,7 +6,6 @@ import { CopyInput } from "./copy-input";
 
 const meta = preview.meta({
     component: CopyInput,
-    tags: ["autodocs"],
     args: {
         value: "example-value-to-copy",
         className: "bg-zinc-900",
@@ -168,6 +167,18 @@ const meta = preview.meta({
                     summary:
                         "React.ReactNode | ((handleCopy: () => void, copied: boolean) => React.ReactNode)",
                 },
+            },
+        },
+        disabled: {
+            control: "boolean",
+            description: "Whether the input is disabled",
+            table: {
+                type: {
+                    summary: "boolean",
+                },
+            },
+            defaultValue: {
+                summary: "false",
             },
         },
         className: {

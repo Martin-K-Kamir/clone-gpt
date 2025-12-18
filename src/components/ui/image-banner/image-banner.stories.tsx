@@ -8,7 +8,6 @@ import { ImageBanner } from "./image-banner";
 
 const meta = preview.meta({
     component: ImageBanner,
-    tags: ["autodocs"],
     argTypes: {
         src: {
             control: "text",

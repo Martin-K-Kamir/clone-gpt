@@ -5,7 +5,6 @@ import { LazyImage } from "./lazy-image";
 
 const meta = preview.meta({
     component: LazyImage,
-    tags: ["autodocs"],
     argTypes: {
         src: {
             control: "text",

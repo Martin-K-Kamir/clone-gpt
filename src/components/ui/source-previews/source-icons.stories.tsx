@@ -39,7 +39,6 @@ const mockSources: SourceUrlUIPart[] = [
 
 const meta = preview.meta({
     component: SourceIcons,
-    tags: ["autodocs"],
     args: {
         sources: mockSources,
     },

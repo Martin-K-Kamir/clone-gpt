@@ -108,7 +108,6 @@ const defaultUpcomingForecasts = createMockWeatherItems(
 
 const meta = preview.meta({
     component: Weather,
-    tags: ["autodocs"],
     args: {
         location: defaultLocation,
         forecasts: defaultCurrentForecasts,

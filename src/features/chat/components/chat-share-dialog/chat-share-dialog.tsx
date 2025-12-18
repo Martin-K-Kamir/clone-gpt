@@ -134,10 +134,12 @@ export function ChatShareDialog({
                             value={absoluteUrl(`/chat/${chat.id}`)}
                             label="Share this chat"
                             copyText="Copy Link"
+                            disabled={visibility === CHAT_VISIBILITY.PRIVATE}
                         />
                         <SocialsList
                             url={absoluteUrl(`/chat/${chat.id}`)}
                             text={chat.title}
+                            disabled={visibility === CHAT_VISIBILITY.PRIVATE}
                             onClick={e => {
                                 e.stopPropagation();
                             }}

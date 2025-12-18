@@ -10,7 +10,6 @@ type DelayedRenderStoryArgs = {
 
 const meta = preview.meta({
     component: DelayedRender,
-    tags: ["autodocs"],
     args: {
         children: "This content will appear after 500ms",
         delay: 500,

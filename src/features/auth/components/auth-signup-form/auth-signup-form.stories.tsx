@@ -8,11 +8,11 @@ import type { DBUserId, DBUserRole } from "@/features/user/lib/types";
 
 import { api } from "@/lib/api-response";
 
-import { AuthSignupForm } from "./auth-signup-form";
+import { AuthSignUpForm } from "./auth-signup-form";
 
 const meta = preview.meta({
-    component: AuthSignupForm,
-    tags: ["autodocs"],
+    component: AuthSignUpForm,
+
     args: {
         onSubmit: fn(),
         onSuccess: fn(),

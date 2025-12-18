@@ -5,7 +5,6 @@ import { FileBanner } from "./file-banner";
 
 const meta = preview.meta({
     component: FileBanner,
-    tags: ["autodocs"],
     args: {
         url: "https://example.com/document.pdf",
         name: "example-document.pdf",

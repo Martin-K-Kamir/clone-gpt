@@ -17,7 +17,6 @@ import {
 
 const meta = preview.meta({
     component: Dialog,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

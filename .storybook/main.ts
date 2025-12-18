@@ -27,13 +27,52 @@ export default defineMain({
             load(id: string) {
                 // Intercept after tsconfig resolution - check if it's an action file
                 // Pattern: .../actions/sign-in/sign-in.ts -> .../actions/sign-in/sign-in.mock.ts
-                if (
+                const isAuthAction =
                     id.includes("features/auth/services/actions/") &&
                     !id.includes(".mock") &&
                     (id.endsWith("/sign-in.ts") ||
                         id.endsWith("/sign-in-with-credentials.ts") ||
                         id.endsWith("/sign-out.ts") ||
-                        id.endsWith("/sign-up.ts"))
+                        id.endsWith("/sign-up.ts"));
+
+                const isChatAction =
+                    id.includes("features/chat/services/actions/") &&
+                    !id.includes(".mock") &&
+                    (id.endsWith("/delete-all-user-chats.ts") ||
+                        id.endsWith("/delete-user-chat-by-id.ts") ||
+                        id.endsWith("/delete-user-file.ts") ||
+                        id.endsWith("/delete-user-files.ts") ||
+                        id.endsWith("/downvote-chat-message.ts") ||
+                        id.endsWith("/set-all-user-chats-visibility.ts") ||
+                        id.endsWith("/update-chat-title.ts") ||
+                        id.endsWith("/update-chat-visibility.ts") ||
+                        id.endsWith("/update-many-chats-visibility.ts") ||
+                        id.endsWith("/upload-user-files.ts") ||
+                        id.endsWith("/upvote-chat-message.ts"));
+
+                const isStorageFile =
+                    id.includes("features/chat/services/storage/") &&
+                    !id.includes(".mock") &&
+                    (id.endsWith("/hash-id.ts") ||
+                        id.endsWith("/upload-to-storage.ts") ||
+                        id.endsWith("/delete-storage-directory.ts") ||
+                        id.endsWith("/delete-user-file.ts") ||
+                        id.endsWith("/duplicate-storage-file.ts") ||
+                        id.endsWith("/store-generated-file.ts") ||
+                        id.endsWith("/store-generated-image.ts") ||
+                        id.endsWith("/store-user-file.ts"));
+
+                const isChatProvider =
+                    id.includes("features/chat/providers/") &&
+                    !id.includes(".mock") &&
+                    (id.endsWith("/chat-cache-sync-provider.tsx") ||
+                        id.endsWith("/chat-offset-provider.tsx"));
+
+                if (
+                    isAuthAction ||
+                    isChatAction ||
+                    isStorageFile ||
+                    isChatProvider
                 ) {
                     // Replace .ts with .mock.ts
                     const mockPath = id.replace(/\.ts$/, ".mock.ts");
@@ -56,6 +95,7 @@ export default defineMain({
                         return null;
                     }
                 }
+
                 return null;
             },
         };
@@ -65,6 +105,14 @@ export default defineMain({
             config.plugins = [];
         }
         config.plugins = [mockPlugin, ...config.plugins];
+
+        // Define Node.js globals for browser compatibility
+        config.define = {
+            ...config.define,
+            __dirname: JSON.stringify(""),
+            __filename: JSON.stringify(""),
+            global: "globalThis",
+        };
 
         return config;
     },

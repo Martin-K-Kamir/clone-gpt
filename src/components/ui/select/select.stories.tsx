@@ -23,7 +23,6 @@ import {
 
 const meta = preview.meta({
     component: Select,
-    tags: ["autodocs"],
     args: {
         onValueChange: fn(),
     },

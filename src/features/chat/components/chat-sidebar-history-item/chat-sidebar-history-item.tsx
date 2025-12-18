@@ -30,13 +30,13 @@ type ChatSidebarHistoryItemProps = {
 } & React.ComponentProps<typeof motion.li>;
 
 export function ChatSidebarHistoryItem({
-    animate = true,
     chatId,
     initialData,
     isActive,
     className,
     classNameLink,
     classNameInput,
+    animate = true,
     ...props
 }: ChatSidebarHistoryItemProps) {
     const inputRef = useRef<HTMLInputElement>(null);

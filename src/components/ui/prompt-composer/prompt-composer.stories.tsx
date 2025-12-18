@@ -6,7 +6,6 @@ import { PromptComposer } from "./prompt-composer";
 
 const meta = preview.meta({
     component: PromptComposer,
-    tags: ["autodocs"],
     args: {
         placeholder: "Send a message...",
         onSubmit: fn(),

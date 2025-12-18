@@ -39,7 +39,6 @@ function createImageFile(name: string, width = 150, height = 150): File {
 
 const meta = preview.meta({
     component: FilesPreview,
-    tags: ["autodocs"],
     args: {
         previewFiles: [],
         isLoading: false,

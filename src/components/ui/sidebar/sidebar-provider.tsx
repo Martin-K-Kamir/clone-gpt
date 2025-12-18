@@ -13,13 +13,8 @@ import { useMediaQuery } from "usehooks-ts";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { COOKIE_SIDEBAR } from "@/lib/constants";
-import { cn } from "@/lib/utils";
 
-import {
-    SIDEBAR_KEYBOARD_SHORTCUT,
-    SIDEBAR_WIDTH,
-    SIDEBAR_WIDTH_ICON,
-} from "./constants";
+import { SIDEBAR_KEYBOARD_SHORTCUT } from "./constants";
 
 type SidebarContextProps = {
     state: "expanded" | "collapsed";
@@ -37,16 +32,14 @@ type SidebarProviderProps = {
     defaultOpen?: boolean;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
-} & React.ComponentProps<"div">;
+    children: React.ReactNode;
+};
 
 export function SidebarProvider({
-    className,
-    style,
     children,
     open: openProp,
     onOpenChange: setOpenProp,
     defaultOpen = true,
-    ...props
 }: SidebarProviderProps) {
     const isMobile = useMediaQuery("(max-width: 72.625rem)", {
         defaultValue: false,
@@ -119,25 +112,7 @@ export function SidebarProvider({
 
     return (
         <SidebarContext value={contextValue}>
-            <TooltipProvider delayDuration={0}>
-                <div
-                    data-slot="sidebar-wrapper"
-                    style={
-                        {
-                            "--sidebar-width": SIDEBAR_WIDTH,
-                            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-                            ...style,
-                        } as React.CSSProperties
-                    }
-                    className={cn(
-                        "group/sidebar-wrapper has-data-[variant=inset]:bg-zinc-950 flex min-h-svh w-full",
-                        className,
-                    )}
-                    {...props}
-                >
-                    {children}
-                </div>
-            </TooltipProvider>
+            <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
         </SidebarContext>
     );
 }

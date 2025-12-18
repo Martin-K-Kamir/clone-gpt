@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { AuthSignupForm } from "@/features/auth/components/auth-signup-form";
+import { AuthSignUpForm } from "@/features/auth/components/auth-signup-form";
 
 export const metadata: Metadata = {
     title: "Sign up",
@@ -18,7 +18,7 @@ export default function Page() {
                 <p className="mb-8 text-center text-sm text-zinc-300">
                     Enter your email below to create your account
                 </p>
-                <AuthSignupForm switchToSignin />
+                <AuthSignUpForm switchToSignin />
             </div>
         </div>
     );

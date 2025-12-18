@@ -8,7 +8,6 @@ import { Toaster } from "./sonner";
 
 const meta = preview.meta({
     component: Toaster,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

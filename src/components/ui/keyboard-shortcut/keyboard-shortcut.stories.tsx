@@ -7,7 +7,6 @@ import { KeyboardShortcut } from "./keyboard-shortcut";
 
 const meta = preview.meta({
     component: KeyboardShortcut,
-    tags: ["autodocs"],
     argTypes: {
         platformDetection: {
             control: "select",

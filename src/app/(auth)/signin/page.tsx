@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 
-import { AuthSigninForm } from "@/features/auth/components/auth-signin-form";
+import { AuthSignInForm } from "@/features/auth/components/auth-signin-form";
 
 export const metadata: Metadata = {
     title: "Sign in",
@@ -18,7 +18,7 @@ export default function Page() {
                 <p className="mb-8 text-center text-sm text-zinc-300">
                     Login with your Google or Github account{" "}
                 </p>
-                <AuthSigninForm />
+                <AuthSignInForm />
             </div>
         </div>
     );

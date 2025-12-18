@@ -4,7 +4,6 @@ import { Separator } from "./separator";
 
 const meta = preview.meta({
     component: Separator,
-    tags: ["autodocs"],
     argTypes: {
         orientation: {
             control: "radio",

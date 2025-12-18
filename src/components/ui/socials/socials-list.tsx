@@ -11,6 +11,7 @@ type SocialsListProps = {
     url: string;
     text: string;
     showNativeShare?: boolean;
+    disabled?: boolean;
     onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 } & React.ComponentProps<"ul">;
 
@@ -18,6 +19,7 @@ export function SocialsList({
     showNativeShare = true,
     url,
     text,
+    disabled,
     onClick,
     ...props
 }: SocialsListProps) {
@@ -35,6 +37,7 @@ export function SocialsList({
                     size="icon"
                     className="hover:bg-[#0077b5]"
                     asChild
+                    disabled={disabled}
                 >
                     <SocialShareLink
                         platform="linkedin"
@@ -53,6 +56,7 @@ export function SocialsList({
                     size="icon"
                     className="hover:bg-[#000000]"
                     asChild
+                    disabled={disabled}
                 >
                     <SocialShareLink
                         platform="twitter"
@@ -71,6 +75,7 @@ export function SocialsList({
                     size="icon"
                     className="hover:bg-[#ff4500]"
                     asChild
+                    disabled={disabled}
                 >
                     <SocialShareLink
                         platform="reddit"
@@ -85,7 +90,13 @@ export function SocialsList({
             </li>
             {showNativeShare && canShare && (
                 <li>
-                    <Button variant="secondary" size="icon" onClick={share}>
+                    <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={share}
+                        disabled={disabled}
+                        className="disabled:opacity-100"
+                    >
                         <IconShare2 />
                         <span className="sr-only">Share</span>
                     </Button>

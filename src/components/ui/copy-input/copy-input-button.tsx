@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 
 export type CopyInputButtonProps = {
     copied: boolean;
+    disabled?: boolean;
     copyIcon?: React.ReactNode;
     copiedIcon?: React.ReactNode;
     copyText?: React.ReactNode;
@@ -21,6 +22,7 @@ export type CopyInputButtonProps = {
 export function CopyInputButton({
     children,
     copied,
+    disabled,
     buttonProps,
     copyIcon = <IconCopy />,
     copiedIcon = <IconCheck />,
@@ -64,7 +66,7 @@ export function CopyInputButton({
                 buttonProps?.onClick?.(e);
                 handleCopy();
             }}
-            disabled={copied}
+            disabled={copied || disabled}
         >
             {showIcon &&
                 iconPosition === "left" &&

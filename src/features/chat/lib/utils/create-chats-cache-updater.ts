@@ -145,8 +145,12 @@ export function createChatsCacheUpdater(queryClient: QueryClient) {
     }: WithChatId & { updater: (chat: DBChat) => DBChat }) {
         queryClient.setQueryData(
             [tag.userInitialChatsSearch()],
-            (old: DBChat[]) =>
-                old.map(chat => (chat.id === chatId ? updater(chat) : chat)),
+            (old: DBChat[] | undefined) => {
+                if (!old) return old;
+                return old.map(chat =>
+                    chat.id === chatId ? updater(chat) : chat,
+                );
+            },
         );
     }
 
@@ -179,10 +183,12 @@ export function createChatsCacheUpdater(queryClient: QueryClient) {
     }: WithChatId & WithNewTitle) {
         queryClient.setQueryData(
             [tag.userInitialChatsSearch()],
-            (old: DBChat[]) =>
-                old.map(chat =>
+            (old: DBChat[] | undefined) => {
+                if (!old) return old;
+                return old.map(chat =>
                     chat.id === chatId ? { ...chat, title: newTitle } : chat,
-                ),
+                );
+            },
         );
     }
 

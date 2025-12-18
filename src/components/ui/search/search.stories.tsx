@@ -48,7 +48,6 @@ const defaultSearchDialogContext = {
 
 const meta = preview.meta({
     component: Search,
-    tags: ["autodocs"],
     args: {
         onValueChange: fn(),
     },

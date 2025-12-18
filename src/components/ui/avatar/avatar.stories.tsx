@@ -11,7 +11,6 @@ type AvatarStoryArgs = {
 
 const meta = preview.meta({
     component: Avatar,
-    tags: ["autodocs"],
     args: {
         src: "https://github.com/martin-k-kamir.png",
         alt: "User avatar",

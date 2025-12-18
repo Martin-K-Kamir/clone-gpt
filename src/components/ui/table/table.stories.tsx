@@ -43,7 +43,6 @@ const invoices = [
 
 const meta = preview.meta({
     component: Table,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

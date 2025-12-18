@@ -209,7 +209,6 @@ const productColumns: ColumnDef<Product>[] = [
 
 const meta = preview.meta({
     component: DataTable,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

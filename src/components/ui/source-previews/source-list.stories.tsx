@@ -71,7 +71,7 @@ const createQueryClient = () =>
 
 const meta = preview.meta({
     component: SourceList,
-    tags: ["autodocs"],
+
     decorators: [
         Story => (
             <QueryClientProvider client={createQueryClient()}>

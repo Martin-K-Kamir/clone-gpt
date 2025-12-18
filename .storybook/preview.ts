@@ -23,6 +23,7 @@ initialize({
 });
 
 export default definePreview({
+    tags: ["autodocs"],
     parameters: {
         controls: {
             matchers: {
@@ -43,8 +44,6 @@ export default definePreview({
             options: INITIAL_VIEWPORTS,
         },
     },
-
     loaders: [mswLoader],
-
     addons: [addonA11y(), addonDocs()],
 });

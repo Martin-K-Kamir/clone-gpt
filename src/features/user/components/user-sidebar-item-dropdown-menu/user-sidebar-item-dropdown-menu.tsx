@@ -18,10 +18,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 import {
-    AuthLoginDialog,
-    AuthLoginDialogTrigger,
-} from "@/features/auth/components/auth-login-dialog";
-import { AuthLogoutButton } from "@/features/auth/components/auth-logout-button";
+    AuthSignInDialog,
+    AuthSignInDialogTrigger,
+} from "@/features/auth/components/auth-signin-dialog";
+import { AuthSignOutButton } from "@/features/auth/components/auth-signout-button";
 
 import {
     UserChatPreferenceDialog,
@@ -105,21 +105,24 @@ export function UserSidebarItemDropdownMenu({
                     <DropdownMenuSeparator />
 
                     {showLogout && (
-                        <AuthLogoutButton asChild styled={false}>
+                        <AuthSignOutButton asChild styled={false}>
                             <DropdownMenuItem>
                                 <IconLogout />
                                 Log out
                             </DropdownMenuItem>
-                        </AuthLogoutButton>
+                        </AuthSignOutButton>
                     )}
 
                     {showLogin && (
-                        <AuthLoginDialogTrigger asChild dialogId="login-dialog">
+                        <AuthSignInDialogTrigger
+                            asChild
+                            dialogId="login-dialog"
+                        >
                             <DropdownMenuItem>
                                 <IconLogin />
                                 Log in
                             </DropdownMenuItem>
-                        </AuthLoginDialogTrigger>
+                        </AuthSignInDialogTrigger>
                     )}
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -130,7 +133,7 @@ export function UserSidebarItemDropdownMenu({
                 dialogId="chat-preference-dialog"
             />
             <UserSharedChatsDialog dialogId="shared-chats-dialog" />
-            <AuthLoginDialog dialogId="login-dialog" />
+            <AuthSignInDialog dialogId="login-dialog" />
         </Dialogs>
     );
 }

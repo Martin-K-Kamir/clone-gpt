@@ -6,11 +6,11 @@ import { signInWithCredentials } from "@/features/auth/services/actions";
 
 import { api } from "@/lib/api-response";
 
-import { AuthSigninForm } from "./auth-signin-form";
+import { AuthSignInForm } from "./auth-signin-form";
 
 const meta = preview.meta({
-    component: AuthSigninForm,
-    tags: ["autodocs"],
+    component: AuthSignInForm,
+
     args: {
         onSubmit: fn(),
         onSuccess: fn(),

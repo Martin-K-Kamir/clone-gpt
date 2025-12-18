@@ -21,27 +21,27 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-import { AuthLoginButton } from "@/features/auth/components/auth-login-button";
+import { AuthSignInButton } from "@/features/auth/components/auth-signin-button";
 import { AUTH_PROVIDER } from "@/features/auth/lib/constants";
 import { signinSchema } from "@/features/auth/lib/schemas";
 import { signInWithCredentials } from "@/features/auth/services/actions";
 
-type AuthSigninFormProps = {
+type AuthSignInFormProps = {
     onSwitchToSignup?: () => void;
     onSubmit?: (values: z.infer<typeof signinSchema>) => void;
     onSuccess?: (values: z.infer<typeof signinSchema>) => void;
     onError?: (error: Error | unknown) => void;
 };
 
-export function AuthSigninForm({
+export function AuthSignInForm({
     onSwitchToSignup,
     onSubmit,
     onSuccess,
     onError,
-}: AuthSigninFormProps) {
+}: AuthSignInFormProps) {
     const queryClient = useQueryClient();
     const router = useRouter();
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [isSigningIn, setIsSigningIn] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm<z.infer<typeof signinSchema>>({
         resolver: zodResolver(signinSchema),
@@ -52,7 +52,7 @@ export function AuthSigninForm({
     async function handleSubmit(values: z.infer<typeof signinSchema>) {
         onSubmit?.(values);
         setIsSubmitting(true);
-        setIsLoggingIn(true);
+        setIsSigningIn(true);
 
         const response = await signInWithCredentials({
             email: values.email,
@@ -62,7 +62,7 @@ export function AuthSigninForm({
         await queryClient.resetQueries();
 
         setIsSubmitting(false);
-        setIsLoggingIn(false);
+        setIsSigningIn(false);
 
         if (!response.success) {
             toast.error(response.message);
@@ -83,22 +83,22 @@ export function AuthSigninForm({
                 className="space-y-6"
             >
                 <div className="flex flex-col gap-3">
-                    <AuthLoginButton
+                    <AuthSignInButton
                         provider={AUTH_PROVIDER.GOOGLE}
                         className="bg-zinc-800"
-                        onLoggingInChange={setIsLoggingIn}
-                        disabled={isLoggingIn}
+                        onSigningInChange={setIsSigningIn}
+                        disabled={isSigningIn}
                     >
                         Login with Google
-                    </AuthLoginButton>
-                    <AuthLoginButton
+                    </AuthSignInButton>
+                    <AuthSignInButton
                         provider={AUTH_PROVIDER.GITHUB}
                         className="bg-zinc-800"
-                        onLoggingInChange={setIsLoggingIn}
-                        disabled={isLoggingIn}
+                        onSigningInChange={setIsSigningIn}
+                        disabled={isSigningIn}
                     >
                         Login with Github
-                    </AuthLoginButton>
+                    </AuthSignInButton>
                 </div>
 
                 <FormSeparator className="my-4">or continue with</FormSeparator>
@@ -138,7 +138,7 @@ export function AuthSigninForm({
                 <Button
                     type="submit"
                     className="mb-4 w-full"
-                    disabled={isLoggingIn || isSubmitting}
+                    disabled={isSigningIn || isSubmitting}
                     isLoading={isSubmitting}
                 >
                     Login

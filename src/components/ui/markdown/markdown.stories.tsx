@@ -7,7 +7,6 @@ import { Markdown } from "./markdown";
 
 const meta = preview.meta({
     component: Markdown,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             disable: true,

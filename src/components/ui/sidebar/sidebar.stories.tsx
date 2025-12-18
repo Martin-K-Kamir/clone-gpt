@@ -23,10 +23,11 @@ import { SidebarMenuItem } from "./sidebar-menu-item";
 import { SidebarProvider } from "./sidebar-provider";
 import { SidebarRail } from "./sidebar-rail";
 import { SidebarTrigger } from "./sidebar-trigger";
+import { SidebarWrapper } from "./sidebar-wrapper";
 
 const meta = preview.meta({
     component: Sidebar,
-    tags: ["autodocs"],
+
     parameters: {
         layout: "fullscreen",
     },
@@ -80,53 +81,55 @@ const menuItems = [
 export const Default = meta.story({
     render: () => (
         <SidebarProvider>
-            <Sidebar>
-                <SidebarHeader>
-                    <div className="flex items-center gap-2 px-2 py-1">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-zinc-800">
-                            <span className="text-sm font-bold">A</span>
+            <SidebarWrapper>
+                <Sidebar>
+                    <SidebarHeader>
+                        <div className="flex items-center gap-2 px-2 py-1">
+                            <div className="flex size-8 items-center justify-center rounded-lg bg-zinc-800">
+                                <span className="text-sm font-bold">A</span>
+                            </div>
+                            <span className="font-semibold">Acme Inc</span>
                         </div>
-                        <span className="font-semibold">Acme Inc</span>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Application</SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {menuItems.map(item => (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </SidebarContent>
+                    <SidebarFooter>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton>
+                                    <UsersIcon />
+                                    <span>Team</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarFooter>
+                    <SidebarRail />
+                </Sidebar>
+                <SidebarInset>
+                    <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
+                        <SidebarTrigger />
+                        <span className="font-semibold">Dashboard</span>
+                    </header>
+                    <div className="flex-1 p-4">
+                        <p className="text-zinc-400">Main content goes here</p>
                     </div>
-                </SidebarHeader>
-                <SidebarContent>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Application</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                {menuItems.map(item => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarFooter>
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton>
-                                <UsersIcon />
-                                <span>Team</span>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarFooter>
-                <SidebarRail />
-            </Sidebar>
-            <SidebarInset>
-                <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
-                    <SidebarTrigger />
-                    <span className="font-semibold">Dashboard</span>
-                </header>
-                <div className="flex-1 p-4">
-                    <p className="text-zinc-400">Main content goes here</p>
-                </div>
-            </SidebarInset>
+                </SidebarInset>
+            </SidebarWrapper>
         </SidebarProvider>
     ),
 });
@@ -222,37 +225,39 @@ export const VariantSidebar = meta.story({
     name: "Variant: Sidebar (Default)",
     render: () => (
         <SidebarProvider>
-            <Sidebar variant="sidebar">
-                <SidebarHeader>
-                    <div className="px-2 py-1 font-semibold">
-                        Sidebar Variant
-                    </div>
-                </SidebarHeader>
-                <SidebarContent>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                {menuItems.slice(0, 3).map(item => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarRail />
-            </Sidebar>
-            <SidebarInset>
-                <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
-                    <SidebarTrigger />
-                    <span>Default sidebar variant with border</span>
-                </header>
-            </SidebarInset>
+            <SidebarWrapper>
+                <Sidebar variant="sidebar">
+                    <SidebarHeader>
+                        <div className="px-2 py-1 font-semibold">
+                            Sidebar Variant
+                        </div>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {menuItems.slice(0, 3).map(item => (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </SidebarContent>
+                    <SidebarRail />
+                </Sidebar>
+                <SidebarInset>
+                    <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
+                        <SidebarTrigger />
+                        <span>Default sidebar variant with border</span>
+                    </header>
+                </SidebarInset>
+            </SidebarWrapper>
         </SidebarProvider>
     ),
 });
@@ -261,35 +266,41 @@ export const VariantInset = meta.story({
     name: "Variant: Inset",
     render: () => (
         <SidebarProvider>
-            <Sidebar variant="inset">
-                <SidebarHeader>
-                    <div className="px-2 py-1 font-semibold">Inset Variant</div>
-                </SidebarHeader>
-                <SidebarContent>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                {menuItems.slice(0, 3).map(item => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarRail />
-            </Sidebar>
-            <SidebarInset>
-                <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
-                    <SidebarTrigger />
-                    <span>Inset sidebar with padding and rounded content</span>
-                </header>
-            </SidebarInset>
+            <SidebarWrapper>
+                <Sidebar variant="inset">
+                    <SidebarHeader>
+                        <div className="px-2 py-1 font-semibold">
+                            Inset Variant
+                        </div>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {menuItems.slice(0, 3).map(item => (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </SidebarContent>
+                    <SidebarRail />
+                </Sidebar>
+                <SidebarInset>
+                    <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
+                        <SidebarTrigger />
+                        <span>
+                            Inset sidebar with padding and rounded content
+                        </span>
+                    </header>
+                </SidebarInset>
+            </SidebarWrapper>
         </SidebarProvider>
     ),
 });
@@ -298,35 +309,39 @@ export const SideRight = meta.story({
     name: "Side: Right",
     render: () => (
         <SidebarProvider>
-            <SidebarInset>
-                <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
-                    <span>Content on the left</span>
-                    <SidebarTrigger className="ml-auto" />
-                </header>
-            </SidebarInset>
-            <Sidebar side="right">
-                <SidebarHeader>
-                    <div className="px-2 py-1 font-semibold">Right Sidebar</div>
-                </SidebarHeader>
-                <SidebarContent>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Details</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                {menuItems.slice(0, 3).map(item => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarRail />
-            </Sidebar>
+            <SidebarWrapper>
+                <SidebarInset>
+                    <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
+                        <span>Content on the left</span>
+                        <SidebarTrigger className="ml-auto" />
+                    </header>
+                </SidebarInset>
+                <Sidebar side="right">
+                    <SidebarHeader>
+                        <div className="px-2 py-1 font-semibold">
+                            Right Sidebar
+                        </div>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Details</SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {menuItems.slice(0, 3).map(item => (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </SidebarContent>
+                    <SidebarRail />
+                </Sidebar>
+            </SidebarWrapper>
         </SidebarProvider>
     ),
 });
@@ -335,37 +350,39 @@ export const CollapsibleOffcanvas = meta.story({
     name: "Collapsible: Offcanvas",
     render: () => (
         <SidebarProvider defaultOpen={false}>
-            <Sidebar collapsible="offcanvas">
-                <SidebarHeader>
-                    <div className="px-2 py-1 font-semibold">
-                        Offcanvas Mode
-                    </div>
-                </SidebarHeader>
-                <SidebarContent>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Menu</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                {menuItems.map(item => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarRail />
-            </Sidebar>
-            <SidebarInset>
-                <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
-                    <SidebarTrigger />
-                    <span>Click trigger to slide sidebar in/out</span>
-                </header>
-            </SidebarInset>
+            <SidebarWrapper>
+                <Sidebar collapsible="offcanvas">
+                    <SidebarHeader>
+                        <div className="px-2 py-1 font-semibold">
+                            Offcanvas Mode
+                        </div>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Menu</SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {menuItems.map(item => (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton>
+                                                <item.icon />
+                                                <span>{item.title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </SidebarContent>
+                    <SidebarRail />
+                </Sidebar>
+                <SidebarInset>
+                    <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
+                        <SidebarTrigger />
+                        <span>Click trigger to slide sidebar in/out</span>
+                    </header>
+                </SidebarInset>
+            </SidebarWrapper>
         </SidebarProvider>
     ),
 });
@@ -373,96 +390,92 @@ export const CollapsibleOffcanvas = meta.story({
 export const FullApplication = meta.story({
     name: "Full Application Layout",
     render: () => (
-        <SidebarProvider
-            style={
-                {
-                    "--sidebar-width": "18rem",
-                } as React.CSSProperties
-            }
-        >
-            <Sidebar collapsible="offcanvas" variant="inset">
-                <SidebarHeader>
-                    <div className="flex items-center gap-2 px-2 py-1">
-                        <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-                            <span className="text-sm font-bold text-white">
-                                C
-                            </span>
+        <SidebarProvider>
+            <SidebarWrapper>
+                <Sidebar collapsible="offcanvas" variant="inset">
+                    <SidebarHeader>
+                        <div className="flex items-center gap-2 px-2 py-1">
+                            <div className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
+                                <span className="text-sm font-bold text-white">
+                                    C
+                                </span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-semibold">CloneGPT</span>
+                                <span className="text-xs text-zinc-400">
+                                    AI Assistant
+                                </span>
+                            </div>
                         </div>
-                        <div className="flex flex-col">
-                            <span className="font-semibold">CloneGPT</span>
-                            <span className="text-xs text-zinc-400">
-                                AI Assistant
-                            </span>
-                        </div>
-                    </div>
-                </SidebarHeader>
-                <SidebarContent>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Conversations</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                <SidebarMenuItem>
-                                    <SidebarMenuButton isActive>
-                                        <HomeIcon />
-                                        <span>New Chat</span>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                    <SidebarGroup>
-                        <SidebarGroupLabel>Recent</SidebarGroupLabel>
-                        <SidebarGroupContent>
-                            <SidebarMenu>
-                                {[
-                                    "React hooks explained",
-                                    "TypeScript generics",
-                                    "CSS Grid layout",
-                                    "Next.js routing",
-                                ].map(title => (
-                                    <SidebarMenuItem key={title}>
-                                        <SidebarMenuButton>
-                                            <InboxIcon />
-                                            <span>{title}</span>
+                    </SidebarHeader>
+                    <SidebarContent>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Conversations</SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    <SidebarMenuItem>
+                                        <SidebarMenuButton isActive>
+                                            <HomeIcon />
+                                            <span>New Chat</span>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
-                                ))}
-                            </SidebarMenu>
-                        </SidebarGroupContent>
-                    </SidebarGroup>
-                </SidebarContent>
-                <SidebarFooter>
-                    <SidebarMenu>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton>
-                                <SettingsIcon />
-                                <span>Settings</span>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                        <SidebarMenuItem>
-                            <SidebarMenuButton>
-                                <UsersIcon />
-                                <span>John Doe</span>
-                            </SidebarMenuButton>
-                        </SidebarMenuItem>
-                    </SidebarMenu>
-                </SidebarFooter>
-                <SidebarRail />
-            </Sidebar>
-            <SidebarInset>
-                <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
-                    <SidebarTrigger />
-                    <span className="font-semibold">New Chat</span>
-                </header>
-                <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
-                    <h1 className="text-2xl font-bold">
-                        How can I help you today?
-                    </h1>
-                    <p className="text-zinc-400">
-                        Start a conversation with the AI assistant
-                    </p>
-                </div>
-            </SidebarInset>
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                        <SidebarGroup>
+                            <SidebarGroupLabel>Recent</SidebarGroupLabel>
+                            <SidebarGroupContent>
+                                <SidebarMenu>
+                                    {[
+                                        "React hooks explained",
+                                        "TypeScript generics",
+                                        "CSS Grid layout",
+                                        "Next.js routing",
+                                    ].map(title => (
+                                        <SidebarMenuItem key={title}>
+                                            <SidebarMenuButton>
+                                                <InboxIcon />
+                                                <span>{title}</span>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
+                                </SidebarMenu>
+                            </SidebarGroupContent>
+                        </SidebarGroup>
+                    </SidebarContent>
+                    <SidebarFooter>
+                        <SidebarMenu>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton>
+                                    <SettingsIcon />
+                                    <span>Settings</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <SidebarMenuButton>
+                                    <UsersIcon />
+                                    <span>John Doe</span>
+                                </SidebarMenuButton>
+                            </SidebarMenuItem>
+                        </SidebarMenu>
+                    </SidebarFooter>
+                    <SidebarRail />
+                </Sidebar>
+                <SidebarInset>
+                    <header className="flex h-14 items-center gap-4 border-b border-zinc-800 px-4">
+                        <SidebarTrigger />
+                        <span className="font-semibold">New Chat</span>
+                    </header>
+                    <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4">
+                        <h1 className="text-2xl font-bold">
+                            How can I help you today?
+                        </h1>
+                        <p className="text-zinc-400">
+                            Start a conversation with the AI assistant
+                        </p>
+                    </div>
+                </SidebarInset>
+            </SidebarWrapper>
         </SidebarProvider>
     ),
 });

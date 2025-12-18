@@ -25,7 +25,6 @@ const basicFormSchema = z.object({
 
 const meta = preview.meta({
     component: Form,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

@@ -12,7 +12,6 @@ import { SheetTrigger } from "./sheet-trigger";
 
 const meta = preview.meta({
     component: Sheet,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

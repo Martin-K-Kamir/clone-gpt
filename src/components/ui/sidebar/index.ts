@@ -21,4 +21,5 @@ export * from "./sidebar-group-action";
 export * from "./sidebar-group-content";
 export * from "./sidebar-content";
 export * from "./sidebar-footer";
+export * from "./sidebar-wrapper";
 export * from "./constants";

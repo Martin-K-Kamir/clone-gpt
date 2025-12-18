@@ -5,7 +5,6 @@ import { SocialsList } from "./socials-list";
 
 const meta = preview.meta({
     component: SocialsList,
-    tags: ["autodocs"],
     args: {
         url: "https://example.com/my-article",
         text: "Check out this amazing article!",
@@ -54,6 +53,18 @@ const meta = preview.meta({
                 type: {
                     summary: "(e: React.MouseEvent<HTMLAnchorElement>) => void",
                 },
+            },
+        },
+        disabled: {
+            control: "boolean",
+            description: "Whether the social buttons are disabled",
+            table: {
+                type: {
+                    summary: "boolean",
+                },
+            },
+            defaultValue: {
+                summary: "false",
             },
         },
     },

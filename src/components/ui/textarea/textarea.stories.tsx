@@ -15,7 +15,6 @@ const meta = preview.meta({
             <Textarea {...args} id="textarea" />
         </>
     ),
-    tags: ["autodocs"],
     args: {
         placeholder: "Enter your message...",
         onChange: fn(),

@@ -5,7 +5,6 @@ import { AnyComponent } from "./any-component";
 
 const meta = preview.meta({
     component: AnyComponent,
-    tags: ["autodocs"],
     args: {
         children: "AnyComponent",
     },

@@ -7,7 +7,6 @@ import { Switch } from "./switch";
 
 const meta = preview.meta({
     component: Switch,
-    tags: ["autodocs"],
     args: {
         onCheckedChange: fn(),
     },

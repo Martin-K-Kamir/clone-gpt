@@ -4,8 +4,6 @@ import { Loader } from "./loader";
 
 const meta = preview.meta({
     component: Loader,
-    tags: ["autodocs"],
-
     parameters: {
         chromatic: {
             disableSnapshot: true,

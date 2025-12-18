@@ -4,7 +4,6 @@ import { Skeleton } from "./skeleton";
 
 const meta = preview.meta({
     component: Skeleton,
-    tags: ["autodocs"],
     parameters: {
         a11y: {
             test: "error",

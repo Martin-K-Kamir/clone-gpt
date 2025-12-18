@@ -13,6 +13,7 @@ type CopyInputProps = {
     copyResetDelay?: number;
     labelProps?: Omit<React.ComponentProps<"label">, "children">;
     inputProps?: Omit<React.ComponentProps<"input">, "value" | "onChange">;
+    disabled?: boolean;
     onCopy?: (value: string) => void;
     onCopyError?: (message: string) => void;
 } & Omit<React.ComponentProps<"div">, "children"> &
@@ -32,6 +33,7 @@ export function CopyInput({
     copiedText,
     showIcon,
     iconPosition,
+    disabled,
     label = "Copy value to clipboard",
     onCopyError,
     onCopy,
@@ -69,10 +71,12 @@ export function CopyInput({
                     "w-full select-all bg-transparent text-sm text-zinc-50 outline-none",
                     inputProps?.className,
                 )}
+                disabled={disabled}
                 {...inputProps}
                 readOnly
             />
             <CopyInputButton
+                disabled={disabled}
                 copied={copied}
                 copyIcon={copyIcon}
                 copiedIcon={copiedIcon}
