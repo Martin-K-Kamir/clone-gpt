@@ -35,6 +35,11 @@ export default defineMain({
                         id.endsWith("/sign-out.ts") ||
                         id.endsWith("/sign-up.ts"));
 
+                const isAuthService =
+                    id.includes("features/auth/services/") &&
+                    !id.includes(".mock") &&
+                    id.endsWith("/auth.ts");
+
                 const isChatAction =
                     id.includes("features/chat/services/actions/") &&
                     !id.includes(".mock") &&
@@ -70,6 +75,7 @@ export default defineMain({
 
                 if (
                     isAuthAction ||
+                    isAuthService ||
                     isChatAction ||
                     isStorageFile ||
                     isChatProvider

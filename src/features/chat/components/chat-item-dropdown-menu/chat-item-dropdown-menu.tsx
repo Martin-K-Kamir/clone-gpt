@@ -30,7 +30,6 @@ import { cn } from "@/lib/utils";
 
 type ChatItemDropdownMenuProps = {
     chat: UIChat;
-    onRename?: () => void;
     showShare?: boolean;
     showDelete?: boolean;
     showRename?: boolean;
@@ -38,6 +37,7 @@ type ChatItemDropdownMenuProps = {
         React.ComponentProps<typeof DropdownMenuContent>,
         "children"
     >;
+    onRename?: () => void;
 } & React.ComponentProps<typeof DropdownMenu>;
 
 export function ChatItemDropdownMenu({
