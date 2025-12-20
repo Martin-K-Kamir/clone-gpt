@@ -11,13 +11,13 @@ import type {
 import { duplicateMessages } from "@/features/chat/lib/utils";
 import { createUserChat } from "@/features/chat/services/db/create-user-chat";
 import { getUserChatById } from "@/features/chat/services/db/get-user-chat-by-id";
+import { uncachedGetUserChatMessages } from "@/features/chat/services/db/get-user-chat-messages";
 import { storeUserChatMessages } from "@/features/chat/services/db/store-user-chat-messages";
-import { uncachedGetUserChatMessages } from "@/features/chat/services/db/uncached-get-user-chat-messages";
 
 import { assertIsDBUserId } from "@/features/user/lib/asserts";
 import type { WithUserId } from "@/features/user/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type { WithOptionalThrowOnNotFound } from "@/lib/types";
 
 type DuplicateUserChatProps = WithNewChatId &
@@ -72,9 +72,9 @@ export async function duplicateUserChat({
         });
     }
 
-    revalidateTag(tag.userChats(userId));
-    revalidateTag(tag.userChatsSearch(userId));
-    revalidateTag(tag.userInitialChatsSearch(userId));
+    revalidateTag(tag.userChats(userId), "max");
+    revalidateTag(tag.userChatsSearch(userId), "max");
+    revalidateTag(tag.userInitialChatsSearch(userId), "max");
 
     return newChat as DBChat;
 }

@@ -15,7 +15,7 @@ import {
 import { deleteUserChatById } from "@/features/chat/services/actions";
 
 import { api } from "@/lib/api-response";
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import { PLURAL } from "@/lib/constants";
 
 import {

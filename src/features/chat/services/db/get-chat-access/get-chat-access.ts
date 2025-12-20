@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cacheTag as cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 
 import { assertIsDBChatId } from "@/features/chat/lib/asserts";
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
@@ -9,7 +9,7 @@ import type { WithChatId } from "@/features/chat/lib/types";
 import { assertIsDBUserId } from "@/features/user/lib/asserts";
 import type { WithUserId } from "@/features/user/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 import { supabase } from "@/services/supabase";
 

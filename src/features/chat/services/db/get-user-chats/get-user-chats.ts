@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cacheTag as cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 
 import type { DBChat, WithIsOwner } from "@/features/chat/lib/types";
 
@@ -8,7 +8,7 @@ import { assertIsDBUserId } from "@/features/user/lib/asserts";
 import type { WithUserId } from "@/features/user/lib/types";
 
 import { assertIsNumber } from "@/lib/asserts";
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import { ORDER_BY } from "@/lib/constants";
 import type {
     PaginatedData,

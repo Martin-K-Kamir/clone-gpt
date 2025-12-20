@@ -1,6 +1,6 @@
 "use server";
 
-import { unstable_cacheTag as cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 
 import type { DBChatId, DBChatSearchResult } from "@/features/chat/lib/types";
 
@@ -12,7 +12,7 @@ import {
     assertIsNonEmptyString,
     assertIsNumber,
 } from "@/lib/asserts";
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type {
     DateCursor,
     PaginatedData,

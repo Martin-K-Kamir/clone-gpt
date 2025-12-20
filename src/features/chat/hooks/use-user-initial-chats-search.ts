@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import type { UIChat } from "@/features/chat/lib/types";
 import { getUserChatsByDate } from "@/features/chat/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type { OrderBy } from "@/lib/types";
 import { groupByTimePastPeriods } from "@/lib/utils";
 

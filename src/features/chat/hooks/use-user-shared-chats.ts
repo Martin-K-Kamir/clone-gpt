@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 import { getUserSharedChats } from "../services/api";
 

@@ -1,6 +1,7 @@
 import { openai } from "@ai-sdk/openai";
 import { geolocation } from "@vercel/functions";
 import {
+    type ToolSet,
     convertToModelMessages,
     smoothStream,
     stepCountIs,
@@ -35,11 +36,11 @@ import {
 import { generateChatTitle } from "@/features/chat/services/ai";
 import {
     createUserChat,
-    deleteUserChatMessagesFromMessage,
+    deleteUserChatMessagesStartingFrom,
     duplicateUserChat,
-    getUserChatById,
     storeUserChatMessage,
     storeUserChatMessages,
+    uncachedGetUserChatById,
     uncachedGetUserChatMessages,
     updateUserChat,
     updateUserChatMessage,
@@ -58,7 +59,6 @@ import { removePunctuation } from "@/lib/utils";
 import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
 export const preferredRegion = "fra1";
-export const runtime = "nodejs";
 export const maxDuration = 280;
 
 const MODEL: Parameters<typeof openai>[0] = "gpt-4o";
@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
                     userId: session.user.id,
                     geolocation: userGeolocation,
                 }),
-            },
+            } as ToolSet,
             stopWhen: stepCountIs(10),
             experimental_transform: smoothStream({ chunking: "word" }),
         });
@@ -234,12 +234,13 @@ async function ensureChatAccess({
     userId: DBUserId;
     message: UIChatMessage;
 }): Promise<{ chatId: DBChatId; error: Response | null }> {
-    const chat = await getUserChatById({
+    const chat = await uncachedGetUserChatById({
         chatId,
         userId,
         verifyChatAccess: false,
         throwOnNotFound: false,
     });
+    console.log("[chat] chat:", chat);
 
     if (!chat) {
         try {
@@ -252,7 +253,7 @@ async function ensureChatAccess({
                 title: removePunctuation(generatedTitle ?? titleFromMessage),
                 throwOnNotFound: false,
             });
-
+            console.log("[chat] new chat:", newChat);
             if (!newChat) {
                 return {
                     chatId,
@@ -381,10 +382,10 @@ async function handleMessageStorage({
 
     if (trigger === CHAT_TRIGGER.REGENERATE_MESSAGE && messageId) {
         console.log(
-            "[chat] deleting user chat messages from message:",
+            "[chat] deleting user chat messages starting from message:",
             messageId,
         );
-        await deleteUserChatMessagesFromMessage({ messageId, chatId, userId });
+        await deleteUserChatMessagesStartingFrom({ messageId, chatId, userId });
         console.log("[chat] storing user chat message:", responseMessage);
         await storeUserChatMessage({
             chatId,

@@ -9,7 +9,7 @@ import type {
     WithUserId,
 } from "@/features/user/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import { RevertFn, SyncActionProps, SyncFn, WithNewName } from "@/lib/types";
 import { createCacheUpdater, tabScope } from "@/lib/utils";
 

@@ -40,7 +40,7 @@ import { useUserCacheSyncContext } from "@/features/user/providers";
 import { upsertUserChatPreferences } from "@/features/user/services/actions";
 import { getUserChatPreferences } from "@/features/user/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 import { useSelectableItems } from "@/hooks";
 

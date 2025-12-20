@@ -8,7 +8,7 @@ import type { UIChat } from "@/features/chat/lib/types";
 import { useChatOffsetContext } from "@/features/chat/providers";
 import { getUserChats } from "@/features/chat/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type { OrderBy, PaginatedData } from "@/lib/types";
 
 import { useInView } from "@/hooks";

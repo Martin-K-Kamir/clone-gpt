@@ -14,7 +14,7 @@ import {
 import { updateChatTitle } from "@/features/chat/services/actions";
 
 import { api } from "@/lib/api-response";
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 import { ChatSidebarHistoryItem } from "./chat-sidebar-history-item";
 

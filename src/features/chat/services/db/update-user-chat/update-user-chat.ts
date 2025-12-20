@@ -11,7 +11,7 @@ import type { DBChat, WithChatId } from "@/features/chat/lib/types";
 import { assertIsDBUserId } from "@/features/user/lib/asserts";
 import type { WithUserId } from "@/features/user/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 import { supabase } from "@/services/supabase";
 
@@ -39,7 +39,8 @@ export async function updateUserChat({
 
     if (error) throw new Error("Chat update failed");
 
-    revalidateTag(tag.userChats(userId));
+    revalidateTag(tag.userChats(userId), "max");
+    revalidateTag(tag.userChat(chatId), "max");
 
     console.log("[chat db] updated user chat:", updatedData);
     return updatedData as DBChat;

@@ -1,5 +1,7 @@
 "use server";
 
+import { updateTag } from "next/cache";
+
 import { assertSessionExists } from "@/features/auth/lib/asserts";
 import { auth } from "@/features/auth/services/auth";
 
@@ -13,10 +15,14 @@ import type {
     WithChatMessageId,
     WithUpvote,
 } from "@/features/chat/lib/types";
-import { upvoteChatMessage as _upvoteChatMessage } from "@/features/chat/services/db";
+
+import { assertIsDBUserId } from "@/features/user/lib/asserts";
 
 import { api } from "@/lib/api-response";
+import { tag } from "@/lib/cache-tag";
 import { handleApiError } from "@/lib/utils/handle-api-error";
+
+import { supabase } from "@/services/supabase";
 
 export async function upvoteChatMessage({
     upvote,
@@ -26,16 +32,41 @@ export async function upvoteChatMessage({
     try {
         const session = await auth();
         assertSessionExists(session);
+        const userId = session.user.id;
+        assertIsDBUserId(userId);
         assertIsDBChatMessageId(messageId);
         assertIsDBChatId(chatId);
         assertIsUpvote(upvote);
 
-        const data = await _upvoteChatMessage({
-            upvote,
-            messageId,
-            chatId,
-            userId: session.user.id,
-        });
+        const { data: currentMessage } = await supabase
+            .from("messages")
+            .select("metadata")
+            .eq("id", messageId)
+            .eq("userId", userId)
+            .eq("chatId", chatId)
+            .single();
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const currentMetadata = (currentMessage?.metadata as any) || {};
+
+        const { data, error } = await supabase
+            .from("messages")
+            .update({
+                metadata: {
+                    ...currentMetadata,
+                    isUpvoted: upvote,
+                    isDownvoted: false,
+                },
+            })
+            .eq("id", messageId)
+            .eq("userId", userId)
+            .eq("chatId", chatId)
+            .select("*")
+            .single();
+
+        if (error) throw new Error("Failed to upvote message");
+
+        updateTag(tag.chatMessages(chatId));
 
         return api.success.chat.upvote(data);
     } catch (error) {

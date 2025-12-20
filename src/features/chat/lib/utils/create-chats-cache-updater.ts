@@ -8,7 +8,7 @@ import type {
     WithVisibility,
 } from "@/features/chat/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import { PaginatedData, WithNewTitle } from "@/lib/types";
 import { createCacheUpdater, createInfiniteCacheUpdater } from "@/lib/utils";
 

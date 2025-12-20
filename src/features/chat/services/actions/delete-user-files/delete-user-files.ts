@@ -11,7 +11,7 @@ import type {
     WithChatId,
     WithStoredUploadedFiles,
 } from "@/features/chat/lib/types";
-import { deleteUserFile as _deleteUserFile } from "@/features/chat/services/storage";
+import { deleteUserFile } from "@/features/chat/services/storage";
 
 import { api } from "@/lib/api-response";
 import { handleApiError } from "@/lib/utils/handle-api-error";
@@ -28,7 +28,7 @@ export async function deleteUserFiles({
 
         const data = await Promise.all(
             storedFiles.map(file =>
-                _deleteUserFile({
+                deleteUserFile({
                     chatId,
                     storedFile: file,
                     userId: session.user.id,

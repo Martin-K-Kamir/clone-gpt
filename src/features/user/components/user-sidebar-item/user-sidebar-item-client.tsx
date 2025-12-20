@@ -20,7 +20,7 @@ import type { UIUser } from "@/features/user/lib/types";
 import { useUserSessionContext } from "@/features/user/providers";
 import { getUser } from "@/features/user/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import { getFirstTwoCapitalLetters } from "@/lib/utils";
 
 type UserSidebarItemClientProps = {

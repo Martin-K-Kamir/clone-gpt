@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { useChatIdParam } from "@/features/chat/hooks";
 import { getUserChatById } from "@/features/chat/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 export function PageTitleManager() {
     const pathname = usePathname();

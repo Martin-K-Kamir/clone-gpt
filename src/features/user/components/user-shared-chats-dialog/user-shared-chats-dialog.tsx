@@ -20,7 +20,7 @@ import { getUserSharedChats } from "@/features/chat/services/api";
 
 import { UserSharedChatsTable } from "@/features/user/components/user-shared-chats-table";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 export function UserSharedChatsDialog({
     children,

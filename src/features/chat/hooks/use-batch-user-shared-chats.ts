@@ -11,7 +11,7 @@ import {
     type ApiErrorResponse,
     type ApiSuccessResponse,
 } from "@/lib/api-response";
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type { PaginatedData } from "@/lib/types";
 
 export function useBatchUserSharedChats(visibility: DBChatVisibility) {

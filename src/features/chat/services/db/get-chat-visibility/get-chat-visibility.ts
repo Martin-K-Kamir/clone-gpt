@@ -1,11 +1,11 @@
 "use server";
 
-import { unstable_cacheTag as cacheTag } from "next/cache";
+import { cacheTag } from "next/cache";
 
 import { assertIsDBChatId } from "@/features/chat/lib/asserts";
 import type { DBChat, WithChatId } from "@/features/chat/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 import { supabase } from "@/services/supabase";
 

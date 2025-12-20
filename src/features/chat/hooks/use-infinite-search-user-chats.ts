@@ -10,7 +10,7 @@ import { useDebounceValue } from "usehooks-ts";
 import type { DBChatSearchResult } from "@/features/chat/lib/types";
 import { searchUserChats } from "@/features/chat/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type { DateCursor } from "@/lib/types";
 
 import { useInView } from "@/hooks";

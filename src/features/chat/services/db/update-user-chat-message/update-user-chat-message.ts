@@ -8,7 +8,7 @@ import type { WithChatId, WithMessage } from "@/features/chat/lib/types";
 import { assertIsDBUserId } from "@/features/user/lib/asserts";
 import type { WithUserId } from "@/features/user/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type { Json } from "@/lib/types";
 
 import { supabase } from "@/services/supabase";
@@ -38,8 +38,8 @@ export async function updateUserChatMessage({
 
     if (error) throw new Error("Failed to update chat message");
 
-    revalidateTag(tag.chatMessages(chatId));
-    revalidateTag(tag.userChat(chatId));
-    revalidateTag(tag.userChatsSearch(userId));
+    revalidateTag(tag.chatMessages(chatId), "max");
+    revalidateTag(tag.userChat(chatId), "max");
+    revalidateTag(tag.userChatsSearch(userId), "max");
     console.log("[chat db] updated user chat message:", message);
 }

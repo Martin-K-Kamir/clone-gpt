@@ -35,7 +35,7 @@ import type {
 } from "@/features/user/lib/types";
 import { getUserChatPreferences } from "@/features/user/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import { getParseErrors } from "@/lib/utils";
 
 import { useUuid } from "@/hooks";

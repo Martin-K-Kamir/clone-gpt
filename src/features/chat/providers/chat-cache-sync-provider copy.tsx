@@ -18,7 +18,7 @@ import {
 } from "@/features/chat/lib/utils";
 import { useChatOffsetContext } from "@/features/chat/providers";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import type {
     RevertFn,
     SyncActionProps,

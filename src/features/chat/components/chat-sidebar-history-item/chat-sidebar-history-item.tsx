@@ -14,7 +14,7 @@ import { useChatRename } from "@/features/chat/hooks";
 import type { DBChatId, UIChat } from "@/features/chat/lib/types";
 import { getUserChatById } from "@/features/chat/services/api";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 
 import { ChatSidebarHistoryItemInput } from "./chat-sidebar-history-item-input";
 import { ChatSidebarHistoryItemLink } from "./chat-sidebar-history-item-link";

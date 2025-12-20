@@ -25,7 +25,7 @@ import { getUserChatById } from "@/features/chat/services/api";
 import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import { DBUserRole } from "@/features/user/lib/types";
 
-import { tag } from "@/lib/cache-tags";
+import { tag } from "@/lib/cache-tag";
 import { cn } from "@/lib/utils";
 
 type ChatViewHeaderActionsProps = {

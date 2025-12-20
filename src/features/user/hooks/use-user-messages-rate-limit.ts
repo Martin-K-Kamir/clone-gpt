@@ -5,9 +5,11 @@ import type {
     UserMessagesRateLimitResult,
 } from "@/features/user/lib/types";
 import { checkUserMessagesRateLimit } from "@/features/user/services/api";
-import { useRateLimit } from "@/hooks";
-import { tag } from "@/lib/cache-tags";
+
+import { tag } from "@/lib/cache-tag";
 import { RATE_LIMIT_REASON } from "@/lib/constants";
+
+import { useRateLimit } from "@/hooks";
 
 type UseUserMessagesRateLimitProps = {
     userId: DBUserId;
