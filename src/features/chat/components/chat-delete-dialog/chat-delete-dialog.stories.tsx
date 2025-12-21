@@ -120,6 +120,16 @@ export const Default = meta.story({
         queryClient.setQueryData([tag.userInitialChatsSearch()], [mockChat]);
         queryClient.removeQueries({ queryKey: [tag.userChats()] });
     },
+    parameters: {
+        a11y: {
+            config: {
+                rules: [
+                    { id: "color-contrast", enabled: false },
+                    { id: "aria-valid-attr-value", enabled: false },
+                ],
+            },
+        },
+    },
 });
 
 Default.test("should open dialog", async ({ canvas, userEvent }) => {

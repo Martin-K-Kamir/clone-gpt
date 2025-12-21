@@ -17,8 +17,8 @@ export const TIME_OF_DAY_LIST = [TIME_OF_DAY.DAY, TIME_OF_DAY.NIGHT] as const;
 export const TIME_PAST_PERIODS = {
     TODAY: "Today",
     YESTERDAY: "Yesterday",
-    LAST_WEEK: "Last Week",
-    LAST_MONTH: "Last Month",
-    LAST_YEAR: "Last Year",
+    LAST_WEEK: "This Week",
+    LAST_MONTH: "This Month",
+    LAST_YEAR: "This Year",
     OLDER: "Older",
 } as const;

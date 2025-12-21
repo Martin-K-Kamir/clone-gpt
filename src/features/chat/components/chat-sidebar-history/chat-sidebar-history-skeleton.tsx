@@ -65,7 +65,6 @@ export function ChatSidebarItemsSkeleton({
                         disabled
                     >
                         <Skeleton
-                            aria-hidden
                             className={cn("h-6 w-full", classNameSkeleton)}
                             style={{
                                 width: generateSizePercentage(index),

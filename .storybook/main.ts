@@ -15,6 +15,7 @@ export default defineMain({
     framework: "@storybook/nextjs-vite",
     features: {
         experimentalTestSyntax: true,
+        experimentalRSC: true,
     },
     staticDirs: ["../public"],
     viteFinal: async config => {
@@ -55,6 +56,28 @@ export default defineMain({
                         id.endsWith("/upload-user-files.ts") ||
                         id.endsWith("/upvote-chat-message.ts"));
 
+                const isChatDb =
+                    id.includes("features/chat/services/db/") &&
+                    !id.includes(".mock") &&
+                    (id.endsWith("/create-user-chat.ts") ||
+                        id.endsWith(
+                            "/delete-user-chat-messages-starting-from.ts",
+                        ) ||
+                        id.endsWith("/duplicate-user-chat.ts") ||
+                        id.endsWith("/get-chat-access.ts") ||
+                        id.endsWith("/get-chat-visibility.ts") ||
+                        id.endsWith("/get-user-chat-by-id.ts") ||
+                        id.endsWith("/get-user-chat-messages.ts") ||
+                        id.endsWith("/get-user-chats.ts") ||
+                        id.endsWith("/get-user-chats-by-date.ts") ||
+                        id.endsWith("/get-user-shared-chats.ts") ||
+                        id.endsWith("/is-user-chat-owner.ts") ||
+                        id.endsWith("/search-user-chats.ts") ||
+                        id.endsWith("/store-user-chat-message.ts") ||
+                        id.endsWith("/store-user-chat-messages.ts") ||
+                        id.endsWith("/update-user-chat.ts") ||
+                        id.endsWith("/update-user-chat-message.ts"));
+
                 const isStorageFile =
                     id.includes("features/chat/services/storage/") &&
                     !id.includes(".mock") &&
@@ -67,6 +90,32 @@ export default defineMain({
                         id.endsWith("/store-generated-image.ts") ||
                         id.endsWith("/store-user-file.ts"));
 
+                const isUserAction =
+                    id.includes("features/user/services/actions/") &&
+                    !id.includes(".mock") &&
+                    (id.endsWith("/delete-user.ts") ||
+                        id.endsWith("/update-user-name.ts") ||
+                        id.endsWith("/upsert-user-chat-preferences.ts"));
+
+                const isUserDb =
+                    id.includes("features/user/services/db/") &&
+                    !id.includes(".mock") &&
+                    (id.endsWith("/check-user-messages-rate-limit.ts") ||
+                        id.endsWith("/check-user-files-rate-limit.ts") ||
+                        id.endsWith("/create-user.ts") ||
+                        id.endsWith("/create-guest-user.ts") ||
+                        id.endsWith("/create-user-files-rate-limit.ts") ||
+                        id.endsWith("/create-user-messages-rate-limit.ts") ||
+                        id.endsWith("/get-user-by-email.ts") ||
+                        id.endsWith("/get-user-by-id.ts") ||
+                        id.endsWith("/get-user-chat-preferences.ts") ||
+                        id.endsWith("/get-user-files-rate-limit.ts") ||
+                        id.endsWith("/get-user-messages-rate-limit.ts") ||
+                        id.endsWith("/increment-user-files-rate-limit.ts") ||
+                        id.endsWith("/increment-user-messages-rate-limit.ts") ||
+                        id.endsWith("/update-user-files-rate-limit.ts") ||
+                        id.endsWith("/update-user-messages-rate-limit.ts"));
+
                 const isChatProvider =
                     id.includes("features/chat/providers/") &&
                     !id.includes(".mock") &&
@@ -77,11 +126,24 @@ export default defineMain({
                     isAuthAction ||
                     isAuthService ||
                     isChatAction ||
+                    isChatDb ||
                     isStorageFile ||
+                    isUserAction ||
+                    isUserDb ||
                     isChatProvider
                 ) {
-                    // Replace .ts with .mock.ts
-                    const mockPath = id.replace(/\.ts$/, ".mock.ts");
+                    // Special case: delete-user-chat-messages-starting-from has a differently named mock
+                    let mockPath = id.replace(/\.ts$/, ".mock.ts");
+                    if (
+                        id.endsWith(
+                            "/delete-user-chat-messages-starting-from.ts",
+                        )
+                    ) {
+                        mockPath = id.replace(
+                            "/delete-user-chat-messages-starting-from.ts",
+                            "/delete-user-chat-messages-from-message.mock.ts",
+                        );
+                    }
 
                     try {
                         if (showLogs) {

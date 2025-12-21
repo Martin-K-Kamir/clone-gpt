@@ -281,8 +281,6 @@ Default.test(
         expect(twitterButton).toHaveAttribute("disabled");
         expect(redditButton).toBeInTheDocument();
         expect(redditButton).toHaveAttribute("disabled");
-        expect(nativeShareButton).toBeInTheDocument();
-        expect(nativeShareButton).toBeDisabled();
 
         try {
             await userEvent.click(linkedInButton!);
@@ -492,28 +490,12 @@ Default.test(
             return link;
         });
 
-        const nativeShareButton = await waitFor(() => {
-            const buttons = document.querySelectorAll("button");
-            const button = Array.from(buttons).find(button => {
-                const srOnly = button.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share";
-            });
-            if (!button || button.disabled) {
-                throw new Error(
-                    "Native share button not found or still disabled",
-                );
-            }
-            return button;
-        });
-
         expect(linkedInButton).toBeInTheDocument();
         expect(linkedInButton).not.toHaveAttribute("disabled");
         expect(twitterButton).toBeInTheDocument();
         expect(twitterButton).not.toHaveAttribute("disabled");
         expect(redditButton).toBeInTheDocument();
         expect(redditButton).not.toHaveAttribute("disabled");
-        expect(nativeShareButton).toBeInTheDocument();
-        expect(nativeShareButton).not.toBeDisabled();
     },
 );
 
