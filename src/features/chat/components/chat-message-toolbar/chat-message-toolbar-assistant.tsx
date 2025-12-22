@@ -90,7 +90,7 @@ export function ChatMessageToolbarAssistant({
                 },
                 {
                     delay: stagger(0.1, { startDelay: 0.1 }),
-                    duration: 0.2,
+                    duration: 0.15,
                     ease: "easeOut",
                 },
             );

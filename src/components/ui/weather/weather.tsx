@@ -67,6 +67,8 @@ export function Weather({
 
     return (
         <section
+            data-testid="weather-container"
+            data-slot="weather-container"
             className={cn("space-y-2", className)}
             aria-labelledby="weather-heading"
             role="region"

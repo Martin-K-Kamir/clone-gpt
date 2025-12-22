@@ -37,6 +37,9 @@ export function Loader({ size, className, ...props }: LoaderVariants) {
                 },
             }}
             animate="animate"
+            role="status"
+            aria-label="Loading"
+            aria-busy="true"
             {...props}
         />
     );

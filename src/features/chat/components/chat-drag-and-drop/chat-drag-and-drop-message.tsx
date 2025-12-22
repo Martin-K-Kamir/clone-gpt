@@ -16,6 +16,8 @@ export function ChatDragAndDropMessage({
 }: ChatDragAndDropMessageProps) {
     return (
         <div
+            data-testid="chat-drag-and-drop-message"
+            data-slot="chat-drag-and-drop-message"
             className={cn(
                 "absolute inset-0 z-10 flex flex-col items-center justify-center rounded-b-lg bg-black/60",
                 className,

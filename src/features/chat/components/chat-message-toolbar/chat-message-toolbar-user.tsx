@@ -22,6 +22,7 @@ export function ChatMessageToolbarUser({
     status,
     content,
     parts,
+    className,
     onUpdate,
 }: ChatMessageToolbarUserProps) {
     const { isOwner } = useChatContext();
@@ -41,6 +42,7 @@ export function ChatMessageToolbarUser({
         <ChatMessageActionsUser
             className={cn(
                 "pointer-coarse:opacity-100 opacity-0 transition-opacity group-focus-within/message:opacity-100 group-hover/message:opacity-100",
+                className,
             )}
             content={content}
             disabled={actionsDisabled}

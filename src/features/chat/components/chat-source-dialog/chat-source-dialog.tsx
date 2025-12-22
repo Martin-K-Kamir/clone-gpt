@@ -47,7 +47,7 @@ export function ChatSourceDialog({
                     disabled={disabled}
                 >
                     <SourceIcons sources={sources}>
-                        <span className="ml-1.5">Sources</span>
+                        <span className="ml-1.5">sources</span>
                     </SourceIcons>
                 </Button>
             </DialogTrigger>

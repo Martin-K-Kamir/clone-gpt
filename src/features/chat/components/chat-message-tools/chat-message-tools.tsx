@@ -17,7 +17,7 @@ type ChatMessageToolsProps = {
 
 export function ChatMessageTools({ parts, ...props }: ChatMessageToolsProps) {
     return (
-        <div {...props}>
+        <div {...props} data-testid="chat-message-tools">
             {parts.map(part => {
                 if (!isChatTool(part) || !part.output) {
                     return null;

@@ -33,6 +33,8 @@ export function ChatDragAndDrop({
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
             onDrop={handleDrop}
+            data-testid="chat-drag-and-drop"
+            data-slot="chat-drag-and-drop"
             {...props}
         >
             {children}

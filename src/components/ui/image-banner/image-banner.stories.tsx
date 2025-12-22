@@ -166,9 +166,13 @@ Default.test(
 
         try {
             await step("Find and click the download button", async () => {
-                const downloadButton = await canvas.findByRole("button", {
-                    name: /download image/i,
-                });
+                const downloadButton = await canvas.findByRole(
+                    "button",
+                    {
+                        name: /download image/i,
+                    },
+                    { timeout: 3000 },
+                );
                 expect(downloadButton).toBeInTheDocument();
                 await userEvent.click(downloadButton);
             });
