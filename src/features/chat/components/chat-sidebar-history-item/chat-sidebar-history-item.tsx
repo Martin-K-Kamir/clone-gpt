@@ -69,6 +69,7 @@ export function ChatSidebarHistoryItem({
             transition={{ duration: 0.3, ease: "easeOut" }}
             data-slot="sidebar-menu-item"
             data-sidebar="menu-item"
+            data-testid="chat-sidebar-history-item"
             className={className}
             {...props}
         >

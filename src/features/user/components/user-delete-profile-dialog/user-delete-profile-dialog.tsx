@@ -73,7 +73,9 @@ export function UserDeleteProfileDialog({
         }
 
         onDeleteSuccess?.(userResponse.message || chatResponse.message);
-        toast.success(userResponse.message);
+        if (showToast) {
+            toast.success(userResponse.message);
+        }
         setOpen(false);
         signOutWithSync();
     }

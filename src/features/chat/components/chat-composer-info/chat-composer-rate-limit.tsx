@@ -47,7 +47,11 @@ export function ChatComposerRateLimit() {
     );
 
     return (
-        <ChatComposerInfo open={open} onClose={() => setOpen(false)}>
+        <ChatComposerInfo
+            open={open}
+            onClose={() => setOpen(false)}
+            data-testid="chat-composer-rate-limit"
+        >
             {rateLimitState && (
                 <p>
                     {formatTemplate(rateLimitState.message, {

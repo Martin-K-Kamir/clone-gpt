@@ -27,6 +27,8 @@ const ChatComposer = ({
                 "shadow-zinc-925 2lg:pr-[calc(var(--scrollbar-size)+1rem)] z-10 px-4 shadow-[0_-8px_40px_20px_rgba(0,0,0,0.1)]",
                 className,
             )}
+            data-testid="chat-composer"
+            data-slot="chat-composer"
             {...props}
         >
             <div className="relative mx-auto w-full max-w-3xl pb-12">

@@ -3,9 +3,9 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
-import { tag } from "@/lib/cache-tag";
+import { getUserSharedChats } from "@/features/chat/services/api";
 
-import { getUserSharedChats } from "../services/api";
+import { tag } from "@/lib/cache-tag";
 
 type UseUserSharedChatsOptions = Partial<{
     limit: number;

@@ -20,6 +20,7 @@ import {
 } from "@/features/chat/providers";
 import { getUserChatById } from "@/features/chat/services/db";
 
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { DBUserId } from "@/features/user/lib/types";
 import {
     UserCacheSyncProvider,
@@ -31,6 +32,17 @@ import { ChatViewHeaderSkeleton } from "./chat-view-header-skeleton";
 
 const mockChatId = "chat-123" as DBChatId;
 const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
+
+const mockedGuestSession = {
+    user: {
+        id: mockUserId,
+        name: "Guest",
+        email: "guest@example.com",
+        role: USER_ROLE.GUEST,
+        image: null,
+    },
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
+};
 
 function createMockChat(
     chatId: DBChatId = mockChatId,
@@ -236,6 +248,93 @@ NonOwnerChat.test(
     async ({ canvas }) => {
         const header = canvas.getByRole("banner");
         expect(header).toBeInTheDocument();
+
+        const shareButton = canvas.queryByRole("button", { name: /share/i });
+        const menuButton = canvas.queryByRole("button", {
+            name: /open chat actions/i,
+        });
+        expect(shareButton).not.toBeInTheDocument();
+        expect(menuButton).not.toBeInTheDocument();
+    },
+);
+
+export const GuestUser = meta.story({
+    name: "Guest User",
+    args: {
+        chatId: undefined,
+    },
+    beforeEach: () => {
+        mocked(auth).mockResolvedValue(mockedGuestSession as any);
+    },
+    afterEach: () => {
+        mocked(auth).mockClear();
+        mocked(getUserChatById).mockClear();
+    },
+});
+
+GuestUser.test(
+    "should render header with log in button",
+    async ({ canvas }) => {
+        const header = canvas.getByRole("banner");
+        expect(header).toBeInTheDocument();
+
+        const logInButton = canvas.getByRole("button", { name: /log in/i });
+        expect(logInButton).toBeVisible();
+    },
+);
+
+GuestUser.test(
+    "should open sign in dialog when log in button is clicked",
+    async ({ canvas }) => {
+        const logInButton = canvas.getByRole("button", { name: /log in/i });
+        await userEvent.click(logInButton);
+
+        await waitFor(() => {
+            const dialog = document.querySelector(
+                "[data-slot='dialog-content']",
+            );
+            expect(dialog).toBeInTheDocument();
+        });
+    },
+);
+
+GuestUser.test(
+    "should not show share and menu buttons for guest user",
+    async ({ canvas }) => {
+        const shareButton = canvas.queryByRole("button", { name: /share/i });
+        const menuButton = canvas.queryByRole("button", {
+            name: /open chat actions/i,
+        });
+        expect(shareButton).not.toBeInTheDocument();
+        expect(menuButton).not.toBeInTheDocument();
+    },
+);
+
+export const GuestUserWithChat = meta.story({
+    name: "Guest User With Chat",
+    args: {
+        chatId: mockChatId,
+    },
+    beforeEach: () => {
+        mocked(auth).mockResolvedValue(mockedGuestSession as any);
+        mocked(getUserChatById).mockResolvedValue(
+            createMockChat(mockChatId, mockUserId, false),
+        );
+    },
+    afterEach: () => {
+        mocked(auth).mockClear();
+        mocked(getUserChatById).mockClear();
+    },
+});
+
+GuestUserWithChat.test(
+    "should render log in button even when viewing a chat",
+    async ({ canvas }) => {
+        const header = canvas.getByRole("banner");
+        expect(header).toBeInTheDocument();
+
+        const logInButton = canvas.getByRole("button", { name: /log in/i });
+        expect(logInButton).toBeVisible();
 
         const shareButton = canvas.queryByRole("button", { name: /share/i });
         const menuButton = canvas.queryByRole("button", {

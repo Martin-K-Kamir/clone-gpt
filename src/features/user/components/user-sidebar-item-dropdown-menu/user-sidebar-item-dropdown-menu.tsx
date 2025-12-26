@@ -63,6 +63,7 @@ export function UserSidebarItemDropdownMenu({
 
                 <DropdownMenuContent
                     className="w-(--radix-dropdown-menu-trigger-width) rounded-lg"
+                    data-testid="user-sidebar-item-dropdown-menu-content"
                     sideOffset={8}
                     onCloseAutoFocus={e => e.preventDefault()}
                 >
@@ -147,6 +148,7 @@ export function UserSidebarItemDropdownMenuTrigger({
     ) : (
         <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost">
+                <span className="sr-only">Open user menu</span>
                 <IconDots className="size-4" />
             </Button>
         </DropdownMenuTrigger>

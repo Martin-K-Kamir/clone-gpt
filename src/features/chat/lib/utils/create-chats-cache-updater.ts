@@ -69,15 +69,18 @@ export function createChatsCacheUpdater(queryClient: QueryClient) {
     function removeFromUserSharedChats({ chatId }: WithChatId) {
         const queries = queryClient.getQueriesData({
             queryKey: [tag.userSharedChats()],
-        }) as [[string, number, number], PaginatedData<DBChat[]>][];
+        }) as [[string, number, number], PaginatedData<DBChat[]> | undefined][];
 
         const joinedQueriesData = queries
+            .filter(([, data]) => data?.data)
             .flatMap(([, data]) => {
-                return data.data;
+                return data!.data;
             })
             .filter(chat => chat.id !== chatId);
 
         queries.forEach(([queryKey, originalData], pageIndex) => {
+            if (!originalData) return;
+
             const [, , limit] = queryKey;
 
             const startIndex = pageIndex * limit;

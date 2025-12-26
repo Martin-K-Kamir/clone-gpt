@@ -44,6 +44,7 @@ export const PureChatMessage = ({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             {...props}
+            data-testid="chat-message"
         >
             {isUser && (
                 <ChatMessageUser

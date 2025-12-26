@@ -53,7 +53,9 @@ export function ChatComposerInfo({
                             className="size-8 rounded-full hover:bg-zinc-700"
                             onClick={onClose}
                         >
-                            <span className="sr-only">Close</span>
+                            <span className="sr-only">
+                                Close rate limit info
+                            </span>
                             <IconX />
                         </Button>
                     </motion.div>

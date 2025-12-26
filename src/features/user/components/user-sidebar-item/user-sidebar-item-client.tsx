@@ -69,7 +69,10 @@ export function UserSidebarItemClient({
                                     {getFirstTwoCapitalLetters(user.name)}
                                 </AvatarFallback>
                             </Avatar>
-                            <div className="grid flex-1 text-left text-sm leading-tight">
+                            <div
+                                className="grid flex-1 text-left text-sm leading-tight"
+                                data-testid="user-sidebar-item-name-container"
+                            >
                                 <span className="truncate font-medium text-zinc-50">
                                     {user.name}
                                 </span>
@@ -79,6 +82,7 @@ export function UserSidebarItemClient({
                                     </span>
                                 )}
                             </div>
+                            <span className="sr-only">Open user menu</span>
                             <IconDotsVertical className="ml-auto size-4" />
                         </SidebarMenuButton>
                     </UserSidebarItemDropdownMenuTrigger>

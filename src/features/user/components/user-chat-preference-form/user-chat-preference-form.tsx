@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { IconRefresh } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useTransition } from "react";
+import { useEffect, useId, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import z from "zod";
@@ -49,6 +49,7 @@ type UserChatPreferenceFormProps = {
 };
 
 export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
+    const id = useId();
     const userCacheSync = useUserCacheSyncContext();
     const [isPending, startTransition] = useTransition();
     const {
@@ -137,6 +138,7 @@ export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
                             <FormLabel>How should CloneGPT call you?</FormLabel>
                             <FormControl>
                                 <Input
+                                    data-testid="user-chat-preference-form-nickname-input"
                                     {...field}
                                     placeholder="e.g. John"
                                     isLoading={isUserChatPreferencesPending}
@@ -152,10 +154,14 @@ export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
                     name="role"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>What is your role?</FormLabel>
+                            <FormLabel htmlFor={`${id}-role`}>
+                                What is your role?
+                            </FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input
+                                        id={`${id}-role`}
+                                        data-testid="user-chat-preference-form-role-input"
                                         {...field}
                                         placeholderAnimation
                                         randomize
@@ -188,6 +194,8 @@ export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
                                     <SelectTrigger
                                         className="w-full"
                                         isLoading={isUserChatPreferencesPending}
+                                        data-testid="user-chat-preference-form-personality-select-trigger"
+                                        aria-label="Select a personality"
                                     >
                                         <SelectValue placeholder="Select a personality" />
                                     </SelectTrigger>
@@ -223,6 +231,7 @@ export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
                             </FormLabel>
                             <FormControl>
                                 <Textarea
+                                    data-testid="user-chat-preference-form-characteristics-textarea"
                                     {...field}
                                     placeholder="Describe or choose characteristics"
                                     className="h-24 resize-none"
@@ -232,6 +241,7 @@ export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
                             <div className="flex flex-wrap gap-2">
                                 {characteristics.map(item => (
                                     <Button
+                                        data-testid={`user-chat-preference-form-characteristic-button-${item.id}`}
                                         key={item.id}
                                         variant="outline"
                                         onClick={() => {
@@ -253,7 +263,11 @@ export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
                                         size="icon"
                                         type="button"
                                         disabled={isUserChatPreferencesPending}
+                                        data-testid="user-chat-preference-form-characteristic-refresh-button"
                                     >
+                                        <span className="sr-only">
+                                            Refresh characteristics
+                                        </span>
                                         <IconRefresh />
                                     </Button>
                                 )}
@@ -274,6 +288,7 @@ export function UserChatPreferenceForm({ user }: UserChatPreferenceFormProps) {
                             </FormLabel>
                             <FormControl>
                                 <Textarea
+                                    data-testid="user-chat-preference-form-extraInfo-textarea"
                                     {...field}
                                     placeholder="Interests, values, or preferences to keep in mind"
                                     className="h-24 resize-none"

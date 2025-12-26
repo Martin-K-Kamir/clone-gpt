@@ -444,17 +444,22 @@ export const WithMessages = meta.story({
     ],
 });
 
-WithMessages.test("should render all messages", async ({ canvas }) => {
-    await waitFor(() => {
-        const userMessage = canvas.getByText(/hello, how can you help me\?/i);
-        const assistantMessage = canvas.getByText(
-            /hello! i'm here to help you\./i,
-        );
+WithMessages.test(
+    "should display user and assistant messages",
+    async ({ canvas }) => {
+        await waitFor(() => {
+            const userMessage = canvas.getByText(
+                /hello, how can you help me\?/i,
+            );
+            const assistantMessage = canvas.getByText(
+                /hello! i'm here to help you\./i,
+            );
 
-        expect(userMessage).toBeInTheDocument();
-        expect(assistantMessage).toBeInTheDocument();
-    });
-});
+            expect(userMessage).toBeInTheDocument();
+            expect(assistantMessage).toBeInTheDocument();
+        });
+    },
+);
 
 WithMessages.test(
     "should render messages in correct order",
@@ -492,15 +497,12 @@ export const WithMultipleMessages = meta.story({
     ],
 });
 
-WithMultipleMessages.test(
-    "should render all multiple messages",
-    async ({ canvas }) => {
-        await waitFor(() => {
-            const articles = canvas.getAllByRole("article");
-            expect(articles.length).toBe(6);
-        });
-    },
-);
+WithMultipleMessages.test("should render all messages", async ({ canvas }) => {
+    await waitFor(() => {
+        const articles = canvas.getAllByRole("article");
+        expect(articles.length).toBe(6);
+    });
+});
 
 export const WithLongConversation = meta.story({
     decorators: [
@@ -591,15 +593,12 @@ Would you like me to show you a complete implementation example for the chat fea
     ],
 });
 
-WithLongConversation.test(
-    "should render all messages in long conversation",
-    async ({ canvas }) => {
-        await waitFor(() => {
-            const articles = canvas.getAllByRole("article");
-            expect(articles.length).toBe(4);
-        });
-    },
-);
+WithLongConversation.test("should render all messages", async ({ canvas }) => {
+    await waitFor(() => {
+        const articles = canvas.getAllByRole("article");
+        expect(articles.length).toBe(4);
+    });
+});
 
 WithLongConversation.test(
     "should scroll to bottom on first render",

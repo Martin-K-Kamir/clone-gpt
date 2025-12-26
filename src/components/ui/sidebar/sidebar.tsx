@@ -53,6 +53,7 @@ export function Sidebar({
                         setOpenMobile(false);
                     }
                 }}
+                data-testid="sidebar-sheet"
             >
                 <SheetContent
                     data-sidebar="sidebar"
@@ -64,6 +65,7 @@ export function Sidebar({
                         } as React.CSSProperties
                     }
                     side={side}
+                    data-testid="sidebar-sheet-content"
                 >
                     <div className="flex h-full w-full flex-col">
                         {children}
@@ -81,6 +83,7 @@ export function Sidebar({
             data-variant={variant}
             data-side={side}
             data-slot="sidebar"
+            data-testid="sidebar"
         >
             {/* This is what handles the sidebar gap on desktop */}
             <div
@@ -96,6 +99,7 @@ export function Sidebar({
             />
             <div
                 data-slot="sidebar-container"
+                data-testid="sidebar-container"
                 className={cn(
                     "w-(--sidebar-width) 2lg:flex fixed inset-y-0 z-10 hidden h-svh border-zinc-800 transition-[left,right,width] duration-200 ease-linear",
                     side === "left"

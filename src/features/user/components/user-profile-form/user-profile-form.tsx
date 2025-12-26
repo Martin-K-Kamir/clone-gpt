@@ -13,6 +13,7 @@ import {
     FormField,
     FormItem,
     FormLabel,
+    FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
@@ -21,7 +22,10 @@ import { useUserCacheSyncContext } from "@/features/user/providers";
 import { updateUserName } from "@/features/user/services/actions";
 
 const formSchema = z.object({
-    name: z.string().min(1),
+    name: z
+        .string()
+        .min(1)
+        .max(50, { message: "Name must be 50 characters or less" }),
     email: z.string().email(),
 });
 
@@ -69,10 +73,12 @@ export function UserProfileForm({ user }: UserProfileFormProps) {
                             <FormLabel>Name</FormLabel>
                             <FormControl>
                                 <Input
+                                    data-testid="user-profile-form-name-input"
                                     {...field}
                                     onFocus={() => setIsDisabled(false)}
                                 />
                             </FormControl>
+                            <FormMessage data-testid="user-profile-form-name-error-message" />
                         </FormItem>
                     )}
                 />
@@ -84,7 +90,11 @@ export function UserProfileForm({ user }: UserProfileFormProps) {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input {...field} disabled />
+                                <Input
+                                    data-testid="user-profile-form-email-input"
+                                    {...field}
+                                    disabled
+                                />
                             </FormControl>
                         </FormItem>
                     )}

@@ -43,6 +43,7 @@ export function UserSharedChatsTableDropdownMenu({
             <DropdownMenuContent align="start">
                 <DropdownMenuItem
                     variant="destructive"
+                    data-testid="user-shared-chats-table-dropdown-menu-item-delete-all"
                     onClick={handleDeleteAllSharedChats}
                 >
                     <IconTrash className="size-4" />

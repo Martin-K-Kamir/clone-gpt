@@ -107,6 +107,7 @@ export function DataTableContent({
                             "h-24 text-center font-medium",
                             classNameNoResults,
                         )}
+                        data-testid="data-table-content-no-results"
                     >
                         {noResultsMessage}
                     </TableCell>

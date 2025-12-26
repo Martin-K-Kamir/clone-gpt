@@ -15,6 +15,7 @@ export function ChatComposerPublicNotice({
     return (
         <p
             className={cn("text-balance text-sm text-zinc-400", className)}
+            data-testid="chat-composer-public-notice"
             {...props}
         >
             Public chat. Send a message to copy and continue.

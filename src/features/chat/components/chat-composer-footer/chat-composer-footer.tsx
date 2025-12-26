@@ -12,6 +12,8 @@ export function ChatComposerFooter({
                 "bg-red-925 absolute bottom-0 z-10 flex h-12 w-full items-center justify-center text-center",
                 className,
             )}
+            data-testid="chat-composer-footer"
+            data-slot="chat-composer-footer"
             {...props}
         >
             <ChatComposerPublicNotice />

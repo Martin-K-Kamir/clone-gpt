@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "@/lib/utils";
 
 import {
@@ -6,12 +8,13 @@ import {
 } from "./data-table-button-pagination";
 import { DataTablePageCounter } from "./data-table-page-counter";
 import { DataTableSizeSelector } from "./data-table-size-selector";
+import { useDataTableContext } from "./use-data-table-context";
 
 type DataTablePaginationProps = {
     showButtons?: boolean;
     showSelector?: boolean;
     showCounter?: boolean;
-} & Omit<React.ComponentProps<"div">, "children"> &
+} & Omit<React.ComponentProps<"nav">, "children"> &
     DataTableButtonPaginationProps;
 
 export function DataTablePagination({
@@ -25,8 +28,17 @@ export function DataTablePagination({
     onLastPage,
     ...props
 }: DataTablePaginationProps) {
+    const { table, options } = useDataTableContext();
+    const totalCount = options?.totalCount ?? table.getRowCount();
+
+    if (totalCount === 0) {
+        return null;
+    }
+
     return (
-        <div
+        <nav
+            role="navigation"
+            aria-label="pagination"
             {...props}
             className={cn(
                 "flex flex-wrap items-center justify-end gap-4 sm:gap-8",
@@ -52,6 +64,6 @@ export function DataTablePagination({
                     />
                 </div>
             )}
-        </div>
+        </nav>
     );
 }
