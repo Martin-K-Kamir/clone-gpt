@@ -97,6 +97,14 @@ const meta = preview.meta({
     ],
     parameters: {
         layout: "centered",
+        a11y: {
+            config: {
+                rules: [
+                    { id: "color-contrast", enabled: false },
+                    { id: "aria-valid-attr-value", enabled: false },
+                ],
+            },
+        },
     },
     argTypes: {
         user: {

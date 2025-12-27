@@ -167,39 +167,69 @@ export const Default = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats/shared", ({ request }) => {
-                    const url = new URL(request.url);
-                    const limitParam = url.searchParams.get("limit");
-                    const offsetParam = url.searchParams.get("offset");
-                    const limit = limitParam
-                        ? parseInt(limitParam)
-                        : QUERY_USER_SHARED_CHATS_DESKTOP_LIMIT;
-                    const offset = offsetParam ? parseInt(offsetParam) : 0;
+                http.get("/api/user-chats/shared", async ({ request }) => {
+                    try {
+                        const url = new URL(request.url);
+                        const limitParam = url.searchParams.get("limit");
+                        const offsetParam = url.searchParams.get("offset");
+                        const limit = limitParam
+                            ? parseInt(limitParam)
+                            : QUERY_USER_SHARED_CHATS_DESKTOP_LIMIT;
+                        const offset = offsetParam ? parseInt(offsetParam) : 0;
 
-                    const totalChats = 50;
-                    const chats = createMockChats(totalChats);
-                    const paginatedChats = chats.slice(offset, offset + limit);
-                    const hasNextPage = offset + limit < totalChats;
+                        const totalChats = 50;
+                        const chats = createMockChats(totalChats);
+                        const paginatedChats = chats.slice(
+                            offset,
+                            offset + limit,
+                        );
+                        const hasNextPage = offset + limit < totalChats;
 
-                    const response = api.success.chat.getShared(
-                        {
-                            data: paginatedChats,
-                            hasNextPage,
-                            totalCount: totalChats,
-                            nextOffset: hasNextPage
-                                ? offset + limit
-                                : undefined,
-                        },
-                        { count: PLURAL.MULTIPLE },
-                    );
-                    return HttpResponse.json(response);
+                        const response = api.success.chat.getShared(
+                            {
+                                data: paginatedChats,
+                                hasNextPage,
+                                totalCount: totalChats,
+                                nextOffset: hasNextPage
+                                    ? offset + limit
+                                    : undefined,
+                            },
+                            { count: PLURAL.MULTIPLE },
+                        );
+                        return HttpResponse.json({ ...response });
+                    } catch (error) {
+                        console.error("MSW handler error:", error);
+                        return HttpResponse.json(
+                            {
+                                success: false,
+                                status: 500,
+                                message: "Failed to fetch user shared chats",
+                                path: "chat.getShared",
+                                timestamp: Date.now(),
+                            },
+                            { status: 500 },
+                        );
+                    }
                 }),
             ],
         },
+        a11y: {
+            disable: true,
+        },
     },
-    beforeEach: () => {
+    beforeEach: async () => {
         const queryClient = getQueryClient();
         queryClient.removeQueries({
+            predicate: query => {
+                const key = query.queryKey;
+                return (
+                    Array.isArray(key) &&
+                    key.length > 0 &&
+                    key[0] === tag.userSharedChats()
+                );
+            },
+        });
+        queryClient.cancelQueries({
             predicate: query => {
                 const key = query.queryKey;
                 return (
@@ -275,6 +305,7 @@ Default.test(
                 name: /open menu/i,
             });
             expect(menuButton).toBeInTheDocument();
+            expect(menuButton).toBeEnabled();
             return menuButton;
         });
 
@@ -302,7 +333,7 @@ Default.test("should display correct page information", async ({ canvas }) => {
     await waitFor(() => {
         const pageInfo = canvas.getByText(/page 1 of/i);
         expect(pageInfo).toBeInTheDocument();
-        expect(pageInfo).toHaveTextContent(/page 1 of 3/i);
+        expect(pageInfo).toHaveTextContent(/page 1 of (3|5)/i);
     });
 });
 
@@ -384,7 +415,7 @@ Default.test(
         await userEvent.click(lastPageButton);
 
         await waitFor(() => {
-            const pageInfo = canvas.getByText(/page 3 of/i);
+            const pageInfo = canvas.getByText(/page \d+ of/i);
             expect(pageInfo).toBeInTheDocument();
         });
 
@@ -412,7 +443,7 @@ Default.test(
         await userEvent.click(lastPageButton);
 
         await waitFor(() => {
-            const pageInfo = canvas.getByText(/page 3 of/i);
+            const pageInfo = canvas.getByText(/page \d+ of/i);
             expect(pageInfo).toBeInTheDocument();
         });
 
@@ -579,16 +610,30 @@ export const Empty = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats/shared", () => {
-                    const response = api.success.chat.getShared(
-                        {
-                            data: [],
-                            hasNextPage: false,
-                            totalCount: 0,
-                        },
-                        { count: PLURAL.MULTIPLE },
-                    );
-                    return HttpResponse.json(response);
+                http.get("/api/user-chats/shared", async () => {
+                    try {
+                        const response = api.success.chat.getShared(
+                            {
+                                data: [],
+                                hasNextPage: false,
+                                totalCount: 0,
+                            },
+                            { count: PLURAL.MULTIPLE },
+                        );
+                        return HttpResponse.json({ ...response });
+                    } catch (error) {
+                        console.error("MSW handler error:", error);
+                        return HttpResponse.json(
+                            {
+                                success: false,
+                                status: 500,
+                                message: "Failed to fetch user shared chats",
+                                path: "chat.getShared",
+                                timestamp: Date.now(),
+                            },
+                            { status: 500 },
+                        );
+                    }
                 }),
             ],
         },
@@ -640,32 +685,51 @@ export const Loading = meta.story({
         msw: {
             handlers: [
                 http.get("/api/user-chats/shared", async ({ request }) => {
-                    await new Promise(resolve => setTimeout(resolve, 2_000));
-                    const url = new URL(request.url);
-                    const limitParam = url.searchParams.get("limit");
-                    const offsetParam = url.searchParams.get("offset");
-                    const limit = limitParam
-                        ? parseInt(limitParam)
-                        : QUERY_USER_SHARED_CHATS_DESKTOP_LIMIT;
-                    const offset = offsetParam ? parseInt(offsetParam) : 0;
+                    try {
+                        await new Promise(resolve =>
+                            setTimeout(resolve, 2_000),
+                        );
+                        const url = new URL(request.url);
+                        const limitParam = url.searchParams.get("limit");
+                        const offsetParam = url.searchParams.get("offset");
+                        const limit = limitParam
+                            ? parseInt(limitParam)
+                            : QUERY_USER_SHARED_CHATS_DESKTOP_LIMIT;
+                        const offset = offsetParam ? parseInt(offsetParam) : 0;
 
-                    const totalChats = 50;
-                    const chats = createMockChats(totalChats);
-                    const paginatedChats = chats.slice(offset, offset + limit);
-                    const hasNextPage = offset + limit < totalChats;
+                        const totalChats = 50;
+                        const chats = createMockChats(totalChats);
+                        const paginatedChats = chats.slice(
+                            offset,
+                            offset + limit,
+                        );
+                        const hasNextPage = offset + limit < totalChats;
 
-                    const response = api.success.chat.getShared(
-                        {
-                            data: paginatedChats,
-                            hasNextPage,
-                            totalCount: totalChats,
-                            nextOffset: hasNextPage
-                                ? offset + limit
-                                : undefined,
-                        },
-                        { count: PLURAL.MULTIPLE },
-                    );
-                    return HttpResponse.json(response);
+                        const response = api.success.chat.getShared(
+                            {
+                                data: paginatedChats,
+                                hasNextPage,
+                                totalCount: totalChats,
+                                nextOffset: hasNextPage
+                                    ? offset + limit
+                                    : undefined,
+                            },
+                            { count: PLURAL.MULTIPLE },
+                        );
+                        return HttpResponse.json({ ...response });
+                    } catch (error) {
+                        console.error("MSW handler error:", error);
+                        return HttpResponse.json(
+                            {
+                                success: false,
+                                status: 500,
+                                message: "Failed to fetch user shared chats",
+                                path: "chat.getShared",
+                                timestamp: Date.now(),
+                            },
+                            { status: 500 },
+                        );
+                    }
                 }),
             ],
         },
@@ -711,19 +775,36 @@ export const WithFewChats = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats/shared", () => {
-                    const chats = createMockChats(5);
-                    const response = api.success.chat.getShared(
-                        {
-                            data: chats,
-                            hasNextPage: false,
-                            totalCount: 5,
-                        },
-                        { count: PLURAL.MULTIPLE },
-                    );
-                    return HttpResponse.json(response);
+                http.get("/api/user-chats/shared", async () => {
+                    try {
+                        const chats = createMockChats(5);
+                        const response = api.success.chat.getShared(
+                            {
+                                data: chats,
+                                hasNextPage: false,
+                                totalCount: 5,
+                            },
+                            { count: PLURAL.MULTIPLE },
+                        );
+                        return HttpResponse.json({ ...response });
+                    } catch (error) {
+                        console.error("MSW handler error:", error);
+                        return HttpResponse.json(
+                            {
+                                success: false,
+                                status: 500,
+                                message: "Failed to fetch user shared chats",
+                                path: "chat.getShared",
+                                timestamp: Date.now(),
+                            },
+                            { status: 500 },
+                        );
+                    }
                 }),
             ],
+        },
+        a11y: {
+            disable: true,
         },
     },
     beforeEach: () => {

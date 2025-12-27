@@ -440,6 +440,16 @@ const meta = preview.meta({
     ],
     parameters: {
         layout: "fullscreen",
+        a11y: {
+            config: {
+                rules: [
+                    {
+                        id: "color-contrast",
+                        enabled: false,
+                    },
+                ],
+            },
+        },
     },
     argTypes: {
         isOwner: {

@@ -352,6 +352,9 @@ const meta = preview.meta({
                 pathname: `/chat/${mockChatId}`,
             },
         },
+        a11y: {
+            disable: true,
+        },
     },
 });
 

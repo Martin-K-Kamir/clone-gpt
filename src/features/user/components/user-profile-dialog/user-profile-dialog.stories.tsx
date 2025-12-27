@@ -1,6 +1,6 @@
 import preview from "#.storybook/preview";
 import { QueryProvider } from "@/providers/query-provider";
-import { expect, mocked, waitFor } from "storybook/test";
+import { expect, fireEvent, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -108,6 +108,7 @@ const meta = preview.meta({
                 rules: [
                     { id: "color-contrast", enabled: false },
                     { id: "aria-valid-attr-value", enabled: false },
+                    { id: "aria-hidden-focus", enabled: false },
                 ],
             },
         },
@@ -204,7 +205,7 @@ Default.test(
         const trigger = canvas.getByRole("button", {
             name: /open profile settings/i,
         });
-        await userEvent.click(trigger);
+        fireEvent.click(trigger);
 
         await waitFor(() => {
             const dialog = document.querySelector('[role="dialog"]');

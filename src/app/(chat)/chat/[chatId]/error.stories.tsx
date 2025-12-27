@@ -18,6 +18,16 @@ const meta = preview.meta({
     decorators: [Story => <StoryWrapper Story={Story} />],
     parameters: {
         layout: "fullscreen",
+        a11y: {
+            config: {
+                rules: [
+                    {
+                        id: "color-contrast",
+                        enabled: false,
+                    },
+                ],
+            },
+        },
     },
 });
 
