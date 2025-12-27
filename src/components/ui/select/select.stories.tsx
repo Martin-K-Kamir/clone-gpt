@@ -1,3 +1,8 @@
+import {
+    waitForSelectContent,
+    waitForSelectContentToClose,
+    waitForSelectItemByText,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import {
     GlobeIcon,
@@ -110,32 +115,14 @@ Default.test(
 
         await userEvent.click(trigger);
 
-        const content = await waitFor(() =>
-            document.querySelector('[data-slot="select-content"]'),
-        );
-        expect(content).toBeInTheDocument();
+        await waitForSelectContent();
 
-        const item = await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="select-item"]',
-            );
-            return Array.from(items).find(item =>
-                item.textContent?.includes("Banana"),
-            );
-        });
-
-        if (item) {
-            await userEvent.click(item);
-        }
+        const item = await waitForSelectItemByText(/banana/i);
+        await userEvent.click(item);
 
         expect(args.onValueChange).toHaveBeenCalledWith("banana");
 
-        await waitFor(() => {
-            const contentClosed = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(contentClosed).not.toBeInTheDocument();
-        });
+        await waitForSelectContentToClose();
     },
 );
 
@@ -145,21 +132,11 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         fireEvent.pointerDown(document.body);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).not.toBeInTheDocument();
-        });
+        await waitForSelectContentToClose();
     },
 );
 
@@ -169,21 +146,11 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         await userEvent.keyboard("{Escape}");
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).not.toBeInTheDocument();
-        });
+        await waitForSelectContentToClose();
     },
 );
 
@@ -193,18 +160,8 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        const appleItem = await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="select-item"]',
-            );
-            return Array.from(items).find(item =>
-                item.textContent?.includes("Apple"),
-            );
-        });
-
-        if (appleItem) {
-            await userEvent.click(appleItem);
-        }
+        const appleItem = await waitForSelectItemByText(/apple/i);
+        await userEvent.click(appleItem);
 
         await userEvent.click(trigger);
 
@@ -227,12 +184,7 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         await userEvent.keyboard("{ArrowDown}");
         await userEvent.keyboard("{ArrowDown}");
@@ -252,12 +204,7 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         await userEvent.keyboard("{ArrowDown}");
         await userEvent.keyboard("{ArrowDown}");
@@ -265,12 +212,7 @@ Default.test(
 
         expect(args.onValueChange).toHaveBeenCalled();
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).not.toBeInTheDocument();
-        });
+        await waitForSelectContentToClose();
     },
 );
 
@@ -280,37 +222,19 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
 
         await userEvent.click(trigger);
-        await waitFor(() => {
-            expect(
-                document.querySelector('[data-slot="select-content"]'),
-            ).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
-        const orangeItem = await waitFor(() => {
-            const items = document.querySelectorAll('[role="option"]');
-            return Array.from(items).find(item =>
-                item.textContent?.includes("Orange"),
-            );
-        });
-        if (orangeItem) await userEvent.click(orangeItem);
+        const orangeItem = await waitForSelectItemByText(/orange/i);
+        await userEvent.click(orangeItem);
 
         expect(args.onValueChange).toHaveBeenCalledWith("orange");
         expect(args.onValueChange).toHaveBeenCalledTimes(1);
 
         await userEvent.click(trigger);
-        await waitFor(() => {
-            expect(
-                document.querySelector('[data-slot="select-content"]'),
-            ).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
-        const grapeItem = await waitFor(() => {
-            const items = document.querySelectorAll('[role="option"]');
-            return Array.from(items).find(item =>
-                item.textContent?.includes("Grape"),
-            );
-        });
-        if (grapeItem) await userEvent.click(grapeItem);
+        const grapeItem = await waitForSelectItemByText(/grape/i);
+        await userEvent.click(grapeItem);
 
         expect(args.onValueChange).toHaveBeenCalledWith("grape");
         expect(args.onValueChange).toHaveBeenCalledTimes(2);
@@ -323,11 +247,7 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
 
         await userEvent.click(trigger);
-        await waitFor(() => {
-            expect(
-                document.querySelector('[data-slot="select-content"]'),
-            ).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         await userEvent.keyboard("{ArrowDown}");
         await userEvent.keyboard("{ArrowDown}");
@@ -337,11 +257,7 @@ Default.test(
         expect(args.onValueChange).toHaveBeenCalledTimes(1);
 
         await userEvent.click(trigger);
-        await waitFor(() => {
-            expect(
-                document.querySelector('[data-slot="select-content"]'),
-            ).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         await userEvent.keyboard("{ArrowDown}");
         await userEvent.keyboard("{ArrowDown}");
@@ -361,12 +277,7 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         for (let i = 0; i < 10; i++) {
             await userEvent.keyboard("{ArrowDown}");
@@ -384,12 +295,7 @@ Default.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         for (let i = 0; i < 10; i++) {
             await userEvent.keyboard("{ArrowUp}");
@@ -506,7 +412,7 @@ export const WithIcons = meta.story({
     ),
 });
 
-export const SizeSmall = meta.story({
+export const SizeSm = meta.story({
     render: args => (
         <Select {...args}>
             <SelectTrigger
@@ -613,9 +519,9 @@ WithDisabledItems.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        const items = await waitFor(() =>
-            document.querySelectorAll('[data-slot="select-item"]'),
-        );
+        await waitForSelectContent();
+
+        const items = document.querySelectorAll('[data-slot="select-item"]');
 
         const disabledItems = Array.from(items).filter(
             item => item.getAttribute("data-disabled") === "",
@@ -630,12 +536,7 @@ WithDisabledItems.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         await userEvent.keyboard("{ArrowDown}");
         await userEvent.keyboard("{ArrowDown}");
@@ -654,12 +555,7 @@ WithDisabledItems.test(
         const trigger = canvas.getByRole("combobox");
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const content = document.querySelector(
-                '[data-slot="select-content"]',
-            );
-            expect(content).toBeInTheDocument();
-        });
+        await waitForSelectContent();
 
         await userEvent.keyboard("{ArrowDown}");
         await userEvent.keyboard("{Enter}");

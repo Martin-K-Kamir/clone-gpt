@@ -1,3 +1,7 @@
+import {
+    waitForDropdownMenu,
+    waitForDropdownMenuItemByText,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect, waitFor } from "storybook/test";
 
@@ -320,32 +324,13 @@ Tables.test(
             });
 
             await step("Wait for dropdown menu to open", async () => {
-                const menu = await waitFor(() =>
-                    document.querySelector(
-                        '[data-slot="dropdown-menu-content"]',
-                    ),
-                );
+                const menu = await waitForDropdownMenu();
                 expect(menu).toBeInTheDocument();
             });
 
             await step("Find and click the CSV download option", async () => {
-                const downloadAsCSVButton = await waitFor(() => {
-                    const items = Array.from(
-                        document.querySelectorAll(
-                            '[data-slot="dropdown-menu-item"]',
-                        ) || [],
-                    );
-
-                    const item = items.find(item =>
-                        item.textContent?.includes("Download as CSV"),
-                    );
-
-                    if (!item) {
-                        throw new Error("Download as CSV button not found");
-                    }
-
-                    return item;
-                });
+                const downloadAsCSVButton =
+                    await waitForDropdownMenuItemByText(/download as csv/i);
 
                 expect(downloadAsCSVButton).toBeInTheDocument();
                 await userEvent.click(downloadAsCSVButton);
@@ -401,32 +386,13 @@ Tables.test(
             });
 
             await step("Wait for dropdown menu to open", async () => {
-                const menu = await waitFor(() =>
-                    document.querySelector(
-                        '[data-slot="dropdown-menu-content"]',
-                    ),
-                );
+                const menu = await waitForDropdownMenu();
                 expect(menu).toBeInTheDocument();
             });
 
             await step("Find and click the Excel download option", async () => {
-                const downloadAsExcelButton = await waitFor(() => {
-                    const items = Array.from(
-                        document.querySelectorAll(
-                            '[data-slot="dropdown-menu-item"]',
-                        ) || [],
-                    );
-
-                    const item = items.find(item =>
-                        item.textContent?.includes("Download as Excel"),
-                    );
-
-                    if (!item) {
-                        throw new Error("Download as Excel button not found");
-                    }
-
-                    return item;
-                });
+                const downloadAsExcelButton =
+                    await waitForDropdownMenuItemByText(/download as excel/i);
 
                 expect(downloadAsExcelButton).toBeInTheDocument();
                 await userEvent.click(downloadAsExcelButton);
@@ -442,7 +408,6 @@ Tables.test(
                 );
             });
         } finally {
-            // Cleanup
             document.createElement = originalCreateElement;
         }
     },

@@ -108,7 +108,6 @@ Default.test("should have LinkedIn share link", ({ canvas }) => {
 });
 
 export const WithoutNativeShare = meta.story({
-    name: "Without Native Share",
     args: {
         showNativeShare: false,
     },

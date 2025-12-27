@@ -1,3 +1,7 @@
+import {
+    waitForDropdownMenu,
+    waitForDropdownMenuItemByText,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect, waitFor } from "storybook/test";
 
@@ -215,19 +219,10 @@ Default.test(
         expect(canvas.queryAllByText("°F").length).toBe(0);
         await userEvent.click(menuButton);
 
-        const temperatureSystemMenuItem = await waitFor(() => {
-            const items = document.querySelectorAll(
-                "[data-slot='dropdown-menu-item']",
-            );
+        await waitForDropdownMenu();
 
-            const temperatureSystemMenuItem = Array.from(items).find(item =>
-                item.textContent?.includes("°F"),
-            );
-            if (!temperatureSystemMenuItem) {
-                throw new Error("Temperature system menu item not found");
-            }
-            return temperatureSystemMenuItem;
-        });
+        const temperatureSystemMenuItem =
+            await waitForDropdownMenuItemByText(/°F/i);
         await userEvent.click(temperatureSystemMenuItem);
 
         await waitFor(() => {
@@ -252,18 +247,9 @@ Default.test(
         expect(canvas.queryByText("15:00")).toBeVisible();
         await userEvent.click(menuButton);
 
-        const timeFormatMenuItem = await waitFor(() => {
-            const items = document.querySelectorAll(
-                "[data-slot='dropdown-menu-item']",
-            );
-            const timeFormatMenuItem = Array.from(items).find(item =>
-                item.textContent?.includes("12h"),
-            );
-            if (!timeFormatMenuItem) {
-                throw new Error("Time format menu item not found");
-            }
-            return timeFormatMenuItem;
-        });
+        await waitForDropdownMenu();
+
+        const timeFormatMenuItem = await waitForDropdownMenuItemByText(/12h/i);
         await userEvent.click(timeFormatMenuItem);
 
         await waitFor(() => {

@@ -1,6 +1,7 @@
+import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { IconPencil } from "@tabler/icons-react";
-import { expect, fireEvent, fn, waitFor } from "storybook/test";
+import { expect, fireEvent, fn } from "storybook/test";
 
 import { Button } from "./button";
 import { BUTTON_SIZES, BUTTON_VARIANTS } from "./button.variants";
@@ -153,17 +154,16 @@ export const WithTooltip = meta.story({
     },
 });
 
-WithTooltip.test("should show tooltip", async ({ canvas, userEvent }) => {
-    const button = canvas.getByRole("button");
-    await userEvent.hover(button);
+WithTooltip.test(
+    "should show tooltip on hover",
+    async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole("button");
+        await userEvent.hover(button);
 
-    await waitFor(() => {
-        const tooltipContent = document.querySelector(
-            '[data-slot="tooltip-content"]',
-        );
-        expect(tooltipContent).toBeVisible();
-    });
-});
+        const tooltip = await waitForTooltip();
+        expect(tooltip).toBeVisible();
+    },
+);
 
 export const IconOnly = meta.story({
     args: {

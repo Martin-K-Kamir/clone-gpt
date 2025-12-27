@@ -1,3 +1,4 @@
+import { getFileInput } from "#.storybook/lib/utils/elements";
 import preview from "#.storybook/preview";
 import type { ChatStatus } from "ai";
 import { expect, fn, userEvent, waitFor } from "storybook/test";
@@ -367,9 +368,7 @@ Default.test(
 Default.test(
     "should call onFileSelect when file is selected",
     async ({ args }) => {
-        const fileInput = document.querySelector(
-            'input[type="file"]',
-        ) as HTMLInputElement;
+        const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
         const mockFile = new File(["test content"], "test-file.txt", {
@@ -827,9 +826,7 @@ export const MultipleFiles = meta.story({
 MultipleFiles.test(
     "should call onFileSelect with multiple files when multiple files are selected",
     async ({ args }) => {
-        const fileInput = document.querySelector(
-            'input[type="file"]',
-        ) as HTMLInputElement;
+        const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
         const file1 = new File(["content1"], "test-file-1.txt", {
@@ -875,9 +872,7 @@ export const WithFileTypes = meta.story({
 WithFileTypes.test(
     "should call onFileSelect with correct file types when file is selected",
     async ({ args }) => {
-        const fileInput = document.querySelector(
-            'input[type="file"]',
-        ) as HTMLInputElement;
+        const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
         const imageFile = new File(["image content"], "test-image.jpg", {
@@ -914,11 +909,9 @@ WithFileTypes.test(
     },
 );
 WithFileTypes.test("should have accept attribute set correctly", async () => {
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
+    const fileInput = getFileInput();
     expect(fileInput).toBeInTheDocument();
-    expect(fileInput.accept).toBe("image/*,.pdf,.txt");
+    expect(fileInput?.accept).toBe("image/*,.pdf,.txt");
 });
 
 export const WithMaxFileSize = meta.story({
@@ -930,9 +923,7 @@ export const WithMaxFileSize = meta.story({
 WithMaxFileSize.test(
     "should have max attribute set on file input",
     async () => {
-        const fileInput = document.querySelector(
-            'input[type="file"]',
-        ) as HTMLInputElement;
+        const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
         expect(fileInput.getAttribute("max")).toBe("5242880"); // 5MB in bytes
@@ -942,9 +933,7 @@ WithMaxFileSize.test(
 WithMaxFileSize.test(
     "should call onFileSelect with file within size limit",
     async ({ args }) => {
-        const fileInput = document.querySelector(
-            'input[type="file"]',
-        ) as HTMLInputElement;
+        const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
         const validFile = new File(
@@ -971,13 +960,13 @@ WithMaxFileSize.test(
     },
 );
 
-export const NoAutoFocus = meta.story({
+export const WithoutAutoFocus = meta.story({
     args: {
         autoFocus: false,
     },
 });
 
-NoAutoFocus.test(
+WithoutAutoFocus.test(
     "should not focus textarea when autoFocus is false",
     async ({ canvas }) => {
         const textarea = canvas.getByRole("textbox");
@@ -985,13 +974,13 @@ NoAutoFocus.test(
     },
 );
 
-export const NoResetOnSubmit = meta.story({
+export const WithoutResetOnSubmit = meta.story({
     args: {
         resetOnSubmit: false,
     },
 });
 
-NoResetOnSubmit.test(
+WithoutResetOnSubmit.test(
     "should not reset input after submit when resetOnSubmit is false",
     async ({ canvas }) => {
         const textarea = canvas.getByRole("textbox") as HTMLTextAreaElement;

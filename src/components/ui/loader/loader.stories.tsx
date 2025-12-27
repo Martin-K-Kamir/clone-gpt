@@ -41,13 +41,13 @@ export const Default = meta.story({
     },
 });
 
-export const Small = meta.story({
+export const SizeSm = meta.story({
     args: {
         size: "sm",
     },
 });
 
-export const Large = meta.story({
+export const SizeLg = meta.story({
     args: {
         size: "lg",
     },

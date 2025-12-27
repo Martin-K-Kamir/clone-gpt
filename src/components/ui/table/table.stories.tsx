@@ -109,7 +109,6 @@ Default.test("should display all invoices", ({ canvas }) => {
 });
 
 export const Empty = meta.story({
-    name: "Empty Table",
     render: args => (
         <Table className="bg-zinc-925" {...args}>
             <TableHeader>
@@ -139,7 +138,6 @@ Empty.test("should display empty state message", ({ canvas }) => {
 });
 
 export const ManyRows = meta.story({
-    name: "Many Rows",
     parameters: {
         a11y: {
             disable: true,

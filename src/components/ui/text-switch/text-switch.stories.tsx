@@ -151,7 +151,6 @@ Default.test("should call onChange on click", async ({ canvas, args }) => {
 });
 
 export const ThreeValues = meta.story({
-    name: "Three Values",
     args: {
         value: "small",
         values: ["small", "medium", "large"],
@@ -187,7 +186,6 @@ ThreeValues.test("should cycle through values", async ({ canvas, args }) => {
 });
 
 export const CustomSeparator = meta.story({
-    name: "Custom Separator",
     args: {
         value: "on",
         values: ["on", "off"],
@@ -213,7 +211,6 @@ CustomSeparator.test(
 );
 
 export const DotSeparator = meta.story({
-    name: "Dot Separator",
     args: {
         value: "light",
         values: ["light", "dark", "system"],

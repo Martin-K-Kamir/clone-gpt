@@ -177,7 +177,7 @@ WithCtrlShortcut.test(
     },
 );
 
-export const NoOSDetected = meta.story({
+export const WithoutOSDetection = meta.story({
     args: {
         platformDetection: () => null,
         shortcuts: {

@@ -1,6 +1,14 @@
+import {
+    findButtonByText,
+    waitForDialog,
+    waitForDialogCloseButton,
+    waitForDialogOverlay,
+    waitForDialogTitle,
+    waitForDialogToClose,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { useState } from "react";
-import { expect, fn, waitFor } from "storybook/test";
+import { expect, fn } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
 
@@ -85,17 +93,8 @@ export const Default = meta.story({
     ),
 });
 
-Default.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open dialog/i,
-    });
-    expect(trigger).toBeVisible();
-
-    await userEvent.click(trigger);
-});
-
 Default.test(
-    "should open and close dialog with escape key",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open dialog/i,
@@ -103,23 +102,28 @@ Default.test(
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
-
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        await userEvent.keyboard("{Escape}");
-
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
     },
 );
 
 Default.test(
-    "should close dialog when clicking outside",
+    "should close dialog with escape key",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open dialog/i,
+        });
+        expect(trigger).toBeVisible();
+
+        await userEvent.click(trigger);
+        await waitForDialog("dialog");
+
+        await userEvent.keyboard("{Escape}");
+        await waitForDialogToClose("dialog");
+    },
+);
+
+Default.test(
+    "should close dialog when clicking overlay",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open dialog/i,
@@ -127,27 +131,12 @@ Default.test(
         expect(trigger).toBeVisible();
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-
-        expect(dialog).toBeInTheDocument();
-        const overlay = await waitFor(() => {
-            const overlay = document.querySelector(
-                '[data-testid="dialog-overlay"]',
-            );
-            if (!overlay) {
-                throw new Error("Overlay not found");
-            }
-            return overlay;
-        });
+        await waitForDialog("dialog");
+        const overlay = await waitForDialogOverlay();
         expect(overlay).toBeInTheDocument();
         await userEvent.click(overlay);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("dialog");
     },
 );
 
@@ -160,24 +149,11 @@ Default.test(
         expect(trigger).toBeVisible();
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        const closeButton = await waitFor(() => {
-            const button = document.querySelector('[data-slot="dialog-close"]');
-            if (!button) {
-                throw new Error("Close button not found");
-            }
-            return button;
-        });
+        await waitForDialog("dialog");
+        const closeButton = await waitForDialogCloseButton();
         await userEvent.click(closeButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("dialog");
     },
 );
 
@@ -202,14 +178,18 @@ export const Simple = meta.story({
     ),
 });
 
-Simple.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /show simple dialog/i,
-    });
-    expect(trigger).toBeVisible();
+Simple.test(
+    "should open dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /show simple dialog/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("dialog");
+    },
+);
 export const LongContent = meta.story({
     render: () => (
         <Dialog>
@@ -247,14 +227,18 @@ export const LongContent = meta.story({
     ),
 });
 
-LongContent.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /show long content/i,
-    });
-    expect(trigger).toBeVisible();
+LongContent.test(
+    "should open dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /show long content/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("dialog");
+    },
+);
 
 export const Controlled = meta.story({
     render: () => {
@@ -295,44 +279,33 @@ export const Controlled = meta.story({
     },
 });
 
-Controlled.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open controlled dialog/i,
-    });
-    expect(trigger).toBeVisible();
+Controlled.test(
+    "should open dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open controlled dialog/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("dialog");
+    },
+);
 
 Controlled.test(
     "should be controlled by external state",
     async ({ canvas, userEvent }) => {
-        const openButton = await canvas.findByRole("button", {
+        const openButton = canvas.getByRole("button", {
             name: /open controlled dialog/i,
         });
         await userEvent.click(openButton);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const closeButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("close"),
-            );
-            if (!button) {
-                throw new Error("Close button not found");
-            }
-            return button;
-        });
+        const closeButton = findButtonByText(/close/i);
         await userEvent.click(closeButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("dialog");
     },
 );
 
@@ -359,14 +332,18 @@ export const WithoutCloseButton = meta.story({
     ),
 });
 
-WithoutCloseButton.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /show dialog/i,
-    });
-    expect(trigger).toBeVisible();
+WithoutCloseButton.test(
+    "should open dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /show dialog/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("dialog");
+    },
+);
 
 export const FormDialog = meta.story({
     render: () => (
@@ -414,14 +391,18 @@ export const FormDialog = meta.story({
     ),
 });
 
-FormDialog.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open form dialog/i,
-    });
-    expect(trigger).toBeVisible();
+FormDialog.test(
+    "should open dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open form dialog/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("dialog");
+    },
+);
 
 export const MultipleDialogsWithId = meta.story({
     render: () => (
@@ -497,15 +478,9 @@ MultipleDialogsWithId.test(
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
+        await waitForDialog("dialog");
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        const title = await waitFor(() =>
-            document.querySelector('[data-slot="dialog-title"]'),
-        );
+        const title = await waitForDialogTitle();
         expect(title).toHaveTextContent("First Dialog");
     },
 );
@@ -519,15 +494,9 @@ MultipleDialogsWithId.test(
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
+        await waitForDialog("dialog");
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        const title = await waitFor(() =>
-            document.querySelector('[data-slot="dialog-title"]'),
-        );
+        const title = await waitForDialogTitle();
         expect(title).toHaveTextContent("Second Dialog");
     },
 );
@@ -541,15 +510,9 @@ MultipleDialogsWithId.test(
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
+        await waitForDialog("dialog");
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        const title = await waitFor(() =>
-            document.querySelector('[data-slot="dialog-title"]'),
-        );
+        const title = await waitForDialogTitle();
         expect(title).toHaveTextContent("Third Dialog");
     },
 );
@@ -562,49 +525,26 @@ MultipleDialogsWithId.test(
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
+        await waitForDialog("dialog");
         await userEvent.keyboard("{Escape}");
-
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("dialog");
     },
 );
 
 MultipleDialogsWithId.test(
-    "should close dialog when clicking outside",
+    "should close dialog when clicking overlay",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open third dialog/i,
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        const overlay = await waitFor(() => {
-            const overlay = document.querySelector(
-                '[data-testid="dialog-overlay"]',
-            );
-            if (!overlay) {
-                throw new Error("Overlay not found");
-            }
-            return overlay;
-        });
+        await waitForDialog("dialog");
+        const overlay = await waitForDialogOverlay();
         expect(overlay).toBeInTheDocument();
         await userEvent.click(overlay);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("dialog");
     },
 );
 
@@ -616,34 +556,20 @@ MultipleDialogsWithId.test(
         });
         await userEvent.click(firstTrigger);
 
-        let dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        let title = await waitFor(() =>
-            document.querySelector('[data-slot="dialog-title"]'),
-        );
+        await waitForDialog("dialog");
+        let title = await waitForDialogTitle();
         expect(title).toHaveTextContent("First Dialog");
 
         await userEvent.keyboard("{Escape}");
-
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("dialog");
 
         const secondTrigger = canvas.getByRole("button", {
             name: /open second dialog/i,
         });
         await userEvent.click(secondTrigger);
 
-        dialog = await waitFor(() => document.querySelector('[role="dialog"]'));
-        expect(dialog).toBeInTheDocument();
-
-        title = await waitFor(() =>
-            document.querySelector('[data-slot="dialog-title"]'),
-        );
+        await waitForDialog("dialog");
+        title = await waitForDialogTitle();
         expect(title).toHaveTextContent("Second Dialog");
     },
 );
@@ -662,31 +588,14 @@ MultipleDialogsWithId.test(
             expect(trigger).toBeVisible();
             await userEvent.click(trigger);
 
-            const dialog = await waitFor(() =>
-                document.querySelector('[role="dialog"]'),
-            );
-            expect(dialog).toBeInTheDocument();
-
-            const dialogTitle = await waitFor(() =>
-                document.querySelector('[data-slot="dialog-title"]'),
-            );
+            await waitForDialog("dialog");
+            const dialogTitle = await waitForDialogTitle();
             expect(dialogTitle).toHaveTextContent(title);
 
-            const closeButton = await waitFor(() => {
-                const button = document.querySelector(
-                    '[data-slot="dialog-close"]',
-                );
-                if (!button) {
-                    throw new Error("Close button not found");
-                }
-                return button;
-            });
+            const closeButton = await waitForDialogCloseButton();
             await userEvent.click(closeButton);
 
-            await waitFor(() => {
-                const dialog = document.querySelector('[role="dialog"]');
-                expect(dialog).not.toBeInTheDocument();
-            });
+            await waitForDialogToClose("dialog");
         }
     },
 );

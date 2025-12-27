@@ -1,3 +1,4 @@
+import { waitForElement } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import {
     CalendarIcon,
@@ -135,84 +136,61 @@ export const Default = meta.story({
 });
 
 Default.test(
-    "should collapse sidebar with trigger",
+    "should collapse sidebar when trigger is clicked",
     async ({ userEvent, canvas }) => {
         const trigger = canvas.getByTestId("sidebar-trigger-button");
 
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const sidebarWrapper = document.querySelector(
-                '[data-slot="sidebar"]',
-            );
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
-        });
+        const sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
     },
 );
 
 Default.test(
-    "should expand sidebar with trigger",
+    "should expand sidebar when trigger is clicked again",
     async ({ userEvent, canvas }) => {
         const trigger = canvas.getByTestId("sidebar-trigger-button");
 
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const sidebarWrapper = document.querySelector(
-                '[data-slot="sidebar"]',
-            );
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
-        });
+        let sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const sidebarWrapper = document.querySelector(
-                '[data-slot="sidebar"]',
-            );
-            expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
-        });
+        sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
+        expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
     },
 );
 
 Default.test(
-    "should collapse sidebar with keyboard shortcut",
+    "should collapse sidebar when keyboard shortcut is pressed",
     async ({ userEvent }) => {
         await userEvent.keyboard("{Control>}b{/Control}");
 
-        await waitFor(() => {
-            const sidebarWrapper = document.querySelector(
-                '[data-slot="sidebar"]',
-            );
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
-        });
+        const sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
     },
 );
 
 Default.test(
-    "should expand sidebar with keyboard shortcut",
+    "should expand sidebar when keyboard shortcut is pressed again",
     async ({ userEvent }) => {
         await userEvent.keyboard("{Control>}b{/Control}");
 
-        await waitFor(() => {
-            const sidebarWrapper = document.querySelector(
-                '[data-slot="sidebar"]',
-            );
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
-        });
+        let sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
 
         await userEvent.keyboard("{Control>}b{/Control}");
 
-        await waitFor(() => {
-            const sidebarWrapper = document.querySelector(
-                '[data-slot="sidebar"]',
-            );
-            expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
-        });
+        sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
+        expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
     },
 );
 
 Default.test(
-    "should sidebar menu button be interactive",
+    "should be interactive when menu button is clicked",
     async ({ userEvent, canvas }) => {
         const menuButton = canvas.getByRole("button", { name: "Home" });
 

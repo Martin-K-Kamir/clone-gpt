@@ -35,7 +35,6 @@ export const Avatar = meta.story({
 });
 
 export const TextBlock = meta.story({
-    name: "Text Block",
     render: () => (
         <div className="flex flex-col gap-2">
             <Skeleton className="h-4 w-full" />
@@ -46,7 +45,6 @@ export const TextBlock = meta.story({
 });
 
 export const ChatMessage = meta.story({
-    name: "Chat Message",
     render: () => (
         <div className="flex gap-3">
             <Skeleton className="h-8 w-8 shrink-0 rounded-full" />

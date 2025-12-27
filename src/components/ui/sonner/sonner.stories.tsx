@@ -1,3 +1,13 @@
+import {
+    getAllSonnerToasts,
+    getSonnerToast,
+    getSonnerToastByType,
+} from "#.storybook/lib/utils/elements";
+import {
+    waitForSonnerToast,
+    waitForSonnerToastByType,
+    waitForSonnerToastToDisappear,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { toast } from "sonner";
 import { expect, fireEvent, waitFor } from "storybook/test";
@@ -111,10 +121,7 @@ Default.test(
 
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -128,7 +135,7 @@ Default.test(
         await userEvent.click(button);
 
         await waitFor(() => {
-            const toasts = document.querySelectorAll("[data-sonner-toast]");
+            const toasts = getAllSonnerToasts();
             expect(toasts.length).toBe(3);
         });
     },
@@ -143,14 +150,7 @@ Default.test(
         await userEvent.click(button);
         await userEvent.click(button);
 
-        const toastElement = await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            if (!toast) {
-                // @ts-expect-error - This is a test
-                throw new Error("Toast not found");
-            }
-            return toast;
-        });
+        const toastElement = await waitForSonnerToast();
         expect(toastElement).toBeInTheDocument();
 
         await userEvent.hover(toastElement);
@@ -186,14 +186,7 @@ SwipeDismiss.test(
 
         await userEvent.click(button);
 
-        const toastElement = await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            if (!toast) {
-                // @ts-expect-error - This is a test
-                throw new Error("Toast not found");
-            }
-            return toast;
-        });
+        const toastElement = await waitForSonnerToast();
         expect(toastElement).toBeInTheDocument();
 
         // Get toast position for swipe gesture
@@ -228,10 +221,7 @@ SwipeDismiss.test(
         });
 
         // Toast should be dismissed after swipe
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).not.toBeInTheDocument();
-        });
+        await waitForSonnerToastToDisappear();
     },
 );
 
@@ -247,7 +237,7 @@ SwipeDismiss.test(
 
         // Wait for all toasts to appear
         await waitFor(() => {
-            const toasts = document.querySelectorAll("[data-sonner-toast]");
+            const toasts = getAllSonnerToasts();
             expect(toasts.length).toBe(3);
         });
 
@@ -284,7 +274,7 @@ SwipeDismiss.test(
 
         // Dismiss each toast one by one
         for (let expectedCount = 3; expectedCount > 0; expectedCount--) {
-            const toasts = document.querySelectorAll("[data-sonner-toast]");
+            const toasts = getAllSonnerToasts();
             expect(toasts.length).toBe(expectedCount);
 
             const frontToast = toasts[0];
@@ -298,15 +288,13 @@ SwipeDismiss.test(
 
             // Wait for toast to be dismissed
             await waitFor(() => {
-                const remainingToasts = document.querySelectorAll(
-                    "[data-sonner-toast]",
-                );
+                const remainingToasts = getAllSonnerToasts();
                 expect(remainingToasts.length).toBe(expectedCount - 1);
             });
         }
 
         // All toasts should be dismissed
-        const finalToasts = document.querySelectorAll("[data-sonner-toast]");
+        const finalToasts = getAllSonnerToasts();
         expect(finalToasts.length).toBe(0);
     },
 );
@@ -332,7 +320,7 @@ Success.test("should show success toast", async ({ canvas, userEvent }) => {
     await userEvent.click(button);
 
     await waitFor(() => {
-        const toastElement = document.querySelector("[data-sonner-toast]");
+        const toastElement = getSonnerToast();
         expect(toastElement).toBeInTheDocument();
     });
 });
@@ -358,7 +346,7 @@ Error.test("should show error toast", async ({ canvas, userEvent }) => {
     await userEvent.click(button);
 
     await waitFor(() => {
-        const toastElement = document.querySelector("[data-sonner-toast]");
+        const toastElement = getSonnerToast();
         expect(toastElement).toBeInTheDocument();
     });
 });
@@ -385,7 +373,7 @@ Warning.test("should show warning toast", async ({ canvas, userEvent }) => {
     await userEvent.click(button);
 
     await waitFor(() => {
-        const toastElement = document.querySelector("[data-sonner-toast]");
+        const toastElement = getSonnerToast();
         expect(toastElement).toBeInTheDocument();
     });
 });
@@ -412,7 +400,7 @@ Info.test("should show info toast", async ({ canvas, userEvent }) => {
     await userEvent.click(button);
 
     await waitFor(() => {
-        const toastElement = document.querySelector("[data-sonner-toast]");
+        const toastElement = getSonnerToast();
         expect(toastElement).toBeInTheDocument();
     });
 });
@@ -448,16 +436,12 @@ WithDescription.test(
 
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-            expect(toastElement?.textContent).toContain(
-                "Event has been created",
-            );
-            expect(toastElement?.textContent).toContain(
-                "Monday, January 3rd at 6:00pm",
-            );
-        });
+        const toastElement = await waitForSonnerToast();
+        expect(toastElement).toBeInTheDocument();
+        expect(toastElement.textContent).toContain("Event has been created");
+        expect(toastElement.textContent).toContain(
+            "Monday, January 3rd at 6:00pm",
+        );
     },
 );
 
@@ -490,14 +474,12 @@ WithAction.test(
 
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
+        const toastElement = await waitForSonnerToast();
+        expect(toastElement).toBeInTheDocument();
 
-            const actionButton = toastElement?.querySelector("button");
-            expect(actionButton).toBeInTheDocument();
-            expect(actionButton?.textContent).toContain("Undo");
-        });
+        const actionButton = toastElement.querySelector("button");
+        expect(actionButton).toBeInTheDocument();
+        expect(actionButton?.textContent).toContain("Undo");
     },
 );
 
@@ -509,24 +491,16 @@ WithAction.test(
         });
         await userEvent.click(button);
 
-        const actionButton = await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            const btn = toastElement?.querySelector("button");
-            if (!btn) {
-                // @ts-expect-error - This is a test
-                throw new Error("Action button not found");
-            }
-            return btn;
-        });
+        const toastElement = await waitForSonnerToast();
+        const actionButton = toastElement.querySelector("button");
+        if (!actionButton) {
+            // @ts-expect-error - Action button not found
+            throw new Error("Action button not found");
+        }
 
         await userEvent.click(actionButton);
 
-        await waitFor(() => {
-            const successToast = document.querySelector(
-                '[data-sonner-toast][data-type="success"]',
-            );
-            expect(successToast).toBeInTheDocument();
-        });
+        await waitForSonnerToastByType("success");
     },
 );
 
@@ -561,15 +535,13 @@ WithCloseButton.test(
 
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
+        const toastElement = await waitForSonnerToast();
+        expect(toastElement).toBeInTheDocument();
 
-            const closeButton = toastElement?.querySelector(
-                '[data-close-button="true"]',
-            );
-            expect(closeButton).toBeInTheDocument();
-        });
+        const closeButton = toastElement.querySelector(
+            '[data-close-button="true"]',
+        );
+        expect(closeButton).toBeInTheDocument();
     },
 );
 
@@ -585,10 +557,7 @@ WithCloseButton.test(
         const closeButton = canvas.getByLabelText("Close toast");
         await userEvent.click(closeButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).not.toBeInTheDocument();
-        });
+        await waitForSonnerToastToDisappear();
     },
 );
 
@@ -618,10 +587,7 @@ CustomDuration.test(
 
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -651,23 +617,10 @@ AutoDismiss.test(
 
         await userEvent.click(button);
 
-        const toastElement = await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            if (!toast) {
-                // @ts-expect-error - This is a test
-                throw new Error("Toast not found");
-            }
-            return toast;
-        });
+        const toastElement = await waitForSonnerToast();
         expect(toastElement).toBeInTheDocument();
 
-        await waitFor(
-            () => {
-                const toast = document.querySelector("[data-sonner-toast]");
-                expect(toast).not.toBeInTheDocument();
-            },
-            { timeout: 3000 },
-        );
+        await waitForSonnerToastToDisappear({ timeout: 3000 });
     },
 );
 
@@ -680,33 +633,18 @@ AutoDismiss.test(
 
         await userEvent.click(button);
 
-        const toastElement = await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            if (!toast) {
-                // @ts-expect-error - This is a test
-                throw new Error("Toast not found");
-            }
-            return toast;
-        });
+        const toastElement = await waitForSonnerToast();
         expect(toastElement).toBeInTheDocument();
 
         await userEvent.hover(toastElement);
 
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-        expect(
-            document.querySelector("[data-sonner-toast]"),
-        ).toBeInTheDocument();
+        expect(getSonnerToast()).toBeInTheDocument();
 
         await userEvent.unhover(toastElement);
 
-        await waitFor(
-            () => {
-                const toast = document.querySelector("[data-sonner-toast]");
-                expect(toast).not.toBeInTheDocument();
-            },
-            { timeout: 3000 },
-        );
+        await waitForSonnerToastToDisappear({ timeout: 3000 });
     },
 );
 
@@ -746,17 +684,13 @@ PromiseToast.test(
 
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-            expect(toastElement).toHaveAttribute("data-type", "loading");
-        });
+        const toastElement = await waitForSonnerToast();
+        expect(toastElement).toBeInTheDocument();
+        expect(toastElement).toHaveAttribute("data-type", "loading");
 
         await waitFor(
             () => {
-                const toastElement = document.querySelector(
-                    '[data-sonner-toast][data-type="success"]',
-                );
+                const toastElement = getSonnerToastByType("success");
                 expect(toastElement).toBeInTheDocument();
             },
             { timeout: 3000 },
@@ -808,12 +742,7 @@ RichColors.test(
         });
         await userEvent.click(successButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector(
-                '[data-sonner-toast][data-type="success"]',
-            );
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToastByType("success");
     },
 );
 
@@ -823,12 +752,7 @@ RichColors.test("should display error toast", async ({ canvas, userEvent }) => {
     });
     await userEvent.click(errorButton);
 
-    await waitFor(() => {
-        const toastElement = document.querySelector(
-            '[data-sonner-toast][data-type="error"]',
-        );
-        expect(toastElement).toBeInTheDocument();
-    });
+    await waitForSonnerToastByType("error");
 });
 
 RichColors.test(
@@ -839,12 +763,7 @@ RichColors.test(
         });
         await userEvent.click(warningButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector(
-                '[data-sonner-toast][data-type="warning"]',
-            );
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToastByType("warning");
     },
 );
 
@@ -854,12 +773,7 @@ RichColors.test("should display info toast", async ({ canvas, userEvent }) => {
     });
     await userEvent.click(infoButton);
 
-    await waitFor(() => {
-        const toastElement = document.querySelector(
-            '[data-sonner-toast][data-type="info"]',
-        );
-        expect(toastElement).toBeInTheDocument();
-    });
+    await waitForSonnerToastByType("info");
 });
 
 export const Positions = meta.story({
@@ -944,10 +858,7 @@ Positions.test(
         const topLeftButton = canvas.getByRole("button", { name: /top left/i });
         await userEvent.click(topLeftButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -959,10 +870,7 @@ Positions.test(
         });
         await userEvent.click(topCenterButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -974,10 +882,7 @@ Positions.test(
         });
         await userEvent.click(topRightButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -989,10 +894,7 @@ Positions.test(
         });
         await userEvent.click(bottomLeftButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -1003,10 +905,7 @@ Positions.test(
             name: /bottom center/i,
         });
         await userEvent.click(bottomCenterButton);
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -1017,10 +916,7 @@ Positions.test(
             name: /bottom right/i,
         });
         await userEvent.click(bottomRightButton);
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -1069,20 +965,14 @@ DismissToast.test(
         const showButton = canvas.getByRole("button", { name: /show toast/i });
         await userEvent.click(showButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
 
         const dismissButton = canvas.getByRole("button", {
             name: /dismiss toast/i,
         });
         await userEvent.click(dismissButton);
 
-        await waitFor(() => {
-            const toastElement = document.querySelector("[data-sonner-toast]");
-            expect(toastElement).not.toBeInTheDocument();
-        });
+        await waitForSonnerToastToDisappear();
     },
 );
 
@@ -1096,7 +986,7 @@ DismissToast.test(
         await userEvent.click(showButton);
 
         await waitFor(() => {
-            const toasts = document.querySelectorAll("[data-sonner-toast]");
+            const toasts = getAllSonnerToasts();
             expect(toasts.length).toBeGreaterThanOrEqual(1);
         });
 
@@ -1106,7 +996,7 @@ DismissToast.test(
         await userEvent.click(dismissAllButton);
 
         await waitFor(() => {
-            const toasts = document.querySelectorAll("[data-sonner-toast]");
+            const toasts = getAllSonnerToasts();
             expect(toasts.length).toBe(0);
         });
     },

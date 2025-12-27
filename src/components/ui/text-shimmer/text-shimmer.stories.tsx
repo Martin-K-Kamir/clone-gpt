@@ -47,14 +47,12 @@ export const Default = meta.story({
 });
 
 export const LongText = meta.story({
-    name: "Long Text",
     args: {
         children: "Analyzing your request and preparing a detailed response...",
     },
 });
 
 export const CustomParagraphStyling = meta.story({
-    name: "Custom Paragraph Styling",
     args: {
         children: "Custom styled text",
         classNameParagraph: "text-base font-bold",

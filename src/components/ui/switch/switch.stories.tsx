@@ -161,7 +161,6 @@ Disabled.test("should be disabled", async ({ canvas, args }) => {
 });
 
 export const DisabledChecked = meta.story({
-    name: "Disabled & Checked",
     args: {
         disabled: true,
         defaultChecked: true,
@@ -175,7 +174,6 @@ DisabledChecked.test("should be disabled and checked", ({ canvas }) => {
 });
 
 export const InForm = meta.story({
-    name: "In Form Context",
     render: () => (
         <form className="space-y-4">
             <div className="flex items-center justify-between">

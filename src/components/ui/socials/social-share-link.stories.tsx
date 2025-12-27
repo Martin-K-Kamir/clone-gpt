@@ -251,7 +251,6 @@ export const WithCustomPopupOptions = meta.story({
 });
 
 export const WithIcon = meta.story({
-    name: "With Icon",
     args: {
         platform: "twitter",
         url: "https://example.com/my-article",
@@ -266,7 +265,6 @@ export const WithIcon = meta.story({
 });
 
 export const IconOnly = meta.story({
-    name: "Icon Only",
     args: {
         platform: "twitter",
         url: "https://example.com/my-article",
@@ -280,7 +278,6 @@ export const IconOnly = meta.story({
 });
 
 export const WithButtonComponent = meta.story({
-    name: "With Button Component",
     args: {
         platform: "twitter",
         url: "https://example.com",

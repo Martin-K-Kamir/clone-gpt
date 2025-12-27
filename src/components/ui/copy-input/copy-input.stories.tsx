@@ -196,8 +196,8 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-    "should display value and copy it when clicked",
-    async ({ canvas, args }) => {
+    "should display value and show copied state when button is clicked",
+    async ({ canvas, args, userEvent }) => {
         const input = canvas.getByDisplayValue(args.value);
         expect(input).toBeVisible();
 
@@ -292,12 +292,12 @@ export const CustomChildren = meta.story({
 });
 
 CustomChildren.test(
-    "should work with custom button children",
-    async ({ canvas, args }) => {
+    "should work with custom button children and show copied state",
+    async ({ canvas, args, userEvent }) => {
         const button = canvas.getByRole("button", {
             name: /copy/i,
         });
-        await expect(button).toBeVisible();
+        expect(button).toBeVisible();
 
         await userEvent.click(button);
 

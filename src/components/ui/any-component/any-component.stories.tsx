@@ -66,12 +66,15 @@ export const AsButton = meta.story({
     },
 });
 
-AsButton.test("should be clickable", async ({ canvas, userEvent, args }) => {
-    const button = canvas.getByRole("button");
-    expect(button).toBeVisible();
-    await userEvent.click(button);
-    expect(args.onClick).toHaveBeenCalled();
-});
+AsButton.test(
+    "should call onClick when button is clicked",
+    async ({ canvas, userEvent, args }) => {
+        const button = canvas.getByRole("button");
+        expect(button).toBeVisible();
+        await userEvent.click(button);
+        expect(args.onClick).toHaveBeenCalled();
+    },
+);
 
 export const AsHeading = meta.story({
     render: () => (

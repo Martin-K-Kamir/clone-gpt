@@ -98,7 +98,7 @@ export const CustomFallback = meta.story({
     } as AvatarStoryArgs,
 });
 
-export const Large = meta.story({
+export const SizeLg = meta.story({
     args: {
         src: "https://github.com/martin-k-kamir.png",
         alt: "User avatar",
@@ -107,7 +107,7 @@ export const Large = meta.story({
     } as AvatarStoryArgs,
 });
 
-export const Small = meta.story({
+export const SizeSm = meta.story({
     args: {
         src: "https://github.com/martin-k-kamir.png",
         alt: "User avatar",

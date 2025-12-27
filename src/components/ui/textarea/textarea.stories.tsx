@@ -163,7 +163,6 @@ Loading.test("should not accept input", async ({ canvas, userEvent }) => {
 });
 
 export const WithLabel = meta.story({
-    name: "With Label",
     render: args => (
         <div className="flex flex-col gap-2">
             <Label htmlFor="with-label">Your message</Label>
@@ -178,7 +177,6 @@ WithLabel.test("should be associated with label", async ({ canvas }) => {
 });
 
 export const WithError = meta.story({
-    name: "With Error",
     args: {
         placeholder: "This field has an error",
         "aria-invalid": true,
@@ -216,7 +214,6 @@ WithDefaultValue.test(
 );
 
 export const ReadOnly = meta.story({
-    name: "Read Only",
     args: {
         readOnly: true,
         value: "This content is read-only and cannot be edited.",
@@ -237,7 +234,6 @@ ReadOnly.test("should not accept input", async ({ canvas, userEvent }) => {
 });
 
 export const MaxLength = meta.story({
-    name: "With Max Length",
     args: {
         maxLength: 100,
         placeholder: "Limited to 100 characters",

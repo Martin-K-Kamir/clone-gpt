@@ -1,3 +1,4 @@
+import { getInputPlaceholderText } from "#.storybook/lib/utils/elements";
 import preview from "#.storybook/preview";
 import { expect, fn, waitFor } from "storybook/test";
 
@@ -264,21 +265,9 @@ PlaceholderAnimation.test(
         const input = canvas.getByRole("textbox");
         expect(input).toBeVisible();
 
-        const getPlaceholderText = () => {
-            // Find the input element, then find its parent container
-            const inputElement = document.querySelector('[data-slot="input"]');
-            const parentContainer = inputElement?.parentElement;
-            // Find the placeholder wrapper (sibling div with absolute positioning)
-            const placeholderWrapper = parentContainer?.querySelector(
-                ".pointer-events-none.absolute",
-            );
-            const span = placeholderWrapper?.querySelector("span");
-            return span?.textContent?.trim() || "";
-        };
-
         await waitFor(
             () => {
-                const text = getPlaceholderText();
+                const text = getInputPlaceholderText();
                 expect(text).toBe(args.placeholders?.[0]);
             },
             { timeout: 3000 },
@@ -286,7 +275,7 @@ PlaceholderAnimation.test(
 
         await waitFor(
             () => {
-                const text = getPlaceholderText();
+                const text = getInputPlaceholderText();
                 expect(text).toBe(args.placeholders?.[1]);
             },
             { timeout: 2500 },
@@ -294,7 +283,7 @@ PlaceholderAnimation.test(
 
         await waitFor(
             () => {
-                const text = getPlaceholderText();
+                const text = getInputPlaceholderText();
                 expect(text).toBe(args.placeholders?.[2]);
             },
             { timeout: 2500 },
@@ -302,7 +291,7 @@ PlaceholderAnimation.test(
 
         await waitFor(
             () => {
-                const text = getPlaceholderText();
+                const text = getInputPlaceholderText();
                 expect(text).toBe(args.placeholders?.[0]);
             },
             { timeout: 2500 },
@@ -338,19 +327,9 @@ PlaceholderAnimationRandomized.test(
         const seenPlaceholders = new Set<string>();
         let previousPlaceholder = "";
 
-        const getPlaceholderText = () => {
-            const inputElement = document.querySelector('[data-slot="input"]');
-            const parentContainer = inputElement?.parentElement;
-            const placeholderWrapper = parentContainer?.querySelector(
-                ".pointer-events-none.absolute",
-            );
-            const span = placeholderWrapper?.querySelector("span");
-            return span?.textContent?.trim() || "";
-        };
-
         await waitFor(
             () => {
-                const text = getPlaceholderText();
+                const text = getInputPlaceholderText();
                 expect(text).toBeTruthy();
                 expect(placeholders).toContain(text);
                 previousPlaceholder = text;
@@ -362,7 +341,7 @@ PlaceholderAnimationRandomized.test(
         for (let i = 0; i < 6; i++) {
             await waitFor(
                 () => {
-                    const text = getPlaceholderText();
+                    const text = getInputPlaceholderText();
                     expect(text).toBeTruthy();
                     expect(placeholders).toContain(text);
 
@@ -418,22 +397,12 @@ PlaceholderAnimationStopped.test(
         const input = canvas.getByRole("textbox");
         expect(input).toHaveValue("");
 
-        const getPlaceholderText = () => {
-            const inputElement = document.querySelector('[data-slot="input"]');
-            const parentContainer = inputElement?.parentElement;
-            const placeholderWrapper = parentContainer?.querySelector(
-                ".pointer-events-none.absolute",
-            );
-            const span = placeholderWrapper?.querySelector("span");
-            return span?.textContent?.trim() || "";
-        };
-
-        const text = getPlaceholderText();
+        const text = getInputPlaceholderText();
         expect(text).toBe("This won't animate");
 
         await new Promise(resolve => setTimeout(resolve, 2500));
 
-        const textAfterWait = getPlaceholderText();
+        const textAfterWait = getInputPlaceholderText();
         expect(textAfterWait).toBe("This won't animate");
     },
 );
@@ -453,19 +422,9 @@ export const PlaceholderAnimationWithValue = meta.story({
 PlaceholderAnimationWithValue.test(
     "should not show placeholder when value is set",
     async ({ canvas }) => {
-        const getPlaceholderText = () => {
-            const inputElement = document.querySelector('[data-slot="input"]');
-            const parentContainer = inputElement?.parentElement;
-            const placeholderWrapper = parentContainer?.querySelector(
-                ".pointer-events-none.absolute",
-            );
-            const span = placeholderWrapper?.querySelector("span");
-            return span?.textContent?.trim() || "";
-        };
-
         const input = canvas.getByRole("textbox");
         expect(input).toHaveValue("User has typed something");
-        const text = getPlaceholderText();
+        const text = getInputPlaceholderText();
         expect(text).toBe("");
     },
 );

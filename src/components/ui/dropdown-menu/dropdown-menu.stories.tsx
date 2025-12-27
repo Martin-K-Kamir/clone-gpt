@@ -1,3 +1,8 @@
+import {
+    waitForDropdownMenu,
+    waitForDropdownMenuItemByText,
+    waitForDropdownMenuToClose,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import {
     CopyIcon,
@@ -102,14 +107,18 @@ export const Default = meta.story({
     ),
 });
 
-Default.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /actions/i,
-    });
-    expect(trigger).toBeVisible();
+Default.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /actions/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 Default.test(
     "should open and close dropdown menu",
@@ -121,67 +130,46 @@ Default.test(
 
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
         await userEvent.keyboard("{Escape}");
 
-        await waitFor(() => {
-            const menu = document.querySelector(
-                '[data-slot="dropdown-menu-content"]',
-            );
-            expect(menu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuToClose();
     },
 );
 
 Default.test(
-    "should close when clicking outside",
+    "should close dropdown menu when clicking outside",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /actions/i,
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
         fireEvent.pointerDown(document.body);
 
-        await waitFor(() => {
-            const menu = document.querySelector(
-                '[data-slot="dropdown-menu-content"]',
-            );
-            expect(menu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuToClose();
     },
 );
 
 Default.test(
-    "should close when pressing escape key",
+    "should close dropdown menu when pressing escape key",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /actions/i,
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
         await userEvent.keyboard("{Escape}");
 
-        await waitFor(() => {
-            const menu = document.querySelector(
-                '[data-slot="dropdown-menu-content"]',
-            );
-            expect(menu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuToClose();
     },
 );
 
@@ -193,9 +181,7 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -255,9 +241,7 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -293,9 +277,7 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -332,40 +314,22 @@ Default.test(
 );
 
 Default.test(
-    "should close when selecting item",
+    "should close dropdown menu when selecting item",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /actions/i,
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
-        const profileItem = await waitFor(() => {
-            const items = Array.from(
-                document.querySelectorAll('[data-slot="dropdown-menu-item"]'),
-            );
-            const item = items.find(item =>
-                item.textContent?.includes("Profile"),
-            );
-            if (!item) {
-                throw new Error("Profile item not found");
-            }
-            return item;
-        });
+        const profileItem = await waitForDropdownMenuItemByText(/profile/i);
         expect(profileItem).toBeInTheDocument();
 
         await userEvent.click(profileItem);
 
-        await waitFor(() => {
-            const menu = document.querySelector(
-                '[data-slot="dropdown-menu-content"]',
-            );
-            expect(menu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuToClose();
     },
 );
 
@@ -375,9 +339,7 @@ Default.test("should select item on click", async ({ canvas, userEvent }) => {
     });
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
 
     const profileItem = await waitFor(() => {
@@ -410,20 +372,13 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
 
-        await waitFor(() => {
-            const menu = document.querySelector(
-                '[data-slot="dropdown-menu-content"]',
-            );
-            expect(menu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuToClose();
     },
 );
 
@@ -466,14 +421,18 @@ export const WithSeparators = meta.story({
     ),
 });
 
-WithSeparators.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /menu/i,
-    });
-    expect(trigger).toBeVisible();
+WithSeparators.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /menu/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 export const WithGroups = meta.story({
     parameters: {
@@ -515,14 +474,18 @@ export const WithGroups = meta.story({
     ),
 });
 
-WithGroups.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /menu/i,
-    });
-    expect(trigger).toBeVisible();
+WithGroups.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /menu/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 export const WithShortcuts = meta.story({
     parameters: {
@@ -562,14 +525,18 @@ export const WithShortcuts = meta.story({
     ),
 });
 
-WithShortcuts.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /menu/i,
-    });
-    expect(trigger).toBeVisible();
+WithShortcuts.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /menu/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 export const WithSubmenus = meta.story({
     parameters: {
@@ -622,14 +589,18 @@ export const WithSubmenus = meta.story({
     ),
 });
 
-WithSubmenus.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /menu/i,
-    });
-    expect(trigger).toBeVisible();
+WithSubmenus.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /menu/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 WithSubmenus.test(
     "should open submenu on click",
@@ -639,9 +610,7 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
         const subTrigger = await waitFor(() => {
@@ -671,9 +640,7 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
         const subTrigger = await waitFor(() => {
@@ -705,9 +672,7 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
         const subTrigger = await waitFor(() => {
@@ -775,12 +740,7 @@ WithSubmenus.test(
 
         fireEvent.pointerDown(document.body);
 
-        await waitFor(() => {
-            const menu = document.querySelector(
-                '[data-slot="dropdown-menu-content"]',
-            );
-            expect(menu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuToClose();
 
         await waitFor(() => {
             const subMenu = document.querySelector(
@@ -812,12 +772,7 @@ WithSubmenus.test(
         await userEvent.hover(subTrigger);
         await userEvent.keyboard("{Escape}");
 
-        await waitFor(() => {
-            const menu = document.querySelector(
-                '[data-slot="dropdown-menu-content"]',
-            );
-            expect(menu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuToClose();
 
         await waitFor(() => {
             const subMenu = document.querySelector(
@@ -881,9 +836,7 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -945,9 +898,7 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -991,9 +942,7 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -1061,16 +1010,7 @@ WithSubmenus.test(
 
         await userEvent.click(subTrigger);
 
-        const editItem = await waitFor(() => {
-            const items = Array.from(
-                document.querySelectorAll('[data-slot="dropdown-menu-item"]'),
-            );
-            const item = items.find(item => item.textContent?.includes("Edit"));
-            if (!item) {
-                throw new Error("Edit item not found");
-            }
-            return item;
-        });
+        const editItem = await waitForDropdownMenuItemByText(/edit/i);
         expect(editItem).toBeInTheDocument();
 
         await userEvent.click(editItem);
@@ -1149,14 +1089,18 @@ export const WithCheckboxes = meta.story({
     },
 });
 
-WithCheckboxes.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /view options/i,
-    });
-    expect(trigger).toBeVisible();
+WithCheckboxes.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /view options/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 WithCheckboxes.test(
     "should toggle checkbox items",
@@ -1202,9 +1146,7 @@ WithCheckboxes.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function findItem(text: string) {
             const items = Array.from(
@@ -1237,9 +1179,7 @@ WithCheckboxes.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -1316,14 +1256,18 @@ export const WithRadioGroups = meta.story({
     },
 });
 
-WithRadioGroups.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /position/i,
-    });
-    expect(trigger).toBeVisible();
+WithRadioGroups.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /position/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 WithRadioGroups.test(
     "should select radio items",
@@ -1377,9 +1321,7 @@ WithRadioGroups.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function findItem(text: string) {
             const items = Array.from(
@@ -1412,9 +1354,7 @@ WithRadioGroups.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -1488,14 +1428,18 @@ export const DestructiveItems = meta.story({
     ),
 });
 
-DestructiveItems.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /actions/i,
-    });
-    expect(trigger).toBeVisible();
+DestructiveItems.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /actions/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 export const ComplexExample = meta.story({
     parameters: {
@@ -1598,14 +1542,18 @@ export const ComplexExample = meta.story({
     },
 });
 
-ComplexExample.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open menu/i,
-    });
-    expect(trigger).toBeVisible();
+ComplexExample.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open menu/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 export const DisabledItems = meta.story({
     parameters: {
@@ -1641,14 +1589,18 @@ export const DisabledItems = meta.story({
     ),
 });
 
-DisabledItems.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /menu/i,
-    });
-    expect(trigger).toBeVisible();
+DisabledItems.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /menu/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDropdownMenu();
+    },
+);
 
 DisabledItems.test(
     "should have disabled items",
@@ -1687,9 +1639,7 @@ DisabledItems.test(
         });
         await userEvent.click(trigger);
 
-        await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        await waitForDropdownMenu();
 
         function getHighlightedItem() {
             return document.querySelector(
@@ -1731,18 +1681,9 @@ DisabledItems.test(
         });
         await userEvent.click(trigger);
 
-        const settingsItem = await waitFor(() => {
-            const items = Array.from(
-                document.querySelectorAll('[data-slot="dropdown-menu-item"]'),
-            );
-            const item = items.find(item =>
-                item.textContent?.includes("Settings (Disabled)"),
-            );
-            if (!item) {
-                throw new Error("Settings (Disabled) item not found");
-            }
-            return item;
-        });
+        const settingsItem = await waitForDropdownMenuItemByText(
+            /settings \(disabled\)/i,
+        );
 
         try {
             await userEvent.hover(settingsItem);
@@ -1761,23 +1702,12 @@ DisabledItems.test(
         });
         await userEvent.click(trigger);
 
-        const menu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-content"]'),
-        );
+        const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
-        const settingsItem = await waitFor(() => {
-            const items = Array.from(
-                document.querySelectorAll('[data-slot="dropdown-menu-item"]'),
-            );
-            const item = items.find(item =>
-                item.textContent?.includes("Settings (Disabled)"),
-            );
-            if (!item) {
-                throw new Error("Settings (Disabled) item not found");
-            }
-            return item;
-        });
+        const settingsItem = await waitForDropdownMenuItemByText(
+            /settings \(disabled\)/i,
+        );
 
         try {
             await userEvent.click(settingsItem);
@@ -1818,16 +1748,17 @@ export const SideBottom = meta.story({
     ),
 });
 
-SideBottom.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideBottom.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "bottom");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "bottom");
+    },
+);
 
 export const SideTop = meta.story({
     parameters: {
@@ -1864,9 +1795,7 @@ SideTop.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "top");
 });
@@ -1906,9 +1835,7 @@ SideLeft.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "left");
 });
@@ -1948,9 +1875,7 @@ SideRight.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "right");
 });
@@ -1992,9 +1917,7 @@ AlignStart.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-align", "start");
 });
@@ -2036,9 +1959,7 @@ AlignCenter.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-align", "center");
 });
@@ -2080,9 +2001,7 @@ AlignEnd.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-align", "end");
 });
@@ -2124,9 +2043,7 @@ SideTopAlignStart.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "top");
     expect(menu).toHaveAttribute("data-align", "start");
@@ -2169,9 +2086,7 @@ SideTopAlignEnd.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "top");
     expect(menu).toHaveAttribute("data-align", "end");
@@ -2212,9 +2127,7 @@ SideRightAlignStart.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "right");
     expect(menu).toHaveAttribute("data-align", "start");
@@ -2255,9 +2168,7 @@ SideRightAlignEnd.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "right");
     expect(menu).toHaveAttribute("data-align", "end");
@@ -2298,9 +2209,7 @@ SideLeftAlignStart.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "left");
     expect(menu).toHaveAttribute("data-align", "start");
@@ -2341,9 +2250,7 @@ SideLeftAlignEnd.test("should open", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button");
     await userEvent.click(trigger);
 
-    const menu = await waitFor(() =>
-        document.querySelector('[data-slot="dropdown-menu-content"]'),
-    );
+    const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
     expect(menu).toHaveAttribute("data-side", "left");
     expect(menu).toHaveAttribute("data-align", "end");

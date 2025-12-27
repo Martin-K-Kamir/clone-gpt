@@ -29,7 +29,7 @@ Default.test("should render heading and description", async ({ canvas }) => {
 });
 
 Default.test(
-    "should render try again button",
+    "should call reset when try again button is clicked",
     async ({ canvas, userEvent, args }) => {
         const button = canvas.getByRole("button", {
             name: /try again/i,

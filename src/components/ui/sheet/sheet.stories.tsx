@@ -1,3 +1,4 @@
+import { findButtonByText } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { useState } from "react";
 import { expect, fireEvent, fn, waitFor } from "storybook/test";
@@ -125,19 +126,22 @@ export const Default = meta.story({
     ),
 });
 
-Default.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open sheet/i,
-    });
-    expect(trigger).toBeVisible();
+Default.test(
+    "should open sheet when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open sheet/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
+        await userEvent.click(trigger);
 
-    const sheetContent = await waitFor(() =>
-        document.querySelector('[data-slot="sheet-content"]'),
-    );
-    expect(sheetContent).toBeInTheDocument();
-});
+        const sheetContent = await waitFor(() =>
+            document.querySelector('[data-slot="sheet-content"]'),
+        );
+        expect(sheetContent).toBeInTheDocument();
+    },
+);
 
 Default.test(
     "should open and close sheet with cancel button",
@@ -154,16 +158,10 @@ Default.test(
         );
         expect(sheetContent).toBeInTheDocument();
 
-        const closeButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("cancel"),
-            );
-            if (!button) {
-                throw new Error("Cancel button not found");
-            }
-            return button;
-        });
+        const closeButton = findButtonByText(/cancel/i);
+        if (!closeButton) {
+            throw new Error("Cancel button not found");
+        }
         await userEvent.click(closeButton);
 
         await waitFor(() => {
@@ -352,18 +350,21 @@ export const SideRight = meta.story({
     ),
 });
 
-SideRight.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open from right/i,
-    });
+SideRight.test(
+    "should open sheet when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open from right/i,
+        });
 
-    await userEvent.click(trigger);
+        await userEvent.click(trigger);
 
-    const sheetContent = await waitFor(() =>
-        document.querySelector('[data-slot="sheet-content"]'),
-    );
-    expect(sheetContent).toBeInTheDocument();
-});
+        const sheetContent = await waitFor(() =>
+            document.querySelector('[data-slot="sheet-content"]'),
+        );
+        expect(sheetContent).toBeInTheDocument();
+    },
+);
 
 export const SideLeft = meta.story({
     name: "Side: Left",
@@ -386,18 +387,21 @@ export const SideLeft = meta.story({
     ),
 });
 
-SideLeft.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open from left/i,
-    });
+SideLeft.test(
+    "should open sheet when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open from left/i,
+        });
 
-    await userEvent.click(trigger);
+        await userEvent.click(trigger);
 
-    const sheetContent = await waitFor(() =>
-        document.querySelector('[data-slot="sheet-content"]'),
-    );
-    expect(sheetContent).toBeInTheDocument();
-});
+        const sheetContent = await waitFor(() =>
+            document.querySelector('[data-slot="sheet-content"]'),
+        );
+        expect(sheetContent).toBeInTheDocument();
+    },
+);
 
 export const SideTop = meta.story({
     name: "Side: Top",
@@ -420,18 +424,21 @@ export const SideTop = meta.story({
     ),
 });
 
-SideTop.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open from top/i,
-    });
+SideTop.test(
+    "should open sheet when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open from top/i,
+        });
 
-    await userEvent.click(trigger);
+        await userEvent.click(trigger);
 
-    const sheetContent = await waitFor(() =>
-        document.querySelector('[data-slot="sheet-content"]'),
-    );
-    expect(sheetContent).toBeInTheDocument();
-});
+        const sheetContent = await waitFor(() =>
+            document.querySelector('[data-slot="sheet-content"]'),
+        );
+        expect(sheetContent).toBeInTheDocument();
+    },
+);
 
 export const SideBottom = meta.story({
     name: "Side: Bottom",
@@ -459,18 +466,21 @@ export const SideBottom = meta.story({
     ),
 });
 
-SideBottom.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open from bottom/i,
-    });
+SideBottom.test(
+    "should open sheet when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open from bottom/i,
+        });
 
-    await userEvent.click(trigger);
+        await userEvent.click(trigger);
 
-    const sheetContent = await waitFor(() =>
-        document.querySelector('[data-slot="sheet-content"]'),
-    );
-    expect(sheetContent).toBeInTheDocument();
-});
+        const sheetContent = await waitFor(() =>
+            document.querySelector('[data-slot="sheet-content"]'),
+        );
+        expect(sheetContent).toBeInTheDocument();
+    },
+);
 
 export const AllSides = meta.story({
     name: "All Sides Preview",
@@ -574,17 +584,20 @@ export const Controlled = meta.story({
     },
 });
 
-Controlled.test("should open", async ({ canvas, userEvent }) => {
-    const openButton = await canvas.findByRole("button", {
-        name: /open controlled sheet/i,
-    });
-    await userEvent.click(openButton);
+Controlled.test(
+    "should open sheet when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const openButton = await canvas.findByRole("button", {
+            name: /open controlled sheet/i,
+        });
+        await userEvent.click(openButton);
 
-    const sheetContent = await waitFor(() =>
-        document.querySelector('[data-slot="sheet-content"]'),
-    );
-    expect(sheetContent).toBeInTheDocument();
-});
+        const sheetContent = await waitFor(() =>
+            document.querySelector('[data-slot="sheet-content"]'),
+        );
+        expect(sheetContent).toBeInTheDocument();
+    },
+);
 
 Controlled.test(
     "should be controlled by external state",

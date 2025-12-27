@@ -1,3 +1,8 @@
+import {
+    findButtonByText,
+    waitForDialog,
+    waitForDialogToClose,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { useState } from "react";
 import { expect, fireEvent, fn, waitFor } from "storybook/test";
@@ -79,62 +84,8 @@ export const Default = meta.story({
     ),
 });
 
-Default.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open alert dialog/i,
-    });
-    expect(trigger).toBeVisible();
-
-    await userEvent.click(trigger);
-});
-
-Default.test("should open and close dialog", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open alert dialog/i,
-    });
-    expect(trigger).toBeVisible();
-
-    await userEvent.click(trigger);
-
-    const dialog = await waitFor(() => {
-        const element = document.querySelector('[role="alertdialog"]');
-        if (!element) {
-            throw new Error("Dialog not found");
-        }
-        return element;
-    });
-    expect(dialog).toBeInTheDocument();
-
-    const title = await waitFor(() =>
-        document.querySelector('[data-slot="alert-dialog-title"]'),
-    );
-    expect(title).toBeInTheDocument();
-
-    const description = await waitFor(() =>
-        document.querySelector('[data-slot="alert-dialog-description"]'),
-    );
-    expect(description).toBeInTheDocument();
-
-    const cancelButton = await waitFor(() => {
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const button = buttons.find(btn =>
-            btn.textContent?.toLowerCase().includes("cancel"),
-        );
-        if (!button) {
-            throw new Error("Cancel button not found");
-        }
-        return button;
-    });
-    await userEvent.click(cancelButton);
-
-    await waitFor(() => {
-        const dialog = document.querySelector('[role="alertdialog"]');
-        expect(dialog).not.toBeInTheDocument();
-    });
-});
-
 Default.test(
-    "should open and close dialog with escape key",
+    "should open alert dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open alert dialog/i,
@@ -142,35 +93,70 @@ Default.test(
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
-
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
-
-        await userEvent.keyboard("{Escape}");
-
-        const cancelButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("cancel"),
-            );
-            if (!button) {
-                throw new Error("Cancel button not found");
-            }
-            return button;
-        });
-        await userEvent.click(cancelButton);
-
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialog("alertdialog");
     },
 );
 
 Default.test(
-    "should open and can not be closed by clicking outside",
+    "should open and close alert dialog",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open alert dialog/i,
+        });
+        expect(trigger).toBeVisible();
+
+        await userEvent.click(trigger);
+
+        const dialog = await waitForDialog("alertdialog");
+        expect(dialog).toBeInTheDocument();
+
+        const title = await waitFor(() =>
+            document.querySelector('[data-slot="alert-dialog-title"]'),
+        );
+        expect(title).toBeInTheDocument();
+
+        const description = await waitFor(() =>
+            document.querySelector('[data-slot="alert-dialog-description"]'),
+        );
+        expect(description).toBeInTheDocument();
+
+        const cancelButton = findButtonByText(/cancel/i);
+        if (!cancelButton) {
+            throw new Error("Cancel button not found");
+        }
+        await userEvent.click(cancelButton);
+
+        await waitForDialogToClose("alertdialog");
+    },
+);
+
+Default.test(
+    "should open and close alert dialog with escape key",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open alert dialog/i,
+        });
+        expect(trigger).toBeVisible();
+
+        await userEvent.click(trigger);
+
+        const dialog = await waitForDialog("alertdialog");
+        expect(dialog).toBeInTheDocument();
+
+        await userEvent.keyboard("{Escape}");
+
+        const cancelButton = findButtonByText(/cancel/i);
+        if (!cancelButton) {
+            throw new Error("Cancel button not found");
+        }
+        await userEvent.click(cancelButton);
+
+        await waitForDialogToClose("alertdialog");
+    },
+);
+
+Default.test(
+    "should not close alert dialog when clicking outside",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open alert dialog/i,
@@ -178,11 +164,9 @@ Default.test(
         expect(trigger).toBeVisible();
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-
+        const dialog = await waitForDialog("alertdialog");
         expect(dialog).toBeInTheDocument();
+
         await fireEvent.click(document.body);
         expect(dialog).toBeInTheDocument();
     },
@@ -213,14 +197,18 @@ export const Destructive = meta.story({
     ),
 });
 
-Destructive.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /delete account/i,
-    });
-    expect(trigger).toBeVisible();
+Destructive.test(
+    "should open alert dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /delete account/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("alertdialog");
+    },
+);
 
 export const Simple = meta.story({
     render: () => (
@@ -243,14 +231,18 @@ export const Simple = meta.story({
     ),
 });
 
-Simple.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /show simple alert/i,
-    });
-    expect(trigger).toBeVisible();
+Simple.test(
+    "should open alert dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /show simple alert/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("alertdialog");
+    },
+);
 
 export const LongContent = meta.story({
     render: () => (
@@ -286,14 +278,18 @@ export const LongContent = meta.story({
     ),
 });
 
-LongContent.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /show long content/i,
-    });
-    expect(trigger).toBeVisible();
+LongContent.test(
+    "should open alert dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /show long content/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("alertdialog");
+    },
+);
 
 export const Controlled = meta.story({
     render: () => {
@@ -329,14 +325,18 @@ export const Controlled = meta.story({
     },
 });
 
-Controlled.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /open controlled dialog/i,
-    });
-    expect(trigger).toBeVisible();
+Controlled.test(
+    "should open alert dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /open controlled dialog/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("alertdialog");
+    },
+);
 
 Controlled.test(
     "should be controlled by external state",
@@ -346,31 +346,20 @@ Controlled.test(
         });
         await userEvent.click(openButton);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
+        const dialog = await waitForDialog("alertdialog");
         expect(dialog).toBeInTheDocument();
 
-        const closeButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("close"),
-            );
-            if (!button) {
-                throw new Error("Close button not found");
-            }
-            return button;
-        });
+        const closeButton = findButtonByText(/close/i);
+        if (!closeButton) {
+            throw new Error("Close button not found");
+        }
         await userEvent.click(closeButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("alertdialog");
     },
 );
 
-export const NoCancelButton = meta.story({
+export const WithoutCancelButton = meta.story({
     render: () => (
         <AlertDialog>
             <AlertDialogTrigger asChild>
@@ -392,11 +381,15 @@ export const NoCancelButton = meta.story({
     ),
 });
 
-NoCancelButton.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", {
-        name: /show alert/i,
-    });
-    expect(trigger).toBeVisible();
+WithoutCancelButton.test(
+    "should open alert dialog when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button", {
+            name: /show alert/i,
+        });
+        expect(trigger).toBeVisible();
 
-    await userEvent.click(trigger);
-});
+        await userEvent.click(trigger);
+        await waitForDialog("alertdialog");
+    },
+);

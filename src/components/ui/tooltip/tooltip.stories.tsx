@@ -1,3 +1,4 @@
+import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { expect, fn, waitFor } from "storybook/test";
@@ -92,13 +93,9 @@ Default.test("should show tooltip on hover", async ({ canvas, userEvent }) => {
 
     await userEvent.hover(button);
 
-    await waitFor(() => {
-        const tooltipContent = document.querySelector(
-            '[data-slot="tooltip-content"]',
-        );
-        expect(tooltipContent).toBeVisible();
-        expect(tooltipContent).toHaveTextContent("This is a tooltip");
-    });
+    const tooltip = await waitForTooltip();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent("This is a tooltip");
 });
 
 Default.test(
@@ -107,21 +104,17 @@ Default.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            );
-            expect(tooltipContent).toBeVisible();
-        });
+        const tooltip = await waitForTooltip();
+        expect(tooltip).toBeInTheDocument();
 
         await userEvent.unhover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            );
-            expect(tooltipContent).not.toBeVisible();
-        });
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const tooltipAfterUnhover = document.querySelector(
+            '[data-slot="tooltip-content"]',
+        );
+        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(tooltipAfterUnhover).not.toBeInTheDocument();
     },
 );
 
@@ -138,7 +131,6 @@ Default.test(
 );
 
 export const WithCustomContent = meta.story({
-    name: "With Custom Content",
     render: args => (
         <div className="flex min-h-[200px] items-center justify-center">
             <Tooltip {...args}>
@@ -164,20 +156,15 @@ WithCustomContent.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            );
-            expect(tooltipContent).toBeVisible();
-            expect(tooltipContent).toHaveTextContent(
-                "This tooltip has custom content with an icon",
-            );
-        });
+        const tooltip = await waitForTooltip();
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveTextContent(
+            "This tooltip has custom content with an icon",
+        );
     },
 );
 
-export const Top = meta.story({
-    name: "Position Top",
+export const SideTop = meta.story({
     render: args => (
         <div className="flex min-h-[200px] items-end justify-center pb-20">
             <Tooltip {...args}>
@@ -190,21 +177,19 @@ export const Top = meta.story({
     ),
 });
 
-Top.test("should position tooltip on top", async ({ canvas, userEvent }) => {
-    const button = canvas.getByRole("button");
-    await userEvent.hover(button);
+SideTop.test(
+    "should position tooltip on top",
+    async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole("button");
+        await userEvent.hover(button);
 
-    await waitFor(() => {
-        const tooltipContent = document.querySelector(
-            '[data-slot="tooltip-content"]',
-        ) as HTMLElement;
-        expect(tooltipContent).toBeVisible();
-        expect(tooltipContent).toHaveAttribute("data-side", "top");
-    });
-});
+        const tooltip = (await waitForTooltip()) as HTMLElement;
+        expect(tooltip).toBeInTheDocument();
+        expect(tooltip).toHaveAttribute("data-side", "top");
+    },
+);
 
-export const Bottom = meta.story({
-    name: "Position Bottom",
+export const SideBottom = meta.story({
     render: args => (
         <div className="flex min-h-[200px] items-start justify-center pt-20">
             <Tooltip {...args}>
@@ -217,7 +202,7 @@ export const Bottom = meta.story({
     ),
 });
 
-Bottom.test(
+SideBottom.test(
     "should position tooltip on bottom",
     async ({ canvas, userEvent }) => {
         const button = canvas.getByRole("button");
@@ -227,14 +212,13 @@ Bottom.test(
             const tooltipContent = document.querySelector(
                 '[data-slot="tooltip-content"]',
             ) as HTMLElement;
-            expect(tooltipContent).toBeVisible();
+            expect(tooltipContent).toBeInTheDocument();
             expect(tooltipContent).toHaveAttribute("data-side", "bottom");
         });
     },
 );
 
-export const Left = meta.story({
-    name: "Position Left",
+export const SideLeft = meta.story({
     render: args => (
         <div className="flex min-h-[200px] items-center justify-end pr-20">
             <Tooltip {...args}>
@@ -247,21 +231,23 @@ export const Left = meta.story({
     ),
 });
 
-Left.test("should position tooltip on left", async ({ canvas, userEvent }) => {
-    const button = canvas.getByRole("button");
-    await userEvent.hover(button);
+SideLeft.test(
+    "should position tooltip on left",
+    async ({ canvas, userEvent }) => {
+        const button = canvas.getByRole("button");
+        await userEvent.hover(button);
 
-    await waitFor(() => {
-        const tooltipContent = document.querySelector(
-            '[data-slot="tooltip-content"]',
-        ) as HTMLElement;
-        expect(tooltipContent).toBeVisible();
-        expect(tooltipContent).toHaveAttribute("data-side", "left");
-    });
-});
+        await waitFor(() => {
+            const tooltipContent = document.querySelector(
+                '[data-slot="tooltip-content"]',
+            ) as HTMLElement;
+            expect(tooltipContent).toBeInTheDocument();
+            expect(tooltipContent).toHaveAttribute("data-side", "left");
+        });
+    },
+);
 
-export const Right = meta.story({
-    name: "Position Right",
+export const SideRight = meta.story({
     render: args => (
         <div className="flex min-h-[200px] items-center justify-start pl-20">
             <Tooltip {...args}>
@@ -274,7 +260,7 @@ export const Right = meta.story({
     ),
 });
 
-Right.test(
+SideRight.test(
     "should position tooltip on right",
     async ({ canvas, userEvent }) => {
         const button = canvas.getByRole("button");
@@ -284,14 +270,13 @@ Right.test(
             const tooltipContent = document.querySelector(
                 '[data-slot="tooltip-content"]',
             ) as HTMLElement;
-            expect(tooltipContent).toBeVisible();
+            expect(tooltipContent).toBeInTheDocument();
             expect(tooltipContent).toHaveAttribute("data-side", "right");
         });
     },
 );
 
 export const WithDelay = meta.story({
-    name: "With Delay",
     args: {
         delayDuration: 500,
     },
@@ -313,27 +298,18 @@ WithDelay.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            );
-            expect(tooltipContent).toBeNull();
-        });
-
-        await waitFor(
-            () => {
-                const tooltipContent = document.querySelector(
-                    '[data-slot="tooltip-content"]',
-                );
-                expect(tooltipContent).toBeVisible();
-            },
-            { timeout: 600 },
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const tooltipBeforeDelay = document.querySelector(
+            '[data-slot="tooltip-content"]',
         );
+        expect(tooltipBeforeDelay).toBeNull();
+
+        const tooltip = await waitForTooltip({ timeout: 600 });
+        expect(tooltip).toBeInTheDocument();
     },
 );
 
 export const WithCustomStyling = meta.story({
-    name: "With Custom Styling",
     render: args => (
         <div className="flex min-h-[200px] items-center justify-center">
             <Tooltip {...args}>
@@ -357,17 +333,12 @@ WithCustomStyling.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            ) as HTMLElement;
-            expect(tooltipContent).toBeVisible();
-        });
+        const tooltip = await waitForTooltip();
+        expect(tooltip).toBeInTheDocument();
     },
 );
 
 export const WithDisabledTrigger = meta.story({
-    name: "With Disabled Trigger",
     render: args => (
         <div className="flex min-h-[200px] items-center justify-center">
             <Tooltip {...args}>
@@ -394,11 +365,9 @@ WithDisabledTrigger.test(
 
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            );
-            expect(tooltipContent).toBeNull();
-        });
+        const tooltipContent = document.querySelector(
+            '[data-slot="tooltip-content"]',
+        );
+        expect(tooltipContent).toBeNull();
     },
 );

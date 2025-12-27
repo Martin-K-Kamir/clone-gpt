@@ -118,14 +118,14 @@ LongDelay.test(
     },
 );
 
-export const NoDelay = meta.story({
+export const WithoutDelay = meta.story({
     args: {
         children: "This content appears immediately (0ms delay)",
         delay: 0,
     } as DelayedRenderStoryArgs,
 });
 
-NoDelay.test(
+WithoutDelay.test(
     "should render content immediately with no delay",
     async ({ canvas }) => {
         await waitFor(
