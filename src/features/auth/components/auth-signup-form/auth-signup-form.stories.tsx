@@ -1,10 +1,9 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { createMockSignupUserData } from "#.storybook/lib/mocks/auth";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import { signUp } from "@/features/auth/services/actions";
-
-import type { DBUserId, DBUserRole } from "@/features/user/lib/types";
 
 import { api } from "@/lib/api-response";
 
@@ -21,12 +20,12 @@ const meta = preview.meta({
         switchToSignin: false,
     },
     decorators: [
-        (Story, {}) => (
-            <QueryProvider>
+        Story => (
+            <WithQueryProvider>
                 <div className="min-w-md bg-zinc-925">
                     <Story />
                 </div>
-            </QueryProvider>
+            </WithQueryProvider>
         ),
     ],
     parameters: {
@@ -81,23 +80,7 @@ const meta = preview.meta({
     },
 });
 
-export const Default = meta.story({
-    name: "Default",
-    beforeEach: () => {
-        mocked(signUp).mockResolvedValue(
-            api.success.auth.signup({
-                id: "00000000-0000-0000-0000-000000000000" as DBUserId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user" as DBUserRole,
-            }),
-        );
-    },
-    afterEach: () => {
-        mocked(signUp).mockClear();
-    },
-});
+export const Default = meta.story();
 
 Default.test("should render form with all fields", async ({ canvas }) => {
     const nameInput = canvas.getByLabelText(/name/i);
@@ -164,6 +147,10 @@ Default.test(
 Default.test(
     "should submit form with valid credentials",
     async ({ canvas, userEvent, args }) => {
+        mocked(signUp).mockResolvedValueOnce(
+            api.success.auth.signup(createMockSignupUserData()),
+        );
+
         const nameInput = canvas.getByLabelText(/name/i);
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/^password$/i);
@@ -201,6 +188,10 @@ Default.test(
 Default.test(
     "should submit form when pressing Enter on confirm password field",
     async ({ canvas, userEvent, args }) => {
+        mocked(signUp).mockResolvedValueOnce(
+            api.success.auth.signup(createMockSignupUserData()),
+        );
+
         const nameInput = canvas.getByLabelText(/name/i);
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/^password$/i);
@@ -235,6 +226,15 @@ Default.test(
 Default.test(
     "should call onSuccess callback on successful signup",
     async ({ canvas, userEvent, args }) => {
+        mocked(signUp).mockResolvedValueOnce(
+            api.success.auth.signup(
+                createMockSignupUserData({
+                    email: "jane@example.com",
+                    name: "Jane Smith",
+                }),
+            ),
+        );
+
         const nameInput = canvas.getByLabelText(/name/i);
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/^password$/i);
@@ -296,13 +296,11 @@ Default.test(
                     setTimeout(
                         () =>
                             resolve(
-                                api.success.auth.signup({
-                                    id: "00000000-0000-0000-0000-000000000000" as DBUserId,
-                                    email: "test@example.com",
-                                    name: "Test User",
-                                    image: null,
-                                    role: "user" as DBUserRole,
-                                }),
+                                api.success.auth.signup(
+                                    createMockSignupUserData({
+                                        name: "Test User",
+                                    }),
+                                ),
                             ),
                         100,
                     ),
@@ -368,13 +366,11 @@ Default.test(
                     setTimeout(
                         () =>
                             resolve(
-                                api.success.auth.signup({
-                                    id: "00000000-0000-0000-0000-000000000000" as DBUserId,
-                                    email: "test@example.com",
-                                    name: "Test User",
-                                    image: null,
-                                    role: "user" as DBUserRole,
-                                }),
+                                api.success.auth.signup(
+                                    createMockSignupUserData({
+                                        name: "Test User",
+                                    }),
+                                ),
                             ),
                         100,
                     ),
@@ -500,7 +496,6 @@ Default.test(
 );
 
 export const WithoutSwitchToSignin = meta.story({
-    name: "Without Switch to Signin (Link)",
     args: {
         onSwitchToSignin: undefined,
     },
@@ -516,7 +511,6 @@ WithoutSwitchToSignin.test(
 );
 
 export const WithSwitchToSigninRedirect = meta.story({
-    name: "With Switch to Signin Redirect",
     args: {
         switchToSignin: true,
     },

@@ -1,6 +1,13 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { createMockGuestSession } from "#.storybook/lib/mocks/auth";
+import { MOCK_CHAT_ID, createMockChat } from "#.storybook/lib/mocks/chats";
+import {
+    waitForDialog,
+    waitForDropdownMenu,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense } from "react";
+import type React from "react";
 import { expect, mocked, userEvent, waitFor } from "storybook/test";
 
 import {
@@ -13,15 +20,13 @@ import { SessionSyncProvider } from "@/features/auth/providers";
 import { auth } from "@/features/auth/services/auth";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChat, DBChatId, WithIsOwner } from "@/features/chat/lib/types";
+import type { DBChatId, WithIsOwner } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatOffsetProvider,
 } from "@/features/chat/providers";
 import { getUserChatById } from "@/features/chat/services/db";
 
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import type { DBUserId } from "@/features/user/lib/types";
 import {
     UserCacheSyncProvider,
     UserSessionProvider,
@@ -30,101 +35,71 @@ import {
 import { ChatViewHeader } from "./chat-view-header";
 import { ChatViewHeaderSkeleton } from "./chat-view-header-skeleton";
 
-const mockChatId = "chat-123" as DBChatId;
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-const mockedGuestSession = {
-    user: {
-        id: mockUserId,
-        name: "Guest",
-        email: "guest@example.com",
-        role: USER_ROLE.GUEST,
-        image: null,
-    },
-    expires: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(),
-};
-
-function createMockChat(
-    chatId: DBChatId = mockChatId,
-    userId: DBUserId = mockUserId,
+function createMockChatWithOwner(
+    chatId: DBChatId = MOCK_CHAT_ID,
     isOwner = true,
-): DBChat & WithIsOwner {
+): ReturnType<typeof createMockChat> & WithIsOwner {
     return {
-        id: chatId,
-        userId,
-        title: "My Chat Conversation",
-        visibility: CHAT_VISIBILITY.PRIVATE,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        visibleAt: new Date().toISOString(),
+        ...createMockChat({
+            id: chatId,
+            visibility: CHAT_VISIBILITY.PRIVATE,
+        }),
         isOwner,
-    } as const;
-}
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: 1,
-                staleTime: 60 * 1000,
-                refetchOnReconnect: false,
-                refetchOnWindowFocus: false,
-                refetchOnMount: false,
-            },
-        },
-    });
+    };
 }
 
 const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
     return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <SidebarProvider>
-                                    <SidebarWrapper
-                                        style={
-                                            {
-                                                "--sidebar-width":
-                                                    "calc(var(--spacing) * 72)",
-                                                "--header-height":
-                                                    "calc(var(--spacing) * 12)",
-                                            } as React.CSSProperties
-                                        }
-                                        className="max-h-svh"
-                                    >
-                                        <SidebarInset>
-                                            <Suspense
-                                                fallback={
-                                                    <ChatViewHeaderSkeleton />
-                                                }
-                                            >
-                                                <Story />
-                                            </Suspense>
-                                        </SidebarInset>
-                                    </SidebarWrapper>
-                                </SidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
+        <UserSessionProvider>
+            <SessionSyncProvider>
+                <ChatOffsetProvider>
+                    <UserCacheSyncProvider>
+                        <ChatCacheSyncProvider>
+                            <SidebarProvider>
+                                <SidebarWrapper
+                                    style={
+                                        {
+                                            "--sidebar-width":
+                                                "calc(var(--spacing) * 72)",
+                                            "--header-height":
+                                                "calc(var(--spacing) * 12)",
+                                        } as React.CSSProperties
+                                    }
+                                    className="max-h-svh"
+                                >
+                                    <SidebarInset>
+                                        <Suspense
+                                            fallback={
+                                                <ChatViewHeaderSkeleton />
+                                            }
+                                        >
+                                            <Story />
+                                        </Suspense>
+                                    </SidebarInset>
+                                </SidebarWrapper>
+                            </SidebarProvider>
+                        </ChatCacheSyncProvider>
+                    </UserCacheSyncProvider>
+                </ChatOffsetProvider>
+            </SessionSyncProvider>
+        </UserSessionProvider>
     );
 };
 
 const meta = preview.meta({
     component: ChatViewHeader,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story: React.ComponentType) => (
+            <WithQueryProvider>
+                <StoryWrapper Story={Story} />
+            </WithQueryProvider>
+        ),
+    ],
     parameters: {
         layout: "fullscreen",
         nextjs: {
             navigation: {
-                pathname: "/chat/123",
+                pathname: `/chat/${MOCK_CHAT_ID}`,
             },
         },
     },
@@ -159,11 +134,11 @@ Default.test("should render header with all elements", async ({ canvas }) => {
 export const WithChat = meta.story({
     name: "With Chat",
     args: {
-        chatId: mockChatId,
+        chatId: MOCK_CHAT_ID,
     },
     beforeEach: () => {
         mocked(getUserChatById).mockResolvedValue(
-            createMockChat(mockChatId, mockUserId, true),
+            createMockChatWithOwner(MOCK_CHAT_ID, true),
         );
     },
     afterEach: () => {
@@ -187,7 +162,7 @@ WithChat.test("should render header with chat actions", async ({ canvas }) => {
 WithChat.test("should fetch chat data when chatId is provided", async () => {
     await waitFor(() => {
         expect(mocked(getUserChatById)).toHaveBeenCalledWith({
-            chatId: mockChatId,
+            chatId: MOCK_CHAT_ID,
             userId: expect.any(String),
         });
     });
@@ -200,12 +175,8 @@ WithChat.test(
         await userEvent.click(shareButton);
         expect(shareButton).toBeVisible();
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                "[data-slot='dialog-content']",
-            );
-            expect(dialog).toBeInTheDocument();
-        });
+        const dialog = await waitForDialog();
+        expect(dialog).toBeInTheDocument();
     },
 );
 
@@ -218,23 +189,19 @@ WithChat.test(
         await userEvent.click(menuButton);
         expect(menuButton).toBeVisible();
 
-        await waitFor(() => {
-            const dropdown = document.querySelector(
-                "[data-slot='dropdown-menu-content']",
-            );
-            expect(dropdown).toBeInTheDocument();
-        });
+        const dropdown = await waitForDropdownMenu();
+        expect(dropdown).toBeInTheDocument();
     },
 );
 
 export const NonOwnerChat = meta.story({
     name: "Non-Owner Chat",
     args: {
-        chatId: mockChatId,
+        chatId: MOCK_CHAT_ID,
     },
     beforeEach: () => {
         mocked(getUserChatById).mockResolvedValue(
-            createMockChat(mockChatId, mockUserId, false),
+            createMockChatWithOwner(MOCK_CHAT_ID, false),
         );
     },
     afterEach: () => {
@@ -264,7 +231,7 @@ export const GuestUser = meta.story({
         chatId: undefined,
     },
     beforeEach: () => {
-        mocked(auth).mockResolvedValue(mockedGuestSession as any);
+        mocked(auth).mockResolvedValue(createMockGuestSession() as any);
     },
     afterEach: () => {
         mocked(auth).mockClear();
@@ -289,12 +256,8 @@ GuestUser.test(
         const logInButton = canvas.getByRole("button", { name: /log in/i });
         await userEvent.click(logInButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                "[data-slot='dialog-content']",
-            );
-            expect(dialog).toBeInTheDocument();
-        });
+        const dialog = await waitForDialog();
+        expect(dialog).toBeInTheDocument();
     },
 );
 
@@ -313,12 +276,12 @@ GuestUser.test(
 export const GuestUserWithChat = meta.story({
     name: "Guest User With Chat",
     args: {
-        chatId: mockChatId,
+        chatId: MOCK_CHAT_ID,
     },
     beforeEach: () => {
-        mocked(auth).mockResolvedValue(mockedGuestSession as any);
+        mocked(auth).mockResolvedValue(createMockGuestSession() as any);
         mocked(getUserChatById).mockResolvedValue(
-            createMockChat(mockChatId, mockUserId, false),
+            createMockChatWithOwner(MOCK_CHAT_ID, false),
         );
     },
     afterEach: () => {

@@ -1,11 +1,20 @@
+import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import {
+    MOCK_ASSISTANT_MESSAGE_ID,
+    createMockAssistantMessageMetadata,
+    createMockDownvoteResponseData,
+    createMockUpvoteResponseData,
+} from "#.storybook/lib/mocks/messages";
+import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
+import { createQueryClient } from "#.storybook/lib/utils/query-client";
+import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { SessionSyncProvider } from "@/features/auth/providers";
 
-import type { DBChatId, DBChatMessageId } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatOffsetProvider,
@@ -15,7 +24,6 @@ import {
 import { downvoteChatMessage } from "@/features/chat/services/actions/downvote-chat-message";
 import { upvoteChatMessage } from "@/features/chat/services/actions/upvote-chat-message";
 
-import type { DBUserId } from "@/features/user/lib/types";
 import {
     UserCacheSyncProvider,
     UserSessionProvider,
@@ -24,39 +32,6 @@ import {
 import { api } from "@/lib/api-response";
 
 import { ChatMessageActionsAssistant } from "./chat-message-actions-assistant";
-
-const mockChatId = "chat-123" as DBChatId;
-const mockMessageId = "00000000-0000-0000-0000-000000000002" as DBChatMessageId;
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-function createMockMetadata(overrides?: {
-    isUpvoted?: boolean;
-    isDownvoted?: boolean;
-}) {
-    return {
-        role: "assistant" as const,
-        createdAt: "2024-01-15T12:00:00.000Z",
-        model: "gpt-4",
-        totalTokens: 100,
-        isUpvoted: false,
-        isDownvoted: false,
-        ...overrides,
-    };
-}
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: 1,
-                staleTime: 60 * 1000,
-                refetchOnReconnect: false,
-                refetchOnWindowFocus: false,
-                refetchOnMount: false,
-            },
-        },
-    });
-}
 
 const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
     const queryClient = useMemo(() => createQueryClient(), []);
@@ -70,10 +45,10 @@ const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
                             <ChatCacheSyncProvider>
                                 <ChatSidebarProvider>
                                     <ChatProvider
-                                        userId={mockUserId}
+                                        userId={MOCK_USER_ID}
                                         isNewChat={false}
                                         isOwner={true}
-                                        chatId={mockChatId}
+                                        chatId={MOCK_CHAT_ID}
                                         messages={[]}
                                         userChatPreferences={null}
                                     >
@@ -95,43 +70,23 @@ const meta = preview.meta({
     component: ChatMessageActionsAssistant,
     decorators: [Story => <StoryWrapper Story={Story} />],
     args: {
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        metadata: createMockMetadata(),
+        metadata: createMockAssistantMessageMetadata(),
     },
     beforeEach: () => {
         mocked(upvoteChatMessage).mockResolvedValue(
-            api.success.chat.upvote({
-                id: mockMessageId,
-                chatId: mockChatId,
-                userId: mockUserId,
-                role: "assistant" as const,
-                content: "",
-                createdAt: new Date().toISOString(),
-                metadata: createMockMetadata({ isUpvoted: true }),
-                parts: [],
-            }),
+            api.success.chat.upvote(createMockUpvoteResponseData()) as any,
         );
         mocked(downvoteChatMessage).mockResolvedValue(
-            api.success.chat.downvote({
-                id: mockMessageId,
-                chatId: mockChatId,
-                userId: mockUserId,
-                role: "assistant" as const,
-                content: "",
-                createdAt: new Date().toISOString(),
-                metadata: createMockMetadata({ isDownvoted: true }),
-                parts: [],
-            }),
+            api.success.chat.downvote(createMockDownvoteResponseData()) as any,
         );
     },
 });
 
-export const Default = meta.story({
-    name: "Default",
-});
+export const Default = meta.story({});
 
 Default.test("should render all action buttons", async ({ canvas }) => {
     const copyButton = canvas.getByRole("button", { name: /copy/i });
@@ -153,11 +108,9 @@ Default.test("should show tooltips on hover", async ({ canvas, userEvent }) => {
     const copyButton = canvas.getByRole("button", { name: /copy/i });
     await userEvent.hover(copyButton);
 
-    await waitFor(() => {
-        const tooltip = document.querySelector('[data-slot="tooltip-content"]');
-        expect(tooltip).toBeVisible();
-        expect(tooltip).toHaveTextContent("Copy");
-    });
+    const tooltip = await waitForTooltip();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent("Copy");
 });
 
 Default.test(
@@ -181,8 +134,8 @@ Default.test(
 
         await waitFor(() => {
             expect(mocked(upvoteChatMessage)).toHaveBeenCalledWith({
-                messageId: mockMessageId,
-                chatId: mockChatId,
+                messageId: MOCK_ASSISTANT_MESSAGE_ID,
+                chatId: MOCK_CHAT_ID,
                 upvote: true,
             });
         });
@@ -199,8 +152,8 @@ Default.test(
 
         await waitFor(() => {
             expect(mocked(downvoteChatMessage)).toHaveBeenCalledWith({
-                messageId: mockMessageId,
-                chatId: mockChatId,
+                messageId: MOCK_ASSISTANT_MESSAGE_ID,
+                chatId: MOCK_CHAT_ID,
                 downvote: true,
             });
         });
@@ -208,13 +161,12 @@ Default.test(
 );
 
 export const Upvoted = meta.story({
-    name: "Upvoted",
     args: {
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        metadata: createMockMetadata({
+        metadata: createMockAssistantMessageMetadata({
             isUpvoted: true,
             isDownvoted: false,
         }),
@@ -234,8 +186,8 @@ Upvoted.test(
 
         await waitFor(() => {
             expect(mocked(upvoteChatMessage)).toHaveBeenCalledWith({
-                messageId: mockMessageId,
-                chatId: mockChatId,
+                messageId: MOCK_ASSISTANT_MESSAGE_ID,
+                chatId: MOCK_CHAT_ID,
                 upvote: false,
             });
         });
@@ -243,13 +195,12 @@ Upvoted.test(
 );
 
 export const Downvoted = meta.story({
-    name: "Downvoted",
     args: {
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        metadata: createMockMetadata({
+        metadata: createMockAssistantMessageMetadata({
             isUpvoted: false,
             isDownvoted: true,
         }),
@@ -271,8 +222,8 @@ Downvoted.test(
 
         await waitFor(() => {
             expect(mocked(downvoteChatMessage)).toHaveBeenCalledWith({
-                messageId: mockMessageId,
-                chatId: mockChatId,
+                messageId: MOCK_ASSISTANT_MESSAGE_ID,
+                chatId: MOCK_CHAT_ID,
                 downvote: false,
             });
         });
@@ -280,13 +231,12 @@ Downvoted.test(
 );
 
 export const Disabled = meta.story({
-    name: "Disabled",
     args: {
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        metadata: createMockMetadata(),
+        metadata: createMockAssistantMessageMetadata(),
         disabled: true,
     },
 });
@@ -354,13 +304,12 @@ Disabled.test(
 );
 
 export const WithoutCopy = meta.story({
-    name: "Without Copy Button",
     args: {
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        metadata: createMockMetadata(),
+        metadata: createMockAssistantMessageMetadata(),
         showCopy: false,
     },
 });
@@ -376,13 +325,12 @@ WithoutCopy.test("should not show copy button", async ({ canvas }) => {
 });
 
 export const WithoutRegenerate = meta.story({
-    name: "Without Regenerate Button",
     args: {
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        metadata: createMockMetadata(),
+        metadata: createMockAssistantMessageMetadata(),
         showRegenerate: false,
     },
 });
@@ -401,13 +349,12 @@ WithoutRegenerate.test(
 );
 
 export const WithoutVotes = meta.story({
-    name: "Without Vote Buttons",
     args: {
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        metadata: createMockMetadata(),
+        metadata: createMockAssistantMessageMetadata(),
         showUpvote: false,
         showDownvote: false,
     },

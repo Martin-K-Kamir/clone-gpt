@@ -1,5 +1,7 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { MOCK_SOURCE_PARTS } from "#.storybook/lib/mocks/messages";
+import { MOCK_SOURCE_PREVIEWS } from "#.storybook/lib/mocks/messages";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type SourceUrlUIPart } from "ai";
 import { HttpResponse, delay, http } from "msw";
 import { expect, waitFor } from "storybook/test";
@@ -8,75 +10,18 @@ import { SourcePreview } from "@/lib/types";
 
 import { SourceList } from "./source-list";
 
-const mockSources: SourceUrlUIPart[] = [
-    {
-        type: "source-url",
-        sourceId: "source-1",
-        url: "https://github.com/vercel/next.js",
-        title: "Next.js - The React Framework",
-    },
-    {
-        type: "source-url",
-        sourceId: "source-2",
-        url: "https://react.dev/reference/react",
-        title: "React Reference Documentation",
-    },
-    {
-        type: "source-url",
-        sourceId: "source-3",
-        url: "https://tailwindcss.com/docs",
-        title: "Tailwind CSS Documentation",
-    },
-];
-
-const mockPreviews: SourcePreview[] = [
-    {
-        url: "https://github.com/vercel/next.js",
-        title: "Next.js by Vercel - The React Framework for the Web",
-        description:
-            "Production grade React applications that scale. The world's leading companies use Next.js to build static and dynamic websites and web applications.",
-        siteName: "GitHub",
-        image: "https://opengraph.githubassets.com/next.js",
-        favicon: "https://github.githubassets.com/favicons/favicon.svg",
-    },
-    {
-        url: "https://react.dev/reference/react",
-        title: "React Reference Overview",
-        description:
-            "The React reference documentation provides detailed information about working with React.",
-        siteName: "React",
-        image: "https://react.dev/images/og-home.png",
-        favicon: "https://react.dev/favicon.ico",
-    },
-    {
-        url: "https://tailwindcss.com/docs",
-        title: "Tailwind CSS - Documentation",
-        description:
-            "A utility-first CSS framework packed with classes that can be composed to build any design, directly in your markup.",
-        siteName: "Tailwind CSS",
-        image: "https://tailwindcss.com/og-image.png",
-        favicon: "https://tailwindcss.com/favicon.ico",
-    },
-];
-
-const createQueryClient = () =>
-    new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                staleTime: Infinity,
-            },
-        },
-    });
+const mockSources: SourceUrlUIPart[] = MOCK_SOURCE_PARTS.filter(
+    part => part.type === "source-url",
+);
+const mockPreviews: SourcePreview[] = MOCK_SOURCE_PREVIEWS;
 
 const meta = preview.meta({
     component: SourceList,
-
     decorators: [
         Story => (
-            <QueryClientProvider client={createQueryClient()}>
+            <WithQueryProvider>
                 <Story />
-            </QueryClientProvider>
+            </WithQueryProvider>
         ),
     ],
     parameters: {

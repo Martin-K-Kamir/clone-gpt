@@ -1,9 +1,13 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import {
+    createMockGuestUser,
+    createMockUser,
+} from "#.storybook/lib/mocks/users";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
-import { expect, waitFor } from "storybook/test";
+import type React from "react";
+import { expect } from "storybook/test";
 
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import type { DBUserId, UIUser } from "@/features/user/lib/types";
+import type { UIUser } from "@/features/user/lib/types";
 import { UserSessionContext } from "@/features/user/providers";
 
 import { ChatGreeting } from "./chat-greeting";
@@ -14,12 +18,12 @@ const meta = preview.meta({
         as: "h1",
     },
     decorators: [
-        (Story, { parameters }) => {
+        (Story: React.ComponentType, { parameters }) => {
             const mockUser =
                 (parameters.user as UIUser | null | undefined) ?? null;
 
             return (
-                <QueryProvider>
+                <WithQueryProvider>
                     <UserSessionContext.Provider
                         value={{
                             user: mockUser,
@@ -28,7 +32,7 @@ const meta = preview.meta({
                     >
                         <Story />
                     </UserSessionContext.Provider>
-                </QueryProvider>
+                </WithQueryProvider>
             );
         },
     ],
@@ -64,64 +68,39 @@ const meta = preview.meta({
     },
 });
 
-const mockRegularUser: UIUser = {
-    id: "user-1" as DBUserId,
-    name: "John Doe",
-    email: "john@example.com",
-    image: null,
-    role: USER_ROLE.USER,
-};
-
-const mockGuestUser: UIUser = {
-    id: "guest-1" as DBUserId,
-    name: "Guest User",
-    email: "guest@example.com",
-    image: null,
-    role: USER_ROLE.GUEST,
-};
-
 export const Default = meta.story({
-    name: "Default (Regular User)",
     parameters: {
-        user: mockRegularUser,
+        user: createMockUser(),
     },
 });
 
 Default.test("should render greeting for regular user", async ({ canvas }) => {
-    await waitFor(() => {
-        const greeting = canvas.getByText(
-            /Good (morning|afternoon|evening), John!/,
-        );
-        expect(greeting).toBeVisible();
-    });
+    const greeting = canvas.getByText(
+        /Good (morning|afternoon|evening), John!/,
+    );
+    expect(greeting).toBeInTheDocument();
 });
 
 export const GuestUser = meta.story({
-    name: "Guest User",
     parameters: {
-        user: mockGuestUser,
+        user: createMockGuestUser(),
     },
 });
 
 GuestUser.test("should render greeting for guest user", async ({ canvas }) => {
-    await waitFor(() => {
-        const greeting = canvas.getByText(
-            /Good (morning|afternoon|evening), there!/,
-        );
-        expect(greeting).toBeVisible();
-    });
+    const greeting = canvas.getByText(
+        /Good (morning|afternoon|evening), there!/,
+    );
+    expect(greeting).toBeInTheDocument();
 });
 
 export const NoUser = meta.story({
-    name: "No User",
     parameters: {
         user: null,
     },
 });
 
 NoUser.test("should not render when no user", async ({ canvas }) => {
-    await waitFor(() => {
-        const greeting = canvas.queryByText(/Good (morning|afternoon|evening)/);
-        expect(greeting).not.toBeInTheDocument();
-    });
+    const greeting = canvas.queryByText(/Good (morning|afternoon|evening)/);
+    expect(greeting).not.toBeInTheDocument();
 });

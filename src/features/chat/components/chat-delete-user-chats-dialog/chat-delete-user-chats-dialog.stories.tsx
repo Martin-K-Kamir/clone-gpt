@@ -1,10 +1,15 @@
+import { WithQueryProviderAndToaster } from "#.storybook/lib/decorators/providers";
+import {
+    findButtonByText,
+    waitForDialog,
+    waitForDialogToClose,
+    waitForSonnerToast,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 
 import {
     ChatCacheSyncProvider,
@@ -24,14 +29,13 @@ const meta = preview.meta({
     component: ChatDeleteUserChatsDialog,
     decorators: [
         Story => (
-            <QueryProvider>
+            <WithQueryProviderAndToaster>
                 <ChatOffsetProvider>
                     <ChatCacheSyncProvider>
                         <Story />
-                        <Toaster />
                     </ChatCacheSyncProvider>
                 </ChatOffsetProvider>
-            </QueryProvider>
+            </WithQueryProviderAndToaster>
         ),
     ],
     args: {
@@ -86,7 +90,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
     render: args => (
         <ChatDeleteUserChatsDialog {...args}>
             <ChatDeleteAllDialogTrigger asChild>
@@ -110,14 +113,11 @@ Default.test("should open dialog", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button", { name: /delete chats/i });
     await userEvent.click(trigger);
 
-    const dialog = await waitFor(() =>
-        document.querySelector('[role="alertdialog"]'),
-    );
-    expect(dialog).toBeInTheDocument();
+    await waitForDialog("alertdialog");
 });
 
 Default.test(
-    "should delete all chats when Delete All Chats button is clicked",
+    "should delete all chats when delete all chats button is clicked",
     async ({ canvas, userEvent }) => {
         mocked(deleteAllUserChats).mockResolvedValueOnce(
             api.success.chat.delete(undefined, {
@@ -130,11 +130,10 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
@@ -156,21 +155,16 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            expect(
-                document.querySelector('[role="alertdialog"]'),
-            ).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("alertdialog");
     },
 );
 
@@ -188,20 +182,16 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -219,20 +209,16 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -250,24 +236,21 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            expect(
-                document.querySelector('[role="alertdialog"]'),
-            ).toBeInTheDocument();
-        });
+        const dialog = await waitForDialog("alertdialog");
+        expect(dialog).toBeInTheDocument();
     },
 );
 
+// todo
 // Default.test(
 //     "should call onDelete when delete is initiated",
 //     async ({ canvas, userEvent, args }) => {
@@ -304,11 +287,10 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(onDeleteSuccess).toHaveBeenCalledTimes(1);
@@ -331,11 +313,10 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(onDeleteError).toHaveBeenCalledTimes(1);
@@ -344,7 +325,6 @@ Default.test(
 );
 
 export const WithoutToast = meta.story({
-    name: "Without Toast",
     args: {
         showToast: false,
     },
@@ -371,11 +351,10 @@ WithoutToast.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
@@ -389,7 +368,6 @@ WithoutToast.test(
 );
 
 export const WithRedirect = meta.story({
-    name: "With Redirect",
     args: {
         redirectUrl: "/settings",
     },
@@ -416,11 +394,10 @@ WithRedirect.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete All Chats",
-        );
-        await userEvent.click(deleteButton!);
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
@@ -433,7 +410,6 @@ WithRedirect.test(
 );
 
 export const WithCurrentPath = meta.story({
-    name: "With Current Path",
     args: {
         redirectUrl: "/settings",
     },
@@ -481,11 +457,10 @@ WithCurrentPath.test(
             });
             await userEvent.click(trigger);
 
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const deleteButton = buttons.find(
-                button => button.textContent?.trim() === "Delete All Chats",
-            );
-            await userEvent.click(deleteButton!);
+            await waitForDialog("alertdialog");
+
+            const deleteButton = findButtonByText("Delete All Chats");
+            await userEvent.click(deleteButton);
 
             await waitFor(() => {
                 expect(mocked(deleteAllUserChats)).toHaveBeenCalled();

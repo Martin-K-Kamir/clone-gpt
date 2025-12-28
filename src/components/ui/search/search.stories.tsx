@@ -1,5 +1,7 @@
+import { FIXED_DATE } from "#.storybook/lib/mocks/chats";
 import {
     waitForDialog,
+    waitForDialogOverlay,
     waitForDialogToClose,
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
@@ -93,11 +95,11 @@ const meta = preview.meta({
     },
 });
 
-const today = new Date();
-const yesterday = sub(today, { days: 1 });
-const fixedDate1 = new Date("2024-01-10T12:00:00Z");
-const fixedDate2 = new Date("2024-01-05T12:00:00Z");
-const fixedDate3 = new Date("2023-12-20T12:00:00Z");
+const today = FIXED_DATE;
+const yesterday = sub(FIXED_DATE, { days: 1 });
+const fixedDate1 = sub(FIXED_DATE, { days: 1 });
+const fixedDate2 = sub(FIXED_DATE, { days: 2 });
+const fixedDate3 = sub(FIXED_DATE, { days: 3 });
 
 // Mock data for search results
 const mockSearchResults: SearchResultsItemResult[] = [
@@ -2266,22 +2268,11 @@ InDialogDefault.test(
 
         const dialog = await waitForDialog();
         expect(dialog).toBeInTheDocument();
-        const overlay = await waitFor(() => {
-            const overlay = document.querySelector(
-                '[data-testid="dialog-overlay"]',
-            );
-            if (!overlay) {
-                throw new Error("Overlay not found");
-            }
-            return overlay;
-        });
+        const overlay = await waitForDialogOverlay();
         expect(overlay).toBeInTheDocument();
         await userEvent.click(overlay);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose();
     },
 );
 
@@ -3087,22 +3078,11 @@ WithDialogTrigger.test(
 
         const dialog = await waitForDialog();
         expect(dialog).toBeInTheDocument();
-        const overlay = await waitFor(() => {
-            const overlay = document.querySelector(
-                '[data-testid="dialog-overlay"]',
-            );
-            if (!overlay) {
-                throw new Error("Overlay not found");
-            }
-            return overlay;
-        });
+        const overlay = await waitForDialogOverlay();
         expect(overlay).toBeInTheDocument();
         await userEvent.click(overlay);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose();
     },
 );
 

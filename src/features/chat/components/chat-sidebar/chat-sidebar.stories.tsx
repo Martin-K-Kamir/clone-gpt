@@ -1,3 +1,7 @@
+import {
+    createMockChats,
+    createMockPaginatedChats,
+} from "#.storybook/lib/mocks/chats";
 import preview from "#.storybook/preview";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, useEffect, useMemo } from "react";
@@ -9,11 +13,8 @@ import { SessionSyncProvider } from "@/features/auth/providers";
 import { auth } from "@/features/auth/services/auth";
 
 import { ChatSearchDialogClient } from "@/features/chat/components/chat-search-dialog";
-import {
-    CHAT_VISIBILITY,
-    QUERY_USER_CHATS_LIMIT,
-} from "@/features/chat/lib/constants";
-import type { DBChat, DBChatId } from "@/features/chat/lib/types";
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import type { DBChat } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatOffsetProvider,
@@ -21,52 +22,17 @@ import {
 } from "@/features/chat/providers";
 import { getUserChats as getUserChatsDB } from "@/features/chat/services/db";
 
-import type { DBUserId } from "@/features/user/lib/types";
 import {
     UserCacheSyncProvider,
     UserSessionProvider,
 } from "@/features/user/providers";
 
-import { api } from "@/lib/api-response";
-import { PLURAL } from "@/lib/constants";
 import type { PaginatedData } from "@/lib/types";
 
 import { ChatSidebar } from "./chat-sidebar";
 import { ChatSidebarSkeleton } from "./chat-sidebar-skeleton";
 
 const DEFAULT_CHATS_LENGTH = 20;
-
-function createMockChat(index: number): DBChat {
-    const fixedDate = new Date("2025-12-20");
-    fixedDate.setDate(fixedDate.getDate() - index);
-    const date = fixedDate.toISOString();
-
-    return {
-        id: index as unknown as DBChatId,
-        userId: "00000000-0000-0000-0000-000000000001" as DBUserId,
-        title: `Chat ${index}`,
-        visibility: CHAT_VISIBILITY.PRIVATE,
-        createdAt: date,
-        updatedAt: date,
-        visibleAt: date,
-    } as const;
-}
-
-function createMockChats(length = DEFAULT_CHATS_LENGTH): DBChat[] {
-    return Array.from({ length }, (_, index) => createMockChat(index));
-}
-
-function createMockPaginatedData(
-    length = DEFAULT_CHATS_LENGTH,
-    hasNextPage = false,
-): PaginatedData<DBChat[]> {
-    return {
-        data: createMockChats(length),
-        totalCount: length,
-        hasNextPage,
-        nextOffset: hasNextPage ? length : undefined,
-    };
-}
 
 function createQueryClient() {
     return new QueryClient({
@@ -156,9 +122,23 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     name: "Default",
-    decorators: [createDecorator(createMockPaginatedData())],
+    decorators: [
+        createDecorator(
+            createMockPaginatedChats({
+                length: DEFAULT_CHATS_LENGTH,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        ),
+    ],
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(createMockPaginatedData());
+        mocked(getUserChatsDB).mockResolvedValue(
+            createMockPaginatedChats({
+                length: DEFAULT_CHATS_LENGTH,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        );
     },
     afterEach: () => {
         mocked(auth).mockClear();
@@ -178,9 +158,10 @@ Default.test("should render sidebar with all sections", async ({ canvas }) => {
     const links = canvas.getAllByRole("link");
     expect(links.length).toBeGreaterThan(1);
 
-    const chatTitles = createMockChats()
-        .slice(0, 5)
-        .map(chat => chat.title);
+    const chatTitles = createMockChats({
+        length: 5,
+        visibility: CHAT_VISIBILITY.PRIVATE,
+    }).map(chat => chat.title);
     chatTitles.forEach(title => {
         expect(canvas.getByText(title)).toBeVisible();
     });
@@ -224,9 +205,23 @@ Skeleton.test("should render skeleton version", async ({ canvas }) => {
 
 export const Empty = meta.story({
     name: "Empty",
-    decorators: [createDecorator(createMockPaginatedData(0))],
+    decorators: [
+        createDecorator(
+            createMockPaginatedChats({
+                length: 0,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        ),
+    ],
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(createMockPaginatedData(0));
+        mocked(getUserChatsDB).mockResolvedValue(
+            createMockPaginatedChats({
+                length: 0,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        );
     },
     afterEach: () => {
         mocked(auth).mockClear();

@@ -1,6 +1,9 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import { waitForElement } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
+import type React from "react";
 import { expect, waitFor } from "storybook/test";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -8,30 +11,33 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { ChatSearchDialogClient } from "@/features/chat/components/chat-search-dialog";
 
 import { ChatSidebarActions } from "./chat-sidebar-actions";
-import { ChatSidebarActionsSkeleton } from "./chat-sidebar-actions-skeleton";
 
 const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
     return (
-        <QueryProvider>
-            <SidebarProvider>
-                <ChatSearchDialogClient>
-                    <div className="w-72 bg-zinc-950 p-4">
-                        <Story />
-                    </div>
-                </ChatSearchDialogClient>
-            </SidebarProvider>
-        </QueryProvider>
+        <SidebarProvider>
+            <ChatSearchDialogClient>
+                <div className="w-72 bg-zinc-950 p-4">
+                    <Story />
+                </div>
+            </ChatSearchDialogClient>
+        </SidebarProvider>
     );
 };
 
 const meta = preview.meta({
     component: ChatSidebarActions,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story: React.ComponentType) => (
+            <WithQueryProvider>
+                <StoryWrapper Story={Story} />
+            </WithQueryProvider>
+        ),
+    ],
     parameters: {
         layout: "fullscreen",
         nextjs: {
             navigation: {
-                pathname: "/chat/123",
+                pathname: `/chat/${MOCK_CHAT_ID}`,
             },
         },
     },
@@ -74,13 +80,9 @@ Default.test(
         const searchButton = canvas.getByRole("button", { name: /search/i });
         await userEvent.click(searchButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                '[data-slot="dialog-content"]',
-            );
-            expect(dialog).toBeInTheDocument();
-            expect(dialog).toHaveAttribute("data-state", "open");
-        });
+        const dialog = await waitForElement('[data-slot="dialog-content"]');
+        expect(dialog).toBeInTheDocument();
+        expect(dialog).toHaveAttribute("data-state", "open");
     },
 );
 
@@ -124,12 +126,8 @@ Default.test(
     async ({ userEvent }) => {
         await userEvent.keyboard("{Control>}k{/Control}");
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                '[data-slot="dialog-content"]',
-            );
-            expect(dialog).toBeInTheDocument();
-            expect(dialog).toHaveAttribute("data-state", "open");
-        });
+        const dialog = await waitForElement('[data-slot="dialog-content"]');
+        expect(dialog).toBeInTheDocument();
+        expect(dialog).toHaveAttribute("data-state", "open");
     },
 );

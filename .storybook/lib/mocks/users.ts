@@ -24,14 +24,16 @@ export function createMockUsers(count: number): UIUser[] {
     );
 }
 
-export function createMockGuestUser(): UIUser {
+export function createMockGuestUser(overrides?: Partial<UIUser>): UIUser {
     return createMockUser({
+        ...overrides,
         role: USER_ROLE.GUEST,
     });
 }
 
-export function createMockAdminUser(): UIUser {
+export function createMockAdminUser(overrides?: Partial<UIUser>): UIUser {
     return createMockUser({
+        ...overrides,
         role: USER_ROLE.ADMIN,
     });
 }

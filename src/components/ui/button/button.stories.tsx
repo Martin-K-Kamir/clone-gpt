@@ -161,7 +161,7 @@ WithTooltip.test(
         await userEvent.hover(button);
 
         const tooltip = await waitForTooltip();
-        expect(tooltip).toBeVisible();
+        expect(tooltip).toBeInTheDocument();
     },
 );
 

@@ -1,55 +1,73 @@
-import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React, { useMemo } from "react";
 
 import { Toaster } from "../../../src/components/ui/sonner";
+import { SessionSyncProvider } from "../../../src/features/auth/providers";
 import {
     ChatCacheSyncProvider,
     ChatOffsetProvider,
+    ChatProvider,
+    ChatSidebarProvider,
 } from "../../../src/features/chat/providers";
-import { QueryProvider } from "../../../src/providers/query-provider";
+import {
+    UserCacheSyncProvider,
+    UserSessionProvider,
+} from "../../../src/features/user/providers";
+import { MOCK_CHAT_ID } from "../mocks/chats";
+import { MOCK_USER_ID } from "../mocks/users";
+import { createQueryClient } from "../utils/query-client";
 
-export function withQueryProvider(Story: React.ComponentType<any>) {
+export function WithQueryProvider({ children }: { children: React.ReactNode }) {
+    const queryClient = useMemo(() => createQueryClient(), []);
+
     return (
-        <QueryProvider>
-            <Story />
-        </QueryProvider>
+        <QueryClientProvider client={queryClient}>
+            {children}
+        </QueryClientProvider>
     );
 }
 
-export function withQueryProviderAndToaster(Story: React.ComponentType<any>) {
+export function WithQueryProviderAndToaster({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
+    const queryClient = useMemo(() => createQueryClient(), []);
+
     return (
-        <QueryProvider>
-            <Story />
+        <QueryClientProvider client={queryClient}>
+            {children}
             <Toaster />
-        </QueryProvider>
+        </QueryClientProvider>
     );
 }
 
 export function withChatProviders(Story: React.ComponentType<any>) {
+    const queryClient = useMemo(() => createQueryClient(), []);
+
     return (
-        <QueryProvider>
+        <QueryClientProvider client={queryClient}>
             <ChatOffsetProvider>
                 <ChatCacheSyncProvider>
                     <Story />
                 </ChatCacheSyncProvider>
             </ChatOffsetProvider>
-        </QueryProvider>
+        </QueryClientProvider>
     );
 }
 
 export function withChatProvidersAndToaster(Story: React.ComponentType<any>) {
+    const queryClient = useMemo(() => createQueryClient(), []);
+
     return (
-        <QueryProvider>
+        <QueryClientProvider client={queryClient}>
             <ChatOffsetProvider>
                 <ChatCacheSyncProvider>
-                    <div className="bg-zinc-925 flex h-full items-center justify-center">
-                        <div className="w-full max-w-2xl">
-                            <Story />
-                        </div>
-                    </div>
+                    <Story />
                     <Toaster />
                 </ChatCacheSyncProvider>
             </ChatOffsetProvider>
-        </QueryProvider>
+        </QueryClientProvider>
     );
 }
 
@@ -66,5 +84,38 @@ export function withDarkBackground(Story: React.ComponentType<any>) {
         <div className="bg-zinc-925 min-h-screen p-4">
             <Story />
         </div>
+    );
+}
+
+export function withChatMessageProviders(Story: React.ComponentType<any>) {
+    const queryClient = useMemo(() => createQueryClient(), []);
+
+    return (
+        <QueryClientProvider client={queryClient}>
+            <UserSessionProvider>
+                <SessionSyncProvider>
+                    <ChatOffsetProvider>
+                        <UserCacheSyncProvider>
+                            <ChatCacheSyncProvider>
+                                <ChatSidebarProvider>
+                                    <ChatProvider
+                                        userId={MOCK_USER_ID}
+                                        isNewChat={false}
+                                        isOwner={true}
+                                        chatId={MOCK_CHAT_ID}
+                                        messages={[]}
+                                        userChatPreferences={null}
+                                    >
+                                        <div className="w-full max-w-4xl bg-zinc-950 p-8">
+                                            <Story />
+                                        </div>
+                                    </ChatProvider>
+                                </ChatSidebarProvider>
+                            </ChatCacheSyncProvider>
+                        </UserCacheSyncProvider>
+                    </ChatOffsetProvider>
+                </SessionSyncProvider>
+            </UserSessionProvider>
+        </QueryClientProvider>
     );
 }

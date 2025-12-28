@@ -1,11 +1,18 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import {
+    FIXED_DATE_PLUS_24H,
+    createMockFilesRateLimit,
+    createMockMessagesRateLimit,
+} from "#.storybook/lib/mocks/rate-limits";
+import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useMemo } from "react";
+import type React from "react";
 import { expect, waitFor } from "storybook/test";
 
 import { SessionSyncProvider } from "@/features/auth/providers";
 
-import type { DBChatId } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatFilesRateLimitContext,
@@ -16,7 +23,6 @@ import {
 } from "@/features/chat/providers";
 
 import type {
-    DBUserId,
     UserFilesRateLimitResult,
     UserMessagesRateLimitResult,
 } from "@/features/user/lib/types";
@@ -29,21 +35,6 @@ import { formatDateTime } from "@/lib/utils";
 
 import { ChatComposerInfo } from "./chat-composer-info";
 
-const fixedDate = new Date("2025-12-22T12:00:00.000Z");
-const mockChatId = "chat-123" as DBChatId;
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                gcTime: 0,
-            },
-        },
-    });
-}
-
 const StoryWrapper = ({
     Story,
     rateLimitMessages,
@@ -53,8 +44,6 @@ const StoryWrapper = ({
     rateLimitMessages?: UserMessagesRateLimitResult;
     rateLimitFiles?: UserFilesRateLimitResult;
 }) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
     const chatMessagesRateLimitContextValue = useMemo(
         () => ({
             rateLimit: rateLimitMessages,
@@ -76,87 +65,80 @@ const StoryWrapper = ({
     );
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={mockUserId}
-                                        isNewChat={false}
-                                        isOwner={true}
-                                        chatId={mockChatId}
-                                        messages={[]}
-                                        userChatPreferences={null}
+        <UserSessionProvider>
+            <SessionSyncProvider>
+                <ChatOffsetProvider>
+                    <UserCacheSyncProvider>
+                        <ChatCacheSyncProvider>
+                            <ChatSidebarProvider>
+                                <ChatProvider
+                                    userId={MOCK_USER_ID}
+                                    isNewChat={false}
+                                    isOwner={true}
+                                    chatId={MOCK_CHAT_ID}
+                                    messages={[]}
+                                    userChatPreferences={null}
+                                >
+                                    <ChatMessagesRateLimitContext.Provider
+                                        value={
+                                            chatMessagesRateLimitContextValue
+                                        }
                                     >
-                                        <ChatMessagesRateLimitContext.Provider
+                                        <ChatFilesRateLimitContext.Provider
                                             value={
-                                                chatMessagesRateLimitContextValue
+                                                chatFilesRateLimitContextValue
                                             }
                                         >
-                                            <ChatFilesRateLimitContext.Provider
-                                                value={
-                                                    chatFilesRateLimitContextValue
-                                                }
-                                            >
-                                                <div className="bg-zinc-925 grid min-h-svh w-full items-center">
-                                                    <div className="relative mx-auto w-full max-w-3xl">
-                                                        <Story />
-                                                    </div>
+                                            <div className="bg-zinc-925 grid min-h-svh w-full items-center">
+                                                <div className="relative mx-auto w-full max-w-3xl">
+                                                    <Story />
                                                 </div>
-                                            </ChatFilesRateLimitContext.Provider>
-                                        </ChatMessagesRateLimitContext.Provider>
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
+                                            </div>
+                                        </ChatFilesRateLimitContext.Provider>
+                                    </ChatMessagesRateLimitContext.Provider>
+                                </ChatProvider>
+                            </ChatSidebarProvider>
+                        </ChatCacheSyncProvider>
+                    </UserCacheSyncProvider>
+                </ChatOffsetProvider>
+            </SessionSyncProvider>
+        </UserSessionProvider>
     );
 };
 
 const meta = preview.meta({
     component: ChatComposerInfo,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story: React.ComponentType) => (
+            <WithQueryProvider>
+                <StoryWrapper Story={Story} />
+            </WithQueryProvider>
+        ),
+    ],
     parameters: {
         layout: "fullscreen",
     },
 });
 
-export const Default = meta.story({
-    decorators: [Story => <StoryWrapper Story={Story} />],
-});
+export const Default = meta.story({});
 
 Default.test(
     "should not render rate limit info when no rate limit",
     async ({ canvas }) => {
-        await waitFor(() => {
-            const rateLimit = canvas.queryByTestId("chat-composer-rate-limit");
-            expect(rateLimit).not.toBeInTheDocument();
-        });
+        const rateLimit = canvas.queryByTestId("chat-composer-rate-limit");
+        expect(rateLimit).not.toBeInTheDocument();
     },
 );
 
 export const WithMessagesRateLimit = meta.story({
     decorators: [
         Story => (
-            <StoryWrapper
-                Story={Story}
-                rateLimitMessages={{
-                    isOverLimit: true,
-                    reason: "messages",
-                    periodStart: fixedDate.toISOString(),
-                    periodEnd: new Date(
-                        fixedDate.getTime() + 24 * 60 * 60 * 1000,
-                    ).toISOString(),
-                    messagesCounter: 100,
-                    tokensCounter: 50000,
-                }}
-            />
+            <WithQueryProvider>
+                <StoryWrapper
+                    Story={Story}
+                    rateLimitMessages={createMockMessagesRateLimit()}
+                />
+            </WithQueryProvider>
         ),
     ],
 });
@@ -164,33 +146,26 @@ export const WithMessagesRateLimit = meta.story({
 WithMessagesRateLimit.test(
     "should show messages rate limit info",
     async ({ canvas }) => {
-        await waitFor(() => {
-            const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
-            expect(rateLimit).toBeInTheDocument();
-        });
+        const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
+        expect(rateLimit).toBeInTheDocument();
     },
 );
 
 WithMessagesRateLimit.test(
     "should show the correct date time",
     async ({ canvas }) => {
-        const periodEnd = new Date(fixedDate.getTime() + 24 * 60 * 60 * 1000);
-        await waitFor(() => {
-            const dateTime = canvas.getByText(
-                new RegExp(formatDateTime(periodEnd.toISOString()), "i"),
-            );
-            expect(dateTime).toBeInTheDocument();
-        });
+        const dateTime = canvas.getByText(
+            new RegExp(formatDateTime(FIXED_DATE_PLUS_24H), "i"),
+        );
+        expect(dateTime).toBeInTheDocument();
     },
 );
 
 WithMessagesRateLimit.test(
     "should close rate limit info when close button is clicked",
     async ({ canvas, userEvent }) => {
-        await waitFor(() => {
-            const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
-            expect(rateLimit).toBeInTheDocument();
-        });
+        const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
+        expect(rateLimit).toBeInTheDocument();
 
         const closeButton = canvas.getByRole("button", {
             name: "Close rate limit info",
@@ -208,18 +183,12 @@ WithMessagesRateLimit.test(
 export const WithFilesRateLimit = meta.story({
     decorators: [
         Story => (
-            <StoryWrapper
-                Story={Story}
-                rateLimitFiles={{
-                    isOverLimit: true,
-                    reason: "files",
-                    periodStart: fixedDate.toISOString(),
-                    periodEnd: new Date(
-                        fixedDate.getTime() + 24 * 60 * 60 * 1000,
-                    ).toISOString(),
-                    filesCounter: 10,
-                }}
-            />
+            <WithQueryProvider>
+                <StoryWrapper
+                    Story={Story}
+                    rateLimitFiles={createMockFilesRateLimit()}
+                />
+            </WithQueryProvider>
         ),
     ],
 });
@@ -227,33 +196,26 @@ export const WithFilesRateLimit = meta.story({
 WithFilesRateLimit.test(
     "should show files rate limit info",
     async ({ canvas }) => {
-        await waitFor(() => {
-            const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
-            expect(rateLimit).toBeInTheDocument();
-        });
+        const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
+        expect(rateLimit).toBeInTheDocument();
     },
 );
 
 WithFilesRateLimit.test(
     "should show the correct date time",
     async ({ canvas }) => {
-        const periodEnd = new Date(fixedDate.getTime() + 24 * 60 * 60 * 1000);
-        await waitFor(() => {
-            const dateTime = canvas.getByText(
-                new RegExp(formatDateTime(periodEnd.toISOString()), "i"),
-            );
-            expect(dateTime).toBeInTheDocument();
-        });
+        const dateTime = canvas.getByText(
+            new RegExp(formatDateTime(FIXED_DATE_PLUS_24H), "i"),
+        );
+        expect(dateTime).toBeInTheDocument();
     },
 );
 
 WithFilesRateLimit.test(
     "should close rate limit info when close button is clicked",
     async ({ canvas, userEvent }) => {
-        await waitFor(() => {
-            const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
-            expect(rateLimit).toBeInTheDocument();
-        });
+        const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
+        expect(rateLimit).toBeInTheDocument();
 
         const closeButton = canvas.getByRole("button", {
             name: "Close rate limit info",

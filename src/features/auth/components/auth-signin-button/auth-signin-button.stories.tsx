@@ -89,7 +89,6 @@ const meta = preview.meta({
 });
 
 export const Google = meta.story({
-    name: "Google Provider",
     args: {
         provider: AUTH_PROVIDER.GOOGLE,
         children: "Sign in with Google",
@@ -142,7 +141,6 @@ Google.test(
 );
 
 export const GitHub = meta.story({
-    name: "GitHub Provider",
     args: {
         provider: AUTH_PROVIDER.GITHUB,
         children: "Sign in with GitHub",
@@ -171,7 +169,6 @@ GitHub.test(
 );
 
 export const Disabled = meta.story({
-    name: "Disabled State",
     args: {
         provider: AUTH_PROVIDER.GOOGLE,
         children: "Sign in with Google",
@@ -202,7 +199,6 @@ Disabled.test(
 );
 
 export const WithCustomVariant = meta.story({
-    name: "With Custom Variant",
     args: {
         provider: AUTH_PROVIDER.GOOGLE,
         children: "Sign in with Google",

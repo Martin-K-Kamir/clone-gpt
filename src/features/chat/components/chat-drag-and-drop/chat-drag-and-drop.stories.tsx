@@ -1,11 +1,18 @@
+import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import {
+    createFile,
+    createMockDataTransfer,
+} from "#.storybook/lib/mocks/files";
+import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
+import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { expect, fn, waitFor } from "storybook/test";
 
 import { SessionSyncProvider } from "@/features/auth/providers";
 
-import type { ChatUploadedFile, DBChatId } from "@/features/chat/lib/types";
+import type { ChatUploadedFile } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatFilesContext,
@@ -14,36 +21,12 @@ import {
     ChatSidebarProvider,
 } from "@/features/chat/providers";
 
-import type { DBUserId } from "@/features/user/lib/types";
 import {
     UserCacheSyncProvider,
     UserSessionProvider,
 } from "@/features/user/providers";
 
 import { ChatDragAndDrop } from "./chat-drag-and-drop";
-
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const mockChatId = "00000000-0000-0000-0000-000000000001" as DBChatId;
-
-function createMockDataTransfer(files: File[] = []): DataTransfer {
-    const dt = new DataTransfer();
-    files.forEach(file => dt.items.add(file));
-    return dt;
-}
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: 1,
-                staleTime: 60 * 1000,
-                refetchOnReconnect: false,
-                refetchOnWindowFocus: false,
-                refetchOnMount: false,
-            },
-        },
-    });
-}
 
 const StoryWrapper = ({
     Story,
@@ -55,7 +38,7 @@ const StoryWrapper = ({
     const queryClient = useMemo(() => createQueryClient(), []);
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [uploadedFiles] = useState<ChatUploadedFile[]>([]);
-    const [isUploadingFiles, setIsUploadingFiles] = useState(false);
+    const [isUploadingFiles] = useState(false);
 
     const mockHandleFileSelect =
         handleFileSelect ??
@@ -93,10 +76,10 @@ const StoryWrapper = ({
                             <ChatCacheSyncProvider>
                                 <ChatSidebarProvider>
                                     <ChatProvider
-                                        userId={mockUserId}
+                                        userId={MOCK_USER_ID}
                                         isNewChat={false}
                                         isOwner={true}
-                                        chatId={mockChatId}
+                                        chatId={MOCK_CHAT_ID}
                                         messages={[]}
                                         userChatPreferences={null}
                                     >
@@ -159,7 +142,6 @@ Default.test(
         const container = canvas.getByTestId("chat-drag-and-drop");
         expect(container).toBeInTheDocument();
 
-        // Simulate drag enter with proper DataTransfer
         const dragEnterEvent = new DragEvent("dragenter", {
             bubbles: true,
             cancelable: true,
@@ -181,7 +163,6 @@ Default.test(
         const container = canvas.getByTestId("chat-drag-and-drop");
         expect(container).toBeInTheDocument();
 
-        // Trigger drag enter
         const dragEnterEvent = new DragEvent("dragenter", {
             bubbles: true,
             cancelable: true,
@@ -194,7 +175,6 @@ Default.test(
             expect(message).toBeInTheDocument();
         });
 
-        // Trigger drag leave
         const dragLeaveEvent = new DragEvent("dragleave", {
             bubbles: true,
             cancelable: true,
@@ -213,11 +193,9 @@ Default.test("should call handleFileSelect on drop", async ({ canvas }) => {
     const container = canvas.getByTestId("chat-drag-and-drop");
     expect(container).toBeInTheDocument();
 
-    // Create mock files
-    const file1 = new File(["content1"], "file1.txt", { type: "text/plain" });
-    const file2 = new File(["content2"], "file2.txt", { type: "text/plain" });
+    const file1 = createFile({ filename: "file1.txt", content: "content1" });
+    const file2 = createFile({ filename: "file2.txt", content: "content2" });
 
-    // Trigger drop event with proper DataTransfer
     const dropEvent = new DragEvent("drop", {
         bubbles: true,
         cancelable: true,
@@ -225,7 +203,6 @@ Default.test("should call handleFileSelect on drop", async ({ canvas }) => {
     });
     container.dispatchEvent(dropEvent);
 
-    // The component should handle the drop
     await waitFor(() => {
         expect(container).toBeInTheDocument();
     });

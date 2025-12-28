@@ -1,6 +1,7 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useMemo } from "react";
+import type React from "react";
 import { expect, fn, waitFor } from "storybook/test";
 
 import { SessionSyncProvider } from "@/features/auth/providers";
@@ -12,41 +13,29 @@ import {
 
 import { ChatMessageActionsUser } from "./chat-message-actions-user";
 
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: 1,
-                staleTime: 60 * 1000,
-                refetchOnReconnect: false,
-                refetchOnWindowFocus: false,
-                refetchOnMount: false,
-            },
-        },
-    });
-}
-
 const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
     return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <UserCacheSyncProvider>
-                        <div className="flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
-                            <Story />
-                        </div>
-                    </UserCacheSyncProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
+        <UserSessionProvider>
+            <SessionSyncProvider>
+                <UserCacheSyncProvider>
+                    <div className="flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
+                        <Story />
+                    </div>
+                </UserCacheSyncProvider>
+            </SessionSyncProvider>
+        </UserSessionProvider>
     );
 };
 
 const meta = preview.meta({
     component: ChatMessageActionsUser,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        Story => (
+            <WithQueryProvider>
+                <StoryWrapper Story={Story} />
+            </WithQueryProvider>
+        ),
+    ],
     args: {
         content: "This is a sample message content that can be copied.",
         onUpdate: fn(),
@@ -81,9 +70,7 @@ const meta = preview.meta({
     },
 });
 
-export const Default = meta.story({
-    name: "Default",
-});
+export const Default = meta.story({});
 
 Default.test("should render copy and update buttons", async ({ canvas }) => {
     const copyButton = canvas.getByRole("button", { name: /copy/i });
@@ -97,11 +84,9 @@ Default.test("should show tooltips on hover", async ({ canvas, userEvent }) => {
     const copyButton = canvas.getByRole("button", { name: /copy/i });
     await userEvent.hover(copyButton);
 
-    await waitFor(() => {
-        const tooltip = document.querySelector('[data-slot="tooltip-content"]');
-        expect(tooltip).toBeVisible();
-        expect(tooltip).toHaveTextContent("Copy");
-    });
+    const tooltip = await waitForTooltip();
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent("Copy");
 });
 
 Default.test(
@@ -133,7 +118,6 @@ Default.test(
 );
 
 export const WithoutUpdate = meta.story({
-    name: "Without Update Button",
     args: {
         content: "This message cannot be updated.",
         showUpdate: false,
@@ -151,7 +135,6 @@ WithoutUpdate.test("should only show copy button", async ({ canvas }) => {
 });
 
 export const WithoutCopy = meta.story({
-    name: "Without Copy Button",
     args: {
         content: "This message cannot be copied.",
         showCopy: false,
@@ -167,7 +150,6 @@ WithoutCopy.test("should only show update button", async ({ canvas }) => {
 });
 
 export const Disabled = meta.story({
-    name: "Disabled",
     args: {
         content: "This message is disabled.",
         disabled: true,

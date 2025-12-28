@@ -1,13 +1,20 @@
+import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import {
+    MOCK_CHAT_STATUS,
+    MOCK_FILE_PARTS_MULTIPLE,
+    MOCK_IMAGE_PARTS_MULTIPLE,
+    createMockTextMessagePart,
+} from "#.storybook/lib/mocks/messages";
+import { createMockMessagesRateLimit } from "#.storybook/lib/mocks/rate-limits";
+import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
+import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ChatStatus } from "ai";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 import { expect, fn } from "storybook/test";
 
 import { SessionSyncProvider } from "@/features/auth/providers";
 
-import { CHAT_MESSAGE_TYPE } from "@/features/chat/lib/constants";
-import type { DBChatId, UIUserChatMessage } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatOffsetProvider,
@@ -16,33 +23,14 @@ import {
 } from "@/features/chat/providers";
 
 import type { UserMessagesRateLimitResult } from "@/features/user/lib/types";
-import type { DBUserId } from "@/features/user/lib/types";
 import {
     UserCacheSyncProvider,
     UserSessionProvider,
 } from "@/features/user/providers";
 
 import { tag } from "@/lib/cache-tag";
-import { RATE_LIMIT_REASON } from "@/lib/constants";
 
 import { ChatMessageToolbarUser } from "./chat-message-toolbar-user";
-
-const mockChatId = "chat-123" as DBChatId;
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: 1,
-                staleTime: 60 * 1000,
-                refetchOnReconnect: false,
-                refetchOnWindowFocus: false,
-                refetchOnMount: false,
-            },
-        },
-    });
-}
 
 const StoryWrapper = ({
     Story,
@@ -58,15 +46,18 @@ const StoryWrapper = ({
     useEffect(() => {
         if (rateLimit !== undefined && rateLimit !== null) {
             queryClient.setQueryData(
-                [tag.userMessagesRateLimit(mockUserId)],
+                [tag.userMessagesRateLimit(MOCK_USER_ID)],
                 rateLimit,
             );
         } else if (rateLimit === null) {
-            queryClient.setQueryData([tag.userMessagesRateLimit(mockUserId)], {
-                isOverLimit: false,
-                tokensCounter: 0,
-                messagesCounter: 0,
-            } as UserMessagesRateLimitResult);
+            queryClient.setQueryData(
+                [tag.userMessagesRateLimit(MOCK_USER_ID)],
+                {
+                    isOverLimit: false,
+                    tokensCounter: 0,
+                    messagesCounter: 0,
+                } as UserMessagesRateLimitResult,
+            );
         }
     }, [queryClient, rateLimit]);
 
@@ -79,10 +70,10 @@ const StoryWrapper = ({
                             <ChatCacheSyncProvider>
                                 <ChatSidebarProvider>
                                     <ChatProvider
-                                        userId={mockUserId}
+                                        userId={MOCK_USER_ID}
                                         isNewChat={false}
                                         isOwner={isOwner}
-                                        chatId={mockChatId}
+                                        chatId={MOCK_CHAT_ID}
                                         messages={[]}
                                         userChatPreferences={null}
                                     >
@@ -105,14 +96,13 @@ const meta = preview.meta({
     decorators: [Story => <StoryWrapper Story={Story} />],
     args: {
         canShowActions: true,
-        status: "ready" as ChatStatus,
+        status: MOCK_CHAT_STATUS.READY,
         content: "This is a sample message content that can be copied.",
         parts: [
-            {
-                type: CHAT_MESSAGE_TYPE.TEXT,
-                text: "This is a sample message content that can be copied.",
-            },
-        ] as UIUserChatMessage["parts"],
+            createMockTextMessagePart(
+                "This is a sample message content that can be copied.",
+            ),
+        ],
         onUpdate: fn(),
         className: "opacity-100",
     },
@@ -123,7 +113,12 @@ const meta = preview.meta({
         },
         status: {
             control: "select",
-            options: ["ready", "streaming", "submitted", "error"],
+            options: [
+                MOCK_CHAT_STATUS.READY,
+                MOCK_CHAT_STATUS.STREAMING,
+                MOCK_CHAT_STATUS.SUBMITTED,
+                MOCK_CHAT_STATUS.ERROR,
+            ],
             description: "The chat status",
         },
         content: {
@@ -170,23 +165,11 @@ Default.test(
 );
 
 export const WithFiles = meta.story({
-    name: "With Files",
     args: {
         parts: [
-            {
-                type: CHAT_MESSAGE_TYPE.TEXT,
-                text: "Here are some documents:",
-            },
-            {
-                kind: CHAT_MESSAGE_TYPE.FILE,
-                type: CHAT_MESSAGE_TYPE.FILE,
-                name: "document.pdf",
-                url: "https://example.com/document.pdf",
-                mediaType: "application/pdf",
-                size: 1024 * 500,
-                extension: "pdf",
-            },
-        ] as UIUserChatMessage["parts"],
+            createMockTextMessagePart("Here are some documents:"),
+            ...MOCK_FILE_PARTS_MULTIPLE,
+        ],
     },
 });
 
@@ -202,27 +185,12 @@ WithFiles.test(
         expect(updateButton).not.toBeInTheDocument();
     },
 );
-
 export const WithImages = meta.story({
-    name: "With Images",
     args: {
         parts: [
-            {
-                type: CHAT_MESSAGE_TYPE.TEXT,
-                text: "Check out these images:",
-            },
-            {
-                kind: CHAT_MESSAGE_TYPE.IMAGE,
-                type: CHAT_MESSAGE_TYPE.FILE,
-                name: "photo.jpg",
-                url: "https://picsum.photos/id/239/800/600",
-                mediaType: "image/jpeg",
-                size: 1024 * 200,
-                extension: "jpg",
-                width: 1920,
-                height: 1080,
-            },
-        ] as UIUserChatMessage["parts"],
+            createMockTextMessagePart("Here are some photos:"),
+            ...MOCK_IMAGE_PARTS_MULTIPLE,
+        ],
     },
 });
 
@@ -240,9 +208,8 @@ WithImages.test(
 );
 
 export const Streaming = meta.story({
-    name: "Streaming",
     args: {
-        status: "streaming" as ChatStatus,
+        status: MOCK_CHAT_STATUS.STREAMING,
     },
 });
 
@@ -255,9 +222,8 @@ Streaming.test("should disable actions when streaming", async ({ canvas }) => {
 });
 
 export const Submitted = meta.story({
-    name: "Submitted",
     args: {
-        status: "submitted" as ChatStatus,
+        status: MOCK_CHAT_STATUS.SUBMITTED,
     },
 });
 
@@ -270,7 +236,6 @@ Submitted.test("should disable actions when submitted", async ({ canvas }) => {
 });
 
 export const NotOwner = meta.story({
-    name: "Not Owner",
     decorators: [Story => <StoryWrapper Story={Story} isOwner={false} />],
 });
 
@@ -288,21 +253,14 @@ NotOwner.test(
 );
 
 export const RateLimitExceeded = meta.story({
-    name: "Rate Limit Exceeded",
     decorators: [
         Story => (
             <StoryWrapper
                 Story={Story}
-                rateLimit={{
-                    isOverLimit: true,
-                    reason: RATE_LIMIT_REASON.MESSAGES,
-                    periodStart: new Date().toISOString(),
-                    periodEnd: new Date(
-                        Date.now() + 24 * 60 * 60 * 1000,
-                    ).toISOString(),
+                rateLimit={createMockMessagesRateLimit({
                     tokensCounter: 1000,
                     messagesCounter: 100,
-                }}
+                })}
             />
         ),
     ],
@@ -325,7 +283,6 @@ RateLimitExceeded.test(
 );
 
 export const Hidden = meta.story({
-    name: "Hidden",
     args: {
         canShowActions: false,
     },

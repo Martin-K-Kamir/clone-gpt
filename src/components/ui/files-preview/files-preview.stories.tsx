@@ -1,41 +1,11 @@
+import {
+    createColoredImageFile,
+    createFile,
+} from "#.storybook/lib/mocks/files";
 import preview from "#.storybook/preview";
 import { expect, fireEvent, fn } from "storybook/test";
 
 import { FilesPreview } from "./files-preview";
-
-function createFile(name: string, content: string | Blob, type: string): File {
-    const blob =
-        typeof content === "string" ? new Blob([content], { type }) : content;
-    return new File([blob], name, { type });
-}
-
-function createImageFile(name: string, width = 150, height = 150): File {
-    // Create a simple colored image using data URL
-    // This creates a 1x1 pixel PNG and scales it
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-        // Create a simple gradient image
-        const gradient = ctx.createLinearGradient(0, 0, width, height);
-        gradient.addColorStop(0, "#3b82f6");
-        gradient.addColorStop(1, "#8b5cf6");
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, width, height);
-    }
-
-    // Convert canvas to blob synchronously using data URL
-    const dataUrl = canvas.toDataURL("image/png");
-    const base64 = dataUrl.split(",")[1];
-    const binaryString = atob(base64);
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-    }
-    const blob = new Blob([bytes], { type: "image/png" });
-    return new File([blob], name, { type: "image/png" });
-}
 
 const meta = preview.meta({
     component: FilesPreview,
@@ -141,8 +111,12 @@ const meta = preview.meta({
 export const Default = meta.story({
     args: {
         previewFiles: [
-            createImageFile("photo.jpg"),
-            createFile("document.pdf", "PDF content", "application/pdf"),
+            createColoredImageFile("#FF0000", "photo.jpg"),
+            createFile({
+                filename: "document.pdf",
+                type: "pdf",
+                content: "PDF content",
+            }),
         ],
     },
 });
@@ -173,7 +147,7 @@ Default.test(
 
 export const SingleImage = meta.story({
     args: {
-        previewFiles: [createImageFile("photo.jpg")],
+        previewFiles: [createColoredImageFile("#FF0000", "photo.jpg")],
     },
 });
 
@@ -216,7 +190,11 @@ SingleImage.test(
 export const SingleDocument = meta.story({
     args: {
         previewFiles: [
-            createFile("document.pdf", "PDF content", "application/pdf"),
+            createFile({
+                filename: "document.pdf",
+                type: "pdf",
+                content: "PDF content",
+            }),
         ],
     },
 });
@@ -237,15 +215,21 @@ SingleDocument.test(
 export const MultipleFiles = meta.story({
     args: {
         previewFiles: [
-            createImageFile("photo1.jpg"),
-            createFile("document.pdf", "PDF content", "application/pdf"),
-            createImageFile("photo2.png"),
-            createFile(
-                "spreadsheet.xlsx",
-                "Excel content",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            ),
-            createFile("script.js", "console.log('Hello');", "text/javascript"),
+            createColoredImageFile("#FF0000", "photo1.jpg"),
+            createFile({
+                filename: "document.pdf",
+                type: "pdf",
+                content: "PDF content",
+            }),
+            createColoredImageFile("#00FF00", "photo2.png"),
+            createFile({
+                filename: "spreadsheet.xlsx",
+                content: "Excel content",
+            }),
+            createFile({
+                filename: "script.js",
+                content: "console.log('Hello');",
+            }),
         ],
     },
 });
@@ -253,10 +237,10 @@ export const MultipleFiles = meta.story({
 export const MultipleImages = meta.story({
     args: {
         previewFiles: [
-            createImageFile("landscape.jpg"),
-            createImageFile("portrait.png"),
-            createImageFile("square.gif"),
-            createImageFile("wide.jpg"),
+            createColoredImageFile("#FF0000", "landscape.jpg"),
+            createColoredImageFile("#00FF00", "portrait.png"),
+            createColoredImageFile("#0000FF", "square.gif"),
+            createColoredImageFile("#FFFF00", "wide.jpg"),
         ],
     },
 });
@@ -264,20 +248,31 @@ export const MultipleImages = meta.story({
 export const MultipleDocuments = meta.story({
     args: {
         previewFiles: [
-            createFile("report.pdf", "PDF content", "application/pdf"),
-            createFile(
-                "data.xlsx",
-                "Excel content",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            ),
-            createFile(
-                "notes.docx",
-                "Word content",
-                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            ),
-            createFile("code.js", "JavaScript code", "text/javascript"),
-            createFile("styles.css", "CSS styles", "text/css"),
-            createFile("readme.md", "Markdown content", "text/markdown"),
+            createFile({
+                filename: "report.pdf",
+                type: "pdf",
+                content: "PDF content",
+            }),
+            createFile({
+                filename: "data.xlsx",
+                content: "Excel content",
+            }),
+            createFile({
+                filename: "notes.docx",
+                content: "Word content",
+            }),
+            createFile({
+                filename: "code.js",
+                content: "JavaScript code",
+            }),
+            createFile({
+                filename: "styles.css",
+                content: "CSS styles",
+            }),
+            createFile({
+                filename: "readme.md",
+                content: "Markdown content",
+            }),
         ],
     },
     decorators: [
@@ -311,8 +306,12 @@ MultipleDocuments.test(
 export const Loading = meta.story({
     args: {
         previewFiles: [
-            createImageFile("loading-photo.jpg"),
-            createFile("loading-doc.pdf", "PDF content", "application/pdf"),
+            createColoredImageFile("#FF0000", "loading-photo.jpg"),
+            createFile({
+                filename: "loading-doc.pdf",
+                type: "pdf",
+                content: "PDF content",
+            }),
         ],
         isLoading: true,
     },

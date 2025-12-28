@@ -1,76 +1,20 @@
+import {
+    MOCK_ADDITIONAL_SOURCE_PARTS,
+    MOCK_ADDITIONAL_SOURCE_PREVIEWS,
+    MOCK_SOURCE_PARTS,
+    MOCK_SOURCE_PREVIEWS,
+    MOCK_SOURCE_SINGLE_PREVIEW,
+    createMockTextMessagePart,
+} from "#.storybook/lib/mocks/messages";
+import { createQueryClient } from "#.storybook/lib/utils/query-client";
+import { waitForElement } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HttpResponse, delay, http } from "msw";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { HttpResponse, http } from "msw";
 import { useMemo } from "react";
-import { expect, waitFor } from "storybook/test";
-
-import type { UIAssistantChatMessage } from "@/features/chat/lib/types";
-
-import { SourcePreview } from "@/lib/types";
+import { expect } from "storybook/test";
 
 import { ChatSourceDialog } from "./chat-source-dialog";
-
-const mockSourceParts: UIAssistantChatMessage["parts"] = [
-    {
-        type: "source-url",
-        sourceId: "source-1",
-        url: "https://github.com/vercel/next.js",
-        title: "Next.js - The React Framework",
-    },
-    {
-        type: "source-url",
-        sourceId: "source-2",
-        url: "https://react.dev/reference/react",
-        title: "React Reference Documentation",
-    },
-    {
-        type: "source-url",
-        sourceId: "source-3",
-        url: "https://tailwindcss.com/docs",
-        title: "Tailwind CSS Documentation",
-    },
-];
-
-const mockPreviews: SourcePreview[] = [
-    {
-        url: "https://github.com/vercel/next.js",
-        title: "Next.js by Vercel - The React Framework for the Web",
-        description:
-            "Production grade React applications that scale. The world's leading companies use Next.js to build static and dynamic websites and web applications.",
-        siteName: "GitHub",
-        image: "https://opengraph.githubassets.com/next.js",
-        favicon: "https://github.githubassets.com/favicons/favicon.svg",
-    },
-    {
-        url: "https://react.dev/reference/react",
-        title: "React Reference Overview",
-        description:
-            "The React reference documentation provides detailed information about working with React.",
-        siteName: "React",
-        image: "https://react.dev/images/og-home.png",
-        favicon: "https://react.dev/favicon.ico",
-    },
-    {
-        url: "https://tailwindcss.com/docs",
-        title: "Tailwind CSS - Documentation",
-        description:
-            "A utility-first CSS framework packed with classes that can be composed to build any design, directly in your markup.",
-        siteName: "Tailwind CSS",
-        image: "https://tailwindcss.com/og-image.png",
-        favicon: "https://tailwindcss.com/favicon.ico",
-    },
-];
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                staleTime: Infinity,
-            },
-        },
-    });
-}
 
 const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
     const queryClient = useMemo(() => createQueryClient(), []);
@@ -109,13 +53,13 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     args: {
-        parts: mockSourceParts,
+        parts: MOCK_SOURCE_PARTS,
     },
     parameters: {
         msw: {
             handlers: [
                 http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json(mockPreviews);
+                    return HttpResponse.json(MOCK_SOURCE_PREVIEWS);
                 }),
             ],
         },
@@ -138,24 +82,20 @@ Default.test(
         const button = canvas.getByRole("button");
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                '[data-slot="dialog-content"]',
-            );
-            expect(dialog).toBeInTheDocument();
-        });
+        const dialog = await waitForElement('[data-slot="dialog-content"]');
+        expect(dialog).toBeInTheDocument();
     },
 );
 
 export const WithSingleSource = meta.story({
     args: {
-        parts: [mockSourceParts[0]],
+        parts: [MOCK_SOURCE_PARTS[0]],
     },
     parameters: {
         msw: {
             handlers: [
                 http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json([mockPreviews[0]]);
+                    return HttpResponse.json([MOCK_SOURCE_SINGLE_PREVIEW]);
                 }),
             ],
         },
@@ -168,55 +108,22 @@ WithSingleSource.test(
         const button = canvas.getByRole("button");
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                '[data-slot="dialog-content"]',
-            );
-            expect(dialog).toBeInTheDocument();
-        });
+        const dialog = await waitForElement('[data-slot="dialog-content"]');
+        expect(dialog).toBeInTheDocument();
     },
 );
 
 export const WithManySources = meta.story({
     args: {
-        parts: [
-            ...mockSourceParts,
-            {
-                type: "source-url",
-                sourceId: "source-4",
-                url: "https://www.typescriptlang.org/docs",
-                title: "TypeScript Documentation",
-            },
-            {
-                type: "source-url",
-                sourceId: "source-5",
-                url: "https://nodejs.org/docs",
-                title: "Node.js Documentation",
-            },
-        ],
+        parts: [...MOCK_SOURCE_PARTS, ...MOCK_ADDITIONAL_SOURCE_PARTS],
     },
     parameters: {
         msw: {
             handlers: [
                 http.post("/api/resource-previews", async () => {
                     return HttpResponse.json([
-                        ...mockPreviews,
-                        {
-                            url: "https://www.typescriptlang.org/docs",
-                            title: "TypeScript Documentation",
-                            description: "TypeScript documentation",
-                            siteName: "TypeScript",
-                            image: "",
-                            favicon: "",
-                        },
-                        {
-                            url: "https://nodejs.org/docs",
-                            title: "Node.js Documentation",
-                            description: "Node.js documentation",
-                            siteName: "Node.js",
-                            image: "",
-                            favicon: "",
-                        },
+                        ...MOCK_SOURCE_PREVIEWS,
+                        ...MOCK_ADDITIONAL_SOURCE_PREVIEWS,
                     ]);
                 }),
             ],
@@ -230,37 +137,27 @@ WithManySources.test(
         const button = canvas.getByRole("button");
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                '[data-slot="dialog-content"]',
-            );
-            expect(dialog).toBeInTheDocument();
+        const dialog = await waitForElement('[data-slot="dialog-content"]');
+        expect(dialog).toBeInTheDocument();
 
-            const items = dialog?.querySelectorAll("li");
-            expect(items?.length).toBeGreaterThan(0);
-        });
+        const items = dialog.querySelectorAll("li");
+        expect(items.length).toBeGreaterThan(0);
     },
 );
 
 export const WithMixedParts = meta.story({
     args: {
         parts: [
-            {
-                type: "text",
-                text: "Here are some sources:",
-            },
-            ...mockSourceParts,
-            {
-                type: "text",
-                text: "More information available.",
-            },
+            createMockTextMessagePart("Here are some sources:"),
+            ...MOCK_SOURCE_PARTS,
+            createMockTextMessagePart("More information available."),
         ],
     },
     parameters: {
         msw: {
             handlers: [
                 http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json(mockPreviews);
+                    return HttpResponse.json(MOCK_SOURCE_PREVIEWS);
                 }),
             ],
         },
@@ -273,14 +170,10 @@ WithMixedParts.test(
         const button = canvas.getByRole("button");
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                '[data-slot="dialog-content"]',
-            );
-            expect(dialog).toBeInTheDocument();
+        const dialog = await waitForElement('[data-slot="dialog-content"]');
+        expect(dialog).toBeInTheDocument();
 
-            const items = dialog?.querySelectorAll("li");
-            expect(items?.length).toBeGreaterThan(0);
-        });
+        const items = dialog.querySelectorAll("li");
+        expect(items.length).toBeGreaterThan(0);
     },
 );

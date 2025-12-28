@@ -1,3 +1,4 @@
+import { FIXED_DATE } from "#.storybook/lib/mocks/chats";
 import preview from "#.storybook/preview";
 import { IconEdit, IconMail, IconTrash, IconUser } from "@tabler/icons-react";
 import { ColumnDef } from "@tanstack/react-table";
@@ -34,7 +35,7 @@ const generateUsers = (count: number): User[] => {
         email: `user${i + 1}@example.com`,
         role: i % 3 === 0 ? "Admin" : i % 2 === 0 ? "Editor" : "Viewer",
         status: i % 4 === 0 ? ("inactive" as const) : ("active" as const),
-        createdAt: new Date(2024, 0, i + 1),
+        createdAt: new Date(FIXED_DATE.getTime() + i * 24 * 60 * 60 * 1000),
     }));
 };
 

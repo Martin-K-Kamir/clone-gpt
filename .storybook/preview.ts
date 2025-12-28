@@ -36,6 +36,14 @@ export default definePreview({
         },
         a11y: {
             test: "error",
+            // config: {
+            //     rules: [
+            //         {
+            //             id: "color-contrast",
+            //             enabled: false,
+            //         },
+            //     ],
+            // },
         },
         nextjs: {
             appDirectory: true,

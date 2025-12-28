@@ -129,8 +129,12 @@ export function findButtonByText(text: string | RegExp): HTMLButtonElement {
     return button;
 }
 
-export function findInputByName(name: string): HTMLInputElement | null {
-    return document.querySelector(`input[name="${name}"]`);
+export function findInputByName(name: string): HTMLInputElement {
+    const input = document.querySelector(`input[name="${name}"]`);
+    if (!input) {
+        throw new Error(`Input with name "${name}" not found`);
+    }
+    return input as HTMLInputElement;
 }
 
 export function findInputByType(type: string): HTMLInputElement | null {
@@ -161,6 +165,47 @@ export async function waitForDropdownMenuItemByText(
             throw new Error(`Dropdown menu item with text "${text}" not found`);
         }
         return item;
+    }, options);
+}
+
+export function findMenuItemByText(text: string | RegExp): HTMLElement | null {
+    const items = Array.from(
+        document.querySelectorAll<HTMLElement>("[role='menuitem']"),
+    );
+    if (typeof text === "string") {
+        return items.find(item => item.textContent?.includes(text)) || null;
+    }
+    return items.find(item => text.test(item.textContent || "")) || null;
+}
+
+export async function waitForMenuItemByText(
+    text: string | RegExp,
+    options?: { timeout?: number },
+): Promise<HTMLElement> {
+    return waitFor(() => {
+        const item = findMenuItemByText(text);
+        if (!item) {
+            throw new Error(`Menu item with text "${text}" not found`);
+        }
+        return item;
+    }, options);
+}
+
+export function getAllMenuItems(): HTMLElement[] {
+    return Array.from(
+        document.querySelectorAll<HTMLElement>("[role='menuitem']"),
+    );
+}
+
+export async function waitForMenuItems(options?: {
+    timeout?: number;
+}): Promise<HTMLElement[]> {
+    return waitFor(() => {
+        const items = getAllMenuItems();
+        if (items.length === 0) {
+            throw new Error("No menu items found");
+        }
+        return items;
     }, options);
 }
 
@@ -206,4 +251,61 @@ export async function waitForSonnerToastByType(
     options?: { timeout?: number },
 ): Promise<HTMLElement> {
     return waitForElement(`[data-sonner-toast][data-type="${type}"]`, options);
+}
+
+export async function waitForSwitch(
+    checked?: boolean,
+    options?: { timeout?: number },
+): Promise<HTMLElement> {
+    return waitFor(() => {
+        const selector =
+            checked !== undefined
+                ? `[role="switch"][aria-checked="${checked}"]`
+                : '[role="switch"]';
+        const switchElement = document.querySelector<HTMLElement>(selector);
+        if (!switchElement) {
+            throw new Error(
+                `Switch element${checked !== undefined ? ` with aria-checked="${checked}"` : ""} not found`,
+            );
+        }
+        return switchElement;
+    }, options);
+}
+
+export function findSocialShareButton(
+    platform: "LinkedIn" | "Twitter" | "Reddit" | "Share",
+): HTMLElement | null {
+    const elements = Array.from(
+        document.querySelectorAll<HTMLElement>("a, button"),
+    );
+    return (
+        elements.find(element => {
+            const srOnly = element.querySelector("span.sr-only");
+            return (
+                srOnly?.textContent === `Share on ${platform}` ||
+                (platform === "Share" && srOnly?.textContent === "Share")
+            );
+        }) || null
+    );
+}
+
+export async function waitForSocialShareButton(
+    platform: "LinkedIn" | "Twitter" | "Reddit" | "Share",
+    options?: { timeout?: number; shouldBeEnabled?: boolean },
+): Promise<HTMLElement> {
+    return waitFor(() => {
+        const button = findSocialShareButton(platform);
+        if (!button) {
+            throw new Error(`Social share button for ${platform} not found`);
+        }
+        if (
+            options?.shouldBeEnabled !== undefined &&
+            options.shouldBeEnabled !== !button.hasAttribute("disabled")
+        ) {
+            throw new Error(
+                `Social share button for ${platform} is not in expected state`,
+            );
+        }
+        return button;
+    }, options);
 }

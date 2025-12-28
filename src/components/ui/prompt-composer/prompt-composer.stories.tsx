@@ -1,3 +1,8 @@
+import {
+    createColoredImageFile,
+    createFile,
+} from "#.storybook/lib/mocks/files";
+import { MOCK_CHAT_STATUS } from "#.storybook/lib/mocks/messages";
 import { getFileInput } from "#.storybook/lib/utils/elements";
 import preview from "#.storybook/preview";
 import type { ChatStatus } from "ai";
@@ -61,7 +66,12 @@ const meta = preview.meta({
         },
         status: {
             control: "select",
-            options: ["idle", "submitted", "streaming", "error"],
+            options: [
+                MOCK_CHAT_STATUS.READY,
+                MOCK_CHAT_STATUS.SUBMITTED,
+                MOCK_CHAT_STATUS.STREAMING,
+                MOCK_CHAT_STATUS.ERROR,
+            ],
             description: "Chat status that affects button visibility",
             table: {
                 type: {
@@ -371,8 +381,9 @@ Default.test(
         const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
-        const mockFile = new File(["test content"], "test-file.txt", {
-            type: "text/plain",
+        const mockFile = createFile({
+            filename: "test-file.txt",
+            content: "test content",
         });
 
         const dataTransfer = new DataTransfer();
@@ -399,12 +410,11 @@ Default.test(
         const textarea = canvas.getByRole("textbox") as HTMLTextAreaElement;
         expect(textarea).toBeInTheDocument();
 
-        const file1 = new File(["content1"], "test-file-1.txt", {
-            type: "text/plain",
+        const file1 = createFile({
+            filename: "test-file-1.txt",
+            content: "content1",
         });
-        const file2 = new File(["content2"], "test-file-2.jpg", {
-            type: "image/jpeg",
-        });
+        const file2 = createColoredImageFile("#FF0000", "test-file-2.jpg");
 
         const mockItems = [
             {
@@ -549,7 +559,7 @@ UpdateVariant.test(
 
 export const StatusSubmitted = meta.story({
     args: {
-        status: "submitted" as ChatStatus,
+        status: MOCK_CHAT_STATUS.SUBMITTED,
     },
 });
 
@@ -571,7 +581,7 @@ StatusSubmitted.test(
 
 export const StatusStreaming = meta.story({
     args: {
-        status: "streaming" as ChatStatus,
+        status: MOCK_CHAT_STATUS.STREAMING,
     },
 });
 
@@ -829,15 +839,15 @@ MultipleFiles.test(
         const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
-        const file1 = new File(["content1"], "test-file-1.txt", {
-            type: "text/plain",
+        const file1 = createFile({
+            filename: "test-file-1.txt",
+            content: "content1",
         });
-        const file2 = new File(["content2"], "test-file-2.txt", {
-            type: "text/plain",
+        const file2 = createFile({
+            filename: "test-file-2.txt",
+            content: "content2",
         });
-        const file3 = new File(["content3"], "test-file-3.jpg", {
-            type: "image/jpeg",
-        });
+        const file3 = createColoredImageFile("#FF0000", "test-file-3.jpg");
 
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(file1);
@@ -875,14 +885,15 @@ WithFileTypes.test(
         const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
-        const imageFile = new File(["image content"], "test-image.jpg", {
-            type: "image/jpeg",
+        const imageFile = createColoredImageFile("#FF0000", "test-image.jpg");
+        const pdfFile = createFile({
+            filename: "test-document.pdf",
+            type: "pdf",
+            content: "pdf content",
         });
-        const pdfFile = new File(["pdf content"], "test-document.pdf", {
-            type: "application/pdf",
-        });
-        const txtFile = new File(["text content"], "test-file.txt", {
-            type: "text/plain",
+        const txtFile = createFile({
+            filename: "test-file.txt",
+            content: "text content",
         });
 
         const dataTransfer = new DataTransfer();
@@ -936,11 +947,11 @@ WithMaxFileSize.test(
         const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
-        const validFile = new File(
-            [new ArrayBuffer(1024 * 1024)], // 1MB
-            "test-file.txt",
-            { type: "text/plain" },
-        );
+        const oneMBContent = "x".repeat(1024 * 1024);
+        const validFile = createFile({
+            filename: "test-file.txt",
+            content: oneMBContent,
+        });
 
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(validFile);

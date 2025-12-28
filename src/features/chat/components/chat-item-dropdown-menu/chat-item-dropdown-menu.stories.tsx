@@ -1,33 +1,22 @@
+import { withChatProvidersAndToaster } from "#.storybook/lib/decorators/providers";
+import { createMockPrivateChat } from "#.storybook/lib/mocks/chats";
+import {
+    waitForDialog,
+    waitForDropdownMenu,
+    waitForMenuItemByText,
+    waitForMenuItems,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { expect, fn, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
-
-import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChatId, UIChat } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
 
 import {
     ChatItemDropdownMenu,
     ChatItemDropdownMenuTrigger,
 } from "./chat-item-dropdown-menu";
 
-const stableDate = new Date("2025-01-01").toISOString();
-const mockChatId = "00000000-0000-0000-0000-000000000001" as DBChatId;
-
-const mockChat: UIChat = {
-    id: mockChatId,
-    title: "My Chat Conversation",
-    visibility: CHAT_VISIBILITY.PRIVATE,
-    createdAt: stableDate,
-    updatedAt: stableDate,
-    visibleAt: stableDate,
-};
+const mockChat = createMockPrivateChat(0);
 
 const meta = preview.meta({
     component: ChatItemDropdownMenu,
@@ -35,18 +24,7 @@ const meta = preview.meta({
         chat: mockChat,
         onRename: fn(),
     },
-    decorators: [
-        Story => (
-            <QueryProvider>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <Story />
-                        <Toaster />
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </QueryProvider>
-        ),
-    ],
+    decorators: [withChatProvidersAndToaster],
     argTypes: {
         chat: {
             control: "object",
@@ -106,7 +84,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
     render: args => (
         <ChatItemDropdownMenu {...args}>
             <ChatItemDropdownMenuTrigger asChild>
@@ -122,10 +99,7 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const menu = document.querySelector('[role="menu"]');
-            expect(menu).toBeInTheDocument();
-        });
+        await waitForDropdownMenu();
     },
 );
 
@@ -137,10 +111,7 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const menuItems = await waitFor(() => {
-            const items = document.querySelectorAll('[role="menuitem"]');
-            return items;
-        });
+        const menuItems = await waitForMenuItems();
 
         expect(menuItems.length).toBeGreaterThan(0);
     },
@@ -152,18 +123,10 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const shareButton = await waitFor(() => {
-            const buttons = document.querySelectorAll('[role="menuitem"]');
-            return Array.from(buttons).find(
-                button => button.textContent === "Share",
-            );
-        });
-        await userEvent.click(shareButton!);
+        const shareButton = await waitForMenuItemByText("Share");
+        await userEvent.click(shareButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
     },
 );
 
@@ -173,18 +136,10 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const deleteButton = await waitFor(() => {
-            const buttons = document.querySelectorAll('[role="menuitem"]');
-            return Array.from(buttons).find(
-                button => button.textContent === "Delete",
-            );
-        });
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForMenuItemByText("Delete");
+        await userEvent.click(deleteButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("alertdialog");
     },
 );
 
@@ -195,13 +150,8 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const renameButton = await waitFor(() => {
-            const buttons = document.querySelectorAll('[role="menuitem"]');
-            return Array.from(buttons).find(
-                button => button.textContent === "Rename",
-            );
-        });
-        await userEvent.click(renameButton!);
+        const renameButton = await waitForMenuItemByText("Rename");
+        await userEvent.click(renameButton);
 
         await waitFor(() => {
             expect(onRename).toHaveBeenCalledTimes(1);
@@ -210,7 +160,6 @@ Default.test(
 );
 
 export const WithoutRename = meta.story({
-    name: "Without Rename",
     args: {
         showRename: false,
     },
@@ -229,9 +178,7 @@ WithoutRename.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const menuItems = await waitFor(() => {
-            return Array.from(document.querySelectorAll('[role="menuitem"]'));
-        });
+        const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
             expect(item.textContent).not.toContain("Rename");
@@ -240,7 +187,6 @@ WithoutRename.test(
 );
 
 export const WithoutShare = meta.story({
-    name: "Without Share",
     args: {
         showShare: false,
     },
@@ -259,9 +205,7 @@ WithoutShare.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const menuItems = await waitFor(() => {
-            return Array.from(document.querySelectorAll('[role="menuitem"]'));
-        });
+        const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
             expect(item.textContent).not.toContain("Share");
@@ -270,7 +214,6 @@ WithoutShare.test(
 );
 
 export const WithoutDelete = meta.story({
-    name: "Without Delete",
     args: {
         showDelete: false,
     },
@@ -289,9 +232,7 @@ WithoutDelete.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const menuItems = await waitFor(() => {
-            return Array.from(document.querySelectorAll('[role="menuitem"]'));
-        });
+        const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
             expect(item.textContent).not.toContain("Delete");
@@ -300,7 +241,6 @@ WithoutDelete.test(
 );
 
 export const OnlyRename = meta.story({
-    name: "Only Rename",
     args: {
         showShare: false,
         showDelete: false,
@@ -320,9 +260,7 @@ OnlyRename.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const menuItems = await waitFor(() => {
-            return Array.from(document.querySelectorAll('[role="menuitem"]'));
-        });
+        const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
             expect(item.textContent).not.toContain("Share");

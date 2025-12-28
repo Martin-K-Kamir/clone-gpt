@@ -143,7 +143,7 @@ Default.test(
         await userEvent.click(trigger);
 
         const sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
     },
 );
 
@@ -155,12 +155,12 @@ Default.test(
         await userEvent.click(trigger);
 
         let sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
 
         await userEvent.click(trigger);
 
         sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-        expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
+            expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
     },
 );
 
@@ -170,7 +170,7 @@ Default.test(
         await userEvent.keyboard("{Control>}b{/Control}");
 
         const sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
     },
 );
 
@@ -180,12 +180,12 @@ Default.test(
         await userEvent.keyboard("{Control>}b{/Control}");
 
         let sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
 
         await userEvent.keyboard("{Control>}b{/Control}");
 
         sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-        expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
+            expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
     },
 );
 

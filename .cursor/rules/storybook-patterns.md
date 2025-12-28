@@ -19,10 +19,10 @@ This document outlines the patterns, conventions, and best practices for writing
 
 ```tsx
 import {
+    WithQueryProvider,
     createMockUser,
     getButton,
     waitForDialog,
-    withQueryProvider,
 } from "#.storybook/lib";
 import preview from "#.storybook/preview";
 import { expect, fn, waitFor } from "storybook/test";
@@ -31,7 +31,13 @@ import { MyComponent } from "./my-component";
 
 const meta = preview.meta({
     component: MyComponent,
-    decorators: [withQueryProvider],
+    decorators: [
+        Story => (
+            <WithQueryProvider>
+                <Story />
+            </WithQueryProvider>
+        ),
+    ],
     parameters: {
         a11y: {
             test: "error",
@@ -125,6 +131,45 @@ All test names should follow the pattern: `"should [action/state]"`
 
 ## Mock Data
 
+### Stable and Fixed Data
+
+**CRITICAL**: All mock data must be **stable and fixed** (no random values). This is essential for visual testing - if data changes between renders, visual regression tests will fail.
+
+**Rules:**
+
+- ✅ Use fixed dates: `FIXED_DATE`, `FIXED_MESSAGE_DATE`, `FIXED_WEATHER_START_DATE`
+- ✅ Use fixed IDs: `MOCK_USER_ID`, `MOCK_CHAT_ID`, `MOCK_MESSAGE_ID`
+- ✅ Use deterministic data generation (based on index, not random)
+- ❌ Never use `Math.random()`, `Date.now()`, `new Date()` without fixed base
+- ❌ Never use `crypto.randomUUID()` or similar random generators
+
+```tsx
+import {
+    FIXED_DATE,
+    MOCK_CHAT_ID,
+    MOCK_USER_ID,
+    createMockChat,
+} from "#.storybook/lib/mocks";
+
+// ✅ Good - uses fixed constants
+const chat = createMockChat(0);
+const chatId = MOCK_CHAT_ID;
+const date = FIXED_DATE;
+
+// ❌ Bad - random or unstable data
+const chatId = crypto.randomUUID();
+const date = new Date().toISOString();
+const randomValue = Math.random();
+
+// ❌ Bad - hardcoded status strings
+const status = "ready" as ChatStatus;
+const status2 = "streaming" as ChatStatus;
+
+// ✅ Good - use status constants
+const status = MOCK_CHAT_STATUS.READY;
+const status2 = MOCK_CHAT_STATUS.STREAMING;
+```
+
 ### Using Shared Mocks
 
 Always use shared mock factories from `#.storybook/lib/mocks` instead of creating inline mocks.
@@ -136,12 +181,16 @@ import {
     createMockChats,
     createMockUserMessage,
     createMockAssistantMessage,
+    MOCK_CHAT_ID,
+    FIXED_DATE,
 } from "#.storybook/lib/mocks";
 
 // ✅ Good
 const user = createMockUser();
 const chat = createMockChat(0);
 const chats = createMockChats(10);
+const chatId = MOCK_CHAT_ID;
+const date = FIXED_DATE;
 
 // ❌ Bad
 const user = {
@@ -149,7 +198,62 @@ const user = {
     name: "Test User",
     // ...
 };
+const chatId = "chat-123" as DBChatId; // Should use MOCK_CHAT_ID
+const date = new Date("2025-01-01").toISOString(); // Should use FIXED_DATE
+const message = MOCK_CONVERSATION_WITH_MULTIPLE_FILES[0]; // Should use MOCK_USER_MESSAGE_WITH_MULTIPLE_FILES
+const parts = MOCK_CONVERSATION_WITH_MULTIPLE_FILES[0].parts.filter(p => p.type === "file"); // Should use MOCK_FILE_PARTS_MULTIPLE
+
+// ✅ Good - use pre-configured constants
+const message = MOCK_USER_MESSAGE_WITH_MULTIPLE_FILES;
+const parts = MOCK_FILE_PARTS_MULTIPLE;
 ```
+
+### No Raw Data in Stories
+
+**CRITICAL**: Never define raw mock data (objects, arrays, constants) directly in story files. All mock data must be defined in the mocks directory (`#.storybook/lib/mocks`) and imported into stories.
+
+**Rules:**
+
+- ✅ All mock data constants must be in `#.storybook/lib/mocks` files
+- ✅ Stories should only import and use mock constants/factories
+- ❌ Never define raw objects, arrays, or constants in story files
+- ❌ Never inline mock data creation in story files
+
+```tsx
+// ❌ Bad - raw data in story file
+const mockSourceParts = [
+    { type: "source-url", url: "https://example.com", title: "Example" },
+];
+const mockPreviews = [{ url: "https://example.com", title: "Example" }];
+
+// ✅ Good - import from mocks
+import { MOCK_SOURCE_PARTS, MOCK_SOURCE_PREVIEWS } from "#.storybook/lib/mocks/messages";
+
+// ❌ Bad - inline factory calls with raw data
+const parts = createMockSourceUrlMessageParts([
+    { url: "https://example.com", title: "Example" },
+]);
+
+// ✅ Good - use pre-configured constants
+const parts = MOCK_SOURCE_PARTS;
+```
+
+**Exception**: Simple, one-off test data that is truly story-specific and won't be reused can be created inline, but prefer moving to mocks if it's more than a simple primitive value.
+
+### Available Constants
+
+- `MOCK_USER_ID` - Fixed user ID
+- `MOCK_CHAT_ID` - Fixed chat ID
+- `MOCK_MESSAGE_ID` - Fixed message ID
+- `MOCK_ASSISTANT_MESSAGE_ID` - Fixed assistant message ID
+- `FIXED_DATE` - Fixed date string (2025-01-01T00:00:00.000Z)
+- `FIXED_MESSAGE_DATE` - Fixed message date string (2024-01-15T12:00:00.000Z)
+- `FIXED_WEATHER_START_DATE` - Fixed weather start date
+- `MOCK_CHAT_STATUS` - Chat status constants object:
+    - `MOCK_CHAT_STATUS.READY` - Ready status
+    - `MOCK_CHAT_STATUS.STREAMING` - Streaming status
+    - `MOCK_CHAT_STATUS.SUBMITTED` - Submitted status
+    - `MOCK_CHAT_STATUS.ERROR` - Error status
 
 ### Available Mock Factories
 
@@ -174,6 +278,43 @@ const user = {
 - `createMockAssistantMessage(text, messageId?)` - Creates an assistant message
 - `createMockUserMessageWithFiles(text, files, messageId?)` - Creates a user message with files
 - `createMockMessages(count, baseText?)` - Creates alternating user/assistant messages
+- `createMockTextMessagePart(text)` - Creates a text message part
+- `createMockFileMessagePart(options?)` - Creates a file message part
+- `createMockImageMessagePart(options?)` - Creates an image message part
+- `createMockFileMessageParts(count, baseName?, extension?)` - Creates multiple file message parts
+- `createMockImageMessageParts(count, baseName?, extension?)` - Creates multiple image message parts
+
+#### Message Examples (Pre-configured Messages)
+
+- `MOCK_USER_MESSAGE_WITH_SINGLE_FILE` - User message with single file
+- `MOCK_USER_MESSAGE_WITH_SINGLE_IMAGE` - User message with single image
+- `MOCK_USER_MESSAGE_WITH_MULTIPLE_FILES` - User message with multiple files
+- `MOCK_USER_MESSAGE_WITH_MULTIPLE_IMAGES` - User message with multiple images
+- `MOCK_ASSISTANT_MESSAGE_WITH_GENERATED_IMAGE` - Assistant message with generated image
+- `MOCK_ASSISTANT_MESSAGE_WITH_GENERATED_FILE` - Assistant message with generated file
+- `MOCK_ASSISTANT_MESSAGE_WITH_WEATHER` - Assistant message with weather tool
+- `MOCK_ASSISTANT_MESSAGE_WITH_MARKDOWN` - Assistant message with markdown content
+- `MOCK_ASSISTANT_MESSAGE_WITH_IMAGE_ANALYSIS` - Assistant message with image analysis
+- `MOCK_ASSISTANT_MESSAGE_WITH_REFERENCE_IMAGE` - Assistant message with reference image
+
+#### Message Parts (Filtered)
+
+- `MOCK_FILE_PARTS_SINGLE` - Single file part
+- `MOCK_FILE_PARTS_MULTIPLE` - Multiple file parts
+- `MOCK_IMAGE_PARTS_SINGLE` - Single image part
+- `MOCK_IMAGE_PARTS_MULTIPLE` - Multiple image parts
+- `MOCK_FILE_AND_IMAGE_PARTS` - Combined file and image parts
+- `MOCK_ASSISTANT_MESSAGE_PARTS_WITH_SOURCES` - Assistant message parts with source URLs
+- `MOCK_TOOL_PARTS_WEATHER` - Weather tool parts
+- `MOCK_TOOL_PARTS_GENERATE_IMAGE` - Generate image tool parts
+- `MOCK_TOOL_PARTS_GENERATE_FILE` - Generate file tool parts
+
+#### Source URL Parts
+
+- `MOCK_SOURCE_PARTS` - Default source URL message parts (3 sources: Next.js, React, Tailwind CSS)
+- `MOCK_ADDITIONAL_SOURCE_PARTS` - Additional source URL message parts (TypeScript, Node.js)
+- `MOCK_SOURCE_PREVIEWS` - Source preview data for API responses (3 previews matching MOCK_SOURCE_PARTS)
+- `MOCK_ADDITIONAL_SOURCE_PREVIEWS` - Additional source preview data (TypeScript, Node.js)
 
 #### Files
 
@@ -280,22 +421,27 @@ Use decorators from `#.storybook/lib/decorators` for common provider setups.
 
 ```tsx
 import {
+    WithQueryProviderAndToaster,
     withChatProviders,
     withChatProvidersAndToaster,
-    withQueryProvider,
-    withQueryProviderAndToaster,
 } from "#.storybook/lib/decorators";
 
 const meta = preview.meta({
     component: MyComponent,
-    decorators: [withQueryProviderAndToaster],
+    decorators: [
+        Story => (
+            <WithQueryProviderAndToaster>
+                <Story />
+            </WithQueryProviderAndToaster>
+        ),
+    ],
 });
 ```
 
 ### Available Decorators
 
-- `withQueryProvider` - Wraps with QueryProvider
-- `withQueryProviderAndToaster` - Wraps with QueryProvider and Toaster
+- `WithQueryProvider` - Wraps with QueryProvider
+- `WithQueryProviderAndToaster` - Wraps with QueryProvider and Toaster
 - `withChatProviders` - Wraps with chat providers (QueryProvider, ChatOffsetProvider, ChatCacheSyncProvider)
 - `withChatProvidersAndToaster` - Wraps with chat providers and Toaster (includes centered layout)
 - `withCenteredLayout` - Centers the story
@@ -480,11 +626,8 @@ Default.test(
 8. **Clean up in beforeEach/afterEach** - Clear queries and mocks appropriately
 9. **One assertion per test** - Or group related assertions logically
 10. **Descriptive test names** - Test names should clearly describe what is being tested
-
-## Examples
-
-See the refactored stories for examples:
-
-- `src/components/ui/button/button.stories.tsx`
-- `src/features/user/components/user-shared-chats-table/user-shared-chats-table.stories.tsx`
-- `src/features/auth/components/auth-signin-dialog/auth-signin-dialog.stories.tsx`
+11. **Use status constants** - Always use `MOCK_CHAT_STATUS` instead of hardcoded status strings
+12. **Use message constants** - Use pre-configured message constants instead of array access like `MOCK_CONVERSATION_WITH_MULTIPLE_FILES[0]`
+13. **Use parts constants** - Use filtered parts constants instead of inline filtering
+14. **Avoid inline filtering** - Don't filter parts inline, use pre-filtered constants like `MOCK_FILE_PARTS_MULTIPLE`
+15. **No raw data in stories** - Never define raw mock data (objects, arrays, constants) directly in story files. All mock data must be defined in `#.storybook/lib/mocks` and imported into stories. This keeps stories clean and makes mock data reusable across multiple stories.

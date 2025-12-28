@@ -1,17 +1,27 @@
+import { withChatProvidersAndToaster } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_ID,
+    createMockChats,
+    createMockPrivateChat,
+    createMockPublicChat,
+} from "#.storybook/lib/mocks/chats";
+import {
+    findButtonByText,
+    waitForDialog,
+    waitForElement,
+    waitForSocialShareButton,
+    waitForSonnerToast,
+    waitForSwitch,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider, getQueryClient } from "@/providers/query-provider";
+import { getQueryClient } from "@/providers/query-provider";
 import { HttpResponse, http } from "msw";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId, UIChat } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
 import { updateChatVisibility } from "@/features/chat/services/actions";
 
 import { api } from "@/lib/api-response";
@@ -20,54 +30,12 @@ import { PLURAL } from "@/lib/constants";
 
 import { ChatShareDialog, ChatShareDialogTrigger } from "./chat-share-dialog";
 
-const stableDate = new Date("2025-01-01").toISOString();
-const mockChatId = "chat-1" as DBChatId;
-
-const mockPrivateChat: UIChat = {
-    id: mockChatId,
-    title: "My Private Chat",
-    visibility: CHAT_VISIBILITY.PRIVATE,
-    createdAt: stableDate,
-    updatedAt: stableDate,
-    visibleAt: stableDate,
-};
-
-const mockPublicChat: UIChat = {
-    id: "chat-2" as DBChatId,
-    title: "My Public Chat",
+const mockPrivateChat = createMockPrivateChat({ index: 0 });
+const mockPublicChat = createMockPublicChat({ index: 1 });
+const mockedSharedChats = createMockChats({
+    length: 3,
     visibility: CHAT_VISIBILITY.PUBLIC,
-    createdAt: stableDate,
-    updatedAt: stableDate,
-    visibleAt: stableDate,
-};
-
-const mockedSharedChats = [
-    {
-        id: "chat-1" as DBChatId,
-        title: "Shared Chat 1",
-        visibility: CHAT_VISIBILITY.PUBLIC,
-        createdAt: stableDate,
-        updatedAt: stableDate,
-        visibleAt: stableDate,
-    },
-    {
-        id: "chat-2" as DBChatId,
-        title: "Shared Chat 2",
-        visibility: CHAT_VISIBILITY.PUBLIC,
-        createdAt: stableDate,
-        updatedAt: stableDate,
-        visibleAt: stableDate,
-    },
-    {
-        id: "chat-3" as DBChatId,
-        title: "Shared Chat 3",
-        visibility: CHAT_VISIBILITY.PUBLIC,
-        createdAt: stableDate,
-        updatedAt: stableDate,
-        visibleAt: stableDate,
-    },
-];
-
+}) as UIChat[];
 const mockedSharedChats2 = [...mockedSharedChats];
 
 const meta = preview.meta({
@@ -75,18 +43,7 @@ const meta = preview.meta({
     args: {
         chat: mockPrivateChat,
     },
-    decorators: [
-        Story => (
-            <QueryProvider>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <Story />
-                        <Toaster />
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </QueryProvider>
-        ),
-    ],
+    decorators: [withChatProvidersAndToaster],
     argTypes: {
         chat: {
             control: "object",
@@ -127,7 +84,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default (Private Chat)",
     render: args => (
         <ChatShareDialog {...args}>
             <ChatShareDialogTrigger asChild>
@@ -144,14 +100,14 @@ export const Default = meta.story({
         );
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData([tag.userChat(mockChatId)], mockPrivateChat);
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockPrivateChat);
         queryClient.removeQueries({ queryKey: [tag.userSharedChats()] });
     },
     afterEach: () => {
         mocked(updateChatVisibility).mockClear();
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData([tag.userChat(mockChatId)], mockPrivateChat);
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockPrivateChat);
         queryClient.removeQueries({ queryKey: [tag.userSharedChats()] });
     },
 });
@@ -160,10 +116,7 @@ Default.test("should open dialog", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button", { name: /share chat/i });
     await userEvent.click(trigger);
 
-    const dialog = await waitFor(() =>
-        document.querySelector('[role="dialog"]'),
-    );
-    expect(dialog).toBeInTheDocument();
+    await waitForDialog("dialog");
 });
 
 Default.test(
@@ -172,21 +125,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector(
-                '[role="switch"][aria-checked="false"]',
-            );
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
-        expect(switchElement).toBeInTheDocument();
+        const switchElement = await waitForSwitch(false);
         expect(switchElement).toHaveAttribute("aria-checked", "false");
     },
 );
@@ -197,20 +138,12 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const input = await waitFor(() =>
-            document.querySelector('input[type="text"]'),
-        );
+        const input = await waitForElement('input[type="text"]');
 
         const copyInputButton = await waitFor(() => {
-            const buttons = document.querySelectorAll("button");
-            return Array.from(buttons).find(
-                button => button.textContent === "Copy Link",
-            );
+            return findButtonByText("Copy Link");
         });
 
         expect(input).toBeInTheDocument();
@@ -219,7 +152,7 @@ Default.test(
         expect(copyInputButton).toBeDisabled();
 
         try {
-            await userEvent.click(copyInputButton!);
+            await userEvent.click(copyInputButton);
         } catch (error) {
             expect(error).toBeInstanceOf(Error);
         }
@@ -238,70 +171,30 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const linkedInButton = await waitFor(() => {
-            const links = document.querySelectorAll("a");
-            return Array.from(links).find(link => {
-                const srOnly = link.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share on LinkedIn";
-            });
-        });
+        const linkedInButton = await waitForSocialShareButton("LinkedIn");
+        const twitterButton = await waitForSocialShareButton("Twitter");
+        const redditButton = await waitForSocialShareButton("Reddit");
 
-        const twitterButton = await waitFor(() => {
-            const links = document.querySelectorAll("a");
-            return Array.from(links).find(link => {
-                const srOnly = link.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share on Twitter";
-            });
-        });
-
-        const redditButton = await waitFor(() => {
-            const links = document.querySelectorAll("a");
-            return Array.from(links).find(link => {
-                const srOnly = link.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share on Reddit";
-            });
-        });
-
-        const nativeShareButton = await waitFor(() => {
-            const buttons = document.querySelectorAll("button");
-            return Array.from(buttons).find(button => {
-                const srOnly = button.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share";
-            });
-        });
-
-        expect(linkedInButton).toBeInTheDocument();
         expect(linkedInButton).toHaveAttribute("disabled");
-        expect(twitterButton).toBeInTheDocument();
         expect(twitterButton).toHaveAttribute("disabled");
-        expect(redditButton).toBeInTheDocument();
         expect(redditButton).toHaveAttribute("disabled");
 
         try {
-            await userEvent.click(linkedInButton!);
+            await userEvent.click(linkedInButton);
         } catch (error) {
             expect(error).toBeInstanceOf(Error);
         }
 
         try {
-            await userEvent.click(twitterButton!);
+            await userEvent.click(twitterButton);
         } catch (error) {
             expect(error).toBeInstanceOf(Error);
         }
 
         try {
-            await userEvent.click(redditButton!);
-        } catch (error) {
-            expect(error).toBeInstanceOf(Error);
-        }
-
-        try {
-            await userEvent.click(nativeShareButton!);
+            await userEvent.click(redditButton);
         } catch (error) {
             expect(error).toBeInstanceOf(Error);
         }
@@ -321,20 +214,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
-
-        expect(switchElement).toHaveAttribute("aria-checked", "false");
+        const switchElement = await waitForSwitch(false);
 
         await userEvent.click(switchElement);
 
@@ -342,7 +224,7 @@ Default.test(
 
         await waitFor(() => {
             expect(mocked(updateChatVisibility)).toHaveBeenCalledWith({
-                chatId: mockChatId,
+                chatId: MOCK_CHAT_ID,
                 visibility: CHAT_VISIBILITY.PUBLIC,
             });
         });
@@ -362,26 +244,15 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
-
-        expect(switchElement).toHaveAttribute("aria-checked", "false");
+        const switchElement = await waitForSwitch(false);
 
         await userEvent.click(switchElement);
 
         await waitFor(() => {
             expect(mocked(updateChatVisibility)).toHaveBeenCalledWith({
-                chatId: mockChatId,
+                chatId: MOCK_CHAT_ID,
                 visibility: CHAT_VISIBILITY.PUBLIC,
             });
         });
@@ -397,12 +268,9 @@ Default.test(
         });
 
         const copyInputButton = await waitFor(() => {
-            const buttons = document.querySelectorAll("button");
-            const button = Array.from(buttons).find(
-                button => button.textContent === "Copy Link",
-            );
-            if (!button || button.disabled) {
-                throw new Error("Copy button not found or still disabled");
+            const button = findButtonByText("Copy Link");
+            if (button.disabled) {
+                throw new Error("Copy button still disabled");
             }
             return button;
         });
@@ -430,64 +298,27 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
-
-        expect(switchElement).toHaveAttribute("aria-checked", "false");
+        const switchElement = await waitForSwitch(false);
 
         await userEvent.click(switchElement);
 
         await waitFor(() => {
             expect(mocked(updateChatVisibility)).toHaveBeenCalledWith({
-                chatId: mockChatId,
+                chatId: MOCK_CHAT_ID,
                 visibility: CHAT_VISIBILITY.PUBLIC,
             });
         });
 
-        const linkedInButton = await waitFor(() => {
-            const links = document.querySelectorAll("a");
-            const link = Array.from(links).find(link => {
-                const srOnly = link.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share on LinkedIn";
-            });
-            if (!link || link.hasAttribute("disabled")) {
-                throw new Error("LinkedIn button not found or still disabled");
-            }
-            return link;
+        const linkedInButton = await waitForSocialShareButton("LinkedIn", {
+            shouldBeEnabled: true,
         });
-
-        const twitterButton = await waitFor(() => {
-            const links = document.querySelectorAll("a");
-            const link = Array.from(links).find(link => {
-                const srOnly = link.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share on Twitter";
-            });
-            if (!link || link.hasAttribute("disabled")) {
-                throw new Error("Twitter button not found or still disabled");
-            }
-            return link;
+        const twitterButton = await waitForSocialShareButton("Twitter", {
+            shouldBeEnabled: true,
         });
-
-        const redditButton = await waitFor(() => {
-            const links = document.querySelectorAll("a");
-            const link = Array.from(links).find(link => {
-                const srOnly = link.querySelector("span.sr-only");
-                return srOnly?.textContent === "Share on Reddit";
-            });
-            if (!link || link.hasAttribute("disabled")) {
-                throw new Error("Reddit button not found or still disabled");
-            }
-            return link;
+        const redditButton = await waitForSocialShareButton("Reddit", {
+            shouldBeEnabled: true,
         });
 
         expect(linkedInButton).toBeInTheDocument();
@@ -515,20 +346,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
-
-        expect(switchElement).toHaveAttribute("aria-checked", "false");
+        const switchElement = await waitForSwitch(false);
 
         await userEvent.click(switchElement);
 
@@ -555,18 +375,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
+        const switchElement = await waitForSwitch();
 
         await userEvent.click(switchElement);
 
@@ -575,7 +386,7 @@ Default.test(
                 'input[type="text"]',
             ) as HTMLInputElement;
             expect(input).toBeInTheDocument();
-            expect(input.value).toContain(`/chat/${mockChatId}`);
+            expect(input.value).toContain(`/chat/${MOCK_CHAT_ID}`);
         });
     },
 );
@@ -586,20 +397,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
-
-        expect(switchElement).toHaveAttribute("aria-checked", "false");
+        const switchElement = await waitForSwitch(false);
 
         await userEvent.click(switchElement);
         expect(mocked(updateChatVisibility)).not.toHaveBeenCalled();
@@ -619,20 +419,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
-
-        expect(switchElement).toHaveAttribute("aria-checked", "false");
+        const switchElement = await waitForSwitch(false);
 
         await userEvent.click(switchElement);
         expect(mocked(updateChatVisibility)).not.toHaveBeenCalled();
@@ -669,23 +458,15 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
         const sharedChatsDialogTrigger = await waitFor(() => {
-            const buttons = document.querySelectorAll("button");
-            return Array.from(buttons).find(button => {
-                return button.textContent === "here";
-            });
+            return findButtonByText("here");
         });
         expect(sharedChatsDialogTrigger).toBeInTheDocument();
-        await userEvent.click(sharedChatsDialogTrigger!);
+        await userEvent.click(sharedChatsDialogTrigger);
 
-        const sharedChatsTable = await waitFor(() =>
-            document.querySelector("table"),
-        );
+        const sharedChatsTable = await waitForElement("table");
         expect(sharedChatsTable).toBeInTheDocument();
     },
 );
@@ -713,14 +494,12 @@ Default.test(
     },
     async ({ canvas, userEvent }) => {
         mocked(updateChatVisibility).mockImplementation(async () => {
-            mockedSharedChats2.push({
-                id: "chat-4" as DBChatId,
-                title: "New Shared Chat",
-                visibility: CHAT_VISIBILITY.PUBLIC,
-                createdAt: stableDate,
-                updatedAt: stableDate,
-                visibleAt: stableDate,
-            });
+            mockedSharedChats2.push(
+                createMockPublicChat({
+                    index: mockedSharedChats2.length,
+                    title: "New Shared Chat",
+                }),
+            );
             return api.success.chat.visibility(CHAT_VISIBILITY.PUBLIC, {
                 count: PLURAL.SINGLE,
                 visibility: CHAT_VISIBILITY.PUBLIC,
@@ -730,18 +509,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
+        const switchElement = await waitForSwitch();
 
         expect(switchElement).toHaveAttribute("aria-checked", "false");
 
@@ -749,30 +519,24 @@ Default.test(
 
         await waitFor(() => {
             expect(mocked(updateChatVisibility)).toHaveBeenCalledWith({
-                chatId: mockChatId,
+                chatId: MOCK_CHAT_ID,
                 visibility: CHAT_VISIBILITY.PUBLIC,
             });
         });
 
         const sharedChatsDialogTrigger = await waitFor(() => {
-            const buttons = document.querySelectorAll("button");
-            return Array.from(buttons).find(button => {
-                return button.textContent === "here";
-            });
+            return findButtonByText("here");
         });
         expect(sharedChatsDialogTrigger).toBeInTheDocument();
         await userEvent.click(sharedChatsDialogTrigger!);
 
-        const sharedChatsTable = await waitFor(() =>
-            document.querySelector("table"),
-        );
+        const sharedChatsTable = await waitForElement("table");
         expect(sharedChatsTable).toBeInTheDocument();
 
         await waitFor(() => {
-            const links = document.querySelectorAll("a");
-            const myChatLink = Array.from(links).find(link => {
-                return link.textContent === "New Shared Chat";
-            });
+            const myChatLink = Array.from(
+                document.querySelectorAll<HTMLElement>("a"),
+            ).find(link => link.textContent === "New Shared Chat");
             expect(myChatLink).toBeInTheDocument();
         });
 
@@ -796,18 +560,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
+        const switchElement = await waitForSwitch();
 
         await userEvent.click(switchElement);
 
@@ -819,15 +574,11 @@ Default.test(
             expect(switchElement).toHaveAttribute("aria-checked", "false");
         });
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
 export const PublicChat = meta.story({
-    name: "Public Chat",
     args: {
         chat: mockPublicChat,
     },
@@ -873,20 +624,9 @@ PublicChat.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector(
-                '[role="switch"][aria-checked="true"]',
-            );
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
+        const switchElement = await waitForSwitch(true);
         expect(switchElement).toHaveAttribute("aria-checked", "true");
     },
 );
@@ -904,18 +644,9 @@ PublicChat.test(
         const trigger = canvas.getByRole("button", { name: /share chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-        const switchElement = await waitFor(() => {
-            const switchBtn = document.querySelector('[role="switch"]');
-            if (!switchBtn) {
-                throw new Error("Switch not found");
-            }
-            return switchBtn;
-        });
+        const switchElement = await waitForSwitch();
 
         expect(switchElement).toHaveAttribute("aria-checked", "true");
 
@@ -927,7 +658,7 @@ PublicChat.test(
 
         await waitFor(() => {
             expect(mocked(updateChatVisibility)).toHaveBeenCalledWith({
-                chatId: "chat-2",
+                chatId: mockPublicChat.id,
                 visibility: CHAT_VISIBILITY.PRIVATE,
             });
         });

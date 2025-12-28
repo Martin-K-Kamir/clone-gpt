@@ -1,17 +1,22 @@
+import { withChatProvidersAndToaster } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_ID,
+    createMockPrivateChat,
+} from "#.storybook/lib/mocks/chats";
+import { getElementsByText } from "#.storybook/lib/utils/elements.js";
+import {
+    findButtonByText,
+    waitForDialog,
+    waitForDialogToClose,
+    waitForSonnerToast,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider, getQueryClient } from "@/providers/query-provider";
+import { getQueryClient } from "@/providers/query-provider";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 
-import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChatId, UIChat } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
 import { deleteUserChatById } from "@/features/chat/services/actions";
 
 import { api } from "@/lib/api-response";
@@ -23,35 +28,14 @@ import {
     ChatDeleteDialogTrigger,
 } from "./chat-delete-dialog";
 
-const stableDate = new Date("2025-01-01").toISOString();
-const mockChatId = "00000000-0000-0000-0000-000000000001" as DBChatId;
-
-const mockChat: UIChat = {
-    id: mockChatId,
-    title: "My Chat Conversation",
-    visibility: CHAT_VISIBILITY.PRIVATE,
-    createdAt: stableDate,
-    updatedAt: stableDate,
-    visibleAt: stableDate,
-};
+const mockChat = createMockPrivateChat();
 
 const meta = preview.meta({
     component: ChatDeleteDialog,
     args: {
         chat: mockChat,
     },
-    decorators: [
-        Story => (
-            <QueryProvider>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <Story />
-                        <Toaster />
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </QueryProvider>
-        ),
-    ],
+    decorators: [withChatProvidersAndToaster],
     argTypes: {
         chat: {
             control: "object",
@@ -92,7 +76,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
     render: args => (
         <ChatDeleteDialog {...args}>
             <ChatDeleteDialogTrigger asChild>
@@ -102,13 +85,13 @@ export const Default = meta.story({
     ),
     beforeEach: () => {
         mocked(deleteUserChatById).mockResolvedValue(
-            api.success.chat.delete(mockChatId, {
+            api.success.chat.delete(MOCK_CHAT_ID, {
                 count: PLURAL.SINGLE,
             }),
         );
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData([tag.userChat(mockChatId)], mockChat);
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockChat);
         queryClient.setQueryData([tag.userInitialChatsSearch()], [mockChat]);
         queryClient.removeQueries({ queryKey: [tag.userChats()] });
     },
@@ -116,7 +99,7 @@ export const Default = meta.story({
         mocked(deleteUserChatById).mockClear();
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData([tag.userChat(mockChatId)], mockChat);
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockChat);
         queryClient.setQueryData([tag.userInitialChatsSearch()], [mockChat]);
         queryClient.removeQueries({ queryKey: [tag.userChats()] });
     },
@@ -136,36 +119,30 @@ Default.test("should open dialog", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button", { name: /delete chat/i });
     await userEvent.click(trigger);
 
-    const dialog = await waitFor(() =>
-        document.querySelector('[role="alertdialog"]'),
-    );
-    expect(dialog).toBeInTheDocument();
+    await waitForDialog("alertdialog");
 });
 
 Default.test(
-    "should display correct description",
+    "should display chat description",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", { name: /delete chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
 
-        const paragraphs = Array.from(document.querySelectorAll("p"));
-        const description = paragraphs.find(paragraph =>
-            paragraph.textContent?.includes("My Chat Conversation"),
+        const description = getElementsByText(
+            "p",
+            new RegExp(mockChat.title, "i"),
         );
         expect(description).toBeInTheDocument();
     },
 );
 
 Default.test(
-    "should delete chat when Delete button is clicked",
+    "should delete chat when delete button is clicked",
     async ({ canvas, userEvent }) => {
         mocked(deleteUserChatById).mockResolvedValueOnce(
-            api.success.chat.delete(mockChatId, {
+            api.success.chat.delete(MOCK_CHAT_ID, {
                 count: PLURAL.SINGLE,
             }),
         );
@@ -173,21 +150,14 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /delete chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete",
-        );
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteUserChatById)).toHaveBeenCalledWith({
-                chatId: mockChatId,
+                chatId: MOCK_CHAT_ID,
             });
         });
     },
@@ -197,7 +167,7 @@ Default.test(
     "should close dialog after successful delete",
     async ({ canvas, userEvent }) => {
         mocked(deleteUserChatById).mockResolvedValueOnce(
-            api.success.chat.delete(mockChatId, {
+            api.success.chat.delete(MOCK_CHAT_ID, {
                 count: PLURAL.SINGLE,
             }),
         );
@@ -205,27 +175,16 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /delete chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete",
-        );
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteUserChatById)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            expect(
-                document.querySelector('[role="alertdialog"]'),
-            ).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("alertdialog");
     },
 );
 
@@ -241,28 +200,18 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /delete chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete",
-        );
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteUserChatById)).toHaveBeenCalledWith({
-                chatId: mockChatId,
+                chatId: MOCK_CHAT_ID,
             });
         });
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -276,23 +225,16 @@ Default.test(
         );
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData([tag.userChat(mockChatId)], mockChat);
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockChat);
         queryClient.setQueryData([tag.userInitialChatsSearch()], [mockChat]);
 
         const trigger = canvas.getByRole("button", { name: /delete chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete",
-        );
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteUserChatById)).toHaveBeenCalled();
@@ -300,7 +242,7 @@ Default.test(
 
         await waitFor(() => {
             const cachedChat = queryClient.getQueryData([
-                tag.userChat(mockChatId),
+                tag.userChat(MOCK_CHAT_ID),
             ]);
             expect(cachedChat).toBeDefined();
         });
@@ -317,7 +259,7 @@ Default.test(
         getRouter().replace.mockClear();
 
         mocked(deleteUserChatById).mockResolvedValueOnce(
-            api.success.chat.delete(mockChatId, {
+            api.success.chat.delete(MOCK_CHAT_ID, {
                 count: PLURAL.SINGLE,
             }),
         );
@@ -325,17 +267,10 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /delete chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete",
-        );
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteUserChatById)).toHaveBeenCalled();
@@ -347,14 +282,13 @@ Default.test(
     },
 );
 
-export const ActiveChat = meta.story({
-    name: "Active Chat",
+export const Active = meta.story({
     parameters: {
         nextjs: {
             appDirectory: true,
             navigation: {
-                pathname: `/chat/${mockChatId}`,
-                query: { chatId: mockChatId },
+                pathname: `/chat/${MOCK_CHAT_ID}`,
+                query: { chatId: MOCK_CHAT_ID },
             },
         },
     },
@@ -367,13 +301,13 @@ export const ActiveChat = meta.story({
     ),
 });
 
-ActiveChat.test(
+Active.test(
     "should navigate to home when deleting active chat",
     async ({ canvas, userEvent }) => {
         getRouter().replace.mockClear();
 
         mocked(deleteUserChatById).mockResolvedValueOnce(
-            api.success.chat.delete(mockChatId, {
+            api.success.chat.delete(MOCK_CHAT_ID, {
                 count: PLURAL.SINGLE,
             }),
         );
@@ -381,17 +315,10 @@ ActiveChat.test(
         const trigger = canvas.getByRole("button", { name: /delete chat/i });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
 
-        const buttons = Array.from(document.querySelectorAll("button"));
-        const deleteButton = buttons.find(
-            button => button.textContent?.trim() === "Delete",
-        );
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        await userEvent.click(deleteButton);
 
         expect(getRouter().replace).toHaveBeenCalledWith("/");
         expect(mocked(deleteUserChatById)).toHaveBeenCalled();

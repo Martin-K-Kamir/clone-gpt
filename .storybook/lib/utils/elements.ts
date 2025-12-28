@@ -49,7 +49,8 @@ export function getSelectItemByText(text: string | RegExp): HTMLElement | null {
 }
 
 export function getFileInput(): HTMLInputElement {
-    const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+    const fileInput =
+        document.querySelector<HTMLInputElement>('input[type="file"]');
     if (!fileInput) {
         throw new Error("File input not found");
     }
@@ -69,4 +70,27 @@ export function getAllSonnerToasts(): HTMLElement[] {
 
 export function getSonnerToastByType(type: string): HTMLElement | null {
     return document.querySelector(`[data-sonner-toast][data-type="${type}"]`);
+}
+
+export function getElementsByText<T extends HTMLElement>(
+    selector: string,
+    text: string | RegExp,
+): T {
+    const elements = document.querySelectorAll(selector);
+    if (typeof text === "string") {
+        const foundElement = Array.from(elements).find(element =>
+            element.textContent?.includes(text),
+        );
+        if (!foundElement) {
+            throw new Error(`Element with text "${text}" not found`);
+        }
+        return foundElement as T;
+    }
+    const foundElement = Array.from(elements).find(element =>
+        text.test(element.textContent || ""),
+    );
+    if (!foundElement) {
+        throw new Error(`Element with text "${text}" not found`);
+    }
+    return foundElement as T;
 }

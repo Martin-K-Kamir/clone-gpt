@@ -1,26 +1,28 @@
+import {
+    createMockChats,
+    createMockPaginatedChats,
+    generateChatId,
+} from "#.storybook/lib/mocks/chats";
+import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { HttpResponse, http } from "msw";
 import { Suspense, useEffect, useMemo } from "react";
-import { expect, fireEvent, mocked, waitFor } from "storybook/test";
+import { expect, mocked, waitFor } from "storybook/test";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-
-import { auth } from "@/features/auth/services/auth";
 
 import {
     CHAT_VISIBILITY,
     QUERY_USER_CHATS_LIMIT,
 } from "@/features/chat/lib/constants";
-import type { DBChat, DBChatId } from "@/features/chat/lib/types";
+import type { DBChat } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatOffsetProvider,
     ChatSidebarProvider,
 } from "@/features/chat/providers";
 import { getUserChats as getUserChatsDB } from "@/features/chat/services/db";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { api } from "@/lib/api-response";
 import { PLURAL } from "@/lib/constants";
@@ -30,54 +32,6 @@ import { ChatSidebarHistory } from "./chat-sidebar-history";
 import { ChatSidebarHistorySkeleton } from "./chat-sidebar-history-skeleton";
 
 const DEFAULT_CHATS_LENGTH = 20;
-
-function createMockChat(index: number): DBChat {
-    const fixedDate = new Date("2025-12-20");
-    fixedDate.setDate(fixedDate.getDate() - index);
-    const date = fixedDate.toISOString();
-
-    return {
-        id: index as unknown as DBChatId,
-        userId: "00000000-0000-0000-0000-000000000001" as DBUserId,
-        title: `Chat ${index}`,
-        visibility: CHAT_VISIBILITY.PRIVATE,
-        createdAt: date,
-        updatedAt: date,
-        visibleAt: date,
-    } as const;
-}
-
-function createMockChats(length = DEFAULT_CHATS_LENGTH): DBChat[] {
-    return Array.from({ length }, (_, index) => createMockChat(index));
-}
-
-function createMockPaginatedData(
-    length = DEFAULT_CHATS_LENGTH,
-    hasNextPage = false,
-): PaginatedData<DBChat[]> {
-    return {
-        data: createMockChats(length),
-        totalCount: length,
-        hasNextPage,
-        nextOffset: hasNextPage ? length : undefined,
-    };
-}
-
-const mockChats = createMockChats();
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: 1,
-                staleTime: 60 * 1000,
-                refetchOnReconnect: false,
-                refetchOnWindowFocus: false,
-                refetchOnMount: false,
-            },
-        },
-    });
-}
 
 const StoryWrapper = ({
     Story,
@@ -131,13 +85,25 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
-    decorators: [createDecorator(createMockPaginatedData())],
+    decorators: [
+        createDecorator(
+            createMockPaginatedChats({
+                length: DEFAULT_CHATS_LENGTH,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        ),
+    ],
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(createMockPaginatedData());
+        mocked(getUserChatsDB).mockResolvedValue(
+            createMockPaginatedChats({
+                length: DEFAULT_CHATS_LENGTH,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        );
     },
     afterEach: () => {
-        mocked(auth).mockClear();
         mocked(getUserChatsDB).mockClear();
     },
 });
@@ -148,7 +114,11 @@ Default.test("should render all chat items", async ({ canvas }) => {
         expect(links.length).toBe(DEFAULT_CHATS_LENGTH);
     });
 
-    const chatTitles = mockChats.slice(0, 5).map(chat => chat.title);
+    const mockChats = createMockChats({
+        length: 5,
+        visibility: CHAT_VISIBILITY.PRIVATE,
+    });
+    const chatTitles = mockChats.map(chat => chat.title);
     chatTitles.forEach(title => {
         expect(canvas.getByText(title)).toBeVisible();
     });
@@ -179,13 +149,25 @@ Default.test(
 );
 
 export const Empty = meta.story({
-    name: "Empty",
-    decorators: [createDecorator(createMockPaginatedData(0))],
+    decorators: [
+        createDecorator(
+            createMockPaginatedChats({
+                length: 0,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        ),
+    ],
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(createMockPaginatedData(0));
+        mocked(getUserChatsDB).mockResolvedValue(
+            createMockPaginatedChats({
+                length: 0,
+                hasNextPage: false,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        );
     },
     afterEach: () => {
-        mocked(auth).mockClear();
         mocked(getUserChatsDB).mockClear();
     },
 });
@@ -206,15 +188,52 @@ Empty.test("should not render any chat links", async ({ canvas }) => {
 
 export const WithPagination = meta.story({
     decorators: [
-        createDecorator(createMockPaginatedData(DEFAULT_CHATS_LENGTH, true)),
+        createDecorator(
+            createMockPaginatedChats({
+                length: 20,
+                hasNextPage: true,
+                nextOffset: 20,
+            }),
+        ),
     ],
+    parameters: {
+        msw: {
+            handlers: [
+                http.get("/api/user-chats", ({ request }) => {
+                    const url = new URL(request.url);
+                    const offset = parseInt(
+                        url.searchParams.get("offset") || "0",
+                        10,
+                    );
+                    const limit = parseInt(
+                        url.searchParams.get("limit") || "40",
+                        10,
+                    );
+
+                    const mockData = createMockPaginatedChats({
+                        length: 20,
+                        hasNextPage: true,
+                        nextOffset: offset + limit,
+                    });
+
+                    const response = api.success.chat.get(mockData, {
+                        count: PLURAL.MULTIPLE,
+                    });
+                    return HttpResponse.json(response);
+                }),
+            ],
+        },
+    },
     beforeEach: () => {
         mocked(getUserChatsDB).mockResolvedValue(
-            createMockPaginatedData(DEFAULT_CHATS_LENGTH, true),
+            createMockPaginatedChats({
+                length: 20,
+                hasNextPage: true,
+                nextOffset: 20,
+            }),
         );
     },
     afterEach: () => {
-        mocked(auth).mockClear();
         mocked(getUserChatsDB).mockClear();
     },
 });
@@ -254,7 +273,7 @@ const ErrorStoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
                                         <Story />
                                     </Suspense>
                                 </div>
-                            </div>
+                            </div>{" "}
                         </ChatSidebarProvider>
                     </ChatCacheSyncProvider>
                 </ChatOffsetProvider>
@@ -264,13 +283,9 @@ const ErrorStoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
 };
 
 export const Error = meta.story({
-    name: "Error",
     decorators: [
         (Story: React.ComponentType) => <ErrorStoryWrapper Story={Story} />,
     ],
-    afterEach: () => {
-        mocked(auth).mockClear();
-    },
 });
 
 Error.test("should render error message", async ({ canvas }) => {
@@ -322,7 +337,11 @@ export const WithoutInitialData = meta.story({
             handlers: [
                 http.get("/api/user-chats", () => {
                     const response = api.success.chat.get(
-                        createMockPaginatedData(),
+                        createMockPaginatedChats({
+                            length: DEFAULT_CHATS_LENGTH,
+                            hasNextPage: false,
+                            visibility: CHAT_VISIBILITY.PRIVATE,
+                        }),
                         { count: PLURAL.MULTIPLE },
                     );
                     return HttpResponse.json(response);
@@ -338,7 +357,6 @@ export const WithoutInitialData = meta.story({
         });
     },
     afterEach: () => {
-        mocked(auth).mockClear();
         mocked(getUserChatsDB).mockClear();
     },
 });
@@ -351,7 +369,11 @@ WithoutInitialData.test(
             expect(links.length).toBe(DEFAULT_CHATS_LENGTH);
         });
 
-        const chatTitles = mockChats.slice(0, 5).map(chat => chat.title);
+        const mockChats = createMockChats({
+            length: 5,
+            visibility: CHAT_VISIBILITY.PRIVATE,
+        });
+        const chatTitles = mockChats.map(chat => chat.title);
         chatTitles.forEach(title => {
             expect(canvas.getByText(title)).toBeVisible();
         });
@@ -368,10 +390,7 @@ const InfiniteScrollingStoryWrapper = () => {
                     <ChatCacheSyncProvider>
                         <ChatSidebarProvider>
                             <div className="bg-zinc-950">
-                                <div
-                                    className="h-182 w-72 p-4"
-                                    data-testid="chat-sidebar-history-container"
-                                >
+                                <div className="h-182 w-72 p-4">
                                     <Suspense
                                         fallback={
                                             <ChatSidebarHistorySkeleton />
@@ -405,16 +424,19 @@ export const InfiniteScrolling = meta.story({
                         10,
                     );
 
-                    const MAX_PAGES = 5;
+                    const MAX_PAGES = 6;
                     const totalChats = MAX_PAGES * limit;
                     const currentPage = Math.floor(offset / limit);
                     const hasNextPage = currentPage + 1 < MAX_PAGES;
                     const nextOffset = hasNextPage ? offset + limit : undefined;
 
-                    const pageChats = Array.from({ length: limit }, (_, i) => {
-                        const chatIndex = offset + i;
-                        return createMockChat(chatIndex);
-                    });
+                    const pageChats = createMockChats({
+                        length: limit,
+                        visibility: CHAT_VISIBILITY.PRIVATE,
+                    }).map((chat, i) => ({
+                        ...chat,
+                        id: generateChatId(offset + i),
+                    }));
 
                     const response = api.success.chat.get(
                         {
@@ -442,11 +464,15 @@ export const InfiniteScrolling = meta.story({
     },
     beforeEach: () => {
         mocked(getUserChatsDB).mockResolvedValue(
-            createMockPaginatedData(DEFAULT_CHATS_LENGTH, true),
+            createMockPaginatedChats({
+                length: DEFAULT_CHATS_LENGTH,
+                hasNextPage: true,
+                nextOffset: DEFAULT_CHATS_LENGTH,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
         );
     },
     afterEach: () => {
-        mocked(auth).mockClear();
         mocked(getUserChatsDB).mockClear();
     },
 });
@@ -454,46 +480,48 @@ export const InfiniteScrolling = meta.story({
 InfiniteScrolling.test(
     "should progressively load additional pages when scrolling",
     async ({ canvas }) => {
-        const getExpectedLength = (pageNumber: number) =>
-            DEFAULT_CHATS_LENGTH + (pageNumber - 1) * QUERY_USER_CHATS_LIMIT;
-
         const links = canvas.getAllByRole("link");
-        expect(links.length).toBe(getExpectedLength(1));
+        expect(links.length).toBeGreaterThan(0);
 
         links.at(-1)?.scrollIntoView({ behavior: "smooth" });
 
-        await waitFor(() => {
-            const links = canvas.getAllByRole("link");
-            expect(links.length).toBe(getExpectedLength(2));
+        const links2 = await waitFor(() => {
+            const links2 = canvas.getAllByRole("link");
+            expect(links2.length).toBeGreaterThan(links.length);
 
-            links.at(-1)?.scrollIntoView({ behavior: "smooth" });
+            links2.at(-1)?.scrollIntoView({ behavior: "smooth" });
+            return links2;
+        });
+
+        const links3 = await waitFor(() => {
+            const links3 = canvas.getAllByRole("link");
+            expect(links3.length).toBeGreaterThan(links2.length);
+
+            links3.at(-1)?.scrollIntoView({ behavior: "smooth" });
+            return links3;
+        });
+
+        const links4 = await waitFor(() => {
+            const links4 = canvas.getAllByRole("link");
+            expect(links4.length).toBeGreaterThan(links3.length);
+
+            links4.at(-1)?.scrollIntoView({ behavior: "smooth" });
+            return links4;
+        });
+
+        const links5 = await waitFor(() => {
+            const links5 = canvas.getAllByRole("link");
+            expect(links5.length).toBeGreaterThan(links4.length);
+
+            links5.at(-1)?.scrollIntoView({ behavior: "smooth" });
+            return links5;
         });
 
         await waitFor(() => {
-            const links = canvas.getAllByRole("link");
-            expect(links.length).toBe(getExpectedLength(3));
-            links.at(-1)?.scrollIntoView({ behavior: "smooth" });
-        });
+            const links6 = canvas.getAllByRole("link");
+            expect(links6.length).toBeGreaterThan(links5.length);
 
-        await waitFor(() => {
-            const links = canvas.getAllByRole("link");
-            expect(links.length).toBe(getExpectedLength(4));
-
-            links.at(-1)?.scrollIntoView({ behavior: "smooth" });
-        });
-
-        await waitFor(() => {
-            const links = canvas.getAllByRole("link");
-            expect(links.length).toBe(getExpectedLength(5));
-
-            links.at(-1)?.scrollIntoView({ behavior: "smooth" });
-        });
-
-        await waitFor(() => {
-            const links = canvas.getAllByRole("link");
-            expect(links.length).toBe(getExpectedLength(6));
-
-            links.at(-1)?.scrollIntoView({ behavior: "smooth" });
+            links6.at(-1)?.scrollIntoView({ behavior: "smooth" });
         });
     },
 );

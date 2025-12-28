@@ -1,5 +1,6 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
+import type React from "react";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import { signInWithCredentials } from "@/features/auth/services/actions";
@@ -18,12 +19,12 @@ const meta = preview.meta({
         onSwitchToSignup: fn(),
     },
     decorators: [
-        (Story, {}) => (
-            <QueryProvider>
+        Story => (
+            <WithQueryProvider>
                 <div className="min-w-md bg-zinc-925">
                     <Story />
                 </div>
-            </QueryProvider>
+            </WithQueryProvider>
         ),
     ],
     parameters: {
@@ -68,17 +69,7 @@ const meta = preview.meta({
     },
 });
 
-export const Default = meta.story({
-    name: "Default",
-    beforeEach: () => {
-        mocked(signInWithCredentials).mockResolvedValue(
-            api.success.auth.signin(null),
-        );
-    },
-    afterEach: () => {
-        mocked(signInWithCredentials).mockClear();
-    },
-});
+export const Default = meta.story();
 
 Default.test("should render form with all fields", async ({ canvas }) => {
     const emailInput = canvas.getByLabelText(/email/i);
@@ -124,6 +115,10 @@ Default.test(
 Default.test(
     "should submit form with valid credentials",
     async ({ canvas, userEvent, args }) => {
+        mocked(signInWithCredentials).mockResolvedValueOnce(
+            api.success.auth.signin(null),
+        );
+
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
         const loginButton = canvas.getByRole("button", { name: "Login" });
@@ -156,6 +151,10 @@ Default.test(
 Default.test(
     "should submit form when pressing Enter on password field",
     async ({ canvas, userEvent, args }) => {
+        mocked(signInWithCredentials).mockResolvedValueOnce(
+            api.success.auth.signin(null),
+        );
+
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
 
@@ -365,7 +364,6 @@ Default.test(
 );
 
 export const WithoutSwitchToSignup = meta.story({
-    name: "Without Switch to Signup (Link)",
     args: {
         onSwitchToSignup: undefined,
     },

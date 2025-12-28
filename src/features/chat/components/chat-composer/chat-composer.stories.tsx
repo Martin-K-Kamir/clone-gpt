@@ -1,5 +1,20 @@
+import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import {
+    createColoredImageFile,
+    createColoredImageFiles,
+    createFile,
+    createMockFiles,
+} from "#.storybook/lib/mocks/files";
+import { MOCK_CHAT_STATUS } from "#.storybook/lib/mocks/messages";
+import {
+    createMockFilesRateLimit,
+    createMockMessagesRateLimit,
+} from "#.storybook/lib/mocks/rate-limits";
+import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
+import { getFileInput } from "#.storybook/lib/utils/elements";
+import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { ChatStatus } from "ai";
 import { useMemo, useState } from "react";
 import { expect, fn, waitFor } from "storybook/test";
@@ -7,7 +22,7 @@ import { expect, fn, waitFor } from "storybook/test";
 import { SessionSyncProvider } from "@/features/auth/providers";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChatId, DBChatVisibility } from "@/features/chat/lib/types";
+import type { DBChatVisibility } from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatFilesContext,
@@ -21,7 +36,6 @@ import {
 } from "@/features/chat/providers";
 
 import type {
-    DBUserId,
     UserFilesRateLimitResult,
     UserMessagesRateLimitResult,
 } from "@/features/user/lib/types";
@@ -32,66 +46,9 @@ import {
 
 import { MemoizedChatComposer } from "./chat-composer";
 
-const fixedDate = new Date("2025-12-22T12:00:00.000Z");
-const mockChatId = "chat-123" as DBChatId;
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-function createImageFileFromDataURL(
-    dataURL: string,
-    filename: string,
-    mimeType: string,
-): File {
-    const arr = dataURL.split(",");
-    const mime = arr[0].match(/:(.*?);/)?.[1] || mimeType;
-    const bstr = atob(arr[1] || "");
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-    while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-    }
-    return new File([u8arr], filename, { type: mime });
-}
-
-function createColoredImageFile(
-    color: string,
-    filename: string,
-    width: number = 100,
-    height: number = 100,
-): File {
-    const canvas = document.createElement("canvas");
-    canvas.width = width;
-    canvas.height = height;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-        ctx.fillStyle = color;
-        ctx.fillRect(0, 0, width, height);
-    }
-    const dataURL = canvas.toDataURL("image/png");
-    return createImageFileFromDataURL(dataURL, filename, "image/png");
-}
-
-const createImageFiles = () => {
-    return [
-        createColoredImageFile("#FF0000", "red.png"),
-        createColoredImageFile("#0000FF", "blue.png"),
-        createColoredImageFile("#00FF00", "green.png"),
-    ];
-};
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                gcTime: 0,
-            },
-        },
-    });
-}
-
 const StoryWrapper = ({
     Story,
-    status = "ready",
+    status = MOCK_CHAT_STATUS.READY,
     selectedFiles = [],
     isUploadingFiles = false,
     rateLimitMessages,
@@ -141,10 +98,10 @@ const StoryWrapper = ({
         () => ({
             status,
             error: undefined,
-            isStreaming: status === "streaming",
-            isSubmitted: status === "submitted",
-            isReady: status === "ready",
-            isError: status === "error",
+            isStreaming: status === MOCK_CHAT_STATUS.STREAMING,
+            isSubmitted: status === MOCK_CHAT_STATUS.SUBMITTED,
+            isReady: status === MOCK_CHAT_STATUS.READY,
+            isError: status === MOCK_CHAT_STATUS.ERROR,
         }),
         [status],
     );
@@ -178,11 +135,11 @@ const StoryWrapper = ({
                             <ChatCacheSyncProvider>
                                 <ChatSidebarProvider>
                                     <ChatProvider
-                                        userId={mockUserId}
+                                        userId={MOCK_USER_ID}
                                         isNewChat={false}
                                         isOwner={isOwner}
                                         visibility={visibility}
-                                        chatId={mockChatId}
+                                        chatId={MOCK_CHAT_ID}
                                         messages={[]}
                                         userChatPreferences={null}
                                     >
@@ -234,9 +191,7 @@ const meta = preview.meta({
     },
 });
 
-export const Default = meta.story({
-    name: "Default",
-});
+export const Default = meta.story({});
 
 Default.test("should render message input textarea", async ({ canvas }) => {
     const textarea = canvas.getByRole("textbox");
@@ -303,10 +258,7 @@ Default.test("should attach an image file", async ({ canvas, userEvent }) => {
     const fileButton = canvas.getByRole("button", { name: "Attach a file" });
     expect(fileButton).toBeInTheDocument();
 
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
+    const fileInput = getFileInput();
 
     const imageFile = createColoredImageFile("#FF0000", "test-image.png");
 
@@ -328,13 +280,11 @@ Default.test("should attach a file", async ({ canvas }) => {
     const fileButton = canvas.getByRole("button", { name: "Attach a file" });
     expect(fileButton).toBeInTheDocument();
 
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
+    const fileInput = getFileInput();
 
-    const textFile = new File(["file content"], "document.txt", {
-        type: "text/plain",
+    const textFile = createFile({
+        filename: "document.txt",
+        content: "file content",
     });
 
     Object.defineProperty(fileInput, "files", {
@@ -355,16 +305,13 @@ Default.test("should attach multiple files", async ({ canvas }) => {
     const fileButton = canvas.getByRole("button", { name: "Attach a file" });
     expect(fileButton).toBeInTheDocument();
 
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
+    const fileInput = getFileInput();
 
-    const files = [
-        new File(["content1"], "file1.txt", { type: "text/plain" }),
-        new File(["content2"], "file2.pdf", { type: "application/pdf" }),
-        new File(["content3"], "file3.tsx", { type: "text/typescript" }),
-    ];
+    const files = createMockFiles([
+        { filename: "file1.txt" },
+        { filename: "file2.pdf" },
+        { filename: "file3.tsx" },
+    ]);
 
     Object.defineProperty(fileInput, "files", {
         value: files,
@@ -385,10 +332,7 @@ Default.test("should attach multiple images", async ({ canvas }) => {
     const fileButton = canvas.getByRole("button", { name: "Attach a file" });
     expect(fileButton).toBeInTheDocument();
 
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
+    const fileInput = getFileInput();
 
     const images = [
         createColoredImageFile("#FF0000", "red.png"),
@@ -419,18 +363,13 @@ Default.test("should attach files and images together", async ({ canvas }) => {
     });
     expect(fileButton).toBeInTheDocument();
 
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
+    const fileInput = getFileInput();
 
     const filesAndImages = [
         createColoredImageFile("#FF0000", "image1.png"),
-        new File(["content1"], "document1.txt", { type: "text/plain" }),
+        createFile({ filename: "document1.txt", content: "content1" }),
         createColoredImageFile("#0000FF", "image2.png"),
-        new File(["content2"], "document2.pdf", {
-            type: "application/pdf",
-        }),
+        createFile({ filename: "document2.pdf", type: "pdf" }),
     ];
 
     Object.defineProperty(fileInput, "files", {
@@ -453,13 +392,11 @@ Default.test("should remove a file", async ({ canvas, userEvent }) => {
     const fileButton = canvas.getByRole("button", { name: "Attach a file" });
     expect(fileButton).toBeInTheDocument();
 
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
+    const fileInput = getFileInput();
 
-    const textFile = new File(["file content"], "document.txt", {
-        type: "text/plain",
+    const textFile = createFile({
+        filename: "document.txt",
+        content: "file content",
     });
 
     Object.defineProperty(fileInput, "files", {
@@ -491,10 +428,7 @@ Default.test("should remove an image", async ({ canvas, userEvent }) => {
     const fileButton = canvas.getByRole("button", { name: "Attach a file" });
     expect(fileButton).toBeInTheDocument();
 
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    expect(fileInput).toBeInTheDocument();
+    const fileInput = getFileInput();
 
     const imageFile = createColoredImageFile("#FF0000", "test-image.png");
 
@@ -528,18 +462,12 @@ export const WithFiles = meta.story({
         Story => (
             <StoryWrapper
                 Story={Story}
-                selectedFiles={[
-                    new File(["content1"], "file1.txt", { type: "text/plain" }),
-                    new File(["content2"], "file2.pdf", {
-                        type: "application/pdf",
-                    }),
-                    new File(["content3"], "file3.tsx", {
-                        type: "text/typescript",
-                    }),
-                    new File(["content4"], "file4.py", {
-                        type: "text/python",
-                    }),
-                ]}
+                selectedFiles={createMockFiles([
+                    { filename: "file1.txt" },
+                    { filename: "file2.pdf" },
+                    { filename: "file3.tsx" },
+                    { filename: "file4.py" },
+                ])}
             />
         ),
     ],
@@ -560,7 +488,10 @@ WithFiles.test(
 export const WithImages = meta.story({
     decorators: [
         Story => (
-            <StoryWrapper Story={Story} selectedFiles={createImageFiles()} />
+            <StoryWrapper
+                Story={Story}
+                selectedFiles={createColoredImageFiles()}
+            />
         ),
     ],
 });
@@ -579,9 +510,9 @@ WithImages.test(
     "should display all three colored images",
     async ({ canvas }) => {
         await waitFor(() => {
-            expect(canvas.getByAltText("red.png")).toBeInTheDocument();
-            expect(canvas.getByAltText("blue.png")).toBeInTheDocument();
-            expect(canvas.getByAltText("green.png")).toBeInTheDocument();
+            expect(canvas.getByAltText("FF0000.png")).toBeInTheDocument();
+            expect(canvas.getByAltText("0000FF.png")).toBeInTheDocument();
+            expect(canvas.getByAltText("00FF00.png")).toBeInTheDocument();
         });
     },
 );
@@ -592,11 +523,9 @@ export const WithFilesAndImages = meta.story({
             <StoryWrapper
                 Story={Story}
                 selectedFiles={[
-                    ...createImageFiles(),
-                    new File(["content1"], "file1.txt", { type: "text/plain" }),
-                    new File(["content2"], "file2.pdf", {
-                        type: "application/pdf",
-                    }),
+                    ...createColoredImageFiles(),
+                    createFile({ filename: "file1.txt", content: "content1" }),
+                    createFile({ filename: "file2.pdf", type: "pdf" }),
                 ]}
             />
         ),
@@ -607,9 +536,9 @@ WithFilesAndImages.test(
     "should show both files and images preview",
     async ({ canvas }) => {
         await waitFor(() => {
-            expect(canvas.getByAltText("red.png")).toBeInTheDocument();
-            expect(canvas.getByAltText("blue.png")).toBeInTheDocument();
-            expect(canvas.getByAltText("green.png")).toBeInTheDocument();
+            expect(canvas.getByAltText("FF0000.png")).toBeInTheDocument();
+            expect(canvas.getByAltText("0000FF.png")).toBeInTheDocument();
+            expect(canvas.getByAltText("00FF00.png")).toBeInTheDocument();
             expect(canvas.getByText("file1.txt")).toBeInTheDocument();
             expect(canvas.getByText("file2.pdf")).toBeInTheDocument();
         });
@@ -622,7 +551,7 @@ export const WithFilesUploading = meta.story({
             <StoryWrapper
                 Story={Story}
                 selectedFiles={[
-                    new File(["content1"], "file1.txt", { type: "text/plain" }),
+                    createFile({ filename: "file1.txt", content: "content1" }),
                 ]}
                 isUploadingFiles={true}
             />
@@ -635,7 +564,7 @@ export const WithImagesUploading = meta.story({
         Story => (
             <StoryWrapper
                 Story={Story}
-                selectedFiles={createImageFiles()}
+                selectedFiles={createColoredImageFiles()}
                 isUploadingFiles={true}
             />
         ),
@@ -643,7 +572,11 @@ export const WithImagesUploading = meta.story({
 });
 
 export const Streaming = meta.story({
-    decorators: [Story => <StoryWrapper Story={Story} status="streaming" />],
+    decorators: [
+        Story => (
+            <StoryWrapper Story={Story} status={MOCK_CHAT_STATUS.STREAMING} />
+        ),
+    ],
 });
 
 Streaming.test("should show stop button", async ({ canvas }) => {
@@ -661,8 +594,11 @@ Streaming.test("should have disabled file button", async ({ canvas }) => {
 });
 
 export const Submitted = meta.story({
-    name: "Submitted",
-    decorators: [Story => <StoryWrapper Story={Story} status="submitted" />],
+    decorators: [
+        Story => (
+            <StoryWrapper Story={Story} status={MOCK_CHAT_STATUS.SUBMITTED} />
+        ),
+    ],
 });
 
 Submitted.test("should show stop button", async ({ canvas }) => {
@@ -684,14 +620,11 @@ export const RateLimitExceeded = meta.story({
         Story => (
             <StoryWrapper
                 Story={Story}
-                rateLimitMessages={{
-                    isOverLimit: true,
-                    reason: "messages",
-                    periodStart: fixedDate.toISOString(),
-                    periodEnd: fixedDate.toISOString(),
+                rateLimitMessages={createMockMessagesRateLimit({
                     tokensCounter: 1000,
                     messagesCounter: 50,
-                }}
+                    hoursOffset: 0,
+                })}
             />
         ),
     ],
@@ -741,13 +674,12 @@ export const FilesRateLimitExceeded = meta.story({
         Story => (
             <StoryWrapper
                 Story={Story}
-                rateLimitFiles={{
-                    isOverLimit: true,
-                    reason: "files",
-                    periodStart: fixedDate.toISOString(),
-                    periodEnd: fixedDate.toISOString(),
-                    filesCounter: 10,
-                }}
+                rateLimitFiles={createMockFilesRateLimit(
+                    {
+                        filesCounter: 10,
+                    },
+                    0,
+                )}
             />
         ),
     ],

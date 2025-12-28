@@ -1,5 +1,5 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import {
@@ -14,26 +14,24 @@ import type { SyncActionProps } from "@/lib/types";
 
 import { AuthSignOutButton } from "./auth-signout-button";
 
-// Store mock function for testing
 let mockSignOutWithSync: ((props?: SyncActionProps) => Promise<void>) | null =
     null;
 
 const meta = preview.meta({
     component: AuthSignOutButton,
-
     args: {
         children: "Log out",
         onClick: fn(),
     },
     decorators: [
-        (Story, {}) => (
-            <QueryProvider>
+        Story => (
+            <WithQueryProvider>
                 <UserSessionProvider>
                     <SessionSyncProvider>
                         <Story />
                     </SessionSyncProvider>
                 </UserSessionProvider>
-            </QueryProvider>
+            </WithQueryProvider>
         ),
     ],
     parameters: {
@@ -99,7 +97,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
     args: {
         children: "Log out",
     },
@@ -134,7 +131,6 @@ Default.test(
 );
 
 export const WithCustomVariant = meta.story({
-    name: "With Custom Variant",
     args: {
         children: "Log out",
         variant: "outline",
@@ -142,7 +138,6 @@ export const WithCustomVariant = meta.story({
 });
 
 export const Disabled = meta.story({
-    name: "Disabled State",
     args: {
         children: "Log out",
         disabled: true,
@@ -172,18 +167,17 @@ Disabled.test(
 );
 
 export const WithMockedSignOutWithSync = meta.story({
-    name: "With Mocked signOutWithSync",
     args: {
         children: "Log out",
     },
     decorators: [
-        (Story, {}) => {
+        (Story: React.ComponentType) => {
             mockSignOutWithSync = fn().mockName("signOutWithSync") as (
                 props?: SyncActionProps,
             ) => Promise<void>;
 
             return (
-                <QueryProvider>
+                <WithQueryProvider>
                     <UserSessionProvider>
                         <SessionSyncContext.Provider
                             value={{
@@ -193,7 +187,7 @@ export const WithMockedSignOutWithSync = meta.story({
                             <Story />
                         </SessionSyncContext.Provider>
                     </UserSessionProvider>
-                </QueryProvider>
+                </WithQueryProvider>
             );
         },
     ],

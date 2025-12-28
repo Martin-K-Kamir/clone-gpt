@@ -1,4 +1,9 @@
 import {
+    DEFAULT_WEATHER_LOCATION,
+    FIXED_WEATHER_START_DATE,
+    createMockWeatherItems,
+} from "#.storybook/lib/mocks/weather-tools";
+import {
     waitForDropdownMenu,
     waitForDropdownMenuItemByText,
 } from "#.storybook/lib/utils/test-helpers";
@@ -8,112 +13,26 @@ import { expect, waitFor } from "storybook/test";
 import {
     TEMPERATURE_SYSTEM,
     TIME_FORMATS,
-    TIME_OF_DAY,
     WEATHER_PERIOD,
 } from "@/lib/constants";
-import type { UIWeatherItem, WeatherPeriod } from "@/lib/types";
 
-import { WeatherLocation } from "./types";
 import { Weather } from "./weather";
-
-const FIXED_START_DATE = new Date("2024-01-15T12:00:00Z");
-
-function createMockWeatherItems(
-    count: number,
-    period: WeatherPeriod,
-    startDate: Date = FIXED_START_DATE,
-): UIWeatherItem[] {
-    const items: UIWeatherItem[] = [];
-    const descriptions = [
-        "clear sky",
-        "few clouds",
-        "scattered clouds",
-        "broken clouds",
-        "shower rain",
-        "rain",
-        "thunderstorm",
-        "snow",
-        "mist",
-    ];
-    const iconCodes = [
-        "01d",
-        "02d",
-        "03d",
-        "04d",
-        "09d",
-        "10d",
-        "11d",
-        "13d",
-        "50d",
-    ] as const;
-
-    const getTemperature = (index: number): number => {
-        const baseTemp = 23;
-        const variation = Math.sin((index / count) * Math.PI * 2) * 5;
-        return Math.round((baseTemp + variation) * 10) / 10;
-    };
-
-    for (let i = 0; i < count; i++) {
-        const date = new Date(startDate);
-        if (period === WEATHER_PERIOD.CURRENT) {
-            date.setHours(date.getHours() + i);
-        } else {
-            date.setDate(date.getDate() + i);
-            date.setHours(12, 0, 0, 0);
-        }
-
-        const temp = getTemperature(i);
-        const tempVariation = (i % 5) + 2;
-        const tempMax = Math.round((temp + tempVariation) * 10) / 10;
-        const tempMin = Math.round((temp - tempVariation) * 10) / 10;
-
-        const description = descriptions[i % descriptions.length];
-        const iconCode = iconCodes[i % iconCodes.length];
-        const timeOfDay =
-            date.getHours() >= 6 && date.getHours() < 18
-                ? TIME_OF_DAY.DAY
-                : TIME_OF_DAY.NIGHT;
-
-        const finalIconCode = iconCode.replace(
-            /[dn]$/,
-            timeOfDay,
-        ) as UIWeatherItem["iconCode"];
-
-        items.push({
-            timestamp: Math.floor(date.getTime() / 1000),
-            date,
-            temp,
-            tempMax,
-            tempMin,
-            description,
-            timeOfDay,
-            iconCode: finalIconCode,
-        });
-    }
-
-    return items;
-}
-
-const defaultLocation: WeatherLocation = {
-    city: "New York",
-    country: "United States",
-};
 
 const defaultCurrentForecasts = createMockWeatherItems(
     24,
     WEATHER_PERIOD.CURRENT,
-    FIXED_START_DATE,
+    FIXED_WEATHER_START_DATE,
 );
 const defaultUpcomingForecasts = createMockWeatherItems(
     14,
     WEATHER_PERIOD.UPCOMING,
-    FIXED_START_DATE,
+    FIXED_WEATHER_START_DATE,
 );
 
 const meta = preview.meta({
     component: Weather,
     args: {
-        location: defaultLocation,
+        location: DEFAULT_WEATHER_LOCATION,
         forecasts: defaultCurrentForecasts,
         period: WEATHER_PERIOD.CURRENT,
         temperatureSystem: TEMPERATURE_SYSTEM.CELSIUS,
@@ -343,7 +262,7 @@ export const WithManyItems = meta.story({
         forecasts: createMockWeatherItems(
             30,
             WEATHER_PERIOD.CURRENT,
-            FIXED_START_DATE,
+            FIXED_WEATHER_START_DATE,
         ),
         period: WEATHER_PERIOD.CURRENT,
     },
@@ -395,7 +314,7 @@ export const WithFewItems = meta.story({
         forecasts: createMockWeatherItems(
             5,
             WEATHER_PERIOD.CURRENT,
-            FIXED_START_DATE,
+            FIXED_WEATHER_START_DATE,
         ),
     },
 });

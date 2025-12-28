@@ -1,3 +1,8 @@
+import {
+    FIXED_DATE,
+    createMockChats,
+    createMockSearchResults,
+} from "#.storybook/lib/mocks/chats";
 import preview from "#.storybook/preview";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -7,242 +12,14 @@ import { expect, mocked, waitFor } from "storybook/test";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import { INITIAL_QUERY_SEARCH_USER_CHATS_LIMIT } from "@/features/chat/lib/constants";
-import type {
-    DBChat,
-    DBChatId,
-    DBChatSearchResult,
-} from "@/features/chat/lib/types";
+import type { DBChatId } from "@/features/chat/lib/types";
 import { getUserChatsByDate } from "@/features/chat/services/db";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { api } from "@/lib/api-response";
 import { PLURAL } from "@/lib/constants";
 
 import { ChatSearchDialog } from "./chat-search-dialog";
 import { ChatSearchDialogTrigger } from "./chat-search-dialog-client";
-
-const fixedDate = new Date("2025-12-22T12:00:00.000Z");
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-const adjectives = [
-    "Modern",
-    "Advanced",
-    "Complete",
-    "Simple",
-    "Quick",
-    "Deep",
-    "Practical",
-    "Comprehensive",
-    "Essential",
-    "Ultimate",
-    "Beginner",
-    "Professional",
-    "Effective",
-    "Creative",
-    "Powerful",
-];
-
-const verbs = [
-    "Learn",
-    "Build",
-    "Create",
-    "Master",
-    "Understand",
-    "Implement",
-    "Design",
-    "Develop",
-    "Explore",
-    "Optimize",
-    "Deploy",
-    "Test",
-    "Refactor",
-    "Debug",
-    "Scale",
-];
-
-const nouns = [
-    "React",
-    "TypeScript",
-    "Next.js",
-    "Node.js",
-    "API",
-    "Database",
-    "Authentication",
-    "State Management",
-    "Component",
-    "Hook",
-    "Server Actions",
-    "Middleware",
-    "Routing",
-    "Styling",
-    "Testing",
-    "Performance",
-    "Security",
-    "Deployment",
-    "CI/CD",
-    "Docker",
-];
-
-const snippetTemplates = [
-    "In this conversation, we discussed the key concepts and best practices for",
-    "The main topic covered here is",
-    "We explored various approaches to",
-    "This chat focused on understanding",
-    "Here we learned about",
-    "The discussion revolved around",
-    "We went through the fundamentals of",
-    "This conversation explains how to",
-    "We covered important aspects of",
-    "The main focus was on",
-    "In this session, we talked about",
-    "We delved into the details of",
-    "This chat provides insights into",
-    "We examined different strategies for",
-    "The conversation highlights",
-];
-
-const snippetEndings = [
-    "and its practical applications.",
-    "with real-world examples.",
-    "including common pitfalls to avoid.",
-    "and how to implement it effectively.",
-    "covering both theory and practice.",
-    "with step-by-step guidance.",
-    "and best practices to follow.",
-    "including performance considerations.",
-    "with code examples and explanations.",
-    "and troubleshooting tips.",
-    "covering advanced techniques.",
-    "with a focus on modern approaches.",
-    "and integration strategies.",
-    "including security best practices.",
-    "with optimization recommendations.",
-];
-
-function generateChatTitle(index: number): string {
-    const pattern = index % 4;
-    const adjIndex = index % adjectives.length;
-    const verbIndex = index % verbs.length;
-    const nounIndex = index % nouns.length;
-
-    switch (pattern) {
-        case 0:
-            return `${verbs[verbIndex]} ${nouns[nounIndex]}`;
-        case 1:
-            return `${verbs[verbIndex]} a ${adjectives[adjIndex]} ${nouns[nounIndex]}`;
-        case 2:
-            return `Understanding ${nouns[nounIndex]}`;
-        case 3:
-            return `How to ${verbs[verbIndex]} ${nouns[nounIndex]}`;
-        default:
-            return `${verbs[verbIndex]} ${nouns[nounIndex]}`;
-    }
-}
-
-function createMockChat(index: number): DBChat {
-    const date = new Date(fixedDate);
-    date.setDate(date.getDate() - index);
-    const dateStr = date.toISOString();
-
-    return {
-        id: `chat-${index}` as DBChatId,
-        userId: mockUserId,
-        title: generateChatTitle(index),
-        visibility: CHAT_VISIBILITY.PRIVATE,
-        createdAt: dateStr,
-        updatedAt: dateStr,
-        visibleAt: dateStr,
-    };
-}
-
-function createMockChats(length = 10): DBChat[] {
-    return Array.from({ length }, (_, index) => createMockChat(index));
-}
-
-function generateSnippet(index: number, title: string): string {
-    const templateIndex = index % snippetTemplates.length;
-    const endingIndex = index % snippetEndings.length;
-    const template = snippetTemplates[templateIndex];
-    const ending = snippetEndings[endingIndex];
-
-    const titleLower = title.toLowerCase();
-    let topic = title;
-
-    if (titleLower.includes("how to")) {
-        topic = title.replace(/^how to /i, "");
-    } else if (titleLower.startsWith("understanding ")) {
-        topic = title.replace(/^understanding /i, "");
-    } else if (titleLower.includes(" a ")) {
-        const parts = title.split(/ a /i);
-        topic = parts[parts.length - 1] || title;
-    } else {
-        const words = title.split(" ");
-        topic = words[words.length - 1] || title;
-    }
-
-    return `${template} ${topic.toLowerCase()} ${ending}`;
-}
-
-function createMockSearchResult(
-    index: number,
-    snippet?: string,
-): DBChatSearchResult {
-    const chat = createMockChat(index);
-    return {
-        ...chat,
-        snippet: snippet || generateSnippet(index, chat.title),
-    };
-}
-
-function createMockSearchResults(
-    query: string,
-    limit = 10,
-    startIndex = 0,
-): DBChatSearchResult[] {
-    const queryLower = query.toLowerCase();
-
-    const totalChatsNeeded = startIndex + limit;
-    const allChats = createMockChats(totalChatsNeeded * 2);
-
-    const matchingChats: DBChatSearchResult[] = [];
-    let currentIndex = startIndex;
-
-    for (let i = 0; i < allChats.length && matchingChats.length < limit; i++) {
-        const chat = allChats[i];
-        const titleLower = chat.title.toLowerCase();
-        const matchesTitle =
-            titleLower.includes(queryLower) ||
-            chat.title
-                .split(" ")
-                .some(word => word.toLowerCase().includes(queryLower));
-
-        if (matchesTitle) {
-            matchingChats.push(
-                createMockSearchResult(
-                    currentIndex,
-                    generateSnippet(currentIndex, chat.title),
-                ),
-            );
-            currentIndex++;
-        }
-    }
-
-    while (matchingChats.length < limit) {
-        const chatIndex = currentIndex;
-        const chat = createMockChat(chatIndex);
-        const titleWithQuery = `${chat.title} ${query}`;
-        matchingChats.push(
-            createMockSearchResult(
-                chatIndex,
-                generateSnippet(chatIndex, titleWithQuery),
-            ),
-        );
-        currentIndex++;
-    }
-
-    return matchingChats.slice(0, limit);
-}
 
 let currentQueryClient: QueryClient | null = null;
 let apiCallCount = 0;
@@ -301,9 +78,15 @@ export const Default = meta.story({
         msw: {
             handlers: [
                 http.get("/api/user-chats", () => {
-                    const response = api.success.chat.get(createMockChats(10), {
-                        count: PLURAL.MULTIPLE,
-                    });
+                    const response = api.success.chat.get(
+                        createMockChats({
+                            length: 10,
+                            visibility: CHAT_VISIBILITY.PRIVATE,
+                        }),
+                        {
+                            count: PLURAL.MULTIPLE,
+                        },
+                    );
                     return HttpResponse.json(response);
                 }),
                 http.get("/api/user-chats/search", ({ request }) => {
@@ -330,7 +113,9 @@ export const Default = meta.story({
                         );
                     }
 
-                    const searchResults = createMockSearchResults(query, 5);
+                    const searchResults = createMockSearchResults(query, 5, 0, {
+                        visibility: CHAT_VISIBILITY.PRIVATE,
+                    });
                     const response = api.success.chat.search({
                         data: searchResults,
                         totalCount: searchResults.length,
@@ -532,7 +317,12 @@ Default.test(
 Default.test(
     "should call getUserChatsByDate when dialog opens",
     async ({ canvas, userEvent }) => {
-        mocked(getUserChatsByDate).mockResolvedValue(createMockChats(10));
+        mocked(getUserChatsByDate).mockResolvedValue(
+            createMockChats({
+                length: 10,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
+        );
 
         const trigger = canvas.getByRole("button", { name: "Open Search" });
         await userEvent.click(trigger);
@@ -561,9 +351,15 @@ export const WithoutInitialData = meta.story({
             handlers: [
                 http.get("/api/user-chats", () => {
                     apiCallCount++;
-                    const response = api.success.chat.get(createMockChats(5), {
-                        count: PLURAL.MULTIPLE,
-                    });
+                    const response = api.success.chat.get(
+                        createMockChats({
+                            length: 5,
+                            visibility: CHAT_VISIBILITY.PRIVATE,
+                        }),
+                        {
+                            count: PLURAL.MULTIPLE,
+                        },
+                    );
                     return HttpResponse.json(response);
                 }),
                 http.get("/api/user-chats/search", ({ request }) => {
@@ -590,7 +386,9 @@ export const WithoutInitialData = meta.story({
                         );
                     }
 
-                    const searchResults = createMockSearchResults(query, 5);
+                    const searchResults = createMockSearchResults(query, 5, 0, {
+                        visibility: CHAT_VISIBILITY.PRIVATE,
+                    });
                     const response = api.success.chat.search({
                         data: searchResults,
                         totalCount: searchResults.length,
@@ -739,9 +537,15 @@ export const WithInfiniteScrolling = meta.story({
         msw: {
             handlers: [
                 http.get("/api/user-chats", () => {
-                    const response = api.success.chat.get(createMockChats(10), {
-                        count: PLURAL.MULTIPLE,
-                    });
+                    const response = api.success.chat.get(
+                        createMockChats({
+                            length: 10,
+                            visibility: CHAT_VISIBILITY.PRIVATE,
+                        }),
+                        {
+                            count: PLURAL.MULTIPLE,
+                        },
+                    );
                     return HttpResponse.json(response);
                 }),
                 http.get("/api/user-chats/search", ({ request }) => {
@@ -766,7 +570,7 @@ export const WithInfiniteScrolling = meta.story({
                     if (cursorDate && cursorId) {
                         const cursorDateObj = new Date(cursorDate);
                         const daysDiff = Math.floor(
-                            (fixedDate.getTime() - cursorDateObj.getTime()) /
+                            (FIXED_DATE.getTime() - cursorDateObj.getTime()) /
                                 (1000 * 60 * 60 * 24),
                         );
                         pageNumber = Math.floor(daysDiff / 10) + 1;
@@ -782,12 +586,13 @@ export const WithInfiniteScrolling = meta.story({
                         query,
                         resultsPerPage,
                         startIndex,
+                        { visibility: CHAT_VISIBILITY.PRIVATE },
                     );
 
                     const nextCursor = hasNextPage
                         ? {
                               date: new Date(
-                                  fixedDate.getTime() -
+                                  FIXED_DATE.getTime() -
                                       (pageNumber + 1) *
                                           10 *
                                           24 *
@@ -813,7 +618,10 @@ export const WithInfiniteScrolling = meta.story({
     },
     beforeEach: () => {
         mocked(getUserChatsByDate).mockResolvedValue(
-            createMockChats(INITIAL_QUERY_SEARCH_USER_CHATS_LIMIT),
+            createMockChats({
+                length: INITIAL_QUERY_SEARCH_USER_CHATS_LIMIT,
+                visibility: CHAT_VISIBILITY.PRIVATE,
+            }),
         );
     },
     afterEach: () => {

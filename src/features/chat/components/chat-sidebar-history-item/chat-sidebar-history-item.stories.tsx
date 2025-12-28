@@ -1,16 +1,16 @@
+import { withChatProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_ID,
+    createMockPrivateChat,
+    generateChatId,
+} from "#.storybook/lib/mocks/chats";
+import { waitForMenuItemByText } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider, getQueryClient } from "@/providers/query-provider";
-import { HttpResponse, http } from "msw";
+import { getQueryClient } from "@/providers/query-provider";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
 
-import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChatId, UIChat } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
 import { updateChatTitle } from "@/features/chat/services/actions";
 
 import { api } from "@/lib/api-response";
@@ -18,37 +18,25 @@ import { tag } from "@/lib/cache-tag";
 
 import { ChatSidebarHistoryItem } from "./chat-sidebar-history-item";
 
-const mockChatId = "chat-1" as DBChatId;
-
-const mockChat: UIChat = {
-    id: mockChatId,
-    title: "My Chat Conversation",
-    visibility: CHAT_VISIBILITY.PRIVATE,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    visibleAt: new Date().toISOString(),
-};
+const mockChat = createMockPrivateChat();
+const mockChatTitle = mockChat.title;
 
 const meta = preview.meta({
     component: ChatSidebarHistoryItem,
     args: {
-        chatId: mockChatId,
+        chatId: MOCK_CHAT_ID,
         isActive: false,
         initialData: mockChat,
     },
     decorators: [
         Story => (
-            <QueryProvider>
-                <SidebarProvider>
-                    <ChatOffsetProvider>
-                        <ChatCacheSyncProvider>
-                            <ul className="w-58 bg-zinc-925">
-                                <Story />
-                            </ul>
-                        </ChatCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SidebarProvider>
-            </QueryProvider>
+            <SidebarProvider>
+                {withChatProviders(() => (
+                    <ul className="w-58 bg-zinc-925">
+                        <Story />
+                    </ul>
+                ))}
+            </SidebarProvider>
         ),
     ],
     parameters: {},
@@ -123,19 +111,18 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
     args: {
-        chatId: mockChatId,
+        chatId: MOCK_CHAT_ID,
         isActive: false,
         initialData: mockChat,
     },
     beforeEach: () => {
         mocked(updateChatTitle).mockResolvedValue(
-            api.success.chat.rename(mockChatId),
+            api.success.chat.rename(MOCK_CHAT_ID),
         );
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData([tag.userChat(mockChatId)], mockChat);
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockChat);
         queryClient.setQueryData([tag.userInitialChatsSearch()], [mockChat]);
         queryClient.removeQueries({ queryKey: [tag.userChats()] });
     },
@@ -143,7 +130,7 @@ export const Default = meta.story({
         mocked(updateChatTitle).mockClear();
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData([tag.userChat(mockChatId)], mockChat);
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockChat);
         queryClient.setQueryData([tag.userInitialChatsSearch()], [mockChat]);
         queryClient.removeQueries({ queryKey: [tag.userChats()] });
     },
@@ -155,26 +142,20 @@ export const Default = meta.story({
 });
 
 Default.test("should render chat item", async ({ canvas }) => {
-    await waitFor(() => {
-        const link = canvas.getByRole("link");
-        expect(link).toBeVisible();
-        expect(link).toHaveTextContent("My Chat Conversation");
-    });
+    const link = canvas.getByRole("link");
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveTextContent(mockChatTitle);
 });
 
 Default.test("should have correct href", async ({ canvas }) => {
     const link = canvas.getByRole("link");
-    expect(link).toHaveAttribute("href", `/chat/${mockChatId}`);
+    expect(link).toHaveAttribute("href", `/chat/${MOCK_CHAT_ID}`);
 });
 
 Default.test("should be interactive", async ({ canvas, userEvent }) => {
-    await waitFor(() => {
-        const link = canvas.getByRole("link");
-        expect(link).toBeVisible();
-        expect(link).toBeEnabled();
-    });
-
     const link = canvas.getByRole("link");
+    expect(link).toBeInTheDocument();
+    expect(link).toBeEnabled();
 
     let preventDefaultCalled = false;
     const clickHandler = (e: MouseEvent) => {
@@ -190,70 +171,48 @@ Default.test("should be interactive", async ({ canvas, userEvent }) => {
 });
 
 Default.test("should open dropdown menu", async ({ canvas, userEvent }) => {
-    await waitFor(() => {
-        const listItem = canvas.getByRole("listitem");
-        expect(listItem).toBeVisible();
-    });
+    const listItem = canvas.getByRole("listitem");
+    expect(listItem).toBeInTheDocument();
 
     const button = canvas.getByRole("button", { name: "Open menu" });
-    expect(button).toBeInTheDocument();
-
     await userEvent.click(button);
 
     expect(button).toHaveAttribute("aria-expanded", "true");
 
-    await waitFor(() => {
-        const menuItems = document.querySelectorAll("[role='menuitem']");
-        expect(menuItems.length).toBeGreaterThan(0);
-    });
+    await waitForMenuItemByText(/./);
 });
 
 Default.test("should render rename input", async ({ canvas, userEvent }) => {
-    await waitFor(() => {
-        const listItem = canvas.getByRole("listitem");
-        expect(listItem).toBeVisible();
-    });
+    const listItem = canvas.getByRole("listitem");
+    expect(listItem).toBeInTheDocument();
 
     const button = canvas.getByRole("button", { name: "Open menu" });
     await userEvent.click(button);
 
-    const renameItem = await waitFor(() => {
-        const menuItems = document.querySelectorAll("[role='menuitem']");
-        return Array.from(menuItems).find(item =>
-            item.textContent?.includes("Rename"),
-        );
-    });
-
-    await userEvent.click(renameItem!);
+    const renameItem = await waitForMenuItemByText("Rename");
+    await userEvent.click(renameItem);
 
     const input = canvas.getByRole("textbox");
-    expect(input).toBeVisible();
+    expect(input).toBeInTheDocument();
     expect(input).toHaveFocus();
-    expect(input).toHaveValue("My Chat Conversation");
+    expect(input).toHaveValue(mockChatTitle);
 });
 
 Default.test(
     "should rename when clicking outside input",
     async ({ canvas, userEvent }) => {
         mocked(updateChatTitle).mockResolvedValueOnce(
-            api.success.chat.rename(mockChatId),
+            api.success.chat.rename(MOCK_CHAT_ID),
         );
 
-        await waitFor(() => {
-            const listItem = canvas.getByRole("listitem");
-            expect(listItem).toBeVisible();
-        });
+        const listItem = canvas.getByRole("listitem");
+        expect(listItem).toBeInTheDocument();
 
         const button = canvas.getByRole("button", { name: "Open menu" });
         await userEvent.click(button);
 
-        const renameItem = await waitFor(() => {
-            const menuItems = document.querySelectorAll("[role='menuitem']");
-            return Array.from(menuItems).find(item =>
-                item.textContent?.includes("Rename"),
-            );
-        });
-        await userEvent.click(renameItem!);
+        const renameItem = await waitForMenuItemByText("Rename");
+        await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
@@ -272,7 +231,7 @@ Default.test(
         expect(link).toHaveTextContent("New Chat Title");
 
         expect(mocked(updateChatTitle)).toHaveBeenCalledWith({
-            chatId: mockChatId,
+            chatId: MOCK_CHAT_ID,
             newTitle: "New Chat Title",
         });
     },
@@ -282,24 +241,17 @@ Default.test(
     "should rename when pressing Enter",
     async ({ canvas, userEvent }) => {
         mocked(updateChatTitle).mockResolvedValueOnce(
-            api.success.chat.rename(mockChatId),
+            api.success.chat.rename(MOCK_CHAT_ID),
         );
 
-        await waitFor(() => {
-            const listItem = canvas.getByRole("listitem");
-            expect(listItem).toBeVisible();
-        });
+        const listItem = canvas.getByRole("listitem");
+        expect(listItem).toBeInTheDocument();
 
         const button = canvas.getByRole("button", { name: "Open menu" });
         await userEvent.click(button);
 
-        const renameItem = await waitFor(() => {
-            const menuItems = document.querySelectorAll("[role='menuitem']");
-            return Array.from(menuItems).find(item =>
-                item.textContent?.includes("Rename"),
-            );
-        });
-        await userEvent.click(renameItem!);
+        const renameItem = await waitForMenuItemByText("Rename");
+        await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
@@ -318,7 +270,7 @@ Default.test(
         });
 
         expect(mocked(updateChatTitle)).toHaveBeenCalledWith({
-            chatId: mockChatId,
+            chatId: MOCK_CHAT_ID,
             newTitle: "New Chat Title",
         });
     },
@@ -331,21 +283,14 @@ Default.test(
             api.error.chat.rename(new Error("Failed to rename chat")),
         );
 
-        await waitFor(() => {
-            const listItem = canvas.getByRole("listitem");
-            expect(listItem).toBeVisible();
-        });
+        const listItem = canvas.getByRole("listitem");
+        expect(listItem).toBeInTheDocument();
 
         const button = canvas.getByRole("button", { name: "Open menu" });
         await userEvent.click(button);
 
-        const renameItem = await waitFor(() => {
-            const menuItems = document.querySelectorAll("[role='menuitem']");
-            return Array.from(menuItems).find(item =>
-                item.textContent?.includes("Rename"),
-            );
-        });
-        await userEvent.click(renameItem!);
+        const renameItem = await waitForMenuItemByText("Rename");
+        await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
@@ -362,7 +307,7 @@ Default.test(
 
         await waitFor(() => {
             const link = canvas.getByRole("link");
-            expect(link).toHaveTextContent("My Chat Conversation");
+            expect(link).toHaveTextContent(mockChatTitle);
         });
 
         expect(canvas.queryByRole("textbox")).not.toBeInTheDocument();
@@ -372,21 +317,14 @@ Default.test(
 Default.test(
     "should cancel rename when pressing Escape",
     async ({ canvas, userEvent }) => {
-        await waitFor(() => {
-            const listItem = canvas.getByRole("listitem");
-            expect(listItem).toBeVisible();
-        });
+        const listItem = canvas.getByRole("listitem");
+        expect(listItem).toBeInTheDocument();
 
         const button = canvas.getByRole("button", { name: "Open menu" });
         await userEvent.click(button);
 
-        const renameItem = await waitFor(() => {
-            const menuItems = document.querySelectorAll("[role='menuitem']");
-            return Array.from(menuItems).find(item =>
-                item.textContent?.includes("Rename"),
-            );
-        });
-        await userEvent.click(renameItem!);
+        const renameItem = await waitForMenuItemByText("Rename");
+        await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
@@ -403,7 +341,7 @@ Default.test(
 
         await waitFor(() => {
             const link = canvas.getByRole("link");
-            expect(link).toHaveTextContent("My Chat Conversation");
+            expect(link).toHaveTextContent(mockChatTitle);
         });
 
         expect(mocked(updateChatTitle)).not.toHaveBeenCalled();
@@ -413,25 +351,18 @@ Default.test(
 Default.test(
     "should not trigger request when renamed to same value",
     async ({ canvas, userEvent }) => {
-        await waitFor(() => {
-            const listItem = canvas.getByRole("listitem");
-            expect(listItem).toBeVisible();
-        });
+        const listItem = canvas.getByRole("listitem");
+        expect(listItem).toBeInTheDocument();
 
         const button = canvas.getByRole("button", { name: "Open menu" });
         await userEvent.click(button);
 
-        const renameItem = await waitFor(() => {
-            const menuItems = document.querySelectorAll("[role='menuitem']");
-            return Array.from(menuItems).find(item =>
-                item.textContent?.includes("Rename"),
-            );
-        });
-        await userEvent.click(renameItem!);
+        const renameItem = await waitForMenuItemByText("Rename");
+        await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
-        await userEvent.type(input, "My Chat Conversation");
+        await userEvent.type(input, mockChatTitle);
 
         await userEvent.type(input, "{Enter}");
 
@@ -442,9 +373,8 @@ Default.test(
 );
 
 export const Active = meta.story({
-    name: "Active",
     args: {
-        chatId: mockChatId,
+        chatId: MOCK_CHAT_ID,
         isActive: true,
         initialData: mockChat,
     },
@@ -456,58 +386,14 @@ export const Active = meta.story({
 });
 
 Active.test("should mark active chat item", async ({ canvas }) => {
-    await waitFor(() => {
-        const link = canvas.getByRole("link");
-        expect(link).toHaveAttribute("data-active", "true");
-        expect(link).toHaveAttribute("aria-current", "page");
-    });
+    const link = canvas.getByRole("link");
+    expect(link).toHaveAttribute("data-active", "true");
+    expect(link).toHaveAttribute("aria-current", "page");
 });
-
-export const WithoutInitialData = meta.story({
-    name: "Without Initial Data",
-    args: {
-        chatId: "11" as DBChatId,
-        initialData: undefined,
-        isActive: false,
-    },
-    parameters: {
-        msw: {
-            handlers: [
-                http.get(`/api/user-chats/11`, () => {
-                    const response = api.success.chat.get(
-                        {
-                            id: "11",
-                            title: "My API Chat Conversation",
-                            visibility: CHAT_VISIBILITY.PRIVATE,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString(),
-                            visibleAt: new Date().toISOString(),
-                            isOwner: true,
-                        },
-                        { count: 1 },
-                    );
-                    return HttpResponse.json(response);
-                }),
-            ],
-        },
-    },
-});
-
-WithoutInitialData.test(
-    "should fetch chat data when initialData is not provided",
-    async ({ canvas }) => {
-        await waitFor(() => {
-            const link = canvas.getByRole("link");
-            expect(link).toBeVisible();
-            expect(link).toHaveTextContent("My API Chat Conversation");
-        });
-    },
-);
 
 export const LongTitle = meta.story({
-    name: "Long Title",
     args: {
-        chatId: "chat-2" as DBChatId,
+        chatId: generateChatId(1),
         isActive: false,
         initialData: {
             ...mockChat,

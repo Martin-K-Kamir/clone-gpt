@@ -1,4 +1,7 @@
-import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
+import {
+    waitForElement,
+    waitForTooltip,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { IconInfoCircle } from "@tabler/icons-react";
 import { expect, fn, waitFor } from "storybook/test";
@@ -110,7 +113,7 @@ Default.test(
         await userEvent.unhover(button);
 
         await new Promise(resolve => setTimeout(resolve, 100));
-        const tooltipAfterUnhover = document.querySelector(
+        const tooltipAfterUnhover = await waitForElement(
             '[data-slot="tooltip-content"]',
         );
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -208,13 +211,9 @@ SideBottom.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            ) as HTMLElement;
-            expect(tooltipContent).toBeInTheDocument();
-            expect(tooltipContent).toHaveAttribute("data-side", "bottom");
-        });
+        const tooltipContent = await waitForTooltip();
+        expect(tooltipContent).toBeInTheDocument();
+        expect(tooltipContent).toHaveAttribute("data-side", "bottom");
     },
 );
 
@@ -237,13 +236,9 @@ SideLeft.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            ) as HTMLElement;
-            expect(tooltipContent).toBeInTheDocument();
-            expect(tooltipContent).toHaveAttribute("data-side", "left");
-        });
+        const tooltipContent = await waitForTooltip();
+        expect(tooltipContent).toBeInTheDocument();
+        expect(tooltipContent).toHaveAttribute("data-side", "left");
     },
 );
 
@@ -266,13 +261,9 @@ SideRight.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await waitFor(() => {
-            const tooltipContent = document.querySelector(
-                '[data-slot="tooltip-content"]',
-            ) as HTMLElement;
-            expect(tooltipContent).toBeInTheDocument();
-            expect(tooltipContent).toHaveAttribute("data-side", "right");
-        });
+        const tooltipContent = await waitForTooltip();
+        expect(tooltipContent).toBeInTheDocument();
+        expect(tooltipContent).toHaveAttribute("data-side", "right");
     },
 );
 

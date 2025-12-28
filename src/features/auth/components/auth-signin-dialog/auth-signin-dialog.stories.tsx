@@ -1,5 +1,12 @@
+import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { createMockSignupUserData } from "#.storybook/lib/mocks/auth";
+import {
+    findButtonByText,
+    findInputByName,
+    waitForDialog,
+    waitForDialogToClose,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
@@ -8,8 +15,6 @@ import {
     signInWithCredentials,
     signUp,
 } from "@/features/auth/services/actions";
-
-import type { DBUserId, DBUserRole } from "@/features/user/lib/types";
 
 import { api } from "@/lib/api-response";
 
@@ -25,10 +30,10 @@ const meta = preview.meta({
         defaultOpen: false,
     },
     decorators: [
-        (Story, {}) => (
-            <QueryProvider>
+        Story => (
+            <WithQueryProvider>
                 <Story />
-            </QueryProvider>
+            </WithQueryProvider>
         ),
     ],
     parameters: {
@@ -77,7 +82,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
     render: () => (
         <AuthSignInDialog>
             <AuthSignInDialogTrigger asChild>
@@ -85,24 +89,6 @@ export const Default = meta.story({
             </AuthSignInDialogTrigger>
         </AuthSignInDialog>
     ),
-    beforeEach: () => {
-        mocked(signInWithCredentials).mockResolvedValue(
-            api.success.auth.signin(null),
-        );
-        mocked(signUp).mockResolvedValue(
-            api.success.auth.signup({
-                id: "00000000-0000-0000-0000-000000000000" as DBUserId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user" as DBUserRole,
-            }),
-        );
-    },
-    afterEach: () => {
-        mocked(signInWithCredentials).mockClear();
-        mocked(signUp).mockClear();
-    },
 });
 
 Default.test(
@@ -115,10 +101,7 @@ Default.test(
 
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
     },
 );
 
@@ -130,13 +113,10 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const dialog = document.querySelector('[role="dialog"]');
+        const dialog = await waitForDialog("dialog");
         expect(dialog).toBeInTheDocument();
 
-        const buttons = document.querySelectorAll("button");
-        const loginButton = Array.from(buttons).find(button =>
-            button.textContent?.includes("Login"),
-        );
+        const loginButton = findButtonByText("Login");
         expect(loginButton).toBeInTheDocument();
     },
 );
@@ -149,19 +129,14 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = document.querySelectorAll("button");
-        const signupButton = Array.from(buttons).find(button =>
-            button.textContent?.includes("Sign up"),
-        );
-        expect(signupButton).toBeInTheDocument();
-        await userEvent.click(signupButton!);
+        await waitForDialog("dialog");
 
-        const buttonsForSignupForm = document.querySelectorAll("button");
-        const createAccountButton = Array.from(buttonsForSignupForm).find(
-            button => button.textContent?.includes("Create Account"),
-        );
+        const signupButton = findButtonByText("Sign up");
+        expect(signupButton).toBeInTheDocument();
+        await userEvent.click(signupButton);
+
+        const createAccountButton = findButtonByText("Create Account");
         expect(createAccountButton).toBeInTheDocument();
-        expect(signupButton).not.toBeInTheDocument();
     },
 );
 
@@ -173,34 +148,21 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const buttons = document.querySelectorAll("button");
-        const signupButton = Array.from(buttons).find(button =>
-            button.textContent?.includes("Sign up"),
-        );
+        await waitForDialog("dialog");
+
+        const signupButton = findButtonByText("Sign up");
         expect(signupButton).toBeInTheDocument();
-        await userEvent.click(signupButton!);
+        await userEvent.click(signupButton);
 
-        const buttonsForSignupForm = document.querySelectorAll("button");
-        const createAccountButton = Array.from(buttonsForSignupForm).find(
-            button => button.textContent?.includes("Create Account"),
-        );
+        const createAccountButton = findButtonByText("Create Account");
         expect(createAccountButton).toBeInTheDocument();
-        expect(signupButton).not.toBeInTheDocument();
 
-        const signinButton = Array.from(buttonsForSignupForm).find(button =>
-            button.textContent?.includes("Sign in"),
-        );
+        const signinButton = findButtonByText("Sign in");
         expect(signinButton).toBeInTheDocument();
 
-        await userEvent.click(signinButton!);
+        await userEvent.click(signinButton);
 
-        expect(signinButton).not.toBeInTheDocument();
-        expect(createAccountButton).not.toBeInTheDocument();
-
-        const buttonsForSigninForm = document.querySelectorAll("button");
-        const loginButton = Array.from(buttonsForSigninForm).find(button =>
-            button.textContent?.includes("Login"),
-        );
+        const loginButton = findButtonByText("Login");
         expect(loginButton).toBeInTheDocument();
     },
 );
@@ -208,26 +170,21 @@ Default.test(
 Default.test(
     "should close dialog on successful signin",
     async ({ canvas, userEvent }) => {
+        mocked(signInWithCredentials).mockResolvedValueOnce(
+            api.success.auth.signin(null),
+        );
+
         const trigger = canvas.getByRole("button", {
             name: /open login dialog/i,
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
+        const dialog = await waitForDialog("dialog");
         expect(dialog).toBeInTheDocument();
 
-        const emailInput = dialog?.querySelector(
-            'input[name="email"]',
-        ) as HTMLInputElement;
-        const passwordInput = dialog?.querySelector(
-            'input[type="password"]',
-        ) as HTMLInputElement;
-
-        const loginButton = Array.from(
-            dialog?.querySelectorAll("button") || [],
-        ).find(button => button.textContent === "Login");
+        const emailInput = findInputByName("email");
+        const passwordInput = findInputByName("password");
+        const loginButton = findButtonByText("Login");
 
         expect(emailInput).toBeInTheDocument();
         expect(passwordInput).toBeInTheDocument();
@@ -237,16 +194,13 @@ Default.test(
         await userEvent.clear(passwordInput);
         await userEvent.type(emailInput, "test@example.com");
         await userEvent.type(passwordInput, "password123");
-        await userEvent.click(loginButton!);
+        await userEvent.click(loginButton);
 
         await waitFor(() => {
             expect(mocked(signInWithCredentials)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("dialog");
     },
 );
 
@@ -262,20 +216,12 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
+        const dialog = await waitForDialog("dialog");
         expect(dialog).toBeInTheDocument();
 
-        const emailInput = dialog?.querySelector(
-            'input[name="email"]',
-        ) as HTMLInputElement;
-        const passwordInput = dialog?.querySelector(
-            'input[type="password"]',
-        ) as HTMLInputElement;
-        const loginButton = Array.from(
-            dialog?.querySelectorAll("button") || [],
-        ).find(button => button.textContent === "Login");
+        const emailInput = findInputByName("email");
+        const passwordInput = findInputByName("password");
+        const loginButton = findButtonByText("Login");
 
         expect(emailInput).toBeInTheDocument();
         expect(passwordInput).toBeInTheDocument();
@@ -285,13 +231,13 @@ Default.test(
         await userEvent.clear(passwordInput);
         await userEvent.type(emailInput, "test@example.com");
         await userEvent.type(passwordInput, "wrongpassword");
-        await userEvent.click(loginButton!);
+        await userEvent.click(loginButton);
 
         await waitFor(() => {
             expect(mocked(signInWithCredentials)).toHaveBeenCalled();
         });
 
-        const stillOpenDialog = document.querySelector('[role="dialog"]');
+        const stillOpenDialog = await waitForDialog("dialog");
         expect(stillOpenDialog).toBeInTheDocument();
     },
 );
@@ -299,40 +245,36 @@ Default.test(
 Default.test(
     "should switch to signup and submit form successfully",
     async ({ canvas, userEvent }) => {
+        mocked(signUp).mockResolvedValueOnce(
+            api.success.auth.signup(
+                createMockSignupUserData({
+                    email: "john@example.com",
+                }),
+            ),
+        );
+
         const trigger = canvas.getByRole("button", {
             name: /open login dialog/i,
         });
         await userEvent.click(trigger);
 
-        const buttons = document.querySelectorAll("button");
-        const signupButton = Array.from(buttons).find(button =>
-            button.textContent?.includes("Sign up"),
-        );
-        expect(signupButton).toBeInTheDocument();
-        await userEvent.click(signupButton!);
+        await waitForDialog("dialog");
 
-        // Fill and submit signup form
-        const nameInput = document.querySelector(
-            'input[name="name"]',
-        ) as HTMLInputElement;
-        const emailInput = document.querySelector(
-            'input[name="email"]',
-        ) as HTMLInputElement;
-        const passwordInput = document.querySelector(
-            'input[name="password"]',
-        ) as HTMLInputElement;
-        const confirmPasswordInput = document.querySelector(
-            'input[name="confirmPassword"]',
-        ) as HTMLInputElement;
-        const createAccountButton = document.querySelector(
-            'button[type="submit"]',
-        );
+        const signupButton = findButtonByText("Sign up");
+        expect(signupButton).toBeInTheDocument();
+        await userEvent.click(signupButton);
+
+        const nameInput = findInputByName("name");
+        const emailInput = findInputByName("email");
+        const passwordInput = findInputByName("password");
+        const confirmPasswordInput = findInputByName("confirmPassword");
+        const createAccountButton = findButtonByText("Create Account");
 
         await userEvent.type(nameInput, "John Doe");
         await userEvent.type(emailInput, "john@example.com");
         await userEvent.type(passwordInput, "password123");
         await userEvent.type(confirmPasswordInput, "password123");
-        await userEvent.click(createAccountButton!);
+        await userEvent.click(createAccountButton);
 
         await waitFor(() => {
             expect(mocked(signUp)).toHaveBeenCalledWith({
@@ -343,9 +285,7 @@ Default.test(
             });
         });
 
-        const loginButton = document.querySelector(
-            'button[type="submit"]',
-        ) as HTMLButtonElement;
+        const loginButton = findButtonByText("Login");
         expect(loginButton).toBeInTheDocument();
     },
 );

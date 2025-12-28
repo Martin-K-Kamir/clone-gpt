@@ -1,16 +1,23 @@
+import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import {
+    MOCK_ASSISTANT_MESSAGE_ID,
+    MOCK_ASSISTANT_MESSAGE_PARTS_WITH_SOURCES,
+    createMockAssistantMessageMetadata,
+    createMockDownvoteResponseData,
+    createMockTextMessagePart,
+    createMockUpvoteResponseData,
+} from "#.storybook/lib/mocks/messages";
+import { createMockMessagesRateLimit } from "#.storybook/lib/mocks/rate-limits";
+import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
+import { createQueryClient } from "#.storybook/lib/utils/query-client";
+import { waitForDialog } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
-import { expect, mocked, userEvent, waitFor } from "storybook/test";
+import { expect, mocked } from "storybook/test";
 
 import { SessionSyncProvider } from "@/features/auth/providers";
 
-import { CHAT_MESSAGE_TYPE, CHAT_TOOL } from "@/features/chat/lib/constants";
-import type {
-    DBChatId,
-    DBChatMessageId,
-    UIAssistantChatMessage,
-} from "@/features/chat/lib/types";
 import {
     ChatCacheSyncProvider,
     ChatOffsetProvider,
@@ -20,7 +27,6 @@ import {
 import { downvoteChatMessage } from "@/features/chat/services/actions/downvote-chat-message";
 import { upvoteChatMessage } from "@/features/chat/services/actions/upvote-chat-message";
 
-import type { DBUserId } from "@/features/user/lib/types";
 import type { UserMessagesRateLimitResult } from "@/features/user/lib/types";
 import {
     UserCacheSyncProvider,
@@ -29,42 +35,8 @@ import {
 
 import { api } from "@/lib/api-response";
 import { tag } from "@/lib/cache-tag";
-import { RATE_LIMIT_REASON } from "@/lib/constants";
 
 import { ChatMessageToolbarAssistant } from "./chat-message-toolbar-assistant";
-
-const mockChatId = "chat-123" as DBChatId;
-const mockMessageId = "00000000-0000-0000-0000-000000000002" as DBChatMessageId;
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-function createMockMetadata(overrides?: {
-    isUpvoted?: boolean;
-    isDownvoted?: boolean;
-}) {
-    return {
-        role: "assistant" as const,
-        createdAt: "2024-01-15T12:00:00.000Z",
-        model: "gpt-4",
-        totalTokens: 100,
-        isUpvoted: false,
-        isDownvoted: false,
-        ...overrides,
-    };
-}
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: 1,
-                staleTime: 60 * 1000,
-                refetchOnReconnect: false,
-                refetchOnWindowFocus: false,
-                refetchOnMount: false,
-            },
-        },
-    });
-}
 
 const StoryWrapper = ({
     Story,
@@ -82,21 +54,23 @@ const StoryWrapper = ({
     useEffect(() => {
         if (rateLimit !== undefined && rateLimit !== null) {
             queryClient.setQueryData(
-                [tag.userMessagesRateLimit(mockUserId)],
+                [tag.userMessagesRateLimit(MOCK_USER_ID)],
                 rateLimit,
             );
         } else if (rateLimit === null) {
-            // Set default rate limit (not over limit)
-            queryClient.setQueryData([tag.userMessagesRateLimit(mockUserId)], {
-                isOverLimit: false,
-                tokensCounter: 0,
-                messagesCounter: 0,
-            } as UserMessagesRateLimitResult);
+            queryClient.setQueryData(
+                [tag.userMessagesRateLimit(MOCK_USER_ID)],
+                {
+                    isOverLimit: false,
+                    tokensCounter: 0,
+                    messagesCounter: 0,
+                } as UserMessagesRateLimitResult,
+            );
         }
 
         if (isRateLimitPending) {
             queryClient.setQueryData(
-                [tag.userMessagesRateLimit(mockUserId)],
+                [tag.userMessagesRateLimit(MOCK_USER_ID)],
                 undefined,
             );
         }
@@ -111,10 +85,10 @@ const StoryWrapper = ({
                             <ChatCacheSyncProvider>
                                 <ChatSidebarProvider>
                                     <ChatProvider
-                                        userId={mockUserId}
+                                        userId={MOCK_USER_ID}
                                         isNewChat={false}
                                         isOwner={isOwner}
-                                        chatId={mockChatId}
+                                        chatId={MOCK_CHAT_ID}
                                         messages={[]}
                                         userChatPreferences={null}
                                     >
@@ -137,42 +111,23 @@ const meta = preview.meta({
     decorators: [Story => <StoryWrapper Story={Story} />],
     args: {
         canShowActions: true,
-        chatId: mockChatId,
-        messageId: mockMessageId,
+        chatId: MOCK_CHAT_ID,
+        messageId: MOCK_ASSISTANT_MESSAGE_ID,
         content:
             "This is a sample assistant message that can be copied, regenerated, and voted on.",
         parts: [
-            {
-                type: CHAT_MESSAGE_TYPE.TEXT,
-                text: "This is a sample assistant message that can be copied, regenerated, and voted on.",
-            },
-        ] as UIAssistantChatMessage["parts"],
-        metadata: createMockMetadata(),
+            createMockTextMessagePart(
+                "This is a sample assistant message that can be copied, regenerated, and voted on.",
+            ),
+        ],
+        metadata: createMockAssistantMessageMetadata(),
     },
     beforeEach: () => {
         mocked(upvoteChatMessage).mockResolvedValue(
-            api.success.chat.upvote({
-                id: mockMessageId,
-                chatId: mockChatId,
-                userId: mockUserId,
-                role: "assistant" as const,
-                content: "",
-                createdAt: new Date().toISOString(),
-                metadata: createMockMetadata({ isUpvoted: true }),
-                parts: [],
-            }),
+            api.success.chat.upvote(createMockUpvoteResponseData()) as any,
         );
         mocked(downvoteChatMessage).mockResolvedValue(
-            api.success.chat.downvote({
-                id: mockMessageId,
-                chatId: mockChatId,
-                userId: mockUserId,
-                role: "assistant" as const,
-                content: "",
-                createdAt: new Date().toISOString(),
-                metadata: createMockMetadata({ isDownvoted: true }),
-                parts: [],
-            }),
+            api.success.chat.downvote(createMockDownvoteResponseData()) as any,
         );
     },
     argTypes: {
@@ -216,23 +171,21 @@ export const NotOwner = meta.story({
 NotOwner.test(
     "should not show regenerate and vote buttons when user is not owner",
     async ({ canvas }) => {
-        await waitFor(() => {
-            const copyButton = canvas.getByRole("button", { name: /copy/i });
-            const regenerateButton = canvas.queryByRole("button", {
-                name: /try again/i,
-            });
-            const upvoteButton = canvas.queryByRole("button", {
-                name: /upvote/i,
-            });
-            const downvoteButton = canvas.queryByRole("button", {
-                name: /downvote/i,
-            });
-
-            expect(copyButton).toBeInTheDocument();
-            expect(regenerateButton).not.toBeInTheDocument();
-            expect(upvoteButton).not.toBeInTheDocument();
-            expect(downvoteButton).not.toBeInTheDocument();
+        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const regenerateButton = canvas.queryByRole("button", {
+            name: /try again/i,
         });
+        const upvoteButton = canvas.queryByRole("button", {
+            name: /upvote/i,
+        });
+        const downvoteButton = canvas.queryByRole("button", {
+            name: /downvote/i,
+        });
+
+        expect(copyButton).toBeInTheDocument();
+        expect(regenerateButton).not.toBeInTheDocument();
+        expect(upvoteButton).not.toBeInTheDocument();
+        expect(downvoteButton).not.toBeInTheDocument();
     },
 );
 
@@ -241,16 +194,10 @@ export const RateLimitExceeded = meta.story({
         Story => (
             <StoryWrapper
                 Story={Story}
-                rateLimit={{
-                    isOverLimit: true,
-                    reason: RATE_LIMIT_REASON.MESSAGES,
-                    periodStart: new Date().toISOString(),
-                    periodEnd: new Date(
-                        Date.now() + 24 * 60 * 60 * 1000,
-                    ).toISOString(),
+                rateLimit={createMockMessagesRateLimit({
                     tokensCounter: 1000,
                     messagesCounter: 100,
-                }}
+                })}
                 isOwner={true}
             />
         ),
@@ -260,74 +207,45 @@ export const RateLimitExceeded = meta.story({
 RateLimitExceeded.test(
     "should not show regenerate button when rate limit is exceeded",
     async ({ canvas }) => {
-        await waitFor(() => {
-            const copyButton = canvas.getByRole("button", { name: /copy/i });
-            const regenerateButton = canvas.queryByRole("button", {
-                name: /try again/i,
-            });
-            const upvoteButton = canvas.getByRole("button", {
-                name: /upvote/i,
-            });
-
-            expect(copyButton).toBeInTheDocument();
-            expect(regenerateButton).not.toBeInTheDocument();
-            expect(upvoteButton).toBeInTheDocument();
+        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const regenerateButton = canvas.queryByRole("button", {
+            name: /try again/i,
         });
+        const upvoteButton = canvas.getByRole("button", {
+            name: /upvote/i,
+        });
+
+        expect(copyButton).toBeInTheDocument();
+        expect(regenerateButton).not.toBeInTheDocument();
+        expect(upvoteButton).toBeInTheDocument();
     },
 );
 
 export const Disabled = meta.story({
-    name: "Disabled",
     args: {
         disabled: true,
     },
 });
 
 Disabled.test("should disable all buttons", async ({ canvas }) => {
-    await waitFor(() => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
-        const regenerateButton = canvas.getByRole("button", {
-            name: /try again/i,
-        });
-        const upvoteButton = canvas.getByRole("button", { name: /upvote/i });
-        const downvoteButton = canvas.getByRole("button", {
-            name: /downvote/i,
-        });
-
-        expect(copyButton).toBeDisabled();
-        expect(regenerateButton).toBeDisabled();
-        expect(upvoteButton).toBeDisabled();
-        expect(downvoteButton).toBeDisabled();
+    const copyButton = canvas.getByRole("button", { name: /copy/i });
+    const regenerateButton = canvas.getByRole("button", {
+        name: /try again/i,
     });
+    const upvoteButton = canvas.getByRole("button", { name: /upvote/i });
+    const downvoteButton = canvas.getByRole("button", {
+        name: /downvote/i,
+    });
+
+    expect(copyButton).toBeDisabled();
+    expect(regenerateButton).toBeDisabled();
+    expect(upvoteButton).toBeDisabled();
+    expect(downvoteButton).toBeDisabled();
 });
 
 export const WithSources = meta.story({
-    name: "With Sources",
     args: {
-        parts: [
-            {
-                type: CHAT_MESSAGE_TYPE.TEXT,
-                text: "Here's some information based on the following sources:",
-            },
-            {
-                type: "source-url",
-                sourceId: "source-1",
-                url: "https://github.com/vercel/next.js",
-                title: "Next.js - The React Framework",
-            },
-            {
-                type: "source-url",
-                sourceId: "source-2",
-                url: "https://react.dev/reference/react",
-                title: "React Reference Documentation",
-            },
-            {
-                type: "source-url",
-                sourceId: "source-3",
-                url: "https://tailwindcss.com/docs",
-                title: "Tailwind CSS Documentation",
-            },
-        ] as UIAssistantChatMessage["parts"],
+        parts: MOCK_ASSISTANT_MESSAGE_PARTS_WITH_SOURCES,
     },
 });
 
@@ -347,17 +265,11 @@ WithSources.test(
         });
         await userEvent.click(sourceButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector(
-                "[data-slot='dialog-content']",
-            );
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
     },
 );
 
 export const Hidden = meta.story({
-    name: "Hidden",
     args: {
         canShowActions: false,
     },
