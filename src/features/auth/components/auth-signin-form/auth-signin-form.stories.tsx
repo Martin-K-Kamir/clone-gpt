@@ -1,6 +1,5 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { QueryProvider } from "#.storybook/lib/decorators/providers";
 import preview from "#.storybook/preview";
-import type React from "react";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import { signInWithCredentials } from "@/features/auth/services/actions";
@@ -11,7 +10,6 @@ import { AuthSignInForm } from "./auth-signin-form";
 
 const meta = preview.meta({
     component: AuthSignInForm,
-
     args: {
         onSubmit: fn(),
         onSuccess: fn(),
@@ -20,11 +18,11 @@ const meta = preview.meta({
     },
     decorators: [
         Story => (
-            <WithQueryProvider>
+            <QueryProvider>
                 <div className="min-w-md bg-zinc-925">
                     <Story />
                 </div>
-            </WithQueryProvider>
+            </QueryProvider>
         ),
     ],
     parameters: {

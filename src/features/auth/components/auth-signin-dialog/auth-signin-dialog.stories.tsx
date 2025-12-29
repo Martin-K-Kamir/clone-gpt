@@ -1,4 +1,4 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { QueryProvider } from "#.storybook/lib/decorators/providers";
 import { createMockSignupUserData } from "#.storybook/lib/mocks/auth";
 import {
     findButtonByText,
@@ -25,15 +25,14 @@ import {
 
 const meta = preview.meta({
     component: AuthSignInDialog,
-
     args: {
         defaultOpen: false,
     },
     decorators: [
         Story => (
-            <WithQueryProvider>
+            <QueryProvider>
                 <Story />
-            </WithQueryProvider>
+            </QueryProvider>
         ),
     ],
     parameters: {

@@ -1,9 +1,8 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import { waitForElement } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
-import type React from "react";
 import { expect, waitFor } from "storybook/test";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -12,25 +11,19 @@ import { ChatSearchDialogClient } from "@/features/chat/components/chat-search-d
 
 import { ChatSidebarActions } from "./chat-sidebar-actions";
 
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    return (
-        <SidebarProvider>
-            <ChatSearchDialogClient>
-                <div className="w-72 bg-zinc-950 p-4">
-                    <Story />
-                </div>
-            </ChatSearchDialogClient>
-        </SidebarProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatSidebarActions,
     decorators: [
-        (Story: React.ComponentType) => (
-            <WithQueryProvider>
-                <StoryWrapper Story={Story} />
-            </WithQueryProvider>
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <SidebarProvider>
+                    <ChatSearchDialogClient>
+                        <div className="w-72 bg-zinc-950 p-4">
+                            <Story />
+                        </div>
+                    </ChatSearchDialogClient>
+                </SidebarProvider>
+            </AppProviders>
         ),
     ],
     parameters: {

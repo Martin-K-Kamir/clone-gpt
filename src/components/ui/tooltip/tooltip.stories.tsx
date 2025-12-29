@@ -1,3 +1,4 @@
+import { getTooltip } from "#.storybook/lib/utils/elements";
 import {
     waitForElement,
     waitForTooltip,
@@ -290,9 +291,7 @@ WithDelay.test(
         await userEvent.hover(button);
 
         await new Promise(resolve => setTimeout(resolve, 100));
-        const tooltipBeforeDelay = document.querySelector(
-            '[data-slot="tooltip-content"]',
-        );
+        const tooltipBeforeDelay = getTooltip();
         expect(tooltipBeforeDelay).toBeNull();
 
         const tooltip = await waitForTooltip({ timeout: 600 });
@@ -356,9 +355,7 @@ WithDisabledTrigger.test(
 
         await new Promise(resolve => setTimeout(resolve, 300));
 
-        const tooltipContent = document.querySelector(
-            '[data-slot="tooltip-content"]',
-        );
+        const tooltipContent = getTooltip();
         expect(tooltipContent).toBeNull();
     },
 );

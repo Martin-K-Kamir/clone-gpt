@@ -1,194 +1,36 @@
-import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_FILES_AND_IMAGES,
+    MOCK_FILES_IMAGES,
+    MOCK_FILES_MIXED,
     createColoredImageFile,
     createColoredImageFiles,
     createFile,
-    createMockFiles,
 } from "#.storybook/lib/mocks/files";
 import { MOCK_CHAT_STATUS } from "#.storybook/lib/mocks/messages";
 import {
     createMockFilesRateLimit,
     createMockMessagesRateLimit,
 } from "#.storybook/lib/mocks/rate-limits";
-import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
 import { getFileInput } from "#.storybook/lib/utils/elements";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { ChatStatus } from "ai";
-import { useMemo, useState } from "react";
-import { expect, fn, waitFor } from "storybook/test";
-
-import { SessionSyncProvider } from "@/features/auth/providers";
+import { expect, waitFor } from "storybook/test";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChatVisibility } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatFilesContext,
-    ChatFilesRateLimitContext,
-    ChatHandlersContext,
-    ChatMessagesRateLimitContext,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-    ChatStatusContext,
-} from "@/features/chat/providers";
-
-import type {
-    UserFilesRateLimitResult,
-    UserMessagesRateLimitResult,
-} from "@/features/user/lib/types";
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
 
 import { MemoizedChatComposer } from "./chat-composer";
 
-const StoryWrapper = ({
-    Story,
-    status = MOCK_CHAT_STATUS.READY,
-    selectedFiles = [],
-    isUploadingFiles = false,
-    rateLimitMessages,
-    rateLimitFiles,
-    isOwner = true,
-    visibility,
-}: {
-    Story: React.ComponentType;
-    status?: ChatStatus;
-    selectedFiles?: File[];
-    isUploadingFiles?: boolean;
-    rateLimitMessages?: UserMessagesRateLimitResult;
-    rateLimitFiles?: UserFilesRateLimitResult;
-    isOwner?: boolean;
-    visibility?: DBChatVisibility;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-    const [files, setFiles] = useState<File[]>(selectedFiles);
-    const [uploadedFiles] = useState<any[]>([]);
-
-    const chatFilesContextValue = useMemo(
-        () => ({
-            selectedFiles: files,
-            uploadedFiles,
-            isUploadingFiles,
-            handleFileSelect: fn((newFiles: File[]) => {
-                setFiles(prev => [...prev, ...newFiles]);
-            }),
-            handleFileRemove: fn((file: File) => {
-                setFiles(prev => prev.filter(f => f !== file));
-            }),
-        }),
-        [files, uploadedFiles, isUploadingFiles],
-    );
-
-    const chatHandlersContextValue = useMemo(
-        () => ({
-            handleSendMessage: fn(),
-            handleStop: fn(),
-            handleUserRegenerate: fn(),
-            handleAssistantRegenerate: fn(),
-        }),
-        [],
-    );
-
-    const chatStatusContextValue = useMemo(
-        () => ({
-            status,
-            error: undefined,
-            isStreaming: status === MOCK_CHAT_STATUS.STREAMING,
-            isSubmitted: status === MOCK_CHAT_STATUS.SUBMITTED,
-            isReady: status === MOCK_CHAT_STATUS.READY,
-            isError: status === MOCK_CHAT_STATUS.ERROR,
-        }),
-        [status],
-    );
-
-    const chatMessagesRateLimitContextValue = useMemo(
-        () => ({
-            rateLimit: rateLimitMessages,
-            isLoading: false,
-            isPending: false,
-            error: null,
-        }),
-        [rateLimitMessages],
-    );
-
-    const chatFilesRateLimitContextValue = useMemo(
-        () => ({
-            rateLimit: rateLimitFiles,
-            isLoading: false,
-            isPending: false,
-            error: null,
-        }),
-        [rateLimitFiles],
-    );
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={MOCK_USER_ID}
-                                        isNewChat={false}
-                                        isOwner={isOwner}
-                                        visibility={visibility}
-                                        chatId={MOCK_CHAT_ID}
-                                        messages={[]}
-                                        userChatPreferences={null}
-                                    >
-                                        <ChatStatusContext.Provider
-                                            value={chatStatusContextValue}
-                                        >
-                                            <ChatFilesContext.Provider
-                                                value={chatFilesContextValue}
-                                            >
-                                                <ChatHandlersContext.Provider
-                                                    value={
-                                                        chatHandlersContextValue
-                                                    }
-                                                >
-                                                    <ChatMessagesRateLimitContext.Provider
-                                                        value={
-                                                            chatMessagesRateLimitContextValue
-                                                        }
-                                                    >
-                                                        <ChatFilesRateLimitContext.Provider
-                                                            value={
-                                                                chatFilesRateLimitContextValue
-                                                            }
-                                                        >
-                                                            <div className="bg-zinc-925 grid min-h-svh w-full items-center">
-                                                                <Story />
-                                                            </div>
-                                                        </ChatFilesRateLimitContext.Provider>
-                                                    </ChatMessagesRateLimitContext.Provider>
-                                                </ChatHandlersContext.Provider>
-                                            </ChatFilesContext.Provider>
-                                        </ChatStatusContext.Provider>
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: MemoizedChatComposer,
-    decorators: [Story => <StoryWrapper Story={Story} />],
-    parameters: {
-        layout: "fullscreen",
-    },
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <div className="bg-zinc-925 grid min-h-svh w-full items-center">
+                    <Story />
+                </div>
+            </AppProviders>
+        ),
+    ],
 });
 
 export const Default = meta.story({});
@@ -254,7 +96,7 @@ Default.test(
     },
 );
 
-Default.test("should attach an image file", async ({ canvas, userEvent }) => {
+Default.test("should attach an image file", async ({ canvas }) => {
     const fileButton = canvas.getByRole("button", { name: "Attach a file" });
     expect(fileButton).toBeInTheDocument();
 
@@ -307,14 +149,8 @@ Default.test("should attach multiple files", async ({ canvas }) => {
 
     const fileInput = getFileInput();
 
-    const files = createMockFiles([
-        { filename: "file1.txt" },
-        { filename: "file2.pdf" },
-        { filename: "file3.tsx" },
-    ]);
-
     Object.defineProperty(fileInput, "files", {
-        value: files,
+        value: MOCK_FILES_MIXED,
         writable: false,
     });
 
@@ -334,14 +170,8 @@ Default.test("should attach multiple images", async ({ canvas }) => {
 
     const fileInput = getFileInput();
 
-    const images = [
-        createColoredImageFile("#FF0000", "red.png"),
-        createColoredImageFile("#0000FF", "blue.png"),
-        createColoredImageFile("#00FF00", "green.png"),
-    ];
-
     Object.defineProperty(fileInput, "files", {
-        value: images,
+        value: MOCK_FILES_IMAGES,
         writable: false,
     });
 
@@ -351,9 +181,9 @@ Default.test("should attach multiple images", async ({ canvas }) => {
     await waitFor(() => {
         const imageElements = canvas.getAllByRole("img");
         expect(imageElements.length).toBeGreaterThanOrEqual(3);
-        expect(canvas.getByAltText("red.png")).toBeInTheDocument();
-        expect(canvas.getByAltText("blue.png")).toBeInTheDocument();
-        expect(canvas.getByAltText("green.png")).toBeInTheDocument();
+        expect(canvas.getByAltText("FF0000.png")).toBeInTheDocument();
+        expect(canvas.getByAltText("0000FF.png")).toBeInTheDocument();
+        expect(canvas.getByAltText("00FF00.png")).toBeInTheDocument();
     });
 });
 
@@ -365,15 +195,8 @@ Default.test("should attach files and images together", async ({ canvas }) => {
 
     const fileInput = getFileInput();
 
-    const filesAndImages = [
-        createColoredImageFile("#FF0000", "image1.png"),
-        createFile({ filename: "document1.txt", content: "content1" }),
-        createColoredImageFile("#0000FF", "image2.png"),
-        createFile({ filename: "document2.pdf", type: "pdf" }),
-    ];
-
     Object.defineProperty(fileInput, "files", {
-        value: filesAndImages,
+        value: MOCK_FILES_AND_IMAGES,
         writable: false,
     });
 
@@ -381,10 +204,13 @@ Default.test("should attach files and images together", async ({ canvas }) => {
     fileInput.dispatchEvent(changeEvent);
 
     await waitFor(() => {
-        expect(canvas.getByAltText("image1.png")).toBeInTheDocument();
-        expect(canvas.getByAltText("image2.png")).toBeInTheDocument();
-        expect(canvas.getByText("document1.txt")).toBeInTheDocument();
-        expect(canvas.getByText("document2.pdf")).toBeInTheDocument();
+        expect(canvas.getByAltText("FF0000.png")).toBeInTheDocument();
+        expect(canvas.getByAltText("0000FF.png")).toBeInTheDocument();
+        expect(canvas.getByAltText("00FF00.png")).toBeInTheDocument();
+        expect(canvas.getByText("file1.txt")).toBeInTheDocument();
+        expect(canvas.getByText("file2.pdf")).toBeInTheDocument();
+        expect(canvas.getByText("file3.tsx")).toBeInTheDocument();
+        expect(canvas.getByText("file4.py")).toBeInTheDocument();
     });
 });
 
@@ -458,19 +284,11 @@ Default.test("should remove an image", async ({ canvas, userEvent }) => {
 });
 
 export const WithFiles = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                selectedFiles={createMockFiles([
-                    { filename: "file1.txt" },
-                    { filename: "file2.pdf" },
-                    { filename: "file3.tsx" },
-                    { filename: "file4.py" },
-                ])}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            selectedFiles: MOCK_FILES_MIXED,
+        },
+    },
 });
 
 WithFiles.test(
@@ -486,14 +304,11 @@ WithFiles.test(
 );
 
 export const WithImages = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                selectedFiles={createColoredImageFiles()}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            selectedFiles: MOCK_FILES_IMAGES,
+        },
+    },
 });
 
 WithImages.test(
@@ -518,18 +333,11 @@ WithImages.test(
 );
 
 export const WithFilesAndImages = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                selectedFiles={[
-                    ...createColoredImageFiles(),
-                    createFile({ filename: "file1.txt", content: "content1" }),
-                    createFile({ filename: "file2.pdf", type: "pdf" }),
-                ]}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            selectedFiles: MOCK_FILES_AND_IMAGES,
+        },
+    },
 });
 
 WithFilesAndImages.test(
@@ -546,37 +354,31 @@ WithFilesAndImages.test(
 );
 
 export const WithFilesUploading = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                selectedFiles={[
-                    createFile({ filename: "file1.txt", content: "content1" }),
-                ]}
-                isUploadingFiles={true}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            selectedFiles: [
+                createFile({ filename: "file1.txt", content: "content1" }),
+            ],
+            isUploadingFiles: true,
+        },
+    },
 });
 
 export const WithImagesUploading = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                selectedFiles={createColoredImageFiles()}
-                isUploadingFiles={true}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            selectedFiles: createColoredImageFiles(),
+            isUploadingFiles: true,
+        },
+    },
 });
 
 export const Streaming = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper Story={Story} status={MOCK_CHAT_STATUS.STREAMING} />
-        ),
-    ],
+    parameters: {
+        provider: {
+            status: MOCK_CHAT_STATUS.STREAMING,
+        },
+    },
 });
 
 Streaming.test("should show stop button", async ({ canvas }) => {
@@ -594,11 +396,11 @@ Streaming.test("should have disabled file button", async ({ canvas }) => {
 });
 
 export const Submitted = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper Story={Story} status={MOCK_CHAT_STATUS.SUBMITTED} />
-        ),
-    ],
+    parameters: {
+        provider: {
+            status: MOCK_CHAT_STATUS.SUBMITTED,
+        },
+    },
 });
 
 Submitted.test("should show stop button", async ({ canvas }) => {
@@ -616,18 +418,15 @@ Submitted.test("should have disabled file button", async ({ canvas }) => {
 });
 
 export const RateLimitExceeded = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                rateLimitMessages={createMockMessagesRateLimit({
-                    tokensCounter: 1000,
-                    messagesCounter: 50,
-                    hoursOffset: 0,
-                })}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            rateLimitMessages: createMockMessagesRateLimit({
+                tokensCounter: 1000,
+                messagesCounter: 50,
+                hoursOffset: 0,
+            }),
+        },
+    },
 });
 
 RateLimitExceeded.test("should display rate limit info", async ({ canvas }) => {
@@ -670,19 +469,14 @@ RateLimitExceeded.test(
 );
 
 export const FilesRateLimitExceeded = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                rateLimitFiles={createMockFilesRateLimit(
-                    {
-                        filesCounter: 10,
-                    },
-                    0,
-                )}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            rateLimitFiles: createMockFilesRateLimit({
+                filesCounter: 10,
+                hoursOffset: 0,
+            }),
+        },
+    },
 });
 
 FilesRateLimitExceeded.test(
@@ -728,15 +522,12 @@ FilesRateLimitExceeded.test(
 );
 
 export const WithFooter = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                isOwner={false}
-                visibility={CHAT_VISIBILITY.PUBLIC}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            isOwner: false,
+            visibility: CHAT_VISIBILITY.PUBLIC,
+        },
+    },
 });
 
 WithFooter.test(
@@ -751,15 +542,12 @@ WithFooter.test(
 );
 
 export const WithFooterOwner = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                isOwner={true}
-                visibility={CHAT_VISIBILITY.PRIVATE}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            isOwner: true,
+            visibility: CHAT_VISIBILITY.PRIVATE,
+        },
+    },
 });
 
 WithFooterOwner.test(

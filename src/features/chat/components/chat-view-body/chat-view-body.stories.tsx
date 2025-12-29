@@ -1,3 +1,4 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_CONVERSATION_BASIC,
@@ -10,286 +11,26 @@ import {
     MOCK_CONVERSATION_WITH_SINGLE_FILE,
     MOCK_CONVERSATION_WITH_SINGLE_IMAGE,
 } from "#.storybook/lib/mocks/conversations";
-import {
-    MOCK_FILES_MIXED,
-    createColoredImageFiles,
-} from "#.storybook/lib/mocks/files";
-import {
-    MOCK_CHAT_STATUS,
-    createMockUserMessage,
-} from "#.storybook/lib/mocks/messages";
+import { createMockUserMessage } from "#.storybook/lib/mocks/messages";
 import { MOCK_USER_ID, createMockUser } from "#.storybook/lib/mocks/users";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { ChatStatus } from "ai";
-import { useEffect, useMemo, useState } from "react";
-import { expect, fn, waitFor } from "storybook/test";
-
-import { SessionSyncProvider } from "@/features/auth/providers";
+import { expect, waitFor } from "storybook/test";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type {
-    DBChatId,
-    DBChatVisibility,
-    UIChatMessage,
-} from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatFilesContext,
-    ChatFilesRateLimitContext,
-    ChatHandlersContext,
-    ChatMessagesRateLimitContext,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-    ChatStatusContext,
-} from "@/features/chat/providers";
 
-import type {
-    DBUserId,
-    UIUser,
-    UserFilesRateLimitResult,
-    UserMessagesRateLimitResult,
-} from "@/features/user/lib/types";
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-    useUserSessionContext,
-} from "@/features/user/providers";
-
-import { ChatViewBody, ChatViewBodyContent } from "./chat-view-body";
+import { ChatViewBody } from "./chat-view-body";
 
 const mockUser = createMockUser();
-
-function UserSessionSetter({ user }: { user: UIUser }) {
-    const { setUser } = useUserSessionContext();
-    useEffect(() => {
-        setUser(user);
-    }, [setUser, user]);
-    return null;
-}
-
-function ChatViewBodyWithFilesOverride({
-    chatId,
-    userId,
-    isNewChat,
-    isOwner,
-    userChatPreferences,
-    messages = [],
-    visibility,
-    filesContextValue,
-    ...props
-}: {
-    chatId: DBChatId;
-    userId: DBUserId;
-    isNewChat?: boolean;
-    isOwner?: boolean;
-    visibility?: DBChatVisibility;
-    messages?: UIChatMessage[];
-    userChatPreferences: any;
-    filesContextValue: {
-        selectedFiles: File[];
-        uploadedFiles: any[];
-        isUploadingFiles: boolean;
-        handleFileSelect: (files: File[]) => void;
-        handleFileRemove: (file: File) => void;
-    };
-} & Omit<React.ComponentProps<"div">, "children">) {
-    return (
-        <ChatProvider
-            userId={userId}
-            isNewChat={isNewChat}
-            isOwner={isOwner}
-            chatId={chatId}
-            messages={messages}
-            userChatPreferences={userChatPreferences}
-            visibility={visibility}
-        >
-            <ChatFilesContext.Provider value={filesContextValue}>
-                <ChatViewBodyContent {...props} />
-            </ChatFilesContext.Provider>
-        </ChatProvider>
-    );
-}
-
-const StoryWrapper = ({
-    Story,
-    status = MOCK_CHAT_STATUS.READY,
-    messages = [],
-    selectedFiles = [],
-    isUploadingFiles = false,
-    rateLimitMessages,
-    rateLimitFiles,
-    isOwner = true,
-    visibility = CHAT_VISIBILITY.PRIVATE,
-    isNewChat = false,
-    userChatPreferences = null,
-    userId,
-    chatId,
-}: {
-    Story: React.ComponentType<any>;
-    status?: ChatStatus;
-    messages?: UIChatMessage[];
-    selectedFiles?: File[];
-    isUploadingFiles?: boolean;
-    rateLimitMessages?: UserMessagesRateLimitResult;
-    rateLimitFiles?: UserFilesRateLimitResult;
-    isOwner?: boolean;
-    visibility?: DBChatVisibility;
-    isNewChat?: boolean;
-    userChatPreferences?: any;
-    userId?: DBUserId;
-    chatId?: DBChatId;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-    const [files, setFiles] = useState<File[]>(selectedFiles);
-    const [uploadedFiles] = useState<any[]>([]);
-
-    useEffect(() => {
-        setFiles(selectedFiles);
-    }, [selectedFiles]);
-
-    const chatFilesContextValue = useMemo(
-        () => ({
-            selectedFiles: files,
-            uploadedFiles,
-            isUploadingFiles,
-            handleFileSelect: fn((newFiles: File[]) => {
-                setFiles(prev => [...prev, ...newFiles]);
-            }),
-            handleFileRemove: fn((file: File) => {
-                setFiles(prev => prev.filter(f => f !== file));
-            }),
-        }),
-        [files, uploadedFiles, isUploadingFiles],
-    );
-
-    const chatHandlersContextValue = useMemo(
-        () => ({
-            handleSendMessage: fn(),
-            handleStop: fn(),
-            handleUserRegenerate: fn(),
-            handleAssistantRegenerate: fn(),
-        }),
-        [],
-    );
-
-    const chatStatusContextValue = useMemo(
-        () => ({
-            status,
-            error: undefined,
-            isStreaming: status === MOCK_CHAT_STATUS.STREAMING,
-            isSubmitted: status === MOCK_CHAT_STATUS.SUBMITTED,
-            isReady: status === MOCK_CHAT_STATUS.READY,
-            isError: status === MOCK_CHAT_STATUS.ERROR,
-        }),
-        [status],
-    );
-
-    const chatMessagesRateLimitContextValue = useMemo(
-        () => ({
-            rateLimit: rateLimitMessages,
-            isLoading: false,
-            isPending: false,
-            error: null,
-        }),
-        [rateLimitMessages],
-    );
-
-    const chatFilesRateLimitContextValue = useMemo(
-        () => ({
-            rateLimit: rateLimitFiles,
-            isLoading: false,
-            isPending: false,
-            error: null,
-        }),
-        [rateLimitFiles],
-    );
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <UserSessionSetter user={mockUser} />
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatStatusContext.Provider
-                                        value={chatStatusContextValue}
-                                    >
-                                        <ChatHandlersContext.Provider
-                                            value={chatHandlersContextValue}
-                                        >
-                                            <ChatMessagesRateLimitContext.Provider
-                                                value={
-                                                    chatMessagesRateLimitContextValue
-                                                }
-                                            >
-                                                <ChatFilesRateLimitContext.Provider
-                                                    value={
-                                                        chatFilesRateLimitContextValue
-                                                    }
-                                                >
-                                                    <div className="bg-zinc-925 relative flex h-screen w-full flex-col overflow-hidden">
-                                                        {selectedFiles.length >
-                                                            0 &&
-                                                        userId &&
-                                                        chatId ? (
-                                                            <ChatViewBodyWithFilesOverride
-                                                                userId={userId}
-                                                                chatId={chatId}
-                                                                isNewChat={
-                                                                    isNewChat
-                                                                }
-                                                                isOwner={
-                                                                    isOwner
-                                                                }
-                                                                visibility={
-                                                                    visibility
-                                                                }
-                                                                messages={
-                                                                    messages
-                                                                }
-                                                                userChatPreferences={
-                                                                    userChatPreferences
-                                                                }
-                                                                filesContextValue={
-                                                                    chatFilesContextValue
-                                                                }
-                                                            />
-                                                        ) : (
-                                                            <Story />
-                                                        )}
-                                                    </div>
-                                                </ChatFilesRateLimitContext.Provider>
-                                            </ChatMessagesRateLimitContext.Provider>
-                                        </ChatHandlersContext.Provider>
-                                    </ChatStatusContext.Provider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
 
 const meta = preview.meta({
     component: ChatViewBody,
     decorators: [
-        (Story, context) => (
-            <StoryWrapper
-                Story={Story}
-                status={context.args.status || MOCK_CHAT_STATUS.READY}
-                messages={context.args.messages}
-                isOwner={context.args.isOwner}
-                visibility={context.args.visibility}
-                isNewChat={context.args.isNewChat}
-                userChatPreferences={context.args.userChatPreferences}
-            />
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <div className="bg-zinc-925 relative flex h-screen w-full flex-col overflow-hidden">
+                    <Story />
+                </div>
+            </AppProviders>
         ),
     ],
     parameters: {
@@ -303,6 +44,9 @@ const meta = preview.meta({
                     },
                 ],
             },
+        },
+        provider: {
+            user: mockUser,
         },
     },
     argTypes: {
@@ -482,22 +226,6 @@ export const WithFilesInComposer = meta.story({
         isNewChat: false,
         userChatPreferences: null,
     },
-    decorators: [
-        (Story, context) => (
-            <StoryWrapper
-                Story={Story}
-                status={MOCK_CHAT_STATUS.READY}
-                messages={context.args.messages}
-                selectedFiles={MOCK_FILES_MIXED}
-                userId={context.args.userId}
-                chatId={context.args.chatId}
-                isOwner={context.args.isOwner}
-                visibility={context.args.visibility}
-                isNewChat={context.args.isNewChat}
-                userChatPreferences={context.args.userChatPreferences}
-            />
-        ),
-    ],
 });
 
 export const WithImagesInComposer = meta.story({
@@ -510,20 +238,4 @@ export const WithImagesInComposer = meta.story({
         isNewChat: false,
         userChatPreferences: null,
     },
-    decorators: [
-        (Story, context) => (
-            <StoryWrapper
-                Story={Story}
-                status={MOCK_CHAT_STATUS.READY}
-                messages={context.args.messages}
-                selectedFiles={createColoredImageFiles()}
-                userId={context.args.userId}
-                chatId={context.args.chatId}
-                isOwner={context.args.isOwner}
-                visibility={context.args.visibility}
-                isNewChat={context.args.isNewChat}
-                userChatPreferences={context.args.userChatPreferences}
-            />
-        ),
-    ],
 });

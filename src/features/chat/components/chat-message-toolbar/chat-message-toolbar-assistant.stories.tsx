@@ -1,3 +1,4 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_ASSISTANT_MESSAGE_ID,
@@ -8,107 +9,30 @@ import {
     createMockUpvoteResponseData,
 } from "#.storybook/lib/mocks/messages";
 import { createMockMessagesRateLimit } from "#.storybook/lib/mocks/rate-limits";
-import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import { waitForDialog } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
 import { expect, mocked } from "storybook/test";
 
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-} from "@/features/chat/providers";
 import { downvoteChatMessage } from "@/features/chat/services/actions/downvote-chat-message";
 import { upvoteChatMessage } from "@/features/chat/services/actions/upvote-chat-message";
 
-import type { UserMessagesRateLimitResult } from "@/features/user/lib/types";
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
-
 import { api } from "@/lib/api-response";
-import { tag } from "@/lib/cache-tag";
 
 import { ChatMessageToolbarAssistant } from "./chat-message-toolbar-assistant";
 
-const StoryWrapper = ({
-    Story,
-    isOwner = true,
-    rateLimit = null,
-    isRateLimitPending = false,
-}: {
-    Story: React.ComponentType;
-    isOwner?: boolean;
-    rateLimit?: UserMessagesRateLimitResult | null;
-    isRateLimitPending?: boolean;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    useEffect(() => {
-        if (rateLimit !== undefined && rateLimit !== null) {
-            queryClient.setQueryData(
-                [tag.userMessagesRateLimit(MOCK_USER_ID)],
-                rateLimit,
-            );
-        } else if (rateLimit === null) {
-            queryClient.setQueryData(
-                [tag.userMessagesRateLimit(MOCK_USER_ID)],
-                {
-                    isOverLimit: false,
-                    tokensCounter: 0,
-                    messagesCounter: 0,
-                } as UserMessagesRateLimitResult,
-            );
-        }
-
-        if (isRateLimitPending) {
-            queryClient.setQueryData(
-                [tag.userMessagesRateLimit(MOCK_USER_ID)],
-                undefined,
-            );
-        }
-    }, [queryClient, rateLimit, isRateLimitPending]);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={MOCK_USER_ID}
-                                        isNewChat={false}
-                                        isOwner={isOwner}
-                                        chatId={MOCK_CHAT_ID}
-                                        messages={[]}
-                                        userChatPreferences={null}
-                                    >
-                                        <div className="group/message flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
-                                            <Story />
-                                        </div>
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatMessageToolbarAssistant,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story, { parameters }) => {
+            return (
+                <AppProviders {...parameters.provider}>
+                    <div className="group/message flex min-h-[200px] items-center justify-center bg-zinc-950">
+                        <Story />
+                    </div>
+                </AppProviders>
+            );
+        },
+    ],
     args: {
         canShowActions: true,
         chatId: MOCK_CHAT_ID,
@@ -160,12 +84,19 @@ const meta = preview.meta({
             description: "Whether all action buttons are disabled",
         },
     },
+    parameters: {
+        layout: "fullscreen",
+    },
 });
 
 export const Default = meta.story({});
 
 export const NotOwner = meta.story({
-    decorators: [Story => <StoryWrapper Story={Story} isOwner={false} />],
+    parameters: {
+        provider: {
+            isOwner: false,
+        },
+    },
 });
 
 NotOwner.test(
@@ -190,18 +121,16 @@ NotOwner.test(
 );
 
 export const RateLimitExceeded = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                rateLimit={createMockMessagesRateLimit({
-                    tokensCounter: 1000,
-                    messagesCounter: 100,
-                })}
-                isOwner={true}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            rateLimit: createMockMessagesRateLimit({
+                isOverLimit: true,
+                tokensCounter: 1000,
+                messagesCounter: 100,
+            }),
+            isOwner: true,
+        },
+    },
 });
 
 RateLimitExceeded.test(

@@ -1,4 +1,4 @@
-import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     MOCK_CONVERSATION_COMPLEX,
     MOCK_CONVERSATION_MULTIPLE,
@@ -23,106 +23,26 @@ import {
     createMockAssistantMessageWithTool,
     createMockUserMessage,
 } from "#.storybook/lib/mocks/messages";
-import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import type { ChatStatus } from "ai";
-import { useMemo } from "react";
 import { expect, waitFor } from "storybook/test";
 
-import { SessionSyncProvider } from "@/features/auth/providers";
-
 import { CHAT_TOOL } from "@/features/chat/lib/constants";
-import type { DBChatId, UIChatMessage } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-    ChatStatusContext,
-} from "@/features/chat/providers";
-
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
 
 import { ChatMessages } from "./chat-messages";
 
-const StoryWrapper = ({
-    Story,
-    messages = [],
-    chatId = MOCK_CHAT_ID,
-    status,
-    error,
-}: {
-    Story: React.ComponentType;
-    messages?: UIChatMessage[];
-    chatId?: DBChatId;
-    status?: ChatStatus;
-    error?: Error;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    const chatStatusContextValue = useMemo(
-        () =>
-            status !== undefined
-                ? {
-                      status,
-                      error,
-                      isStreaming: status === MOCK_CHAT_STATUS.STREAMING,
-                      isSubmitted: status === MOCK_CHAT_STATUS.SUBMITTED,
-                      isReady: status === MOCK_CHAT_STATUS.READY,
-                      isError: status === MOCK_CHAT_STATUS.ERROR,
-                  }
-                : undefined,
-        [status, error],
-    );
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={MOCK_USER_ID}
-                                        isNewChat={false}
-                                        isOwner={true}
-                                        chatId={chatId}
-                                        messages={messages}
-                                        userChatPreferences={null}
-                                    >
-                                        {chatStatusContextValue ? (
-                                            <ChatStatusContext.Provider
-                                                value={chatStatusContextValue}
-                                            >
-                                                <div className="h-screen w-full bg-zinc-950">
-                                                    <Story />
-                                                </div>
-                                            </ChatStatusContext.Provider>
-                                        ) : (
-                                            <div className="h-screen w-full bg-zinc-950">
-                                                <Story />
-                                            </div>
-                                        )}
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatMessages,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story, { parameters }) => {
+            return (
+                <AppProviders {...parameters.provider}>
+                    <div className="h-screen w-full bg-zinc-950">
+                        <Story />
+                    </div>
+                </AppProviders>
+            );
+        },
+    ],
     parameters: {
         layout: "fullscreen",
         a11y: {
@@ -138,14 +58,20 @@ const meta = preview.meta({
     },
 });
 
-export const Default = meta.story({});
+export const Default = meta.story({
+    parameters: {
+        provider: {
+            messages: [],
+        },
+    },
+});
 
 export const WithMessages = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper Story={Story} messages={MOCK_CONVERSATION_SIMPLE} />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_SIMPLE,
+        },
+    },
 });
 
 WithMessages.test(
@@ -172,11 +98,11 @@ WithMessages.test(
 );
 
 export const WithMultipleMessages = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper Story={Story} messages={MOCK_CONVERSATION_MULTIPLE} />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_MULTIPLE,
+        },
+    },
 });
 
 WithMultipleMessages.test("should render all messages", async ({ canvas }) => {
@@ -185,14 +111,11 @@ WithMultipleMessages.test("should render all messages", async ({ canvas }) => {
 });
 
 export const WithLongConversation = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_LONG_MESSAGES}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_LONG_MESSAGES,
+        },
+    },
 });
 
 WithLongConversation.test("should render all messages", async ({ canvas }) => {
@@ -345,161 +268,119 @@ WithLongConversation.test(
 );
 
 export const UserWithSingleImage = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_SINGLE_IMAGE}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_SINGLE_IMAGE,
+        },
+    },
 });
 
 export const UserWithSingleFile = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_SINGLE_FILE}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_SINGLE_FILE,
+        },
+    },
 });
 
 export const UserWithMultipleImages = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_MULTIPLE_IMAGES}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_MULTIPLE_IMAGES,
+        },
+    },
 });
 
 export const UserWithMultipleFiles = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_MULTIPLE_FILES}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_MULTIPLE_FILES,
+        },
+    },
 });
 
 export const AssistantWithWeather = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_WEATHER}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_WEATHER,
+        },
+    },
 });
 
 export const AssistantWithGeneratedImage = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_GENERATED_IMAGE}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_GENERATED_IMAGE,
+        },
+    },
 });
 
 export const AssistantWithGeneratedImagePortrait = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_GENERATED_IMAGE_PORTRAIT}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_GENERATED_IMAGE_PORTRAIT,
+        },
+    },
 });
 
 export const AssistantWithGeneratedImageLandscape = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_GENERATED_IMAGE_LANDSCAPE}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_GENERATED_IMAGE_LANDSCAPE,
+        },
+    },
 });
 
 export const AssistantWithGeneratedImages = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_GENERATED_IMAGES}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_GENERATED_IMAGES,
+        },
+    },
 });
 
 export const AssistantWithGeneratedFile = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_GENERATED_FILE}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_GENERATED_FILE,
+        },
+    },
 });
 
 export const AssistantWithGeneratedFiles = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_GENERATED_FILES}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_GENERATED_FILES,
+        },
+    },
 });
 
 export const AssistantWithMarkdown = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_MARKDOWN}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_MARKDOWN,
+        },
+    },
 });
 
 export const UserUploadWithAssistantResponse = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={MOCK_CONVERSATION_WITH_IMAGE_ANALYSIS}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_WITH_IMAGE_ANALYSIS,
+        },
+    },
 });
 
 export const WithError = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={[
-                    createMockUserMessage({ text: "This will cause an error" }),
-                ]}
-                status={MOCK_CHAT_STATUS.ERROR}
-                error={new Error("Failed to process request")}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: [
+                createMockUserMessage({ text: "This will cause an error" }),
+            ],
+            status: MOCK_CHAT_STATUS.ERROR,
+            error: new Error("Failed to process request"),
+        },
+    },
 });
 
 WithError.test("should show error message", async ({ canvas }) => {
@@ -510,20 +391,17 @@ WithError.test("should show error message", async ({ canvas }) => {
 });
 
 export const WithLoading = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                messages={[
-                    createMockUserMessage({
-                        text: "What's the weather in New York?",
-                    }),
-                    createMockAssistantMessageWithTool(CHAT_TOOL.GET_WEATHER),
-                ]}
-                status={MOCK_CHAT_STATUS.STREAMING}
-            />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: [
+                createMockUserMessage({
+                    text: "What's the weather in New York?",
+                }),
+                createMockAssistantMessageWithTool(CHAT_TOOL.GET_WEATHER),
+            ],
+            status: MOCK_CHAT_STATUS.STREAMING,
+        },
+    },
 });
 
 WithLoading.test(
@@ -544,9 +422,9 @@ WithLoading.test(
 );
 
 export const ComplexConversation = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper Story={Story} messages={MOCK_CONVERSATION_COMPLEX} />
-        ),
-    ],
+    parameters: {
+        provider: {
+            messages: MOCK_CONVERSATION_COMPLEX,
+        },
+    },
 });

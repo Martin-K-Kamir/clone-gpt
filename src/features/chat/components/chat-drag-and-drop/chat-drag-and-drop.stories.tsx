@@ -1,109 +1,24 @@
-import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     createFile,
     createMockDataTransfer,
 } from "#.storybook/lib/mocks/files";
-import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { expect, fn, waitFor } from "storybook/test";
-
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import type { ChatUploadedFile } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatFilesContext,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-} from "@/features/chat/providers";
-
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
+import { expect, waitFor } from "storybook/test";
 
 import { ChatDragAndDrop } from "./chat-drag-and-drop";
 
-const StoryWrapper = ({
-    Story,
-    handleFileSelect,
-}: {
-    Story: React.ComponentType;
-    handleFileSelect?: (files: File[]) => void;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [uploadedFiles] = useState<ChatUploadedFile[]>([]);
-    const [isUploadingFiles] = useState(false);
-
-    const mockHandleFileSelect =
-        handleFileSelect ??
-        fn((files: File[]) => {
-            setSelectedFiles(prev => [...prev, ...files]);
-        });
-
-    const mockHandleFileRemove = fn((file: File) => {
-        setSelectedFiles(prev => prev.filter(f => f !== file));
-    });
-
-    const chatFilesContextValue = useMemo(
-        () => ({
-            selectedFiles,
-            uploadedFiles,
-            isUploadingFiles,
-            handleFileSelect: mockHandleFileSelect,
-            handleFileRemove: mockHandleFileRemove,
-        }),
-        [
-            selectedFiles,
-            uploadedFiles,
-            isUploadingFiles,
-            mockHandleFileSelect,
-            mockHandleFileRemove,
-        ],
-    );
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={MOCK_USER_ID}
-                                        isNewChat={false}
-                                        isOwner={true}
-                                        chatId={MOCK_CHAT_ID}
-                                        messages={[]}
-                                        userChatPreferences={null}
-                                    >
-                                        <ChatFilesContext.Provider
-                                            value={chatFilesContextValue}
-                                        >
-                                            <div className="h-screen w-full bg-zinc-950">
-                                                <Story />
-                                            </div>
-                                        </ChatFilesContext.Provider>
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatDragAndDrop,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <div className="h-screen w-full bg-zinc-950">
+                    <Story />
+                </div>
+            </AppProviders>
+        ),
+    ],
     argTypes: {
         renderDragOverMessage: {
             control: false,

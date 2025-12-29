@@ -1,39 +1,19 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import type React from "react";
 import { expect, fn, waitFor } from "storybook/test";
 
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
-
 import { ChatMessageActionsUser } from "./chat-message-actions-user";
-
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    return (
-        <UserSessionProvider>
-            <SessionSyncProvider>
-                <UserCacheSyncProvider>
-                    <div className="flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
-                        <Story />
-                    </div>
-                </UserCacheSyncProvider>
-            </SessionSyncProvider>
-        </UserSessionProvider>
-    );
-};
 
 const meta = preview.meta({
     component: ChatMessageActionsUser,
     decorators: [
         Story => (
-            <WithQueryProvider>
-                <StoryWrapper Story={Story} />
-            </WithQueryProvider>
+            <AppProviders>
+                <div className="flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
+                    <Story />
+                </div>
+            </AppProviders>
         ),
     ],
     args: {

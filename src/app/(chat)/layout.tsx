@@ -17,15 +17,7 @@ export const preferredRegion = "fra1";
 export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <SidebarProvider>
-            <SidebarWrapper
-                style={
-                    {
-                        "--sidebar-width": "calc(var(--spacing) * 72)",
-                        "--header-height": "calc(var(--spacing) * 12)",
-                    } as React.CSSProperties
-                }
-                className="max-h-svh"
-            >
+            <SidebarWrapper className="max-h-svh">
                 <Suspense fallback={<ChatSidebarSkeleton />}>
                     <ChatSearchDialog>
                         <ChatSidebar />

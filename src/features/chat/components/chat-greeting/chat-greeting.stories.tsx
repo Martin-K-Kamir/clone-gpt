@@ -1,14 +1,10 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { UserSessionProvider } from "#.storybook/lib/decorators/providers";
 import {
     createMockGuestUser,
     createMockUser,
 } from "#.storybook/lib/mocks/users";
 import preview from "#.storybook/preview";
-import type React from "react";
 import { expect } from "storybook/test";
-
-import type { UIUser } from "@/features/user/lib/types";
-import { UserSessionContext } from "@/features/user/providers";
 
 import { ChatGreeting } from "./chat-greeting";
 
@@ -18,21 +14,11 @@ const meta = preview.meta({
         as: "h1",
     },
     decorators: [
-        (Story: React.ComponentType, { parameters }) => {
-            const mockUser =
-                (parameters.user as UIUser | null | undefined) ?? null;
-
+        (Story, { parameters }) => {
             return (
-                <WithQueryProvider>
-                    <UserSessionContext.Provider
-                        value={{
-                            user: mockUser,
-                            setUser: () => {},
-                        }}
-                    >
-                        <Story />
-                    </UserSessionContext.Provider>
-                </WithQueryProvider>
+                <UserSessionProvider {...parameters.provider}>
+                    <Story />
+                </UserSessionProvider>
             );
         },
     ],
@@ -70,7 +56,9 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     parameters: {
-        user: createMockUser(),
+        provider: {
+            user: createMockUser(),
+        },
     },
 });
 
@@ -83,7 +71,9 @@ Default.test("should render greeting for regular user", async ({ canvas }) => {
 
 export const GuestUser = meta.story({
     parameters: {
-        user: createMockGuestUser(),
+        provider: {
+            user: createMockGuestUser(),
+        },
     },
 });
 
@@ -96,7 +86,9 @@ GuestUser.test("should render greeting for guest user", async ({ canvas }) => {
 
 export const NoUser = meta.story({
     parameters: {
-        user: null,
+        provider: {
+            user: null,
+        },
     },
 });
 

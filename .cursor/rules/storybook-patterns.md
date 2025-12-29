@@ -18,27 +18,29 @@ This document outlines the patterns, conventions, and best practices for writing
 ### Basic Story Structure
 
 ```tsx
-import {
-    WithQueryProvider,
-    createMockUser,
-    getButton,
-    waitForDialog,
-} from "#.storybook/lib";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { createMockUser } from "#.storybook/lib/mocks/users";
+import { waitForDialog } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { expect, fn, waitFor } from "storybook/test";
+import { expect, fn } from "storybook/test";
 
 import { MyComponent } from "./my-component";
+
+const mockUser = createMockUser();
 
 const meta = preview.meta({
     component: MyComponent,
     decorators: [
-        Story => (
-            <WithQueryProvider>
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
                 <Story />
-            </WithQueryProvider>
+            </AppProviders>
         ),
     ],
     parameters: {
+        provider: {
+            user: mockUser,
+        },
         a11y: {
             test: "error",
         },
@@ -271,6 +273,7 @@ const parts = MOCK_SOURCE_PARTS;
 - `createMockPaginatedChats(length, hasNextPage?)` - Creates paginated chat data
 - `createMockPrivateChat(index)` - Creates a private chat
 - `createMockPublicChat(index)` - Creates a public chat
+- `createMockChatWithOwner(chatId?, isOwner?)` - Creates a mock chat with `isOwner` property
 
 #### Messages
 
@@ -371,6 +374,8 @@ These utilities use `document.querySelector` for elements that are not easily ac
 
 ### Using Test Helpers
 
+**IMPORTANT**: Always use test helpers from `#.storybook/lib/utils/test-helpers` instead of directly using `document.querySelector` or manual `waitFor` calls. This ensures consistent element querying and better error messages.
+
 Use test helpers from `#.storybook/lib/utils/test-helpers` for common test patterns.
 
 ```tsx
@@ -387,7 +392,7 @@ await clickAndWait(button, userEvent, async () => {
     await waitForDialogToClose();
 });
 
-// ❌ Bad
+// ❌ Bad - Don't use document.querySelector directly
 await waitFor(() => {
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog).toBeInTheDocument();
@@ -413,39 +418,236 @@ await waitFor(() => {
 - `findInputByName(name)` - Find input by name attribute
 - `findInputByType(type)` - Find input by type
 
-## Decorators
+## Decorators and Providers
 
-### Using Decorators
+### Using Providers (Preferred)
 
-Use decorators from `#.storybook/lib/decorators` for common provider setups.
+**IMPORTANT**: Always use component syntax for providers, not function-based decorators. Component syntax is cleaner and more maintainable.
+
+**CRITICAL**: Decorators are inherited in Storybook. If you define a provider decorator in `meta`, it applies to all stories. To customize provider props for individual stories, use `parameters.provider` instead of re-defining decorators. This prevents duplicate provider nesting.
+
+Use providers from `#.storybook/lib/decorators/providers` for common provider setups.
 
 ```tsx
 import {
-    WithQueryProviderAndToaster,
-    withChatProviders,
-    withChatProvidersAndToaster,
-} from "#.storybook/lib/decorators";
+    AppProviders,
+    QueryProvider,
+    UserSessionProvider,
+} from "#.storybook/lib/decorators/providers";
 
 const meta = preview.meta({
     component: MyComponent,
     decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <div className="bg-zinc-925 grid min-h-svh w-full items-center">
+                    <Story />
+                </div>
+            </AppProviders>
+        ),
+    ],
+});
+
+export const Default = meta.story({});
+
+export const WithFiles = meta.story({
+    parameters: {
+        provider: {
+            selectedFiles: MOCK_FILES_MIXED,
+        },
+    },
+});
+```
+
+### Available Providers
+
+#### App Providers
+
+- `QueryProvider` - Basic React Query provider
+- `UserSessionProvider` - User session provider (for components that only need user context)
+- `AppProviders` - Unified app provider that always includes all necessary providers
+    - **Base providers** (always included): `QueryProvider`, `UserSessionProvider`, `SessionSyncProvider`, `ChatOffsetProvider`, `UserCacheSyncProvider`, `ChatCacheSyncProvider`, `Toaster`
+    - **Always includes `ChatProvider` and `ChatSidebarProvider`** with safe defaults
+    - **Always includes context providers** (`ChatStatusContext`, `ChatFilesContext`, `ChatHandlersContext`, `ChatMessagesRateLimitContext`, `ChatFilesRateLimitContext`) with safe defaults
+    - **Props**: `status?`, `selectedFiles?`, `isUploadingFiles?`, `rateLimitMessages?`, `rateLimit?` (alias for `rateLimitMessages`), `rateLimitFiles?`, `isOwner?`, `visibility?`, `uploadedFiles?`, `handleFileSelect?`, `handleFileRemove?`, `messages?`, `chatId?`, `error?`, `user?`
+
+### Provider Pattern with Parameters
+
+**✅ Good - Single decorator with parameters.provider:**
+
+```tsx
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { createMockUser } from "#.storybook/lib/mocks/users";
+
+const mockUser = createMockUser();
+
+const meta = preview.meta({
+    component: MyComponent,
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <div className="bg-zinc-925 grid min-h-svh w-full items-center">
+                    <Story />
+                </div>
+            </AppProviders>
+        ),
+    ],
+    parameters: {
+        provider: {
+            user: mockUser,
+        },
+    },
+});
+
+export const Default = meta.story({});
+
+export const WithFiles = meta.story({
+    parameters: {
+        provider: {
+            selectedFiles: MOCK_FILES_MIXED,
+        },
+    },
+});
+
+export const Streaming = meta.story({
+    parameters: {
+        provider: {
+            status: MOCK_CHAT_STATUS.STREAMING,
+        },
+    },
+});
+
+export const WithRateLimit = meta.story({
+    parameters: {
+        provider: {
+            rateLimit: MOCK_RATE_LIMIT_OVER, // rateLimit is an alias for rateLimitMessages
+        },
+    },
+});
+```
+
+**❌ Bad - Re-defining decorators in stories (causes duplicate providers):**
+
+```tsx
+const meta = preview.meta({
+    component: MyComponent,
+    decorators: [
         Story => (
-            <WithQueryProviderAndToaster>
+            <AppProviders>
                 <Story />
-            </WithQueryProviderAndToaster>
+            </AppProviders>
+        ),
+    ],
+});
+
+// ❌ DON'T DO THIS - Creates duplicate providers!
+export const WithFiles = meta.story({
+    decorators: [
+        Story => (
+            <AppProviders selectedFiles={MOCK_FILES_MIXED}>
+                <Story />
+            </AppProviders>
         ),
     ],
 });
 ```
 
-### Available Decorators
+**✅ Good - Use parameters.provider instead:**
 
-- `WithQueryProvider` - Wraps with QueryProvider
-- `WithQueryProviderAndToaster` - Wraps with QueryProvider and Toaster
-- `withChatProviders` - Wraps with chat providers (QueryProvider, ChatOffsetProvider, ChatCacheSyncProvider)
-- `withChatProvidersAndToaster` - Wraps with chat providers and Toaster (includes centered layout)
-- `withCenteredLayout` - Centers the story
-- `withDarkBackground` - Adds dark background
+```tsx
+export const WithFiles = meta.story({
+    parameters: {
+        provider: {
+            selectedFiles: MOCK_FILES_MIXED,
+        },
+    },
+});
+```
+
+### Decorator Inheritance
+
+Storybook decorators are inherited in this order:
+
+1. Global decorators (from `.storybook/preview.ts`)
+2. Component decorators (from `meta.decorators`)
+3. Story decorators (from individual story `decorators`)
+
+When you add a decorator to a story, it wraps the component decorators, which can cause duplicate provider nesting. Use `parameters.provider` instead to pass props to the existing provider decorator.
+
+### Styling Wrappers
+
+**IMPORTANT**: Styling wrapper divs (with className) should be kept in story files, not in provider components. Providers should only handle logic and context setup.
+
+**✅ Good:**
+
+```tsx
+decorators: [
+    (Story, { parameters }) => (
+        <AppProviders {...parameters.provider}>
+            <div className="bg-zinc-925 grid min-h-svh w-full items-center">
+                <Story />
+            </div>
+        </AppProviders>
+    ),
+],
+```
+
+**❌ Bad - Styling in provider:**
+
+```tsx
+// Don't put styling divs in provider components
+```
+
+### User Session Setup
+
+**IMPORTANT**: Use the `user` prop on providers instead of creating separate setter components. This keeps stories clean and follows the provider pattern.
+
+**✅ Good - Pass user via parameters.provider:**
+
+```tsx
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { createMockUser } from "#.storybook/lib/mocks/users";
+
+const mockUser = createMockUser();
+
+const meta = preview.meta({
+    component: MyComponent,
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
+        ),
+    ],
+    parameters: {
+        provider: {
+            user: mockUser,
+        },
+    },
+});
+```
+
+**❌ Bad - Don't create setter components in story files:**
+
+```tsx
+// ❌ DON'T DO THIS
+function UserSessionSetter({ user }: { user: UIUser }) {
+    const { setUser } = useUserSessionContext();
+    useEffect(() => {
+        setUser(user);
+    }, [setUser, user]);
+    return null;
+}
+
+decorators: [
+    Story => (
+        <AppProviders>
+            <UserSessionSetter user={mockUser} />
+            <Story />
+        </AppProviders>
+    ),
+],
+```
 
 ## MSW Handlers
 
@@ -475,7 +677,7 @@ export const Default = meta.story({
 
 ### Using Query Client Utilities
 
-Use query client utilities from `#.storybook/lib/utils/query-client` for managing query state.
+**IMPORTANT**: Always use query client utilities from `#.storybook/lib/utils/query-client` instead of directly accessing `getQueryClient()` from application code. This ensures consistent query management in Storybook.
 
 ```tsx
 import {
@@ -485,10 +687,31 @@ import {
 } from "#.storybook/lib/utils/query-client";
 
 export const Default = meta.story({
-    beforeEach: () => {
-        clearUserSharedChatsQueries();
+    afterEach: () => {
+        clearAllQueries();
     },
 });
+```
+
+**✅ Good - Use Storybook utilities:**
+
+```tsx
+import { clearAllQueries } from "#.storybook/lib/utils/query-client";
+
+afterEach: () => {
+    clearAllQueries();
+},
+```
+
+**❌ Bad - Don't import from application code:**
+
+```tsx
+import { getQueryClient } from "@/providers/query-provider";
+
+afterEach: () => {
+    const queryClient = getQueryClient();
+    queryClient.clear();
+},
 ```
 
 ### Available Query Client Utilities
@@ -631,3 +854,10 @@ Default.test(
 13. **Use parts constants** - Use filtered parts constants instead of inline filtering
 14. **Avoid inline filtering** - Don't filter parts inline, use pre-filtered constants like `MOCK_FILE_PARTS_MULTIPLE`
 15. **No raw data in stories** - Never define raw mock data (objects, arrays, constants) directly in story files. All mock data must be defined in `#.storybook/lib/mocks` and imported into stories. This keeps stories clean and makes mock data reusable across multiple stories.
+16. **No helper functions in stories** - Move helper functions (like `createMockChatWithOwner`) to the mocks files instead of defining them inline in story files
+17. **Use provider props for user** - Pass `user` via `parameters.provider.user` instead of creating setter components in story files
+18. **Direct spread parameters.provider** - Always spread `parameters.provider` directly onto the provider component (e.g., `<AppProviders {...parameters.provider}>`)
+19. **Use rateLimit alias** - In `AppProviders`, you can use `rateLimit` as an alias for `rateLimitMessages` - both props are supported
+20. **Unified provider** - `AppProviders` is a unified provider that always includes all necessary providers (`ChatProvider`, `ChatSidebarProvider`, and all context providers) with safe defaults. This ensures components that use `useChatContext()` or other chat contexts work even without explicit props
+21. **Use Storybook query utilities** - Always use `clearAllQueries()` from `#.storybook/lib/utils/query-client` instead of `getQueryClient()` from application code
+22. **Use Storybook test helpers** - Always use `waitForDialog()`, `waitForDropdownMenu()`, etc. from `#.storybook/lib/utils/test-helpers` instead of `document.querySelector`

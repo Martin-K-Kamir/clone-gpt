@@ -151,10 +151,18 @@ export function createMockFiles(
     });
 }
 
-export const MOCK_FILES_MIXED: File[] = [
-    createFile({ filename: "document.pdf", type: "pdf" }),
-    createFile({ filename: "button.tsx", type: "typescript" }),
-    createFile({ filename: "sum.js", type: "javascript" }),
+export const MOCK_FILES_MIXED = [
+    createFile({ filename: "file1.txt", type: "text" }),
+    createFile({ filename: "file2.pdf", type: "pdf" }),
+    createFile({ filename: "file3.tsx", type: "typescript" }),
+    createFile({ filename: "file4.py", type: "python" }),
+];
+
+export const MOCK_FILES_IMAGES = createColoredImageFiles();
+
+export const MOCK_FILES_AND_IMAGES = [
+    ...MOCK_FILES_IMAGES,
+    ...MOCK_FILES_MIXED,
 ];
 
 export function createMockDataTransfer(files: File[] = []): DataTransfer {

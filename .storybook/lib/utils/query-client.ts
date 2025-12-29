@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
 import { tag } from "../../../src/lib/cache-tag";
-import { getQueryClient } from "../../../src/providers/query-provider";
+import { getQueryClient as getQueryClientFromApp } from "../../../src/providers/query-provider";
 
 export function createQueryClient() {
     return new QueryClient({
@@ -18,7 +18,7 @@ export function createQueryClient() {
 }
 
 export function clearQueriesByTag(cacheTag: string): void {
-    const queryClient = getQueryClient();
+    const queryClient = getQueryClientFromApp();
     queryClient.removeQueries({
         predicate: query => {
             const key = query.queryKey;
@@ -42,6 +42,10 @@ export function clearUserChatsQueries(): void {
 }
 
 export function clearAllQueries(): void {
-    const queryClient = getQueryClient();
+    const queryClient = getQueryClientFromApp();
     queryClient.clear();
+}
+
+export function getQueryClient() {
+    return getQueryClientFromApp();
 }

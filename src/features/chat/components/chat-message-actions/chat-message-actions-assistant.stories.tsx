@@ -1,3 +1,4 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_ASSISTANT_MESSAGE_ID,
@@ -5,70 +6,28 @@ import {
     createMockDownvoteResponseData,
     createMockUpvoteResponseData,
 } from "#.storybook/lib/mocks/messages";
-import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-} from "@/features/chat/providers";
 import { downvoteChatMessage } from "@/features/chat/services/actions/downvote-chat-message";
 import { upvoteChatMessage } from "@/features/chat/services/actions/upvote-chat-message";
-
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
 
 import { api } from "@/lib/api-response";
 
 import { ChatMessageActionsAssistant } from "./chat-message-actions-assistant";
 
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={MOCK_USER_ID}
-                                        isNewChat={false}
-                                        isOwner={true}
-                                        chatId={MOCK_CHAT_ID}
-                                        messages={[]}
-                                        userChatPreferences={null}
-                                    >
-                                        <div className="flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
-                                            <Story />
-                                        </div>
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatMessageActionsAssistant,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        Story => (
+            <AppProviders>
+                <div className="flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
+                    <Story />
+                </div>
+            </AppProviders>
+        ),
+    ],
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,

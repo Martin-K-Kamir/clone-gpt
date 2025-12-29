@@ -1,6 +1,9 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { createMockGuestSession } from "#.storybook/lib/mocks/auth";
-import { MOCK_CHAT_ID, createMockChat } from "#.storybook/lib/mocks/chats";
+import {
+    MOCK_CHAT_ID,
+    createMockChatWithOwner,
+} from "#.storybook/lib/mocks/chats";
 import {
     waitForDialog,
     waitForDropdownMenu,
@@ -16,83 +19,28 @@ import {
     SidebarWrapper,
 } from "@/components/ui/sidebar";
 
-import { SessionSyncProvider } from "@/features/auth/providers";
 import { auth } from "@/features/auth/services/auth";
 
-import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChatId, WithIsOwner } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
 import { getUserChatById } from "@/features/chat/services/db";
-
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
 
 import { ChatViewHeader } from "./chat-view-header";
 import { ChatViewHeaderSkeleton } from "./chat-view-header-skeleton";
 
-function createMockChatWithOwner(
-    chatId: DBChatId = MOCK_CHAT_ID,
-    isOwner = true,
-): ReturnType<typeof createMockChat> & WithIsOwner {
-    return {
-        ...createMockChat({
-            id: chatId,
-            visibility: CHAT_VISIBILITY.PRIVATE,
-        }),
-        isOwner,
-    };
-}
-
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    return (
-        <UserSessionProvider>
-            <SessionSyncProvider>
-                <ChatOffsetProvider>
-                    <UserCacheSyncProvider>
-                        <ChatCacheSyncProvider>
-                            <SidebarProvider>
-                                <SidebarWrapper
-                                    style={
-                                        {
-                                            "--sidebar-width":
-                                                "calc(var(--spacing) * 72)",
-                                            "--header-height":
-                                                "calc(var(--spacing) * 12)",
-                                        } as React.CSSProperties
-                                    }
-                                    className="max-h-svh"
-                                >
-                                    <SidebarInset>
-                                        <Suspense
-                                            fallback={
-                                                <ChatViewHeaderSkeleton />
-                                            }
-                                        >
-                                            <Story />
-                                        </Suspense>
-                                    </SidebarInset>
-                                </SidebarWrapper>
-                            </SidebarProvider>
-                        </ChatCacheSyncProvider>
-                    </UserCacheSyncProvider>
-                </ChatOffsetProvider>
-            </SessionSyncProvider>
-        </UserSessionProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatViewHeader,
     decorators: [
-        (Story: React.ComponentType) => (
-            <WithQueryProvider>
-                <StoryWrapper Story={Story} />
-            </WithQueryProvider>
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <SidebarProvider>
+                    <SidebarWrapper className="max-h-svh">
+                        <SidebarInset>
+                            <Suspense fallback={<ChatViewHeaderSkeleton />}>
+                                <Story />
+                            </Suspense>
+                        </SidebarInset>
+                    </SidebarWrapper>
+                </SidebarProvider>
+            </AppProviders>
         ),
     ],
     parameters: {

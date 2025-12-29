@@ -1,7 +1,5 @@
 import { cn } from "@/lib/utils";
 
-import { SIDEBAR_WIDTH, SIDEBAR_WIDTH_ICON } from "./constants";
-
 export function SidebarWrapper({
     children,
     style,
@@ -13,8 +11,8 @@ export function SidebarWrapper({
             data-slot="sidebar-wrapper"
             style={
                 {
-                    "--sidebar-width": SIDEBAR_WIDTH,
-                    "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+                    "--sidebar-width": "calc(var(--spacing) * 72)",
+                    "--header-height": "calc(var(--spacing) * 12)",
                     ...style,
                 } as React.CSSProperties
             }

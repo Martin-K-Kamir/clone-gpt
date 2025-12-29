@@ -1,12 +1,12 @@
-import { withChatProviders } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     MOCK_CHAT_ID,
     createMockPrivateChat,
     generateChatId,
 } from "#.storybook/lib/mocks/chats";
+import { getQueryClient } from "#.storybook/lib/utils/query-client";
 import { waitForMenuItemByText } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { getQueryClient } from "@/providers/query-provider";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -29,13 +29,13 @@ const meta = preview.meta({
         initialData: mockChat,
     },
     decorators: [
-        Story => (
+        (Story, { parameters }) => (
             <SidebarProvider>
-                {withChatProviders(() => (
+                <AppProviders {...parameters.provider}>
                     <ul className="w-58 bg-zinc-925">
                         <Story />
                     </ul>
-                ))}
+                </AppProviders>
             </SidebarProvider>
         ),
     ],

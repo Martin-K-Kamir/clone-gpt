@@ -1,4 +1,4 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { QueryProvider } from "#.storybook/lib/decorators/providers";
 import { MOCK_SOURCE_PARTS } from "#.storybook/lib/mocks/messages";
 import { MOCK_SOURCE_PREVIEWS } from "#.storybook/lib/mocks/messages";
 import preview from "#.storybook/preview";
@@ -19,9 +19,9 @@ const meta = preview.meta({
     component: SourceList,
     decorators: [
         Story => (
-            <WithQueryProvider>
+            <QueryProvider>
                 <Story />
-            </WithQueryProvider>
+            </QueryProvider>
         ),
     ],
     parameters: {

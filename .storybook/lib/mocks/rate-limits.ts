@@ -35,21 +35,20 @@ export function createMockMessagesRateLimit(overrides?: {
     } as UserMessagesRateLimitResult;
 }
 
-export function createMockFilesRateLimit(
-    overrides?: {
-        isOverLimit?: boolean;
-        reason?: "files";
-        periodStart?: string;
-        periodEnd?: string;
-        filesCounter?: number;
-    },
-    hoursOffset: number = 24,
-): UserFilesRateLimitResult {
+export function createMockFilesRateLimit(overrides?: {
+    isOverLimit?: boolean;
+    reason?: "files";
+    periodStart?: string;
+    periodEnd?: string;
+    filesCounter?: number;
+    hoursOffset?: number;
+}): UserFilesRateLimitResult {
     const periodStart = overrides?.periodStart ?? FIXED_DATE_STRING;
     const periodEnd =
         overrides?.periodEnd ??
         new Date(
-            FIXED_DATE.getTime() + hoursOffset * 60 * 60 * 1000,
+            FIXED_DATE.getTime() +
+                (overrides?.hoursOffset ?? 24) * 60 * 60 * 1000,
         ).toISOString();
 
     return {

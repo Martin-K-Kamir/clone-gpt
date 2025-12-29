@@ -3,6 +3,7 @@ import type {
     DBChat,
     DBChatId,
     DBChatSearchResult,
+    WithIsOwner,
 } from "../../../src/features/chat/lib/types";
 import type { PaginatedData } from "../../../src/lib/types";
 import { MOCK_USER_ID } from "./users";
@@ -163,6 +164,19 @@ export function createMockPublicChat(
         visibility: CHAT_VISIBILITY.PUBLIC,
         ...overrides,
     });
+}
+
+export function createMockChatWithOwner(
+    chatId?: DBChatId,
+    isOwner = true,
+): ReturnType<typeof createMockChat> & WithIsOwner {
+    return {
+        ...createMockChat({
+            id: chatId,
+            visibility: CHAT_VISIBILITY.PRIVATE,
+        }),
+        isOwner,
+    };
 }
 
 const snippetTemplates = [

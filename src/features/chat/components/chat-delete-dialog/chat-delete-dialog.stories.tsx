@@ -1,9 +1,10 @@
-import { withChatProvidersAndToaster } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     MOCK_CHAT_ID,
     createMockPrivateChat,
 } from "#.storybook/lib/mocks/chats";
 import { getElementsByText } from "#.storybook/lib/utils/elements.js";
+import { getQueryClient } from "#.storybook/lib/utils/query-client";
 import {
     findButtonByText,
     waitForDialog,
@@ -11,7 +12,6 @@ import {
     waitForSonnerToast,
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { getQueryClient } from "@/providers/query-provider";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, mocked, waitFor } from "storybook/test";
 
@@ -35,7 +35,13 @@ const meta = preview.meta({
     args: {
         chat: mockChat,
     },
-    decorators: [withChatProvidersAndToaster],
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
+        ),
+    ],
     argTypes: {
         chat: {
             control: "object",

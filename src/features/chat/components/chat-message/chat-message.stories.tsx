@@ -1,4 +1,4 @@
-import { withChatMessageProviders } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_ASSISTANT_MESSAGE_WITH_GENERATED_FILE,
@@ -24,7 +24,13 @@ import { PureChatMessage } from "./chat-message";
 
 const meta = preview.meta({
     component: PureChatMessage,
-    decorators: [withChatMessageProviders],
+    decorators: [
+        Story => (
+            <AppProviders>
+                <Story />
+            </AppProviders>
+        ),
+    ],
     parameters: {
         layout: "fullscreen",
         a11y: {

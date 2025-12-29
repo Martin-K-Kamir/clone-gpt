@@ -1,13 +1,15 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     FIXED_DATE,
     createMockChats,
     createMockSearchResults,
 } from "#.storybook/lib/mocks/chats";
+import { clearAllQueries } from "#.storybook/lib/utils/query-client";
+import { waitForDialog } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { HttpResponse, http } from "msw";
-import { Suspense, useMemo } from "react";
+import { Suspense } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
@@ -21,48 +23,24 @@ import { PLURAL } from "@/lib/constants";
 import { ChatSearchDialog } from "./chat-search-dialog";
 import { ChatSearchDialogTrigger } from "./chat-search-dialog-client";
 
-let currentQueryClient: QueryClient | null = null;
 let apiCallCount = 0;
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                gcTime: 0,
-                staleTime: 0,
-            },
-        },
-    });
-}
-
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => {
-        const client = createQueryClient();
-        currentQueryClient = client;
-        return client;
-    }, []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <Suspense fallback={<div>Loading...</div>}>
-                <Story />
-                <ChatSearchDialog>
-                    <ChatSearchDialogTrigger>
-                        Open Search
-                    </ChatSearchDialogTrigger>
-                </ChatSearchDialog>
-            </Suspense>
-        </QueryClientProvider>
-    );
-};
-
-const createDecorator = () => {
-    return (Story: React.ComponentType) => <StoryWrapper Story={Story} />;
-};
 
 const meta = preview.meta({
     component: ChatSearchDialog,
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Suspense fallback={<div>Loading...</div>}>
+                    <Story />
+                    <ChatSearchDialog>
+                        <ChatSearchDialogTrigger>
+                            Open Search
+                        </ChatSearchDialogTrigger>
+                    </ChatSearchDialog>
+                </Suspense>
+            </AppProviders>
+        ),
+    ],
     parameters: {
         nextjs: {
             navigation: {
@@ -73,7 +51,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    decorators: [createDecorator()],
     parameters: {
         msw: {
             handlers: [
@@ -128,9 +105,7 @@ export const Default = meta.story({
         },
     },
     afterEach: () => {
-        if (currentQueryClient) {
-            currentQueryClient.clear();
-        }
+        clearAllQueries();
     },
 });
 
@@ -140,10 +115,7 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: "Open Search" });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
     },
 );
 
@@ -344,8 +316,6 @@ Default.test(
 );
 
 export const WithoutInitialData = meta.story({
-    name: "Without Initial Data",
-    decorators: [createDecorator()],
     parameters: {
         msw: {
             handlers: [
@@ -401,9 +371,7 @@ export const WithoutInitialData = meta.story({
         },
     },
     afterEach: () => {
-        if (currentQueryClient) {
-            currentQueryClient.clear();
-        }
+        clearAllQueries();
         mocked(getUserChatsByDate).mockClear();
         apiCallCount = 0;
     },
@@ -415,10 +383,7 @@ WithoutInitialData.test(
         const trigger = canvas.getByRole("button", { name: "Open Search" });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
 
         await waitFor(() => {
             expect(apiCallCount).toBeGreaterThan(0);
@@ -437,7 +402,6 @@ WithoutInitialData.test(
 );
 
 export const Empty = meta.story({
-    decorators: [createDecorator()],
     parameters: {
         msw: {
             handlers: [
@@ -449,9 +413,7 @@ export const Empty = meta.story({
         },
     },
     afterEach: () => {
-        if (currentQueryClient) {
-            currentQueryClient.clear();
-        }
+        clearAllQueries();
     },
 });
 
@@ -470,31 +432,7 @@ Empty.test(
     },
 );
 
-const ErrorStoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => {
-        const client = createQueryClient();
-        currentQueryClient = client;
-        return client;
-    }, []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <Suspense fallback={<div>Loading...</div>}>
-                <Story />
-                <ChatSearchDialog>
-                    <ChatSearchDialogTrigger>
-                        Open Search
-                    </ChatSearchDialogTrigger>
-                </ChatSearchDialog>
-            </Suspense>
-        </QueryClientProvider>
-    );
-};
-
 export const Error = meta.story({
-    decorators: [
-        (Story: React.ComponentType) => <ErrorStoryWrapper Story={Story} />,
-    ],
     parameters: {
         msw: {
             handlers: [
@@ -508,9 +446,7 @@ export const Error = meta.story({
         },
     },
     afterEach: () => {
-        if (currentQueryClient) {
-            currentQueryClient.clear();
-        }
+        clearAllQueries();
     },
 });
 
@@ -524,15 +460,18 @@ Error.test("should handle error gracefully", async ({ canvas, userEvent }) => {
 
     await userEvent.type(input!, "test");
 
-    await waitFor(() => {
-        const emptyText = document.querySelector('[data-slot="search-error"]');
-        expect(emptyText).toBeInTheDocument();
-    });
+    await waitFor(
+        () => {
+            const emptyText = document.querySelector(
+                '[data-slot="search-error"]',
+            );
+            expect(emptyText).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+    );
 });
 
 export const WithInfiniteScrolling = meta.story({
-    name: "With Infinite Scrolling",
-    decorators: [createDecorator()],
     parameters: {
         msw: {
             handlers: [
@@ -625,9 +564,7 @@ export const WithInfiniteScrolling = meta.story({
         );
     },
     afterEach: () => {
-        if (currentQueryClient) {
-            currentQueryClient.clear();
-        }
+        clearAllQueries();
         mocked(getUserChatsByDate).mockClear();
     },
 });

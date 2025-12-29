@@ -1,4 +1,5 @@
-import { WithQueryProviderAndToaster } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { getSonnerToast } from "#.storybook/lib/utils/elements";
 import {
     findButtonByText,
     waitForDialog,
@@ -11,10 +12,6 @@ import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
 
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
 import { deleteAllUserChats } from "@/features/chat/services/actions";
 
 import { api } from "@/lib/api-response";
@@ -28,14 +25,10 @@ import {
 const meta = preview.meta({
     component: ChatDeleteUserChatsDialog,
     decorators: [
-        Story => (
-            <WithQueryProviderAndToaster>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <Story />
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </WithQueryProviderAndToaster>
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
         ),
     ],
     args: {
@@ -250,27 +243,31 @@ Default.test(
     },
 );
 
-// todo
-// Default.test(
-//     "should call onDelete when delete is initiated",
-//     async ({ canvas, userEvent, args }) => {
-//         const onDelete = args.onDelete as ReturnType<typeof fn>;
-//         const trigger = canvas.getByRole("button", {
-//             name: /delete chats/i,
-//         });
-//         await userEvent.click(trigger);
+Default.test(
+    "should call onDelete when delete is initiated",
+    async ({ canvas, userEvent, args }) => {
+        const onDelete = args.onDelete as ReturnType<typeof fn>;
+        mocked(deleteAllUserChats).mockResolvedValueOnce(
+            api.success.chat.delete(undefined, {
+                count: PLURAL.MULTIPLE,
+            }),
+        );
 
-//         const buttons = Array.from(document.querySelectorAll("button"));
-//         const deleteButton = buttons.find(
-//             button => button.textContent?.trim() === "Delete All Chats",
-//         );
-//         await userEvent.click(deleteButton!);
+        const trigger = canvas.getByRole("button", {
+            name: /delete chats/i,
+        });
+        await userEvent.click(trigger);
 
-//         await waitFor(() => {
-//             expect(onDelete).toHaveBeenCalledTimes(1);
-//         });
-//     },
-// );
+        await waitForDialog("alertdialog");
+
+        const deleteButton = findButtonByText("Delete All Chats");
+        await userEvent.click(deleteButton);
+
+        await waitFor(() => {
+            expect(onDelete).toHaveBeenCalledTimes(1);
+        });
+    },
+);
 
 Default.test(
     "should call onDeleteSuccess when delete succeeds",
@@ -362,7 +359,7 @@ WithoutToast.test(
 
         await new Promise(resolve => setTimeout(resolve, 100));
 
-        const toast = document.querySelector("[data-sonner-toast]");
+        const toast = getSonnerToast();
         expect(toast).not.toBeInTheDocument();
     },
 );

@@ -1,66 +1,23 @@
-import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     MOCK_TOOL_PARTS_GENERATE_FILE,
     MOCK_TOOL_PARTS_GENERATE_IMAGE,
     MOCK_TOOL_PARTS_WEATHER,
 } from "#.storybook/lib/mocks/messages";
-import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useMemo } from "react";
 import { expect, waitFor } from "storybook/test";
-
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-} from "@/features/chat/providers";
-
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
 
 import { ChatMessageTools } from "./chat-message-tools";
 
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={MOCK_USER_ID}
-                                        isNewChat={false}
-                                        isOwner={true}
-                                        chatId={MOCK_CHAT_ID}
-                                        messages={[]}
-                                        userChatPreferences={null}
-                                    >
-                                        <Story />
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatMessageTools,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
+        ),
+    ],
     args: {
         parts: [],
     },

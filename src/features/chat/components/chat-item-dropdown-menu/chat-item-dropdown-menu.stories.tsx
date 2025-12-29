@@ -1,4 +1,4 @@
-import { withChatProvidersAndToaster } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { createMockPrivateChat } from "#.storybook/lib/mocks/chats";
 import {
     waitForDialog,
@@ -16,7 +16,7 @@ import {
     ChatItemDropdownMenuTrigger,
 } from "./chat-item-dropdown-menu";
 
-const mockChat = createMockPrivateChat(0);
+const mockChat = createMockPrivateChat();
 
 const meta = preview.meta({
     component: ChatItemDropdownMenu,
@@ -24,7 +24,13 @@ const meta = preview.meta({
         chat: mockChat,
         onRename: fn(),
     },
-    decorators: [withChatProvidersAndToaster],
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
+        ),
+    ],
     argTypes: {
         chat: {
             control: "object",

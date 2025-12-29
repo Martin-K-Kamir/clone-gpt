@@ -1,10 +1,11 @@
-import { withChatProvidersAndToaster } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     MOCK_CHAT_ID,
     createMockChats,
     createMockPrivateChat,
     createMockPublicChat,
 } from "#.storybook/lib/mocks/chats";
+import { getQueryClient } from "#.storybook/lib/utils/query-client";
 import {
     findButtonByText,
     waitForDialog,
@@ -14,14 +15,12 @@ import {
     waitForSwitch,
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { getQueryClient } from "@/providers/query-provider";
 import { HttpResponse, http } from "msw";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type { DBChatId, UIChat } from "@/features/chat/lib/types";
 import { updateChatVisibility } from "@/features/chat/services/actions";
 
 import { api } from "@/lib/api-response";
@@ -35,7 +34,7 @@ const mockPublicChat = createMockPublicChat({ index: 1 });
 const mockedSharedChats = createMockChats({
     length: 3,
     visibility: CHAT_VISIBILITY.PUBLIC,
-}) as UIChat[];
+});
 const mockedSharedChats2 = [...mockedSharedChats];
 
 const meta = preview.meta({
@@ -43,7 +42,13 @@ const meta = preview.meta({
     args: {
         chat: mockPrivateChat,
     },
-    decorators: [withChatProvidersAndToaster],
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
+        ),
+    ],
     argTypes: {
         chat: {
             control: "object",
@@ -598,22 +603,14 @@ export const PublicChat = meta.story({
         );
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData(
-            [tag.userChat("chat-2" as DBChatId)],
-            mockPublicChat,
-        );
-        // Clear shared chats cache
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockPublicChat);
         queryClient.removeQueries({ queryKey: [tag.userSharedChats()] });
     },
     afterEach: () => {
         mocked(updateChatVisibility).mockClear();
 
         const queryClient = getQueryClient();
-        queryClient.setQueryData(
-            [tag.userChat("chat-2" as DBChatId)],
-            mockPublicChat,
-        );
-        // Clear shared chats cache
+        queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockPublicChat);
         queryClient.removeQueries({ queryKey: [tag.userSharedChats()] });
     },
 });

@@ -1,3 +1,4 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     MOCK_ADDITIONAL_SOURCE_PARTS,
     MOCK_ADDITIONAL_SOURCE_PREVIEWS,
@@ -6,31 +7,24 @@ import {
     MOCK_SOURCE_SINGLE_PREVIEW,
     createMockTextMessagePart,
 } from "#.storybook/lib/mocks/messages";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import { waitForElement } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { HttpResponse, http } from "msw";
-import { useMemo } from "react";
 import { expect } from "storybook/test";
 
 import { ChatSourceDialog } from "./chat-source-dialog";
 
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <div className="p-4">
-                <Story />
-            </div>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatSourceDialog,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <div className="p-4">
+                    <Story />
+                </div>
+            </AppProviders>
+        ),
+    ],
     argTypes: {
         parts: {
             control: "object",

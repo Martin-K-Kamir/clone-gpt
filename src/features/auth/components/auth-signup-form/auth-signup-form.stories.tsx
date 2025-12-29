@@ -1,4 +1,4 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { QueryProvider } from "#.storybook/lib/decorators/providers";
 import { createMockSignupUserData } from "#.storybook/lib/mocks/auth";
 import preview from "#.storybook/preview";
 import { expect, fn, mocked, waitFor } from "storybook/test";
@@ -11,7 +11,6 @@ import { AuthSignUpForm } from "./auth-signup-form";
 
 const meta = preview.meta({
     component: AuthSignUpForm,
-
     args: {
         onSubmit: fn(),
         onSuccess: fn(),
@@ -21,11 +20,11 @@ const meta = preview.meta({
     },
     decorators: [
         Story => (
-            <WithQueryProvider>
+            <QueryProvider>
                 <div className="min-w-md bg-zinc-925">
                     <Story />
                 </div>
-            </WithQueryProvider>
+            </QueryProvider>
         ),
     ],
     parameters: {

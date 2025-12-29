@@ -1,3 +1,4 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_CHAT_STATUS,
@@ -6,94 +7,24 @@ import {
     createMockTextMessagePart,
 } from "#.storybook/lib/mocks/messages";
 import { createMockMessagesRateLimit } from "#.storybook/lib/mocks/rate-limits";
-import { MOCK_USER_ID } from "#.storybook/lib/mocks/users";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
 import { expect, fn } from "storybook/test";
-
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-    ChatProvider,
-    ChatSidebarProvider,
-} from "@/features/chat/providers";
-
-import type { UserMessagesRateLimitResult } from "@/features/user/lib/types";
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
-
-import { tag } from "@/lib/cache-tag";
 
 import { ChatMessageToolbarUser } from "./chat-message-toolbar-user";
 
-const StoryWrapper = ({
-    Story,
-    isOwner = true,
-    rateLimit = null,
-}: {
-    Story: React.ComponentType;
-    isOwner?: boolean;
-    rateLimit?: UserMessagesRateLimitResult | null;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    useEffect(() => {
-        if (rateLimit !== undefined && rateLimit !== null) {
-            queryClient.setQueryData(
-                [tag.userMessagesRateLimit(MOCK_USER_ID)],
-                rateLimit,
-            );
-        } else if (rateLimit === null) {
-            queryClient.setQueryData(
-                [tag.userMessagesRateLimit(MOCK_USER_ID)],
-                {
-                    isOverLimit: false,
-                    tokensCounter: 0,
-                    messagesCounter: 0,
-                } as UserMessagesRateLimitResult,
-            );
-        }
-    }, [queryClient, rateLimit]);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <UserCacheSyncProvider>
-                            <ChatCacheSyncProvider>
-                                <ChatSidebarProvider>
-                                    <ChatProvider
-                                        userId={MOCK_USER_ID}
-                                        isNewChat={false}
-                                        isOwner={isOwner}
-                                        chatId={MOCK_CHAT_ID}
-                                        messages={[]}
-                                        userChatPreferences={null}
-                                    >
-                                        <div className="group/message flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
-                                            <Story />
-                                        </div>
-                                    </ChatProvider>
-                                </ChatSidebarProvider>
-                            </ChatCacheSyncProvider>
-                        </UserCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
-
 const meta = preview.meta({
     component: ChatMessageToolbarUser,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story, { parameters }) => {
+            return (
+                <AppProviders {...parameters.provider}>
+                    <div className="group/message flex min-h-[200px] items-center justify-center bg-zinc-950 p-8">
+                        <Story />
+                    </div>
+                </AppProviders>
+            );
+        },
+    ],
     args: {
         canShowActions: true,
         status: MOCK_CHAT_STATUS.READY,
@@ -236,7 +167,11 @@ Submitted.test("should disable actions when submitted", async ({ canvas }) => {
 });
 
 export const NotOwner = meta.story({
-    decorators: [Story => <StoryWrapper Story={Story} isOwner={false} />],
+    parameters: {
+        provider: {
+            isOwner: false,
+        },
+    },
 });
 
 NotOwner.test(
@@ -253,18 +188,13 @@ NotOwner.test(
 );
 
 export const RateLimitExceeded = meta.story({
-    decorators: [
-        Story => (
-            <StoryWrapper
-                Story={Story}
-                rateLimit={createMockMessagesRateLimit({
-                    tokensCounter: 1000,
-                    messagesCounter: 100,
-                })}
-            />
-        ),
-    ],
     parameters: {
+        provider: {
+            rateLimit: createMockMessagesRateLimit({
+                tokensCounter: 1000,
+                messagesCounter: 100,
+            }),
+        },
         chromatic: { disableSnapshot: true },
     },
 });

@@ -1,13 +1,12 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     createMockChats,
     createMockPaginatedChats,
     generateChatId,
 } from "#.storybook/lib/mocks/chats";
-import { createQueryClient } from "#.storybook/lib/utils/query-client";
 import preview from "#.storybook/preview";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { HttpResponse, http } from "msw";
-import { Suspense, useEffect, useMemo } from "react";
+import { Suspense } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -16,86 +15,41 @@ import {
     CHAT_VISIBILITY,
     QUERY_USER_CHATS_LIMIT,
 } from "@/features/chat/lib/constants";
-import type { DBChat } from "@/features/chat/lib/types";
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-    ChatSidebarProvider,
-} from "@/features/chat/providers";
-import { getUserChats as getUserChatsDB } from "@/features/chat/services/db";
+import { getUserChats } from "@/features/chat/services/db";
 
 import { api } from "@/lib/api-response";
 import { PLURAL } from "@/lib/constants";
-import type { PaginatedData } from "@/lib/types";
 
 import { ChatSidebarHistory } from "./chat-sidebar-history";
 import { ChatSidebarHistorySkeleton } from "./chat-sidebar-history-skeleton";
 
 const DEFAULT_CHATS_LENGTH = 20;
 
-const StoryWrapper = ({
-    Story,
-    mockData,
-}: {
-    Story: React.ComponentType;
-    mockData: PaginatedData<DBChat[]>;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    useEffect(() => {
-        mocked(getUserChatsDB).mockResolvedValue(mockData);
-    }, [mockData]);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <SidebarProvider>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <ChatSidebarProvider>
-                            <div className="bg-zinc-950">
-                                <div className="w-72 p-4">
-                                    <Suspense
-                                        fallback={
-                                            <ChatSidebarHistorySkeleton />
-                                        }
-                                    >
-                                        <Story />
-                                    </Suspense>
-                                </div>
-                            </div>
-                        </ChatSidebarProvider>
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </SidebarProvider>
-        </QueryClientProvider>
-    );
-};
-
-const createDecorator = (mockData: PaginatedData<DBChat[]>) => {
-    return (Story: React.ComponentType) => (
-        <StoryWrapper Story={Story} mockData={mockData} />
-    );
-};
-
 const meta = preview.meta({
     component: ChatSidebarHistory,
+    decorators: [
+        Story => (
+            <AppProviders>
+                <SidebarProvider>
+                    <div className="bg-zinc-950">
+                        <div className="h-280 w-72 p-4">
+                            <Suspense fallback={<ChatSidebarHistorySkeleton />}>
+                                <Story />
+                            </Suspense>
+                        </div>
+                    </div>
+                </SidebarProvider>
+            </AppProviders>
+        ),
+    ],
     parameters: {
         layout: "fullscreen",
     },
 });
 
 export const Default = meta.story({
-    decorators: [
-        createDecorator(
-            createMockPaginatedChats({
-                length: DEFAULT_CHATS_LENGTH,
-                hasNextPage: false,
-                visibility: CHAT_VISIBILITY.PRIVATE,
-            }),
-        ),
-    ],
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(
+        mocked(getUserChats).mockResolvedValue(
             createMockPaginatedChats({
                 length: DEFAULT_CHATS_LENGTH,
                 hasNextPage: false,
@@ -104,7 +58,7 @@ export const Default = meta.story({
         );
     },
     afterEach: () => {
-        mocked(getUserChatsDB).mockClear();
+        mocked(getUserChats).mockClear();
     },
 });
 
@@ -149,17 +103,8 @@ Default.test(
 );
 
 export const Empty = meta.story({
-    decorators: [
-        createDecorator(
-            createMockPaginatedChats({
-                length: 0,
-                hasNextPage: false,
-                visibility: CHAT_VISIBILITY.PRIVATE,
-            }),
-        ),
-    ],
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(
+        mocked(getUserChats).mockResolvedValue(
             createMockPaginatedChats({
                 length: 0,
                 hasNextPage: false,
@@ -168,7 +113,7 @@ export const Empty = meta.story({
         );
     },
     afterEach: () => {
-        mocked(getUserChatsDB).mockClear();
+        mocked(getUserChats).mockClear();
     },
 });
 
@@ -187,15 +132,6 @@ Empty.test("should not render any chat links", async ({ canvas }) => {
 });
 
 export const WithPagination = meta.story({
-    decorators: [
-        createDecorator(
-            createMockPaginatedChats({
-                length: 20,
-                hasNextPage: true,
-                nextOffset: 20,
-            }),
-        ),
-    ],
     parameters: {
         msw: {
             handlers: [
@@ -225,7 +161,7 @@ export const WithPagination = meta.story({
         },
     },
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(
+        mocked(getUserChats).mockResolvedValue(
             createMockPaginatedChats({
                 length: 20,
                 hasNextPage: true,
@@ -234,7 +170,7 @@ export const WithPagination = meta.story({
         );
     },
     afterEach: () => {
-        mocked(getUserChatsDB).mockClear();
+        mocked(getUserChats).mockClear();
     },
 });
 
@@ -248,44 +184,15 @@ WithPagination.test(
     },
 );
 
-const ErrorStoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    useEffect(() => {
-        mocked(getUserChatsDB).mockImplementation(async () => {
+export const Error = meta.story({
+    beforeEach: () => {
+        mocked(getUserChats).mockImplementation(async () => {
             throw new globalThis.Error("Failed to fetch user chats");
         });
-    }, []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <SidebarProvider>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <ChatSidebarProvider>
-                            <div className="bg-zinc-950">
-                                <div className="w-72 p-4">
-                                    <Suspense
-                                        fallback={
-                                            <ChatSidebarHistorySkeleton />
-                                        }
-                                    >
-                                        <Story />
-                                    </Suspense>
-                                </div>
-                            </div>{" "}
-                        </ChatSidebarProvider>
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </SidebarProvider>
-        </QueryClientProvider>
-    );
-};
-
-export const Error = meta.story({
-    decorators: [
-        (Story: React.ComponentType) => <ErrorStoryWrapper Story={Story} />,
-    ],
+    },
+    afterEach: () => {
+        mocked(getUserChats).mockClear();
+    },
 });
 
 Error.test("should render error message", async ({ canvas }) => {
@@ -302,36 +209,7 @@ Error.test("should not render chat links on error", async ({ canvas }) => {
     });
 });
 
-const FetchingStoryWrapper = () => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <SidebarProvider>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <ChatSidebarProvider>
-                            <div className="bg-zinc-950">
-                                <div className="w-72 p-4">
-                                    <Suspense
-                                        fallback={
-                                            <ChatSidebarHistorySkeleton />
-                                        }
-                                    >
-                                        <ChatSidebarHistory />
-                                    </Suspense>
-                                </div>
-                            </div>
-                        </ChatSidebarProvider>
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </SidebarProvider>
-        </QueryClientProvider>
-    );
-};
-
 export const WithoutInitialData = meta.story({
-    render: () => <FetchingStoryWrapper />,
     parameters: {
         msw: {
             handlers: [
@@ -350,14 +228,12 @@ export const WithoutInitialData = meta.story({
         },
     },
     beforeEach: () => {
-        mocked(getUserChatsDB).mockImplementation(async () => {
-            return undefined as unknown as PaginatedData<
-                (DBChat & { isOwner: boolean })[]
-            >;
-        });
+        mocked(getUserChats).mockResolvedValue(
+            undefined as unknown as Awaited<ReturnType<typeof getUserChats>>,
+        );
     },
     afterEach: () => {
-        mocked(getUserChatsDB).mockClear();
+        mocked(getUserChats).mockClear();
     },
 });
 
@@ -380,36 +256,7 @@ WithoutInitialData.test(
     },
 );
 
-const InfiniteScrollingStoryWrapper = () => {
-    const queryClient = useMemo(() => createQueryClient(), []);
-
-    return (
-        <QueryClientProvider client={queryClient}>
-            <SidebarProvider>
-                <ChatOffsetProvider>
-                    <ChatCacheSyncProvider>
-                        <ChatSidebarProvider>
-                            <div className="bg-zinc-950">
-                                <div className="h-182 w-72 p-4">
-                                    <Suspense
-                                        fallback={
-                                            <ChatSidebarHistorySkeleton />
-                                        }
-                                    >
-                                        <ChatSidebarHistory />
-                                    </Suspense>
-                                </div>
-                            </div>
-                        </ChatSidebarProvider>
-                    </ChatCacheSyncProvider>
-                </ChatOffsetProvider>
-            </SidebarProvider>
-        </QueryClientProvider>
-    );
-};
-
 export const InfiniteScrolling = meta.story({
-    render: () => <InfiniteScrollingStoryWrapper />,
     parameters: {
         msw: {
             handlers: [
@@ -424,14 +271,20 @@ export const InfiniteScrolling = meta.story({
                         10,
                     );
 
-                    const MAX_PAGES = 6;
-                    const totalChats = MAX_PAGES * limit;
-                    const currentPage = Math.floor(offset / limit);
-                    const hasNextPage = currentPage + 1 < MAX_PAGES;
+                    const INITIAL_ITEMS = DEFAULT_CHATS_LENGTH;
+                    const ADDITIONAL_PAGES = 5;
+                    const TOTAL_ITEMS =
+                        INITIAL_ITEMS + ADDITIONAL_PAGES * limit;
+
+                    const itemsLoaded = offset + limit;
+                    const hasNextPage = itemsLoaded < TOTAL_ITEMS;
                     const nextOffset = hasNextPage ? offset + limit : undefined;
 
+                    const remainingItems = TOTAL_ITEMS - offset;
+                    const pageLength = Math.min(limit, remainingItems);
+
                     const pageChats = createMockChats({
-                        length: limit,
+                        length: pageLength,
                         visibility: CHAT_VISIBILITY.PRIVATE,
                     }).map((chat, i) => ({
                         ...chat,
@@ -441,7 +294,7 @@ export const InfiniteScrolling = meta.story({
                     const response = api.success.chat.get(
                         {
                             data: pageChats,
-                            totalCount: totalChats,
+                            totalCount: TOTAL_ITEMS,
                             hasNextPage,
                             nextOffset,
                         },
@@ -463,7 +316,7 @@ export const InfiniteScrolling = meta.story({
         },
     },
     beforeEach: () => {
-        mocked(getUserChatsDB).mockResolvedValue(
+        mocked(getUserChats).mockResolvedValue(
             createMockPaginatedChats({
                 length: DEFAULT_CHATS_LENGTH,
                 hasNextPage: true,
@@ -473,7 +326,7 @@ export const InfiniteScrolling = meta.story({
         );
     },
     afterEach: () => {
-        mocked(getUserChatsDB).mockClear();
+        mocked(getUserChats).mockClear();
     },
 });
 
@@ -567,13 +420,17 @@ InfiniteScrolling.test(
         await waitFor(() => {
             const links = canvas.getAllByRole("link");
             expect(links.length).toBe(getExpectedLength(6));
-
-            links.at(-1)?.scrollIntoView({ behavior: "smooth" });
         });
 
-        await waitFor(() => {
-            const skeletons = canvas.queryAllByTestId("skeleton");
-            expect(skeletons.length).toBe(0);
-        });
+        const finalLinks = canvas.getAllByRole("link");
+        finalLinks.at(-1)?.scrollIntoView({ behavior: "smooth" });
+
+        await waitFor(
+            () => {
+                const skeletons = canvas.queryAllByTestId("skeleton");
+                expect(skeletons.length).toBe(0);
+            },
+            { timeout: 5000 },
+        );
     },
 );

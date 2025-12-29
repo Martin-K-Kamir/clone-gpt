@@ -1,14 +1,10 @@
-import { WithQueryProvider } from "#.storybook/lib/decorators/providers";
+import { AppProviders } from "#.storybook/lib/decorators/providers";
 import preview from "#.storybook/preview";
+import React from "react";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
-import {
-    SessionSyncContext,
-    SessionSyncProvider,
-} from "@/features/auth/providers";
+import { SessionSyncContext } from "@/features/auth/providers";
 import { signOut } from "@/features/auth/services/actions";
-
-import { UserSessionProvider } from "@/features/user/providers";
 
 import type { SyncActionProps } from "@/lib/types";
 
@@ -24,14 +20,10 @@ const meta = preview.meta({
         onClick: fn(),
     },
     decorators: [
-        Story => (
-            <WithQueryProvider>
-                <UserSessionProvider>
-                    <SessionSyncProvider>
-                        <Story />
-                    </SessionSyncProvider>
-                </UserSessionProvider>
-            </WithQueryProvider>
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
         ),
     ],
     parameters: {
@@ -171,23 +163,17 @@ export const WithMockedSignOutWithSync = meta.story({
         children: "Log out",
     },
     decorators: [
-        (Story: React.ComponentType) => {
-            mockSignOutWithSync = fn().mockName("signOutWithSync") as (
-                props?: SyncActionProps,
-            ) => Promise<void>;
+        Story => {
+            mockSignOutWithSync = fn().mockName("signOutWithSync");
 
             return (
-                <WithQueryProvider>
-                    <UserSessionProvider>
-                        <SessionSyncContext.Provider
-                            value={{
-                                signOutWithSync: mockSignOutWithSync,
-                            }}
-                        >
-                            <Story />
-                        </SessionSyncContext.Provider>
-                    </UserSessionProvider>
-                </WithQueryProvider>
+                <SessionSyncContext.Provider
+                    value={{
+                        signOutWithSync: mockSignOutWithSync,
+                    }}
+                >
+                    <Story />
+                </SessionSyncContext.Provider>
             );
         },
     ],
