@@ -5,17 +5,19 @@ This document outlines the patterns, conventions, and best practices for writing
 ## Table of Contents
 
 - [Story Structure](#story-structure)
-- [Test Naming Conventions](#test-naming-conventions)
+- [Test Naming](#test-naming)
 - [Mock Data](#mock-data)
 - [Element Queries](#element-queries)
 - [Test Helpers](#test-helpers)
-- [Decorators](#decorators)
+- [Decorators & Providers](#decorators--providers)
 - [MSW Handlers](#msw-handlers)
 - [Query Client Management](#query-client-management)
+- [Common Patterns](#common-patterns)
+- [Best Practices](#best-practices)
 
 ## Story Structure
 
-### Basic Story Structure
+### Basic Structure
 
 ```tsx
 import { AppProviders } from "#.storybook/lib/decorators/providers";
@@ -24,8 +26,6 @@ import { waitForDialog } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
-import { MyComponent } from "./my-component";
-
 const mockUser = createMockUser();
 
 const meta = preview.meta({
@@ -38,19 +38,13 @@ const meta = preview.meta({
         ),
     ],
     parameters: {
-        provider: {
-            user: mockUser,
-        },
-        a11y: {
-            test: "error",
-        },
+        provider: { user: mockUser },
+        a11y: { test: "error" },
     },
 });
 
 export const Default = meta.story({
-    args: {
-        onClick: fn(),
-    },
+    args: { onClick: fn() },
 });
 
 Default.test("should render component", async ({ canvas }) => {
@@ -58,389 +52,118 @@ Default.test("should render component", async ({ canvas }) => {
 });
 ```
 
-### Story Naming
+### Story Naming Conventions
 
-- Use PascalCase for story names: `Default`, `WithData`, `Loading`, `Empty`
-- Use descriptive names that indicate the story's purpose
-- Common patterns:
-    - `Default` - The default/standard story
-    - `Loading` - Loading state
-    - `Empty` - Empty state
-    - `WithData` - Story with data
-    - `Error` - Error state
-    - `Disabled` - Disabled state
+- **Default** - Base/default story
+- **WithXxx** - Adds features/data (`WithDescription`, `WithAction`, `WithGroups`)
+- **WithoutXxx** - Removes features (`WithoutFileButton`, `WithoutCancelButton`)
+- **SizeXxx** - Size variations (`SizeXs`, `SizeSm`, `SizeLg`)
+- **SideXxx** - Positioning (`SideRight`, `SideLeft`, `SideTop`, `SideBottom`)
+- **State names** - `Loading`, `Disabled`, `Error`, `Empty`
+- **Variants** - `Destructive`, `Outline`, `Secondary`
+- **CustomXxx** - Custom configurations (`CustomDuration`, `CustomWidth`)
+- **InDialogXxx** - Dialog-specific stories (`InDialogDefault`, `InDialogWithItems`)
 
-#### Naming Conventions
+## Test Naming
 
-**Standard Patterns:**
+**Format**: Always use `"should [action/state]"`
 
-1. **Default Story**: Always use `Default` for the base/default story
-2. **WithXxx Pattern**: Use `WithXxx` for stories that add features/data
-    - ✅ `WithDescription`, `WithAction`, `WithGroups`, `WithIcons`
-    - ✅ `WithInitialValue`, `WithFileTypes`, `WithCustomContent`
-3. **WithoutXxx Pattern**: Use `WithoutXxx` for stories that remove features
-    - ✅ `WithoutFileButton`, `WithoutCancelButton`, `WithoutIcon`
-    - ❌ Avoid `NoXxx` - use `WithoutXxx` instead for consistency
-4. **Size Stories**: Use `SizeXxx` prefix for size variations
-    - ✅ `SizeNone`, `SizeXs`, `SizeSm`, `SizeLg` (button)
-    - ❌ Avoid `SizeSmall` - use `SizeSm` instead
-    - ❌ Avoid `Large`/`Small` without prefix - use `SizeLg`/`SizeSm`
-5. **Position Stories**: Use `SideXxx` prefix for positioning
-    - ✅ `SideRight`, `SideLeft`, `SideTop`, `SideBottom` (sheet, dropdown)
-    - ❌ Avoid `Top`/`Bottom`/`Left`/`Right` without prefix - use `SideXxx`
-6. **State Stories**: Use simple state names
-    - ✅ `Loading`, `Disabled`, `Error`, `Empty`
-7. **Variant Stories**: Use descriptive variant names
-    - ✅ `Destructive`, `Outline`, `Secondary` (button variants)
-    - ✅ `VariantSidebar`, `VariantInset` (when component has explicit variants)
-8. **Controlled Stories**: Use `Controlled` for controlled component examples
-9. **Custom Stories**: Use `CustomXxx` for custom configurations
-    - ✅ `CustomDuration`, `CustomWidth`, `CustomStyling`
-10. **Type/Format Stories**: Use descriptive names for types
-    - ✅ `Email`, `Password`, `Number` (input types)
-    - ✅ `WithCelsius`, `WithFahrenheit` (temperature formats)
-11. **Dialog Context**: Use `InDialogXxx` prefix for dialog-specific stories
-    - ✅ `InDialogDefault`, `InDialogWithItems`, `InDialogWithSearchResults`
-
-## Test Naming Conventions
-
-### Format
-
-All test names should follow the pattern: `"should [action/state]"`
-
-### Examples
-
-✅ **Good:**
-
-- `"should render component"`
-- `"should open dialog when button is clicked"`
-- `"should display error message"`
-- `"should handle form submission"`
-- `"should navigate to next page"`
-
-❌ **Bad:**
-
-- `"renders component"` (missing "should")
-- `"opens dialog"` (missing "should")
-- `"test button click"` (use "should handle button click" instead)
-- `"component renders"` (use "should render component" instead)
-
-### Test Organization
-
-- Group related tests together
-- Use descriptive test names that explain what is being tested
-- One assertion per test when possible, or group related assertions
+✅ **Good**: `"should render component"`, `"should open dialog when button is clicked"`  
+❌ **Bad**: `"renders component"`, `"opens dialog"`, `"test button click"`
 
 ## Mock Data
 
-### Stable and Fixed Data
+### Critical Rules
 
-**CRITICAL**: All mock data must be **stable and fixed** (no random values). This is essential for visual testing - if data changes between renders, visual regression tests will fail.
+**CRITICAL**: All mock data must be **stable and fixed** (no random values) for visual regression testing.
 
-**Rules:**
-
-- ✅ Use fixed dates: `FIXED_DATE`, `FIXED_MESSAGE_DATE`, `FIXED_WEATHER_START_DATE`
-- ✅ Use fixed IDs: `MOCK_USER_ID`, `MOCK_CHAT_ID`, `MOCK_MESSAGE_ID`
-- ✅ Use deterministic data generation (based on index, not random)
-- ❌ Never use `Math.random()`, `Date.now()`, `new Date()` without fixed base
-- ❌ Never use `crypto.randomUUID()` or similar random generators
+- ✅ Use fixed constants: `FIXED_DATE`, `MOCK_USER_ID`, `MOCK_CHAT_ID`, `MOCK_CHAT_STATUS.READY`
+- ✅ Use mock factories from `#.storybook/lib/mocks`
+- ❌ Never use `Math.random()`, `Date.now()`, `crypto.randomUUID()`
+- ❌ Never define raw data in story files - all mocks must be in `#.storybook/lib/mocks`
 
 ```tsx
-import {
-    FIXED_DATE,
-    MOCK_CHAT_ID,
-    MOCK_USER_ID,
-    createMockChat,
-} from "#.storybook/lib/mocks";
-
-// ✅ Good - uses fixed constants
-const chat = createMockChat(0);
-const chatId = MOCK_CHAT_ID;
-const date = FIXED_DATE;
-
-// ❌ Bad - random or unstable data
-const chatId = crypto.randomUUID();
-const date = new Date().toISOString();
-const randomValue = Math.random();
-
-// ❌ Bad - hardcoded status strings
-const status = "ready" as ChatStatus;
-const status2 = "streaming" as ChatStatus;
-
-// ✅ Good - use status constants
-const status = MOCK_CHAT_STATUS.READY;
-const status2 = MOCK_CHAT_STATUS.STREAMING;
-```
-
-### Using Shared Mocks
-
-Always use shared mock factories from `#.storybook/lib/mocks` instead of creating inline mocks.
-
-```tsx
-import {
-    createMockUser,
-    createMockChat,
-    createMockChats,
-    createMockUserMessage,
-    createMockAssistantMessage,
-    MOCK_CHAT_ID,
-    FIXED_DATE,
-} from "#.storybook/lib/mocks";
-
 // ✅ Good
-const user = createMockUser();
+import { FIXED_DATE, MOCK_CHAT_ID, createMockChat, MOCK_CHAT_STATUS } from "#.storybook/lib/mocks";
 const chat = createMockChat(0);
-const chats = createMockChats(10);
-const chatId = MOCK_CHAT_ID;
-const date = FIXED_DATE;
+const status = MOCK_CHAT_STATUS.READY;
 
 // ❌ Bad
-const user = {
-    id: "123",
-    name: "Test User",
-    // ...
-};
-const chatId = "chat-123" as DBChatId; // Should use MOCK_CHAT_ID
-const date = new Date("2025-01-01").toISOString(); // Should use FIXED_DATE
-const message = MOCK_CONVERSATION_WITH_MULTIPLE_FILES[0]; // Should use MOCK_USER_MESSAGE_WITH_MULTIPLE_FILES
-const parts = MOCK_CONVERSATION_WITH_MULTIPLE_FILES[0].parts.filter(p => p.type === "file"); // Should use MOCK_FILE_PARTS_MULTIPLE
-
-// ✅ Good - use pre-configured constants
-const message = MOCK_USER_MESSAGE_WITH_MULTIPLE_FILES;
-const parts = MOCK_FILE_PARTS_MULTIPLE;
+const chatId = crypto.randomUUID();
+const date = new Date().toISOString();
+const status = "ready" as ChatStatus;
+const mockData = [{ id: "123", name: "Test" }]; // Raw data in story
 ```
-
-### No Raw Data in Stories
-
-**CRITICAL**: Never define raw mock data (objects, arrays, constants) directly in story files. All mock data must be defined in the mocks directory (`#.storybook/lib/mocks`) and imported into stories.
-
-**Rules:**
-
-- ✅ All mock data constants must be in `#.storybook/lib/mocks` files
-- ✅ Stories should only import and use mock constants/factories
-- ❌ Never define raw objects, arrays, or constants in story files
-- ❌ Never inline mock data creation in story files
-
-```tsx
-// ❌ Bad - raw data in story file
-const mockSourceParts = [
-    { type: "source-url", url: "https://example.com", title: "Example" },
-];
-const mockPreviews = [{ url: "https://example.com", title: "Example" }];
-
-// ✅ Good - import from mocks
-import { MOCK_SOURCE_PARTS, MOCK_SOURCE_PREVIEWS } from "#.storybook/lib/mocks/messages";
-
-// ❌ Bad - inline factory calls with raw data
-const parts = createMockSourceUrlMessageParts([
-    { url: "https://example.com", title: "Example" },
-]);
-
-// ✅ Good - use pre-configured constants
-const parts = MOCK_SOURCE_PARTS;
-```
-
-**Exception**: Simple, one-off test data that is truly story-specific and won't be reused can be created inline, but prefer moving to mocks if it's more than a simple primitive value.
-
-### Available Constants
-
-- `MOCK_USER_ID` - Fixed user ID
-- `MOCK_CHAT_ID` - Fixed chat ID
-- `MOCK_MESSAGE_ID` - Fixed message ID
-- `MOCK_ASSISTANT_MESSAGE_ID` - Fixed assistant message ID
-- `FIXED_DATE` - Fixed date string (2025-01-01T00:00:00.000Z)
-- `FIXED_MESSAGE_DATE` - Fixed message date string (2024-01-15T12:00:00.000Z)
-- `FIXED_WEATHER_START_DATE` - Fixed weather start date
-- `MOCK_CHAT_STATUS` - Chat status constants object:
-    - `MOCK_CHAT_STATUS.READY` - Ready status
-    - `MOCK_CHAT_STATUS.STREAMING` - Streaming status
-    - `MOCK_CHAT_STATUS.SUBMITTED` - Submitted status
-    - `MOCK_CHAT_STATUS.ERROR` - Error status
 
 ### Available Mock Factories
 
-#### Users
+**Users**: `createMockUser()`, `createMockUsers(count)`, `createMockGuestUser()`, `createMockAdminUser()`
 
-- `createMockUser(overrides?)` - Creates a mock user
-- `createMockUsers(count)` - Creates multiple mock users
-- `createMockGuestUser()` - Creates a guest user
-- `createMockAdminUser()` - Creates an admin user
+**Chats**: `createMockChat(index)`, `createMockChats(count)`, `createMockPaginatedChats(length, hasNextPage?)`, `createMockPrivateChat(index)`, `createMockPublicChat(index)`, `createMockChatWithOwner(chatId?, isOwner?)`
 
-#### Chats
+**Messages**: `createMockUserMessage(text)`, `createMockAssistantMessage(text)`, `createMockUserMessageWithFiles(text, files)`, `createMockMessages(count)`, `createMockTextMessagePart(text)`, `createMockFileMessagePart(options?)`, `createMockImageMessagePart(options?)`
 
-- `createMockChat(index, overrides?)` - Creates a mock chat
-- `createMockChats(count, overrides?)` - Creates multiple mock chats
-- `createMockPaginatedChats(length, hasNextPage?)` - Creates paginated chat data
-- `createMockPrivateChat(index)` - Creates a private chat
-- `createMockPublicChat(index)` - Creates a public chat
-- `createMockChatWithOwner(chatId?, isOwner?)` - Creates a mock chat with `isOwner` property
+**Pre-configured Constants**: `MOCK_USER_MESSAGE_WITH_SINGLE_FILE`, `MOCK_USER_MESSAGE_WITH_MULTIPLE_FILES`, `MOCK_FILE_PARTS_MULTIPLE`, `MOCK_SOURCE_PARTS`, `MOCK_SOURCE_PREVIEWS`, etc.
 
-#### Messages
-
-- `createMockUserMessage(text, messageId?)` - Creates a user message
-- `createMockAssistantMessage(text, messageId?)` - Creates an assistant message
-- `createMockUserMessageWithFiles(text, files, messageId?)` - Creates a user message with files
-- `createMockMessages(count, baseText?)` - Creates alternating user/assistant messages
-- `createMockTextMessagePart(text)` - Creates a text message part
-- `createMockFileMessagePart(options?)` - Creates a file message part
-- `createMockImageMessagePart(options?)` - Creates an image message part
-- `createMockFileMessageParts(count, baseName?, extension?)` - Creates multiple file message parts
-- `createMockImageMessageParts(count, baseName?, extension?)` - Creates multiple image message parts
-
-#### Message Examples (Pre-configured Messages)
-
-- `MOCK_USER_MESSAGE_WITH_SINGLE_FILE` - User message with single file
-- `MOCK_USER_MESSAGE_WITH_SINGLE_IMAGE` - User message with single image
-- `MOCK_USER_MESSAGE_WITH_MULTIPLE_FILES` - User message with multiple files
-- `MOCK_USER_MESSAGE_WITH_MULTIPLE_IMAGES` - User message with multiple images
-- `MOCK_ASSISTANT_MESSAGE_WITH_GENERATED_IMAGE` - Assistant message with generated image
-- `MOCK_ASSISTANT_MESSAGE_WITH_GENERATED_FILE` - Assistant message with generated file
-- `MOCK_ASSISTANT_MESSAGE_WITH_WEATHER` - Assistant message with weather tool
-- `MOCK_ASSISTANT_MESSAGE_WITH_MARKDOWN` - Assistant message with markdown content
-- `MOCK_ASSISTANT_MESSAGE_WITH_IMAGE_ANALYSIS` - Assistant message with image analysis
-- `MOCK_ASSISTANT_MESSAGE_WITH_REFERENCE_IMAGE` - Assistant message with reference image
-
-#### Message Parts (Filtered)
-
-- `MOCK_FILE_PARTS_SINGLE` - Single file part
-- `MOCK_FILE_PARTS_MULTIPLE` - Multiple file parts
-- `MOCK_IMAGE_PARTS_SINGLE` - Single image part
-- `MOCK_IMAGE_PARTS_MULTIPLE` - Multiple image parts
-- `MOCK_FILE_AND_IMAGE_PARTS` - Combined file and image parts
-- `MOCK_ASSISTANT_MESSAGE_PARTS_WITH_SOURCES` - Assistant message parts with source URLs
-- `MOCK_TOOL_PARTS_WEATHER` - Weather tool parts
-- `MOCK_TOOL_PARTS_GENERATE_IMAGE` - Generate image tool parts
-- `MOCK_TOOL_PARTS_GENERATE_FILE` - Generate file tool parts
-
-#### Source URL Parts
-
-- `MOCK_SOURCE_PARTS` - Default source URL message parts (3 sources: Next.js, React, Tailwind CSS)
-- `MOCK_ADDITIONAL_SOURCE_PARTS` - Additional source URL message parts (TypeScript, Node.js)
-- `MOCK_SOURCE_PREVIEWS` - Source preview data for API responses (3 previews matching MOCK_SOURCE_PARTS)
-- `MOCK_ADDITIONAL_SOURCE_PREVIEWS` - Additional source preview data (TypeScript, Node.js)
-
-#### Files
-
-- `createColoredImageFile(color, filename, width?, height?)` - Creates a colored image file
-- `createColoredImageFiles(colors?, filenames?)` - Creates multiple colored image files
-- `createTextFile(content, filename?)` - Creates a text file
-- `createPDFFile(filename?)` - Creates a PDF file
+**Files**: `createColoredImageFile(color, filename)`, `createTextFile(content, filename?)`, `createPDFFile(filename?)`
 
 ## Element Queries
 
-### Using Element Query Utilities
-
-**Important**: Only create utility functions for elements that require `document.querySelector` or complex DOM traversal. Do NOT create wrappers for simple canvas methods like `canvas.getByRole()` or `canvas.getByText()`.
-
-Use the element query utilities from `#.storybook/lib/utils/elements` for elements that require DOM queries.
+**Rule**: Only create utilities for elements requiring `document.querySelector`. Use canvas methods directly for simple queries.
 
 ```tsx
 import {
     getDialog,
-    getDialogOverlay,
-    getDialogCloseButton,
-    getTooltip,
     getInputPlaceholderText,
+    getTooltip,
 } from "#.storybook/lib/utils/elements";
 
-// ✅ Good - uses document.querySelector
+// ✅ Good - document.querySelector needed
 const dialog = getDialog("dialog");
-const overlay = getDialogOverlay();
 const tooltip = getTooltip();
-const placeholderText = getInputPlaceholderText();
 
-// ✅ Good - direct canvas methods (no wrapper needed)
+// ✅ Good - direct canvas methods
 const button = canvas.getByRole("button", { name: /submit/i });
-const input = canvas.getByRole("textbox");
-const heading = canvas.getByRole("heading", { level: 1 });
-
-// ❌ Bad - don't create wrappers for canvas methods
-const button = getButton(canvas, /submit/i); // Don't do this
 ```
 
-### Available Element Queries
-
-These utilities use `document.querySelector` for elements that are not easily accessible via canvas:
-
-- `getDialog(role?)` - Get a dialog element by role
-- `getDialogOverlay()` - Get dialog overlay element
-- `getDialogCloseButton()` - Get dialog close button
-- `getDialogTitle()` - Get dialog title element
-- `getDropdownMenu()` - Get dropdown menu content
-- `getTooltip()` - Get tooltip content
-- `getInputPlaceholderText()` - Get animated placeholder text from input
+**Available**: `getDialog(role?)`, `getDialogOverlay()`, `getDialogCloseButton()`, `getTooltip()`, `getInputPlaceholderText()`, `getDropdownMenu()`
 
 ## Test Helpers
 
-### Using Test Helpers
-
-**IMPORTANT**: Always use test helpers from `#.storybook/lib/utils/test-helpers` instead of directly using `document.querySelector` or manual `waitFor` calls. This ensures consistent element querying and better error messages.
-
-Use test helpers from `#.storybook/lib/utils/test-helpers` for common test patterns.
+**IMPORTANT**: Always use test helpers from `#.storybook/lib/utils/test-helpers` instead of `document.querySelector` or manual `waitFor`.
 
 ```tsx
 import {
-    clickAndWait,
     waitForDialog,
     waitForDialogToClose,
-    waitForDropdownMenu,
+    waitForTooltip,
 } from "#.storybook/lib/utils/test-helpers";
 
 // ✅ Good
 await waitForDialog("dialog");
-await clickAndWait(button, userEvent, async () => {
-    await waitForDialogToClose();
-});
+await waitForDialogToClose("dialog");
 
-// ❌ Bad - Don't use document.querySelector directly
+// ❌ Bad
 await waitFor(() => {
     const dialog = document.querySelector('[role="dialog"]');
     expect(dialog).toBeInTheDocument();
 });
 ```
 
-### Available Test Helpers
+**Available**: `waitForDialog()`, `waitForDialogToClose()`, `waitForTooltip()`, `waitForElement()`, `waitForText()`, `clickAndWait()`, `typeAndWait()`, `findButtonByText()`
 
-- `waitForElement(selector, options?)` - Wait for element to appear
-- `waitForElementToDisappear(selector, options?)` - Wait for element to disappear
-- `waitForDialog(role?, options?)` - Wait for dialog to appear
-- `waitForDialogToClose(role?, options?)` - Wait for dialog to close
-- `waitForDialogOverlay(options?)` - Wait for dialog overlay to appear
-- `waitForDialogCloseButton(options?)` - Wait for dialog close button to appear
-- `waitForDialogTitle(options?)` - Wait for dialog title to appear
-- `waitForDropdownMenu(options?)` - Wait for dropdown menu to appear
-- `waitForDropdownMenuToClose(options?)` - Wait for dropdown menu to close
-- `waitForTooltip(options?)` - Wait for tooltip to appear
-- `waitForText(canvas, text, options?)` - Wait for text to appear
-- `clickAndWait(element, userEvent, waitCondition)` - Click and wait for condition
-- `typeAndWait(input, text, userEvent, waitCondition?)` - Type and wait
-- `findButtonByText(text)` - Find button by text content
-- `findInputByName(name)` - Find input by name attribute
-- `findInputByType(type)` - Find input by type
+## Decorators & Providers
 
-## Decorators and Providers
+### Provider Pattern
 
-### Using Providers (Preferred)
-
-**IMPORTANT**: Always use component syntax for providers, not function-based decorators. Component syntax is cleaner and more maintainable.
-
-**CRITICAL**: Decorators are inherited in Storybook. If you define a provider decorator in `meta`, it applies to all stories. To customize provider props for individual stories, use `parameters.provider` instead of re-defining decorators. This prevents duplicate provider nesting.
-
-Use providers from `#.storybook/lib/decorators/providers` for common provider setups.
+**CRITICAL**: Use `parameters.provider` to customize provider props. Don't re-define decorators in stories (causes duplicate nesting).
 
 ```tsx
-import {
-    AppProviders,
-    QueryProvider,
-    UserSessionProvider,
-} from "#.storybook/lib/decorators/providers";
-
 const meta = preview.meta({
-    component: MyComponent,
     decorators: [
         (Story, { parameters }) => (
             <AppProviders {...parameters.provider}>
-                <div className="bg-zinc-925 grid min-h-svh w-full items-center">
+                <div className="bg-zinc-925">
                     <Story />
                 </div>
             </AppProviders>
@@ -448,243 +171,96 @@ const meta = preview.meta({
     ],
 });
 
-export const Default = meta.story({});
-
+// ✅ Good - Use parameters.provider
 export const WithFiles = meta.story({
     parameters: {
-        provider: {
-            selectedFiles: MOCK_FILES_MIXED,
-        },
+        provider: { selectedFiles: MOCK_FILES_MIXED },
     },
+});
+
+// ❌ Bad - Re-defining decorator
+export const WithFiles = meta.story({
+    decorators: [
+        Story => <AppProviders selectedFiles={MOCK_FILES_MIXED}><Story /></AppProviders>
+    ],
 });
 ```
 
 ### Available Providers
 
-#### App Providers
+- **`AppProviders`** - Unified provider (always includes `ChatProvider`, `ChatSidebarProvider`, and all context providers with safe defaults)
+    - Props: `status?`, `selectedFiles?`, `rateLimit?` (alias for `rateLimitMessages`), `rateLimitFiles?`, `user?`, `messages?`, `chatId?`, etc.
+- **`QueryProvider`** - Basic React Query provider
+- **`UserSessionProvider`** - User session provider
 
-- `QueryProvider` - Basic React Query provider
-- `UserSessionProvider` - User session provider (for components that only need user context)
-- `AppProviders` - Unified app provider that always includes all necessary providers
-    - **Base providers** (always included): `QueryProvider`, `UserSessionProvider`, `SessionSyncProvider`, `ChatOffsetProvider`, `UserCacheSyncProvider`, `ChatCacheSyncProvider`, `Toaster`
-    - **Always includes `ChatProvider` and `ChatSidebarProvider`** with safe defaults
-    - **Always includes context providers** (`ChatStatusContext`, `ChatFilesContext`, `ChatHandlersContext`, `ChatMessagesRateLimitContext`, `ChatFilesRateLimitContext`) with safe defaults
-    - **Props**: `status?`, `selectedFiles?`, `isUploadingFiles?`, `rateLimitMessages?`, `rateLimit?` (alias for `rateLimitMessages`), `rateLimitFiles?`, `isOwner?`, `visibility?`, `uploadedFiles?`, `handleFileSelect?`, `handleFileRemove?`, `messages?`, `chatId?`, `error?`, `user?`
+**Key Points**:
 
-### Provider Pattern with Parameters
-
-**✅ Good - Single decorator with parameters.provider:**
-
-```tsx
-import { AppProviders } from "#.storybook/lib/decorators/providers";
-import { createMockUser } from "#.storybook/lib/mocks/users";
-
-const mockUser = createMockUser();
-
-const meta = preview.meta({
-    component: MyComponent,
-    decorators: [
-        (Story, { parameters }) => (
-            <AppProviders {...parameters.provider}>
-                <div className="bg-zinc-925 grid min-h-svh w-full items-center">
-                    <Story />
-                </div>
-            </AppProviders>
-        ),
-    ],
-    parameters: {
-        provider: {
-            user: mockUser,
-        },
-    },
-});
-
-export const Default = meta.story({});
-
-export const WithFiles = meta.story({
-    parameters: {
-        provider: {
-            selectedFiles: MOCK_FILES_MIXED,
-        },
-    },
-});
-
-export const Streaming = meta.story({
-    parameters: {
-        provider: {
-            status: MOCK_CHAT_STATUS.STREAMING,
-        },
-    },
-});
-
-export const WithRateLimit = meta.story({
-    parameters: {
-        provider: {
-            rateLimit: MOCK_RATE_LIMIT_OVER, // rateLimit is an alias for rateLimitMessages
-        },
-    },
-});
-```
-
-**❌ Bad - Re-defining decorators in stories (causes duplicate providers):**
-
-```tsx
-const meta = preview.meta({
-    component: MyComponent,
-    decorators: [
-        Story => (
-            <AppProviders>
-                <Story />
-            </AppProviders>
-        ),
-    ],
-});
-
-// ❌ DON'T DO THIS - Creates duplicate providers!
-export const WithFiles = meta.story({
-    decorators: [
-        Story => (
-            <AppProviders selectedFiles={MOCK_FILES_MIXED}>
-                <Story />
-            </AppProviders>
-        ),
-    ],
-});
-```
-
-**✅ Good - Use parameters.provider instead:**
-
-```tsx
-export const WithFiles = meta.story({
-    parameters: {
-        provider: {
-            selectedFiles: MOCK_FILES_MIXED,
-        },
-    },
-});
-```
-
-### Decorator Inheritance
-
-Storybook decorators are inherited in this order:
-
-1. Global decorators (from `.storybook/preview.ts`)
-2. Component decorators (from `meta.decorators`)
-3. Story decorators (from individual story `decorators`)
-
-When you add a decorator to a story, it wraps the component decorators, which can cause duplicate provider nesting. Use `parameters.provider` instead to pass props to the existing provider decorator.
-
-### Styling Wrappers
-
-**IMPORTANT**: Styling wrapper divs (with className) should be kept in story files, not in provider components. Providers should only handle logic and context setup.
-
-**✅ Good:**
-
-```tsx
-decorators: [
-    (Story, { parameters }) => (
-        <AppProviders {...parameters.provider}>
-            <div className="bg-zinc-925 grid min-h-svh w-full items-center">
-                <Story />
-            </div>
-        </AppProviders>
-    ),
-],
-```
-
-**❌ Bad - Styling in provider:**
-
-```tsx
-// Don't put styling divs in provider components
-```
-
-### User Session Setup
-
-**IMPORTANT**: Use the `user` prop on providers instead of creating separate setter components. This keeps stories clean and follows the provider pattern.
-
-**✅ Good - Pass user via parameters.provider:**
-
-```tsx
-import { AppProviders } from "#.storybook/lib/decorators/providers";
-import { createMockUser } from "#.storybook/lib/mocks/users";
-
-const mockUser = createMockUser();
-
-const meta = preview.meta({
-    component: MyComponent,
-    decorators: [
-        (Story, { parameters }) => (
-            <AppProviders {...parameters.provider}>
-                <Story />
-            </AppProviders>
-        ),
-    ],
-    parameters: {
-        provider: {
-            user: mockUser,
-        },
-    },
-});
-```
-
-**❌ Bad - Don't create setter components in story files:**
-
-```tsx
-// ❌ DON'T DO THIS
-function UserSessionSetter({ user }: { user: UIUser }) {
-    const { setUser } = useUserSessionContext();
-    useEffect(() => {
-        setUser(user);
-    }, [setUser, user]);
-    return null;
-}
-
-decorators: [
-    Story => (
-        <AppProviders>
-            <UserSessionSetter user={mockUser} />
-            <Story />
-        </AppProviders>
-    ),
-],
-```
+- Styling wrappers stay in story files, not providers
+- Pass `user` via `parameters.provider.user`, not setter components
+- Always spread `parameters.provider` directly: `<AppProviders {...parameters.provider}>`
 
 ## MSW Handlers
 
-### Using MSW Handler Utilities
-
-Use MSW handler utilities from `#.storybook/lib/msw` for consistent API mocking.
-
-```tsx
-import { createSharedChatsHandler } from "#.storybook/lib/msw";
-
-export const Default = meta.story({
-    parameters: {
-        msw: {
-            handlers: [createSharedChatsHandler(50)],
-        },
-    },
-});
-```
-
-### Available MSW Handlers
-
-- `createSharedChatsHandler(totalChats?, delay?)` - Handler for GET /api/user-chats/shared
-- `createEmptySharedChatsHandler()` - Handler for empty shared chats
-- `createFewSharedChatsHandler(count?)` - Handler for few shared chats
-
-## Query Client Management
-
-### Using Query Client Utilities
-
-**IMPORTANT**: Always use query client utilities from `#.storybook/lib/utils/query-client` instead of directly accessing `getQueryClient()` from application code. This ensures consistent query management in Storybook.
+**IMPORTANT**: Always use handler utilities from `#.storybook/lib/msw/handlers` instead of inline handlers.
 
 ```tsx
 import {
-    clearAllQueries,
-    clearQueriesByTag,
-    clearUserSharedChatsQueries,
-} from "#.storybook/lib/utils/query-client";
+    createResourcePreviewsHandler,
+    createUserChatsHandler,
+    createUserChatsSearchHandler,
+} from "#.storybook/lib/msw/handlers";
+
+// ✅ Good
+export const Default = meta.story({
+    parameters: {
+        msw: {
+            handlers: [
+                createUserChatsHandler({ length: 10 }),
+                createUserChatsSearchHandler({ resultsPerQuery: 5 }),
+            ],
+        },
+    },
+});
+
+// ❌ Bad - Inline handlers
+handlers: [
+    http.post("/api/resource-previews", async () => {
+        return HttpResponse.json(MOCK_SOURCE_PREVIEWS);
+    }),
+],
+```
+
+### Available Handlers
+
+**Resource Previews** (`POST /api/resource-previews`):
+
+- `createResourcePreviewsHandler(options?)` - Options: `previews?`, `delay?` (number or `"infinite"`)
+- `createSingleResourcePreviewsHandler()`, `createManyResourcePreviewsHandler()`
+- `createLoadingResourcePreviewsHandler()`, `createErrorResourcePreviewsHandler()`, `createEmptyResourcePreviewsHandler()`
+
+**User Chats** (`GET /api/user-chats`):
+
+- `createUserChatsHandler(options?)` - Simple handler, Options: `length?`, `visibility?`, `delay?`
+- `createUserChatsPaginatedHandler(options?)` - Paginated with `hasNextPage`, Options: `length?`, `hasNextPage?`, `visibility?`, `delay?`
+- `createPaginatedUserChatsHandler(options?)` - Handles offset/limit, Options: `pageLength?`, `hasNextPage?`, `visibility?`, `delay?`
+- `createInfiniteScrollUserChatsHandler(options?)` - Infinite scroll, Options: `initialItems?`, `additionalPages?`, `limit?`, `visibility?`, `delay?`
+- `createEmptyUserChatsHandler()`, `createErrorUserChatsHandler(message?)`
+
+**User Chats Search** (`GET /api/user-chats/search`):
+
+- `createUserChatsSearchHandler(options?)` - Options: `resultsPerQuery?`, `visibility?`, `emptyQueries?`, `delay?`
+- `createPaginatedUserChatsSearchHandler(options?)` - Cursor-based pagination, Options: `maxPages?`, `resultsPerPage?`, `daysPerPage?`, `visibility?`, `emptyQueries?`, `delay?`
+
+**Shared Chats** (`GET /api/user-chats/shared`):
+
+- `createSharedChatsHandler(options?)` - Options: `chats?`, `hasNextPage?`, `delay?`
+
+## Query Client Management
+
+**IMPORTANT**: Always use utilities from `#.storybook/lib/utils/query-client` instead of importing from application code.
+
+```tsx
+import { clearAllQueries } from "#.storybook/lib/utils/query-client";
 
 export const Default = meta.story({
     afterEach: () => {
@@ -693,33 +269,7 @@ export const Default = meta.story({
 });
 ```
 
-**✅ Good - Use Storybook utilities:**
-
-```tsx
-import { clearAllQueries } from "#.storybook/lib/utils/query-client";
-
-afterEach: () => {
-    clearAllQueries();
-},
-```
-
-**❌ Bad - Don't import from application code:**
-
-```tsx
-import { getQueryClient } from "@/providers/query-provider";
-
-afterEach: () => {
-    const queryClient = getQueryClient();
-    queryClient.clear();
-},
-```
-
-### Available Query Client Utilities
-
-- `clearQueriesByTag(cacheTag)` - Clear queries by cache tag
-- `clearUserSharedChatsQueries()` - Clear user shared chats queries
-- `clearUserChatsQueries()` - Clear user chats queries
-- `clearAllQueries()` - Clear all queries
+**Available**: `clearAllQueries()`, `clearQueriesByTag(cacheTag)`, `clearUserSharedChatsQueries()`, `clearUserChatsQueries()`
 
 ## Common Patterns
 
@@ -728,36 +278,18 @@ afterEach: () => {
 ```tsx
 import {
     waitForDialog,
-    waitForDialogCloseButton,
-    waitForDialogOverlay,
     waitForDialogToClose,
 } from "#.storybook/lib/utils/test-helpers";
 
 Default.test("should open and close dialog", async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole("button", { name: /open dialog/i });
     await userEvent.click(trigger);
-
     await waitForDialog("dialog");
 
     const closeButton = await waitForDialogCloseButton();
     await userEvent.click(closeButton);
-
     await waitForDialogToClose("dialog");
 });
-
-Default.test(
-    "should close dialog when clicking overlay",
-    async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /open dialog/i });
-        await userEvent.click(trigger);
-
-        await waitForDialog("dialog");
-        const overlay = await waitForDialogOverlay();
-        await userEvent.click(overlay);
-
-        await waitForDialogToClose("dialog");
-    },
-);
 ```
 
 ### Form Interactions
@@ -765,42 +297,10 @@ Default.test(
 ```tsx
 Default.test("should submit form", async ({ canvas, userEvent }) => {
     const emailInput = canvas.getByPlaceholderText(/email/i);
-    const passwordInput = canvas.getByRole("textbox", { name: /password/i });
     const submitButton = canvas.getByRole("button", { name: /submit/i });
 
     await userEvent.type(emailInput, "test@example.com");
-    await userEvent.type(passwordInput, "password123");
     await userEvent.click(submitButton);
-
-    // Assertions...
-});
-```
-
-### Table Interactions
-
-```tsx
-Default.test("should render table with data", async ({ canvas }) => {
-    const table = canvas.getByRole("table");
-    expect(table).toBeInTheDocument();
-
-    const rows = canvas.getAllByRole("row");
-    expect(rows.length).toBeGreaterThan(1);
-
-    const links = canvas.getAllByRole("link");
-    expect(links.length).toBeGreaterThan(0);
-});
-```
-
-### Pagination
-
-```tsx
-import { waitForText } from "#.storybook/lib/utils/test-helpers";
-
-Default.test("should navigate to next page", async ({ canvas, userEvent }) => {
-    const nextButton = canvas.getByRole("button", { name: /go to next page/i });
-    await userEvent.click(nextButton);
-
-    await waitForText(canvas, /page 2 of/i);
 });
 ```
 
@@ -812,52 +312,26 @@ import { waitForTooltip } from "#.storybook/lib/utils/test-helpers";
 Default.test("should show tooltip on hover", async ({ canvas, userEvent }) => {
     const button = canvas.getByRole("button");
     await userEvent.hover(button);
-
     const tooltip = await waitForTooltip();
     expect(tooltip).toBeVisible();
 });
 ```
 
-### Input Placeholder Animation
-
-```tsx
-import { getInputPlaceholderText } from "#.storybook/lib/utils/elements";
-
-Default.test(
-    "should animate through placeholders",
-    async ({ canvas, args }) => {
-        const input = canvas.getByRole("textbox");
-        expect(input).toBeVisible();
-
-        await waitFor(() => {
-            const text = getInputPlaceholderText();
-            expect(text).toBe(args.placeholders?.[0]);
-        });
-    },
-);
-```
-
 ## Best Practices
 
-1. **Always use shared utilities** - Don't duplicate code, use the shared utilities
-2. **Consistent test names** - Always use "should [action/state]" format
+1. **Always use shared utilities** - Don't duplicate code
+2. **Consistent test names** - Always use `"should [action/state]"` format
 3. **Use mock factories** - Don't create inline mock data
-4. **Use element queries** - Use utility functions instead of direct queries
-5. **Use test helpers** - Use wait helpers instead of manual waitFor calls
-6. **Use decorators** - Use shared decorators for common setups
-7. **Use MSW handlers** - Use handler utilities for consistent API mocking
-8. **Clean up in beforeEach/afterEach** - Clear queries and mocks appropriately
-9. **One assertion per test** - Or group related assertions logically
-10. **Descriptive test names** - Test names should clearly describe what is being tested
-11. **Use status constants** - Always use `MOCK_CHAT_STATUS` instead of hardcoded status strings
-12. **Use message constants** - Use pre-configured message constants instead of array access like `MOCK_CONVERSATION_WITH_MULTIPLE_FILES[0]`
-13. **Use parts constants** - Use filtered parts constants instead of inline filtering
-14. **Avoid inline filtering** - Don't filter parts inline, use pre-filtered constants like `MOCK_FILE_PARTS_MULTIPLE`
-15. **No raw data in stories** - Never define raw mock data (objects, arrays, constants) directly in story files. All mock data must be defined in `#.storybook/lib/mocks` and imported into stories. This keeps stories clean and makes mock data reusable across multiple stories.
-16. **No helper functions in stories** - Move helper functions (like `createMockChatWithOwner`) to the mocks files instead of defining them inline in story files
-17. **Use provider props for user** - Pass `user` via `parameters.provider.user` instead of creating setter components in story files
-18. **Direct spread parameters.provider** - Always spread `parameters.provider` directly onto the provider component (e.g., `<AppProviders {...parameters.provider}>`)
-19. **Use rateLimit alias** - In `AppProviders`, you can use `rateLimit` as an alias for `rateLimitMessages` - both props are supported
-20. **Unified provider** - `AppProviders` is a unified provider that always includes all necessary providers (`ChatProvider`, `ChatSidebarProvider`, and all context providers) with safe defaults. This ensures components that use `useChatContext()` or other chat contexts work even without explicit props
-21. **Use Storybook query utilities** - Always use `clearAllQueries()` from `#.storybook/lib/utils/query-client` instead of `getQueryClient()` from application code
-22. **Use Storybook test helpers** - Always use `waitForDialog()`, `waitForDropdownMenu()`, etc. from `#.storybook/lib/utils/test-helpers` instead of `document.querySelector`
+4. **Use element queries** - Use utilities instead of direct `document.querySelector`
+5. **Use test helpers** - Use wait helpers instead of manual `waitFor` calls
+6. **Use MSW handlers** - Use handler utilities for consistent API mocking
+7. **Clean up in afterEach** - Clear queries and mocks appropriately
+8. **Use status constants** - Always use `MOCK_CHAT_STATUS.READY` instead of hardcoded strings
+9. **Use message constants** - Use pre-configured constants instead of array access
+10. **No raw data in stories** - All mock data must be in `#.storybook/lib/mocks`
+11. **No helper functions in stories** - Move helpers to mocks files
+12. **Use provider props** - Pass props via `parameters.provider`, not setter components
+13. **Direct spread parameters.provider** - Always spread directly: `<AppProviders {...parameters.provider}>`
+14. **Use rateLimit alias** - `rateLimit` is an alias for `rateLimitMessages` in `AppProviders`
+15. **Unified provider** - `AppProviders` always includes all necessary providers with safe defaults
+16. **Use Storybook utilities** - Always use Storybook-specific utilities, not application code imports
