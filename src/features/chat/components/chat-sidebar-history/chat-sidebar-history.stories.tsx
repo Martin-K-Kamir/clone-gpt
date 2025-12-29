@@ -2,10 +2,13 @@ import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     createMockChats,
     createMockPaginatedChats,
-    generateChatId,
 } from "#.storybook/lib/mocks/chats";
+import {
+    createInfiniteScrollUserChatsHandler,
+    createPaginatedUserChatsHandler,
+    createUserChatsPaginatedHandler,
+} from "#.storybook/lib/msw/handlers";
 import preview from "#.storybook/preview";
-import { HttpResponse, http } from "msw";
 import { Suspense } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
@@ -16,9 +19,6 @@ import {
     QUERY_USER_CHATS_LIMIT,
 } from "@/features/chat/lib/constants";
 import { getUserChats } from "@/features/chat/services/db";
-
-import { api } from "@/lib/api-response";
-import { PLURAL } from "@/lib/constants";
 
 import { ChatSidebarHistory } from "./chat-sidebar-history";
 import { ChatSidebarHistorySkeleton } from "./chat-sidebar-history-skeleton";
@@ -135,27 +135,9 @@ export const WithPagination = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats", ({ request }) => {
-                    const url = new URL(request.url);
-                    const offset = parseInt(
-                        url.searchParams.get("offset") || "0",
-                        10,
-                    );
-                    const limit = parseInt(
-                        url.searchParams.get("limit") || "40",
-                        10,
-                    );
-
-                    const mockData = createMockPaginatedChats({
-                        length: 20,
-                        hasNextPage: true,
-                        nextOffset: offset + limit,
-                    });
-
-                    const response = api.success.chat.get(mockData, {
-                        count: PLURAL.MULTIPLE,
-                    });
-                    return HttpResponse.json(response);
+                createPaginatedUserChatsHandler({
+                    pageLength: 20,
+                    hasNextPage: true,
                 }),
             ],
         },
@@ -213,16 +195,9 @@ export const WithoutInitialData = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats", () => {
-                    const response = api.success.chat.get(
-                        createMockPaginatedChats({
-                            length: DEFAULT_CHATS_LENGTH,
-                            hasNextPage: false,
-                            visibility: CHAT_VISIBILITY.PRIVATE,
-                        }),
-                        { count: PLURAL.MULTIPLE },
-                    );
-                    return HttpResponse.json(response);
+                createUserChatsPaginatedHandler({
+                    length: DEFAULT_CHATS_LENGTH,
+                    hasNextPage: false,
                 }),
             ],
         },
@@ -260,47 +235,9 @@ export const InfiniteScrolling = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats", ({ request }) => {
-                    const url = new URL(request.url);
-                    const offset = parseInt(
-                        url.searchParams.get("offset") || "0",
-                        10,
-                    );
-                    const limit = parseInt(
-                        url.searchParams.get("limit") || "40",
-                        10,
-                    );
-
-                    const INITIAL_ITEMS = DEFAULT_CHATS_LENGTH;
-                    const ADDITIONAL_PAGES = 5;
-                    const TOTAL_ITEMS =
-                        INITIAL_ITEMS + ADDITIONAL_PAGES * limit;
-
-                    const itemsLoaded = offset + limit;
-                    const hasNextPage = itemsLoaded < TOTAL_ITEMS;
-                    const nextOffset = hasNextPage ? offset + limit : undefined;
-
-                    const remainingItems = TOTAL_ITEMS - offset;
-                    const pageLength = Math.min(limit, remainingItems);
-
-                    const pageChats = createMockChats({
-                        length: pageLength,
-                        visibility: CHAT_VISIBILITY.PRIVATE,
-                    }).map((chat, i) => ({
-                        ...chat,
-                        id: generateChatId(offset + i),
-                    }));
-
-                    const response = api.success.chat.get(
-                        {
-                            data: pageChats,
-                            totalCount: TOTAL_ITEMS,
-                            hasNextPage,
-                            nextOffset,
-                        },
-                        { count: PLURAL.MULTIPLE },
-                    );
-                    return HttpResponse.json(response);
+                createInfiniteScrollUserChatsHandler({
+                    initialItems: DEFAULT_CHATS_LENGTH,
+                    additionalPages: 5,
                 }),
             ],
         },

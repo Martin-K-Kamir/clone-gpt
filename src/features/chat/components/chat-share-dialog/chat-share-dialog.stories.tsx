@@ -5,6 +5,7 @@ import {
     createMockPrivateChat,
     createMockPublicChat,
 } from "#.storybook/lib/mocks/chats";
+import { createSharedChatsHandler } from "#.storybook/lib/msw/handlers";
 import { getQueryClient } from "#.storybook/lib/utils/query-client";
 import {
     findButtonByText,
@@ -15,7 +16,6 @@ import {
     waitForSwitch,
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { HttpResponse, http } from "msw";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
@@ -444,16 +444,9 @@ Default.test(
         parameters: {
             msw: {
                 handlers: [
-                    http.get("/api/user-chats/shared", () => {
-                        const response = api.success.chat.getShared(
-                            {
-                                data: mockedSharedChats,
-                                hasNextPage: false,
-                                totalCount: mockedSharedChats.length,
-                            },
-                            { count: PLURAL.MULTIPLE },
-                        );
-                        return HttpResponse.json(response);
+                    createSharedChatsHandler({
+                        chats: mockedSharedChats,
+                        hasNextPage: false,
                     }),
                 ],
             },
@@ -482,16 +475,9 @@ Default.test(
         parameters: {
             msw: {
                 handlers: [
-                    http.get("/api/user-chats/shared", () => {
-                        const response = api.success.chat.getShared(
-                            {
-                                data: mockedSharedChats2,
-                                hasNextPage: false,
-                                totalCount: mockedSharedChats2.length,
-                            },
-                            { count: PLURAL.MULTIPLE },
-                        );
-                        return HttpResponse.json(response);
+                    createSharedChatsHandler({
+                        chats: mockedSharedChats2,
+                        hasNextPage: false,
                     }),
                 ],
             },

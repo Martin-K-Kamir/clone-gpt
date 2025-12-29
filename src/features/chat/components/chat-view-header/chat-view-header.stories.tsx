@@ -10,7 +10,6 @@ import {
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { Suspense } from "react";
-import type React from "react";
 import { expect, mocked, userEvent, waitFor } from "storybook/test";
 
 import {

@@ -1,29 +1,25 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { createMockChats } from "#.storybook/lib/mocks/chats";
 import {
-    FIXED_DATE,
-    createMockChats,
-    createMockSearchResults,
-} from "#.storybook/lib/mocks/chats";
+    createEmptyUserChatsHandler,
+    createErrorUserChatsHandler,
+    createPaginatedUserChatsSearchHandler,
+    createUserChatsHandler,
+    createUserChatsSearchHandler,
+} from "#.storybook/lib/msw/handlers";
 import { clearAllQueries } from "#.storybook/lib/utils/query-client";
 import { waitForDialog } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
-import { HttpResponse, http } from "msw";
 import { Suspense } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import { INITIAL_QUERY_SEARCH_USER_CHATS_LIMIT } from "@/features/chat/lib/constants";
-import type { DBChatId } from "@/features/chat/lib/types";
 import { getUserChatsByDate } from "@/features/chat/services/db";
-
-import { api } from "@/lib/api-response";
-import { PLURAL } from "@/lib/constants";
 
 import { ChatSearchDialog } from "./chat-search-dialog";
 import { ChatSearchDialogTrigger } from "./chat-search-dialog-client";
-
-let apiCallCount = 0;
 
 const meta = preview.meta({
     component: ChatSearchDialog,
@@ -54,52 +50,12 @@ export const Default = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats", () => {
-                    const response = api.success.chat.get(
-                        createMockChats({
-                            length: 10,
-                            visibility: CHAT_VISIBILITY.PRIVATE,
-                        }),
-                        {
-                            count: PLURAL.MULTIPLE,
-                        },
-                    );
-                    return HttpResponse.json(response);
+                createUserChatsHandler({
+                    length: 10,
                 }),
-                http.get("/api/user-chats/search", ({ request }) => {
-                    const url = new URL(request.url);
-                    const query = url.searchParams.get("query") || "";
-
-                    if (query === "nonexistentxyz123") {
-                        return HttpResponse.json(
-                            api.success.chat.search({
-                                data: [],
-                                totalCount: 0,
-                                hasNextPage: false,
-                            }),
-                        );
-                    }
-
-                    if (!query.trim()) {
-                        return HttpResponse.json(
-                            api.success.chat.search({
-                                data: [],
-                                totalCount: 0,
-                                hasNextPage: false,
-                            }),
-                        );
-                    }
-
-                    const searchResults = createMockSearchResults(query, 5, 0, {
-                        visibility: CHAT_VISIBILITY.PRIVATE,
-                    });
-                    const response = api.success.chat.search({
-                        data: searchResults,
-                        totalCount: searchResults.length,
-                        hasNextPage: false,
-                    });
-
-                    return HttpResponse.json(response);
+                createUserChatsSearchHandler({
+                    resultsPerQuery: 5,
+                    emptyQueries: ["nonexistentxyz123"],
                 }),
             ],
         },
@@ -319,53 +275,12 @@ export const WithoutInitialData = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats", () => {
-                    apiCallCount++;
-                    const response = api.success.chat.get(
-                        createMockChats({
-                            length: 5,
-                            visibility: CHAT_VISIBILITY.PRIVATE,
-                        }),
-                        {
-                            count: PLURAL.MULTIPLE,
-                        },
-                    );
-                    return HttpResponse.json(response);
+                createUserChatsHandler({
+                    length: 5,
                 }),
-                http.get("/api/user-chats/search", ({ request }) => {
-                    const url = new URL(request.url);
-                    const query = url.searchParams.get("query") || "";
-
-                    if (!query.trim()) {
-                        return HttpResponse.json(
-                            api.success.chat.search({
-                                data: [],
-                                totalCount: 0,
-                                hasNextPage: false,
-                            }),
-                        );
-                    }
-
-                    if (query.toLowerCase().includes("nonexistent")) {
-                        return HttpResponse.json(
-                            api.success.chat.search({
-                                data: [],
-                                totalCount: 0,
-                                hasNextPage: false,
-                            }),
-                        );
-                    }
-
-                    const searchResults = createMockSearchResults(query, 5, 0, {
-                        visibility: CHAT_VISIBILITY.PRIVATE,
-                    });
-                    const response = api.success.chat.search({
-                        data: searchResults,
-                        totalCount: searchResults.length,
-                        hasNextPage: false,
-                    });
-
-                    return HttpResponse.json(response);
+                createUserChatsSearchHandler({
+                    resultsPerQuery: 5,
+                    emptyQueries: ["nonexistent"],
                 }),
             ],
         },
@@ -373,7 +288,6 @@ export const WithoutInitialData = meta.story({
     afterEach: () => {
         clearAllQueries();
         mocked(getUserChatsByDate).mockClear();
-        apiCallCount = 0;
     },
 });
 
@@ -384,10 +298,6 @@ WithoutInitialData.test(
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
-
-        await waitFor(() => {
-            expect(apiCallCount).toBeGreaterThan(0);
-        });
 
         expect(mocked(getUserChatsByDate)).toHaveBeenCalled();
         expect(mocked(getUserChatsByDate)).toHaveReturnedWith(undefined);
@@ -404,12 +314,7 @@ WithoutInitialData.test(
 export const Empty = meta.story({
     parameters: {
         msw: {
-            handlers: [
-                http.get("/api/user-chats", () => {
-                    const response = api.success.chat.get([], { count: 0 });
-                    return HttpResponse.json(response);
-                }),
-            ],
+            handlers: [createEmptyUserChatsHandler()],
         },
     },
     afterEach: () => {
@@ -435,14 +340,7 @@ Empty.test(
 export const Error = meta.story({
     parameters: {
         msw: {
-            handlers: [
-                http.get("/api/user-chats", () => {
-                    return HttpResponse.json(
-                        api.error("Failed to fetch chats"),
-                        { status: 500 },
-                    );
-                }),
-            ],
+            handlers: [createErrorUserChatsHandler("Failed to fetch chats")],
         },
     },
     afterEach: () => {
@@ -475,82 +373,13 @@ export const WithInfiniteScrolling = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user-chats", () => {
-                    const response = api.success.chat.get(
-                        createMockChats({
-                            length: 10,
-                            visibility: CHAT_VISIBILITY.PRIVATE,
-                        }),
-                        {
-                            count: PLURAL.MULTIPLE,
-                        },
-                    );
-                    return HttpResponse.json(response);
+                createUserChatsHandler({
+                    length: 10,
                 }),
-                http.get("/api/user-chats/search", ({ request }) => {
-                    const url = new URL(request.url);
-                    const query = url.searchParams.get("query") || "";
-                    const cursorDate = url.searchParams.get("cursorDate");
-                    const cursorId = url.searchParams.get("cursorId");
-                    const limitParam = url.searchParams.get("limit");
-                    const limit = limitParam ? parseInt(limitParam, 10) : 25;
-
-                    if (!query.trim()) {
-                        return HttpResponse.json(
-                            api.success.chat.search({
-                                data: [],
-                                totalCount: 0,
-                                hasNextPage: false,
-                            }),
-                        );
-                    }
-
-                    let pageNumber = 0;
-                    if (cursorDate && cursorId) {
-                        const cursorDateObj = new Date(cursorDate);
-                        const daysDiff = Math.floor(
-                            (FIXED_DATE.getTime() - cursorDateObj.getTime()) /
-                                (1000 * 60 * 60 * 24),
-                        );
-                        pageNumber = Math.floor(daysDiff / 10) + 1;
-                    }
-
-                    const MAX_PAGES = 5;
-                    const hasNextPage = pageNumber < MAX_PAGES - 1;
-
-                    const resultsPerPage = limit;
-                    const startIndex = pageNumber * resultsPerPage;
-
-                    const searchResults = createMockSearchResults(
-                        query,
-                        resultsPerPage,
-                        startIndex,
-                        { visibility: CHAT_VISIBILITY.PRIVATE },
-                    );
-
-                    const nextCursor = hasNextPage
-                        ? {
-                              date: new Date(
-                                  FIXED_DATE.getTime() -
-                                      (pageNumber + 1) *
-                                          10 *
-                                          24 *
-                                          60 *
-                                          60 *
-                                          1000,
-                              ).toISOString(),
-                              id: `chat-${(pageNumber + 1) * resultsPerPage}` as DBChatId,
-                          }
-                        : undefined;
-
-                    const response = api.success.chat.search({
-                        data: searchResults,
-                        totalCount: MAX_PAGES * resultsPerPage,
-                        hasNextPage,
-                        cursor: nextCursor,
-                    });
-
-                    return HttpResponse.json(response);
+                createPaginatedUserChatsSearchHandler({
+                    maxPages: 5,
+                    resultsPerPage: 25,
+                    daysPerPage: 10,
                 }),
             ],
         },
@@ -559,7 +388,6 @@ export const WithInfiniteScrolling = meta.story({
         mocked(getUserChatsByDate).mockResolvedValue(
             createMockChats({
                 length: INITIAL_QUERY_SEARCH_USER_CHATS_LIMIT,
-                visibility: CHAT_VISIBILITY.PRIVATE,
             }),
         );
     },

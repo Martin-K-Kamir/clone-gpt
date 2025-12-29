@@ -1,19 +1,23 @@
 import { QueryProvider } from "#.storybook/lib/decorators/providers";
-import { MOCK_SOURCE_PARTS } from "#.storybook/lib/mocks/messages";
-import { MOCK_SOURCE_PREVIEWS } from "#.storybook/lib/mocks/messages";
+import {
+    MOCK_SOURCE_PARTS,
+    MOCK_SOURCE_PREVIEWS,
+} from "#.storybook/lib/mocks/messages";
+import {
+    createEmptyResourcePreviewsHandler,
+    createErrorResourcePreviewsHandler,
+    createLoadingResourcePreviewsHandler,
+    createResourcePreviewsHandler,
+} from "#.storybook/lib/msw/handlers";
 import preview from "#.storybook/preview";
 import { type SourceUrlUIPart } from "ai";
-import { HttpResponse, delay, http } from "msw";
 import { expect, waitFor } from "storybook/test";
-
-import { SourcePreview } from "@/lib/types";
 
 import { SourceList } from "./source-list";
 
 const mockSources: SourceUrlUIPart[] = MOCK_SOURCE_PARTS.filter(
     part => part.type === "source-url",
 );
-const mockPreviews: SourcePreview[] = MOCK_SOURCE_PREVIEWS;
 
 const meta = preview.meta({
     component: SourceList,
@@ -102,11 +106,7 @@ export const Default = meta.story({
     },
     parameters: {
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json(mockPreviews);
-                }),
-            ],
+            handlers: [createResourcePreviewsHandler()],
         },
     },
 });
@@ -172,12 +172,7 @@ export const Loading = meta.story({
     },
     parameters: {
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", async () => {
-                    await delay("infinite");
-                    return HttpResponse.json(mockPreviews);
-                }),
-            ],
+            handlers: [createLoadingResourcePreviewsHandler()],
         },
     },
 });
@@ -200,11 +195,7 @@ export const Error = meta.story({
             disable: true,
         },
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", () => {
-                    return HttpResponse.error();
-                }),
-            ],
+            handlers: [createErrorResourcePreviewsHandler()],
         },
     },
 });
@@ -278,11 +269,7 @@ export const Empty = meta.story({
     },
     parameters: {
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", () => {
-                    return HttpResponse.json([]);
-                }),
-            ],
+            handlers: [createEmptyResourcePreviewsHandler()],
         },
     },
 });
@@ -303,11 +290,11 @@ export const DuplicateUrls = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.post("/api/resource-previews", () => {
-                    return HttpResponse.json([
-                        mockPreviews[0],
-                        mockPreviews[1],
-                    ]);
+                createResourcePreviewsHandler({
+                    previews: [
+                        MOCK_SOURCE_PREVIEWS[0],
+                        MOCK_SOURCE_PREVIEWS[1],
+                    ],
                 }),
             ],
         },

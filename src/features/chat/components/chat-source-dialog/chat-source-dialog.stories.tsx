@@ -1,15 +1,16 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
     MOCK_ADDITIONAL_SOURCE_PARTS,
-    MOCK_ADDITIONAL_SOURCE_PREVIEWS,
     MOCK_SOURCE_PARTS,
-    MOCK_SOURCE_PREVIEWS,
-    MOCK_SOURCE_SINGLE_PREVIEW,
     createMockTextMessagePart,
 } from "#.storybook/lib/mocks/messages";
+import {
+    createManyResourcePreviewsHandler,
+    createResourcePreviewsHandler,
+    createSingleResourcePreviewsHandler,
+} from "#.storybook/lib/msw/handlers";
 import { waitForElement } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { HttpResponse, http } from "msw";
 import { expect } from "storybook/test";
 
 import { ChatSourceDialog } from "./chat-source-dialog";
@@ -51,11 +52,7 @@ export const Default = meta.story({
     },
     parameters: {
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json(MOCK_SOURCE_PREVIEWS);
-                }),
-            ],
+            handlers: [createResourcePreviewsHandler()],
         },
     },
 });
@@ -87,11 +84,7 @@ export const WithSingleSource = meta.story({
     },
     parameters: {
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json([MOCK_SOURCE_SINGLE_PREVIEW]);
-                }),
-            ],
+            handlers: [createSingleResourcePreviewsHandler()],
         },
     },
 });
@@ -113,14 +106,7 @@ export const WithManySources = meta.story({
     },
     parameters: {
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json([
-                        ...MOCK_SOURCE_PREVIEWS,
-                        ...MOCK_ADDITIONAL_SOURCE_PREVIEWS,
-                    ]);
-                }),
-            ],
+            handlers: [createManyResourcePreviewsHandler()],
         },
     },
 });
@@ -149,11 +135,7 @@ export const WithMixedParts = meta.story({
     },
     parameters: {
         msw: {
-            handlers: [
-                http.post("/api/resource-previews", async () => {
-                    return HttpResponse.json(MOCK_SOURCE_PREVIEWS);
-                }),
-            ],
+            handlers: [createResourcePreviewsHandler()],
         },
     },
 });
