@@ -27,6 +27,9 @@ const meta = preview.meta({
             disable: true,
         },
         layout: "centered",
+        chromatic: {
+            disableSnapshot: true,
+        },
     },
     argTypes: {
         as: {

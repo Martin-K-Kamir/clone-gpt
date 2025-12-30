@@ -50,6 +50,11 @@ export const WithMessagesRateLimit = meta.story({
 
 WithMessagesRateLimit.test(
     "should show messages rate limit info",
+    {
+        parameters: {
+            chromatic: { disableSnapshot: true },
+        },
+    },
     async ({ canvas }) => {
         const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
         expect(rateLimit).toBeInTheDocument();
@@ -58,6 +63,11 @@ WithMessagesRateLimit.test(
 
 WithMessagesRateLimit.test(
     "should show the correct date time",
+    {
+        parameters: {
+            chromatic: { disableSnapshot: true },
+        },
+    },
     async ({ canvas }) => {
         const dateTime = canvas.getByText(
             new RegExp(formatDateTime(FIXED_DATE_PLUS_24H), "i"),
@@ -68,6 +78,11 @@ WithMessagesRateLimit.test(
 
 WithMessagesRateLimit.test(
     "should close rate limit info when close button is clicked",
+    {
+        parameters: {
+            chromatic: { disableSnapshot: true },
+        },
+    },
     async ({ canvas, userEvent }) => {
         const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
         expect(rateLimit).toBeInTheDocument();
@@ -95,6 +110,11 @@ export const WithFilesRateLimit = meta.story({
 
 WithFilesRateLimit.test(
     "should show files rate limit info",
+    {
+        parameters: {
+            chromatic: { disableSnapshot: true },
+        },
+    },
     async ({ canvas }) => {
         const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
         expect(rateLimit).toBeInTheDocument();
@@ -103,6 +123,11 @@ WithFilesRateLimit.test(
 
 WithFilesRateLimit.test(
     "should show the correct date time",
+    {
+        parameters: {
+            chromatic: { disableSnapshot: true },
+        },
+    },
     async ({ canvas }) => {
         const dateTime = canvas.getByText(
             new RegExp(formatDateTime(FIXED_DATE_PLUS_24H), "i"),
@@ -113,6 +138,11 @@ WithFilesRateLimit.test(
 
 WithFilesRateLimit.test(
     "should close rate limit info when close button is clicked",
+    {
+        parameters: {
+            chromatic: { disableSnapshot: true },
+        },
+    },
     async ({ canvas, userEvent }) => {
         const rateLimit = canvas.getByTestId("chat-composer-rate-limit");
         expect(rateLimit).toBeInTheDocument();

@@ -132,6 +132,11 @@ Default.test("should render chat messages", async ({ canvas }) => {
 
 Default.test(
     "should open share dialog when clicking share button",
+    {
+        parameters: {
+            chromatic: { disableSnapshot: true },
+        },
+    },
     async ({ canvas, userEvent }) => {
         const shareButton = await waitForButtonByRole(
             canvas,
