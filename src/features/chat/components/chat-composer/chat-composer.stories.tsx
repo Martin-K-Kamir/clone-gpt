@@ -1,5 +1,18 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_BUTTON_ATTACH_FILE,
+    MOCK_CHAT_BUTTON_CLOSE_RATE_LIMIT_INFO,
+    MOCK_CHAT_BUTTON_SEND,
+    MOCK_CHAT_BUTTON_STOP,
+    MOCK_CHAT_FILE_1,
+    MOCK_CHAT_FILE_CONTENT_1,
+    MOCK_CHAT_FILE_CONTENT_DEFAULT,
+    MOCK_CHAT_FILE_DOCUMENT,
+    MOCK_CHAT_FILE_IMAGE,
+    MOCK_CHAT_MESSAGE_DEFAULT,
+    MOCK_CHAT_MESSAGE_LONG,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_FILES_AND_IMAGES,
     MOCK_FILES_IMAGES,
     MOCK_FILES_MIXED,
@@ -41,7 +54,9 @@ Default.test("should render message input textarea", async ({ canvas }) => {
 });
 
 Default.test("should have disabled send button", async ({ canvas }) => {
-    const sendButton = canvas.getByRole("button", { name: "Send" });
+    const sendButton = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_SEND,
+    });
     expect(sendButton).toBeDisabled();
 });
 
@@ -49,10 +64,11 @@ Default.test(
     "should have disabled send button when message is too long",
     async ({ canvas, userEvent }) => {
         const textarea = canvas.getByRole("textbox");
-        const text = "a".repeat(10000);
         await userEvent.clear(textarea);
-        await userEvent.paste(text);
-        const sendButton = canvas.getByRole("button", { name: "Send" });
+        await userEvent.paste(MOCK_CHAT_MESSAGE_LONG);
+        const sendButton = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_SEND,
+        });
         expect(sendButton).toBeDisabled();
     },
 );
@@ -61,8 +77,8 @@ Default.test(
     "should be able to type in textarea",
     async ({ canvas, userEvent }) => {
         const textarea = canvas.getByRole("textbox");
-        await userEvent.type(textarea, "Hello, world!");
-        expect(textarea).toHaveValue("Hello, world!");
+        await userEvent.type(textarea, MOCK_CHAT_MESSAGE_DEFAULT);
+        expect(textarea).toHaveValue(MOCK_CHAT_MESSAGE_DEFAULT);
     },
 );
 
@@ -70,8 +86,10 @@ Default.test(
     "should disable send button after submitting message",
     async ({ canvas, userEvent }) => {
         const textarea = canvas.getByRole("textbox");
-        await userEvent.type(textarea, "Hello, world!");
-        const sendButton = canvas.getByRole("button", { name: "Send" });
+        await userEvent.type(textarea, MOCK_CHAT_MESSAGE_DEFAULT);
+        const sendButton = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_SEND,
+        });
         await userEvent.click(sendButton);
         expect(sendButton).toBeDisabled();
     },
@@ -81,7 +99,7 @@ Default.test(
     "should submit message when Enter key is pressed",
     async ({ canvas, userEvent }) => {
         const textarea = canvas.getByRole("textbox");
-        await userEvent.type(textarea, "Hello, world!");
+        await userEvent.type(textarea, MOCK_CHAT_MESSAGE_DEFAULT);
         await userEvent.keyboard("{enter}");
     },
 );
@@ -90,19 +108,21 @@ Default.test(
     "should reset textarea when message is submitted",
     async ({ canvas, userEvent }) => {
         const textarea = canvas.getByRole("textbox");
-        await userEvent.type(textarea, "Hello, world!");
+        await userEvent.type(textarea, MOCK_CHAT_MESSAGE_DEFAULT);
         await userEvent.keyboard("{enter}");
         expect(textarea).toHaveValue("");
     },
 );
 
 Default.test("should attach an image file", async ({ canvas }) => {
-    const fileButton = canvas.getByRole("button", { name: "Attach a file" });
+    const fileButton = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
+    });
     expect(fileButton).toBeInTheDocument();
 
     const fileInput = getFileInput();
 
-    const imageFile = createColoredImageFile("#FF0000", "test-image.png");
+    const imageFile = createColoredImageFile("#FF0000", MOCK_CHAT_FILE_IMAGE);
 
     Object.defineProperty(fileInput, "files", {
         value: [imageFile],
@@ -113,20 +133,22 @@ Default.test("should attach an image file", async ({ canvas }) => {
     fileInput.dispatchEvent(changeEvent);
 
     await waitFor(() => {
-        const image = canvas.getByAltText("test-image.png");
+        const image = canvas.getByAltText(MOCK_CHAT_FILE_IMAGE);
         expect(image).toBeInTheDocument();
     });
 });
 
 Default.test("should attach a file", async ({ canvas }) => {
-    const fileButton = canvas.getByRole("button", { name: "Attach a file" });
+    const fileButton = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
+    });
     expect(fileButton).toBeInTheDocument();
 
     const fileInput = getFileInput();
 
     const textFile = createFile({
-        filename: "document.txt",
-        content: "file content",
+        filename: MOCK_CHAT_FILE_DOCUMENT,
+        content: MOCK_CHAT_FILE_CONTENT_DEFAULT,
     });
 
     Object.defineProperty(fileInput, "files", {
@@ -138,13 +160,15 @@ Default.test("should attach a file", async ({ canvas }) => {
     fileInput.dispatchEvent(changeEvent);
 
     await waitFor(() => {
-        const filesPreview = canvas.getByText("document.txt");
+        const filesPreview = canvas.getByText(MOCK_CHAT_FILE_DOCUMENT);
         expect(filesPreview).toBeInTheDocument();
     });
 });
 
 Default.test("should attach multiple files", async ({ canvas }) => {
-    const fileButton = canvas.getByRole("button", { name: "Attach a file" });
+    const fileButton = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
+    });
     expect(fileButton).toBeInTheDocument();
 
     const fileInput = getFileInput();
@@ -165,7 +189,9 @@ Default.test("should attach multiple files", async ({ canvas }) => {
 });
 
 Default.test("should attach multiple images", async ({ canvas }) => {
-    const fileButton = canvas.getByRole("button", { name: "Attach a file" });
+    const fileButton = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
+    });
     expect(fileButton).toBeInTheDocument();
 
     const fileInput = getFileInput();
@@ -189,7 +215,7 @@ Default.test("should attach multiple images", async ({ canvas }) => {
 
 Default.test("should attach files and images together", async ({ canvas }) => {
     const fileButton = canvas.getByRole("button", {
-        name: "Attach a file",
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
     });
     expect(fileButton).toBeInTheDocument();
 
@@ -215,14 +241,16 @@ Default.test("should attach files and images together", async ({ canvas }) => {
 });
 
 Default.test("should remove a file", async ({ canvas, userEvent }) => {
-    const fileButton = canvas.getByRole("button", { name: "Attach a file" });
+    const fileButton = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
+    });
     expect(fileButton).toBeInTheDocument();
 
     const fileInput = getFileInput();
 
     const textFile = createFile({
-        filename: "document.txt",
-        content: "file content",
+        filename: MOCK_CHAT_FILE_DOCUMENT,
+        content: MOCK_CHAT_FILE_CONTENT_DEFAULT,
     });
 
     Object.defineProperty(fileInput, "files", {
@@ -234,29 +262,31 @@ Default.test("should remove a file", async ({ canvas, userEvent }) => {
     fileInput.dispatchEvent(changeEvent);
 
     await waitFor(() => {
-        expect(canvas.getByText("document.txt")).toBeInTheDocument();
+        expect(canvas.getByText(MOCK_CHAT_FILE_DOCUMENT)).toBeInTheDocument();
     });
 
     const removeButton = canvas.getByRole("button", {
-        name: /remove file document\.txt/i,
+        name: new RegExp(`remove file ${MOCK_CHAT_FILE_DOCUMENT}`, "i"),
     });
     expect(removeButton).toBeInTheDocument();
 
     await userEvent.click(removeButton);
 
     await waitFor(() => {
-        const fileText = canvas.queryByText("document.txt");
+        const fileText = canvas.queryByText(MOCK_CHAT_FILE_DOCUMENT);
         expect(fileText).not.toBeInTheDocument();
     });
 });
 
 Default.test("should remove an image", async ({ canvas, userEvent }) => {
-    const fileButton = canvas.getByRole("button", { name: "Attach a file" });
+    const fileButton = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
+    });
     expect(fileButton).toBeInTheDocument();
 
     const fileInput = getFileInput();
 
-    const imageFile = createColoredImageFile("#FF0000", "test-image.png");
+    const imageFile = createColoredImageFile("#FF0000", MOCK_CHAT_FILE_IMAGE);
 
     Object.defineProperty(fileInput, "files", {
         value: [imageFile],
@@ -267,18 +297,18 @@ Default.test("should remove an image", async ({ canvas, userEvent }) => {
     fileInput.dispatchEvent(changeEvent);
 
     await waitFor(() => {
-        expect(canvas.getByAltText("test-image.png")).toBeInTheDocument();
+        expect(canvas.getByAltText(MOCK_CHAT_FILE_IMAGE)).toBeInTheDocument();
     });
 
     const removeButton = canvas.getByRole("button", {
-        name: /remove file test-image\.png/i,
+        name: new RegExp(`remove file ${MOCK_CHAT_FILE_IMAGE}`, "i"),
     });
     expect(removeButton).toBeInTheDocument();
 
     await userEvent.click(removeButton);
 
     await waitFor(() => {
-        const image = canvas.queryByAltText("test-image.png");
+        const image = canvas.queryByAltText(MOCK_CHAT_FILE_IMAGE);
         expect(image).not.toBeInTheDocument();
     });
 });
@@ -357,7 +387,10 @@ export const WithFilesUploading = meta.story({
     parameters: {
         provider: {
             selectedFiles: [
-                createFile({ filename: "file1.txt", content: "content1" }),
+                createFile({
+                    filename: MOCK_CHAT_FILE_1,
+                    content: MOCK_CHAT_FILE_CONTENT_1,
+                }),
             ],
             isUploadingFiles: true,
         },
@@ -383,14 +416,14 @@ export const Streaming = meta.story({
 
 Streaming.test("should show stop button", async ({ canvas }) => {
     const stopButton = canvas.getByRole("button", {
-        name: "Stop",
+        name: MOCK_CHAT_BUTTON_STOP,
     });
     expect(stopButton).toBeInTheDocument();
 });
 
 Streaming.test("should have disabled file button", async ({ canvas }) => {
     const fileButton = canvas.getByRole("button", {
-        name: "Attach a file",
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
     });
     expect(fileButton).toBeDisabled();
 });
@@ -405,14 +438,14 @@ export const Submitted = meta.story({
 
 Submitted.test("should show stop button", async ({ canvas }) => {
     const stopButton = canvas.getByRole("button", {
-        name: "Stop",
+        name: MOCK_CHAT_BUTTON_STOP,
     });
     expect(stopButton).toBeInTheDocument();
 });
 
 Submitted.test("should have disabled file button", async ({ canvas }) => {
     const fileButton = canvas.getByRole("button", {
-        name: "Attach a file",
+        name: MOCK_CHAT_BUTTON_ATTACH_FILE,
     });
     expect(fileButton).toBeDisabled();
 });
@@ -437,7 +470,9 @@ RateLimitExceeded.test("should display rate limit info", async ({ canvas }) => {
 RateLimitExceeded.test(
     "should have disabled send button",
     async ({ canvas }) => {
-        const sendButton = canvas.getByRole("button", { name: "Send" });
+        const sendButton = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_SEND,
+        });
         expect(sendButton).toBeDisabled();
     },
 );
@@ -446,7 +481,7 @@ RateLimitExceeded.test(
     "should have disabled file button",
     async ({ canvas }) => {
         const fileButton = canvas.getByRole("button", {
-            name: "Attach a file",
+            name: MOCK_CHAT_BUTTON_ATTACH_FILE,
         });
         expect(fileButton).toBeDisabled();
     },
@@ -456,7 +491,7 @@ RateLimitExceeded.test(
     "should close rate limit info when close button is clicked",
     async ({ canvas, userEvent }) => {
         const closeButton = canvas.getByRole("button", {
-            name: "Close rate limit info",
+            name: MOCK_CHAT_BUTTON_CLOSE_RATE_LIMIT_INFO,
         });
         expect(closeButton).toBeInTheDocument();
         await userEvent.click(closeButton);
@@ -490,7 +525,9 @@ FilesRateLimitExceeded.test(
 FilesRateLimitExceeded.test(
     "should have disabled send button",
     async ({ canvas }) => {
-        const sendButton = canvas.getByRole("button", { name: "Send" });
+        const sendButton = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_SEND,
+        });
         expect(sendButton).toBeDisabled();
     },
 );
@@ -499,7 +536,7 @@ FilesRateLimitExceeded.test(
     "should have disabled file button",
     async ({ canvas }) => {
         const fileButton = canvas.getByRole("button", {
-            name: "Attach a file",
+            name: MOCK_CHAT_BUTTON_ATTACH_FILE,
         });
         expect(fileButton).toBeDisabled();
     },
@@ -509,7 +546,7 @@ FilesRateLimitExceeded.test(
     "should close rate limit info when close button is clicked",
     async ({ canvas, userEvent }) => {
         const closeButton = canvas.getByRole("button", {
-            name: "Close rate limit info",
+            name: MOCK_CHAT_BUTTON_CLOSE_RATE_LIMIT_INFO,
         });
         expect(closeButton).toBeInTheDocument();
         await userEvent.click(closeButton);

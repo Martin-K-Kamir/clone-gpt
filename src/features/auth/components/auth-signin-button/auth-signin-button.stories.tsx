@@ -1,3 +1,7 @@
+import {
+    MOCK_AUTH_BUTTON_SIGNIN_GITHUB,
+    MOCK_AUTH_BUTTON_SIGNIN_GOOGLE,
+} from "#.storybook/lib/mocks/auth-forms";
 import preview from "#.storybook/preview";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
@@ -10,7 +14,7 @@ const meta = preview.meta({
     component: AuthSignInButton,
     args: {
         provider: AUTH_PROVIDER.GOOGLE,
-        children: "Sign in with Google",
+        children: MOCK_AUTH_BUTTON_SIGNIN_GOOGLE,
         onClick: fn(),
         onSigningInChange: fn(),
     },
@@ -91,7 +95,7 @@ const meta = preview.meta({
 export const Google = meta.story({
     args: {
         provider: AUTH_PROVIDER.GOOGLE,
-        children: "Sign in with Google",
+        children: MOCK_AUTH_BUTTON_SIGNIN_GOOGLE,
     },
 });
 
@@ -143,14 +147,14 @@ Google.test(
 export const GitHub = meta.story({
     args: {
         provider: AUTH_PROVIDER.GITHUB,
-        children: "Sign in with GitHub",
+        children: MOCK_AUTH_BUTTON_SIGNIN_GITHUB,
     },
 });
 
 GitHub.test("should render GitHub button with icon", async ({ canvas }) => {
     const button = canvas.getByRole("button");
     expect(button).toBeVisible();
-    expect(button).toHaveTextContent("Sign in with GitHub");
+    expect(button).toHaveTextContent(MOCK_AUTH_BUTTON_SIGNIN_GITHUB);
 });
 
 GitHub.test(
@@ -171,7 +175,7 @@ GitHub.test(
 export const Disabled = meta.story({
     args: {
         provider: AUTH_PROVIDER.GOOGLE,
-        children: "Sign in with Google",
+        children: MOCK_AUTH_BUTTON_SIGNIN_GOOGLE,
         disabled: true,
     },
 });
@@ -201,7 +205,7 @@ Disabled.test(
 export const WithCustomVariant = meta.story({
     args: {
         provider: AUTH_PROVIDER.GOOGLE,
-        children: "Sign in with Google",
+        children: MOCK_AUTH_BUTTON_SIGNIN_GOOGLE,
         variant: "default",
     },
 });

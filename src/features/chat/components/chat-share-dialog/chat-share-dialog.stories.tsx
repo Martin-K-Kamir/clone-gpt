@@ -1,5 +1,15 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_BUTTON_COPY_LINK,
+    MOCK_CHAT_BUTTON_HERE,
+    MOCK_CHAT_BUTTON_SHARE_CHAT,
+    MOCK_CHAT_ERROR_UPDATE_VISIBILITY,
+    MOCK_CHAT_SHARED_CHAT_TITLE_NEW,
+    MOCK_CHAT_SOCIAL_LINKEDIN,
+    MOCK_CHAT_SOCIAL_REDDIT,
+    MOCK_CHAT_SOCIAL_TWITTER,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_CHAT_ID,
     createMockChats,
     createMockPrivateChat,
@@ -9,8 +19,10 @@ import { createSharedChatsHandler } from "#.storybook/lib/msw/handlers";
 import { getQueryClient } from "#.storybook/lib/utils/query-client";
 import {
     findButtonByText,
+    waitForButtonByText,
     waitForDialog,
     waitForElement,
+    waitForLinkByText,
     waitForSocialShareButton,
     waitForSonnerToast,
     waitForSwitch,
@@ -92,7 +104,7 @@ export const Default = meta.story({
     render: args => (
         <ChatShareDialog {...args}>
             <ChatShareDialogTrigger asChild>
-                <Button>Share Chat</Button>
+                <Button>{MOCK_CHAT_BUTTON_SHARE_CHAT}</Button>
             </ChatShareDialogTrigger>
         </ChatShareDialog>
     ),
@@ -118,7 +130,9 @@ export const Default = meta.story({
 });
 
 Default.test("should open dialog", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", { name: /share chat/i });
+    const trigger = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+    });
     await userEvent.click(trigger);
 
     await waitForDialog("dialog");
@@ -127,7 +141,9 @@ Default.test("should open dialog", async ({ canvas, userEvent }) => {
 Default.test(
     "should show private chat state by default",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -140,7 +156,9 @@ Default.test(
 Default.test(
     "should have disabled copy input when chat is private",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -148,7 +166,7 @@ Default.test(
         const input = await waitForElement('input[type="text"]');
 
         const copyInputButton = await waitFor(() => {
-            return findButtonByText("Copy Link");
+            return findButtonByText(MOCK_CHAT_BUTTON_COPY_LINK);
         });
 
         expect(input).toBeInTheDocument();
@@ -173,14 +191,22 @@ Default.test(
 Default.test(
     "should have disabled socials when chat is private",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
 
-        const linkedInButton = await waitForSocialShareButton("LinkedIn");
-        const twitterButton = await waitForSocialShareButton("Twitter");
-        const redditButton = await waitForSocialShareButton("Reddit");
+        const linkedInButton = await waitForSocialShareButton(
+            MOCK_CHAT_SOCIAL_LINKEDIN,
+        );
+        const twitterButton = await waitForSocialShareButton(
+            MOCK_CHAT_SOCIAL_TWITTER,
+        );
+        const redditButton = await waitForSocialShareButton(
+            MOCK_CHAT_SOCIAL_REDDIT,
+        );
 
         expect(linkedInButton).toHaveAttribute("disabled");
         expect(twitterButton).toHaveAttribute("disabled");
@@ -216,7 +242,9 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -246,7 +274,9 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -262,26 +292,14 @@ Default.test(
             });
         });
 
-        const input = await waitFor(() => {
-            const inputElement = document.querySelector(
-                'input[type="text"]',
-            ) as HTMLInputElement;
-            if (!inputElement || inputElement.disabled) {
-                throw new Error("Input not found or still disabled");
-            }
-            return inputElement;
-        });
-
-        const copyInputButton = await waitFor(() => {
-            const button = findButtonByText("Copy Link");
-            if (button.disabled) {
-                throw new Error("Copy button still disabled");
-            }
-            return button;
-        });
-
+        const input = await waitForElement('input[type="text"]');
         expect(input).toBeInTheDocument();
         expect(input).not.toBeDisabled();
+
+        const copyInputButton = await waitForButtonByText(
+            MOCK_CHAT_BUTTON_COPY_LINK,
+        );
+
         expect(copyInputButton).toBeInTheDocument();
         expect(copyInputButton).not.toBeDisabled();
 
@@ -300,7 +318,9 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -316,15 +336,24 @@ Default.test(
             });
         });
 
-        const linkedInButton = await waitForSocialShareButton("LinkedIn", {
-            shouldBeEnabled: true,
-        });
-        const twitterButton = await waitForSocialShareButton("Twitter", {
-            shouldBeEnabled: true,
-        });
-        const redditButton = await waitForSocialShareButton("Reddit", {
-            shouldBeEnabled: true,
-        });
+        const linkedInButton = await waitForSocialShareButton(
+            MOCK_CHAT_SOCIAL_LINKEDIN,
+            {
+                shouldBeEnabled: true,
+            },
+        );
+        const twitterButton = await waitForSocialShareButton(
+            MOCK_CHAT_SOCIAL_TWITTER,
+            {
+                shouldBeEnabled: true,
+            },
+        );
+        const redditButton = await waitForSocialShareButton(
+            MOCK_CHAT_SOCIAL_REDDIT,
+            {
+                shouldBeEnabled: true,
+            },
+        );
 
         expect(linkedInButton).toBeInTheDocument();
         expect(linkedInButton).not.toHaveAttribute("disabled");
@@ -340,7 +369,7 @@ Default.test(
     async ({ canvas, userEvent }) => {
         mocked(updateChatVisibility).mockResolvedValueOnce(
             api.error.chat.visibility(
-                new Error("Failed to update visibility"),
+                new Error(MOCK_CHAT_ERROR_UPDATE_VISIBILITY),
                 {
                     visibility: CHAT_VISIBILITY.PUBLIC,
                     count: PLURAL.SINGLE,
@@ -348,7 +377,9 @@ Default.test(
             ),
         );
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -377,7 +408,9 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -386,20 +419,20 @@ Default.test(
 
         await userEvent.click(switchElement);
 
-        await waitFor(() => {
-            const input = document.querySelector(
-                'input[type="text"]',
-            ) as HTMLInputElement;
-            expect(input).toBeInTheDocument();
+        const input = await waitForElement('input[type="text"]');
+        expect(input).toBeInTheDocument();
+        if (input instanceof HTMLInputElement) {
             expect(input.value).toContain(`/chat/${MOCK_CHAT_ID}`);
-        });
+        }
     },
 );
 
 Default.test(
     "should debounce visibility toggle updates",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -421,7 +454,9 @@ Default.test(
 Default.test(
     "should not call API when toggling back to original visibility state",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -453,13 +488,15 @@ Default.test(
         },
     },
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
 
         const sharedChatsDialogTrigger = await waitFor(() => {
-            return findButtonByText("here");
+            return findButtonByText(MOCK_CHAT_BUTTON_HERE);
         });
         expect(sharedChatsDialogTrigger).toBeInTheDocument();
         await userEvent.click(sharedChatsDialogTrigger);
@@ -488,7 +525,7 @@ Default.test(
             mockedSharedChats2.push(
                 createMockPublicChat({
                     index: mockedSharedChats2.length,
-                    title: "New Shared Chat",
+                    title: MOCK_CHAT_SHARED_CHAT_TITLE_NEW,
                 }),
             );
             return api.success.chat.visibility(CHAT_VISIBILITY.PUBLIC, {
@@ -497,7 +534,9 @@ Default.test(
             });
         });
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -516,7 +555,7 @@ Default.test(
         });
 
         const sharedChatsDialogTrigger = await waitFor(() => {
-            return findButtonByText("here");
+            return findButtonByText(MOCK_CHAT_BUTTON_HERE);
         });
         expect(sharedChatsDialogTrigger).toBeInTheDocument();
         await userEvent.click(sharedChatsDialogTrigger!);
@@ -524,12 +563,7 @@ Default.test(
         const sharedChatsTable = await waitForElement("table");
         expect(sharedChatsTable).toBeInTheDocument();
 
-        await waitFor(() => {
-            const myChatLink = Array.from(
-                document.querySelectorAll<HTMLElement>("a"),
-            ).find(link => link.textContent === "New Shared Chat");
-            expect(myChatLink).toBeInTheDocument();
-        });
+        await waitForLinkByText(MOCK_CHAT_SHARED_CHAT_TITLE_NEW);
 
         mockedSharedChats2.pop();
     },
@@ -540,7 +574,7 @@ Default.test(
     async ({ canvas, userEvent }) => {
         mocked(updateChatVisibility).mockResolvedValueOnce(
             api.error.chat.visibility(
-                new Error("Failed to update visibility"),
+                new Error(MOCK_CHAT_ERROR_UPDATE_VISIBILITY),
                 {
                     count: PLURAL.SINGLE,
                     visibility: CHAT_VISIBILITY.PUBLIC,
@@ -548,7 +582,9 @@ Default.test(
             ),
         );
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -576,7 +612,7 @@ export const PublicChat = meta.story({
     render: args => (
         <ChatShareDialog {...args}>
             <ChatShareDialogTrigger asChild>
-                <Button>Share Chat</Button>
+                <Button>{MOCK_CHAT_BUTTON_SHARE_CHAT}</Button>
             </ChatShareDialogTrigger>
         </ChatShareDialog>
     ),
@@ -604,7 +640,9 @@ export const PublicChat = meta.story({
 PublicChat.test(
     "should show public chat state by default",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -624,7 +662,9 @@ PublicChat.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /share chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");

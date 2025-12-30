@@ -1,4 +1,5 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { MOCK_CHAT_BUTTON_CLOSE_RATE_LIMIT_INFO } from "#.storybook/lib/mocks/chat";
 import {
     FIXED_DATE_PLUS_24H,
     createMockFilesRateLimit,
@@ -72,7 +73,7 @@ WithMessagesRateLimit.test(
         expect(rateLimit).toBeInTheDocument();
 
         const closeButton = canvas.getByRole("button", {
-            name: "Close rate limit info",
+            name: MOCK_CHAT_BUTTON_CLOSE_RATE_LIMIT_INFO,
         });
         expect(closeButton).toBeInTheDocument();
         await userEvent.click(closeButton);
@@ -117,7 +118,7 @@ WithFilesRateLimit.test(
         expect(rateLimit).toBeInTheDocument();
 
         const closeButton = canvas.getByRole("button", {
-            name: "Close rate limit info",
+            name: MOCK_CHAT_BUTTON_CLOSE_RATE_LIMIT_INFO,
         });
         expect(closeButton).toBeInTheDocument();
         await userEvent.click(closeButton);

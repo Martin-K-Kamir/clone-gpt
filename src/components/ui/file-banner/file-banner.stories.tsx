@@ -1,3 +1,26 @@
+import {
+    MOCK_FILE_BANNER_CSV,
+    MOCK_FILE_BANNER_EXCEL,
+    MOCK_FILE_BANNER_JAVASCRIPT,
+    MOCK_FILE_BANNER_JSON,
+    MOCK_FILE_BANNER_LARGE,
+    MOCK_FILE_BANNER_LOADING,
+    MOCK_FILE_BANNER_LONG_NAME,
+    MOCK_FILE_BANNER_MARKDOWN,
+    MOCK_FILE_BANNER_NAME,
+    MOCK_FILE_BANNER_PDF,
+    MOCK_FILE_BANNER_PYTHON,
+    MOCK_FILE_BANNER_SIZE_DEFAULT,
+    MOCK_FILE_BANNER_SMALL,
+    MOCK_FILE_BANNER_TYPESCRIPT,
+    MOCK_FILE_BANNER_TYPE_PDF,
+    MOCK_FILE_BANNER_UNKNOWN_TYPE,
+    MOCK_FILE_BANNER_URL,
+    MOCK_FILE_BANNER_WITH_DOWNLOAD,
+    MOCK_FILE_BANNER_WORD,
+    MOCK_FILE_BANNER_ZIP,
+} from "#.storybook/lib/mocks/file-banner";
+import { setupDownloadMock } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect, fn, userEvent, waitFor } from "storybook/test";
 
@@ -6,10 +29,10 @@ import { FileBanner } from "./file-banner";
 const meta = preview.meta({
     component: FileBanner,
     args: {
-        url: "https://example.com/document.pdf",
-        name: "example-document.pdf",
-        size: 1024 * 512, // 512 KB
-        type: "pdf",
+        url: MOCK_FILE_BANNER_URL,
+        name: MOCK_FILE_BANNER_NAME,
+        size: MOCK_FILE_BANNER_SIZE_DEFAULT,
+        type: MOCK_FILE_BANNER_TYPE_PDF,
         download: false,
         isLoading: false,
         onClick: fn(),
@@ -88,148 +111,63 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 export const PDF = meta.story({
-    args: {
-        url: "https://example.com/document.pdf",
-        name: "important-document.pdf",
-        size: 1024 * 2048, // 2 MB
-        type: "pdf",
-    },
+    args: MOCK_FILE_BANNER_PDF,
 });
 
 export const Javascript = meta.story({
-    args: {
-        url: "https://example.com/script.js",
-        name: "main.js",
-        size: 1024 * 128, // 128 KB
-        type: "js",
-    },
+    args: MOCK_FILE_BANNER_JAVASCRIPT,
 });
 
 export const Typescript = meta.story({
-    args: {
-        url: "https://example.com/component.tsx",
-        name: "Button.tsx",
-        size: 1024 * 64, // 64 KB
-        type: "tsx",
-    },
+    args: MOCK_FILE_BANNER_TYPESCRIPT,
 });
 
 export const Python = meta.story({
-    args: {
-        url: "https://example.com/script.py",
-        name: "data_processor.py",
-        size: 1024 * 256, // 256 KB
-        type: "py",
-    },
+    args: MOCK_FILE_BANNER_PYTHON,
 });
 
 export const CSV = meta.story({
-    args: {
-        url: "https://example.com/data.csv",
-        name: "sales-data-2024.csv",
-        size: 1024 * 1024, // 1 MB
-        type: "csv",
-    },
+    args: MOCK_FILE_BANNER_CSV,
 });
 
 export const Excel = meta.story({
-    args: {
-        url: "https://example.com/spreadsheet.xlsx",
-        name: "financial-report.xlsx",
-        size: 1024 * 5120, // 5 MB
-        type: "xlsx",
-    },
+    args: MOCK_FILE_BANNER_EXCEL,
 });
 
 export const Word = meta.story({
-    args: {
-        url: "https://example.com/document.docx",
-        name: "meeting-notes.docx",
-        size: 1024 * 1024 * 2, // 2 MB
-        type: "docx",
-    },
+    args: MOCK_FILE_BANNER_WORD,
 });
 
 export const Zip = meta.story({
-    args: {
-        url: "https://example.com/archive.zip",
-        name: "project-files.zip",
-        size: 1024 * 1024 * 50, // 50 MB
-        type: "zip",
-    },
+    args: MOCK_FILE_BANNER_ZIP,
 });
 
 export const Markdown = meta.story({
-    args: {
-        url: "https://example.com/readme.md",
-        name: "README.md",
-        size: 1024 * 8, // 8 KB
-        type: "md",
-    },
+    args: MOCK_FILE_BANNER_MARKDOWN,
 });
 
 export const JSON = meta.story({
-    args: {
-        url: "https://example.com/config.json",
-        name: "package.json",
-        size: 1024 * 4, // 4 KB
-        type: "json",
-    },
+    args: MOCK_FILE_BANNER_JSON,
 });
 
 export const WithDownload = meta.story({
     args: {
-        url: "https://example.com/downloadable.pdf",
-        name: "downloadable-file.pdf",
-        size: 1024 * 1024, // 1 MB
-        type: "pdf",
+        ...MOCK_FILE_BANNER_WITH_DOWNLOAD,
         download: true,
     },
 });
 
 WithDownload.test(
     "should trigger download when clicked",
-    async ({ canvas, step }) => {
-        const fileUrl = "https://example.com/downloadable.pdf";
-        let fetchCalled = false;
-        let downloadLinkCreated = false;
-
-        // Mock fetch to track if download was triggered
-        const originalFetch = window.fetch;
-        window.fetch = async (input: RequestInfo | URL) => {
-            if (typeof input === "string" && input === fileUrl) {
-                fetchCalled = true;
-                return new Response(
-                    new Blob(["test"], { type: "application/pdf" }),
-                    {
-                        status: 200,
-                        headers: { "Content-Type": "application/pdf" },
-                    },
-                );
-            }
-            return originalFetch(input);
-        };
-
-        // Track if download link is created
-        const originalCreateElement = document.createElement.bind(document);
-        document.createElement = function (
-            tagName: string,
-            options?: ElementCreationOptions,
-        ) {
-            const element = originalCreateElement(tagName, options);
-            if (tagName === "a") {
-                downloadLinkCreated = true;
-                // Prevent actual download
-                element.click = function () {
-                    // Mock click - don't actually download
-                };
-            }
-            return element;
-        };
+    async ({ canvas, step, args }) => {
+        const downloadMock = setupDownloadMock({
+            url: args.url,
+            contentType: "application/pdf",
+        });
 
         try {
             await step("Find and click the file banner", async () => {
-                const banner = await canvas.findByText("downloadable-file.pdf");
+                const banner = await canvas.findByText(args.name);
                 expect(banner).toBeVisible();
                 await userEvent.click(banner);
             });
@@ -237,62 +175,39 @@ WithDownload.test(
             await step("Verify download was triggered", async () => {
                 await waitFor(
                     () => {
-                        expect(fetchCalled).toBe(true);
-                        expect(downloadLinkCreated).toBe(true);
+                        expect(downloadMock.flags.fetchCalled).toBe(true);
+                        expect(downloadMock.flags.downloadLinkCreated).toBe(
+                            true,
+                        );
                     },
                     { timeout: 3000 },
                 );
             });
         } finally {
-            // Cleanup
-            window.fetch = originalFetch;
-            document.createElement = originalCreateElement;
+            downloadMock.cleanup();
         }
     },
 );
 
 export const Loading = meta.story({
     args: {
-        url: "https://example.com/loading.pdf",
-        name: "loading-file.pdf",
-        size: 1024 * 1024, // 1 MB
-        type: "pdf",
+        ...MOCK_FILE_BANNER_LOADING,
         isLoading: true,
     },
 });
 
 export const LargeFile = meta.story({
-    args: {
-        url: "https://example.com/large-file.zip",
-        name: "very-large-archive.zip",
-        size: 1024 * 1024 * 1024 * 2, // 2 GB
-        type: "zip",
-    },
+    args: MOCK_FILE_BANNER_LARGE,
 });
 
 export const SmallFile = meta.story({
-    args: {
-        url: "https://example.com/tiny.txt",
-        name: "tiny-file.txt",
-        size: 256, // 256 bytes
-        type: "txt",
-    },
+    args: MOCK_FILE_BANNER_SMALL,
 });
 
 export const LongFileName = meta.story({
-    args: {
-        url: "https://example.com/file.pdf",
-        name: "this-is-a-very-long-file-name-that-should-truncate-properly-in-the-ui.pdf",
-        size: 1024 * 512, // 512 KB
-        type: "pdf",
-    },
+    args: MOCK_FILE_BANNER_LONG_NAME,
 });
 
 export const UnknownType = meta.story({
-    args: {
-        url: "https://example.com/file.xyz",
-        name: "unknown-file.xyz",
-        size: 1024 * 128, // 128 KB
-        type: "xyz",
-    },
+    args: MOCK_FILE_BANNER_UNKNOWN_TYPE,
 });

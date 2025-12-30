@@ -1,3 +1,9 @@
+import {
+    MOCK_ALL_PLATFORMS_SHORTCUTS,
+    MOCK_CMD_K_SHORTCUTS,
+    MOCK_COMPLEX_SHORTCUTS,
+    MOCK_SHIFT_S_SHORTCUTS,
+} from "#.storybook/lib/mocks/keyboard-shortcut";
 import preview from "#.storybook/preview";
 import { expect, fn, waitFor } from "storybook/test";
 
@@ -70,11 +76,7 @@ export const Default = meta.story({
     },
     args: {
         platformDetection: () => OPERATING_SYSTEM.MACOS,
-        shortcuts: {
-            [OPERATING_SYSTEM.MACOS]: "⌘ K",
-            [OPERATING_SYSTEM.WINDOWS]: "Ctrl K",
-            [OPERATING_SYSTEM.LINUX]: "Ctrl K",
-        },
+        shortcuts: MOCK_CMD_K_SHORTCUTS,
         onShortcut: fn(),
     },
 });
@@ -113,22 +115,14 @@ Default.test(
 export const Windows = meta.story({
     args: {
         platformDetection: () => OPERATING_SYSTEM.WINDOWS,
-        shortcuts: {
-            [OPERATING_SYSTEM.MACOS]: "⌘ K",
-            [OPERATING_SYSTEM.WINDOWS]: "Ctrl K",
-            [OPERATING_SYSTEM.LINUX]: "Ctrl K",
-        },
+        shortcuts: MOCK_CMD_K_SHORTCUTS,
     },
 });
 
 export const Linux = meta.story({
     args: {
         platformDetection: () => OPERATING_SYSTEM.LINUX,
-        shortcuts: {
-            [OPERATING_SYSTEM.MACOS]: "⌘ K",
-            [OPERATING_SYSTEM.WINDOWS]: "Ctrl K",
-            [OPERATING_SYSTEM.LINUX]: "Ctrl K",
-        },
+        shortcuts: MOCK_CMD_K_SHORTCUTS,
     },
 });
 
@@ -138,10 +132,7 @@ export const WithCtrlShortcut = meta.story({
     },
     args: {
         platformDetection: () => OPERATING_SYSTEM.MACOS,
-        shortcuts: {
-            [OPERATING_SYSTEM.WINDOWS]: "Ctrl Shift S",
-            [OPERATING_SYSTEM.MACOS]: "⌘ Shift S",
-        },
+        shortcuts: MOCK_SHIFT_S_SHORTCUTS,
         onShortcut: fn(),
     },
 });
@@ -181,8 +172,10 @@ export const WithoutOSDetection = meta.story({
     args: {
         platformDetection: () => null,
         shortcuts: {
-            [OPERATING_SYSTEM.MACOS]: "⌘ K",
-            [OPERATING_SYSTEM.WINDOWS]: "Ctrl K",
+            [OPERATING_SYSTEM.MACOS]:
+                MOCK_CMD_K_SHORTCUTS[OPERATING_SYSTEM.MACOS],
+            [OPERATING_SYSTEM.WINDOWS]:
+                MOCK_CMD_K_SHORTCUTS[OPERATING_SYSTEM.WINDOWS],
         },
     },
 });
@@ -193,10 +186,7 @@ export const ComplexShortcut = meta.story({
     },
     args: {
         platformDetection: () => OPERATING_SYSTEM.MACOS,
-        shortcuts: {
-            [OPERATING_SYSTEM.MACOS]: "⌘ Shift Option K",
-            [OPERATING_SYSTEM.WINDOWS]: "Ctrl Shift Alt K",
-        },
+        shortcuts: MOCK_COMPLEX_SHORTCUTS,
         onShortcut: fn(),
     },
 });
@@ -234,35 +224,27 @@ ComplexShortcut.test(
 
 export const AllPlatforms = meta.story({
     render: () => {
-        const shortcuts = {
-            [OPERATING_SYSTEM.MACOS]: "⌘ K",
-            [OPERATING_SYSTEM.WINDOWS]: "Ctrl K",
-            [OPERATING_SYSTEM.LINUX]: "Ctrl K",
-            [OPERATING_SYSTEM.ANDROID]: "Ctrl K",
-            [OPERATING_SYSTEM.IOS]: "⌘ K",
-        };
-
         return (
             <div className="bg-zinc-925 space-y-4 rounded-2xl p-4">
                 <div>
                     <p className="mb-2 text-sm text-zinc-100">macOS</p>
                     <KeyboardShortcut
                         platformDetection={() => OPERATING_SYSTEM.MACOS}
-                        shortcuts={shortcuts}
+                        shortcuts={MOCK_ALL_PLATFORMS_SHORTCUTS}
                     />
                 </div>
                 <div>
                     <p className="mb-2 text-sm text-zinc-100">Windows</p>
                     <KeyboardShortcut
                         platformDetection={() => OPERATING_SYSTEM.WINDOWS}
-                        shortcuts={shortcuts}
+                        shortcuts={MOCK_ALL_PLATFORMS_SHORTCUTS}
                     />
                 </div>
                 <div>
                     <p className="mb-2 text-sm text-zinc-100">Linux</p>
                     <KeyboardShortcut
                         platformDetection={() => OPERATING_SYSTEM.LINUX}
-                        shortcuts={shortcuts}
+                        shortcuts={MOCK_ALL_PLATFORMS_SHORTCUTS}
                     />
                 </div>
             </div>

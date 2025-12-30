@@ -1,5 +1,11 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
-import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
+import {
+    MOCK_CHAT_BUTTON_COPY,
+    MOCK_CHAT_BUTTON_UPDATE,
+    MOCK_CHAT_MESSAGE_HERE_ARE_DOCUMENTS_SHORT,
+    MOCK_CHAT_MESSAGE_HERE_ARE_PHOTOS,
+    MOCK_CHAT_MESSAGE_SAMPLE_USER,
+} from "#.storybook/lib/mocks/chat";
 import {
     MOCK_CHAT_STATUS,
     MOCK_FILE_PARTS_MULTIPLE,
@@ -28,12 +34,8 @@ const meta = preview.meta({
     args: {
         canShowActions: true,
         status: MOCK_CHAT_STATUS.READY,
-        content: "This is a sample message content that can be copied.",
-        parts: [
-            createMockTextMessagePart(
-                "This is a sample message content that can be copied.",
-            ),
-        ],
+        content: MOCK_CHAT_MESSAGE_SAMPLE_USER,
+        parts: [createMockTextMessagePart(MOCK_CHAT_MESSAGE_SAMPLE_USER)],
         onUpdate: fn(),
         className: "opacity-100",
     },
@@ -77,8 +79,12 @@ export const Default = meta.story({});
 Default.test(
     "should render toolbar with copy and update buttons",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
-        const updateButton = canvas.getByRole("button", { name: /update/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
+        const updateButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+        });
 
         expect(copyButton).toBeInTheDocument();
         expect(updateButton).toBeInTheDocument();
@@ -88,7 +94,9 @@ Default.test(
 Default.test(
     "should call onUpdate when update button is clicked",
     async ({ canvas, userEvent, args }) => {
-        const updateButton = canvas.getByRole("button", { name: /update/i });
+        const updateButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+        });
         await userEvent.click(updateButton);
 
         expect(args.onUpdate).toHaveBeenCalledTimes(1);
@@ -98,7 +106,9 @@ Default.test(
 export const WithFiles = meta.story({
     args: {
         parts: [
-            createMockTextMessagePart("Here are some documents:"),
+            createMockTextMessagePart(
+                MOCK_CHAT_MESSAGE_HERE_ARE_DOCUMENTS_SHORT,
+            ),
             ...MOCK_FILE_PARTS_MULTIPLE,
         ],
     },
@@ -107,9 +117,11 @@ export const WithFiles = meta.story({
 WithFiles.test(
     "should not show update button when message has files",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const updateButton = canvas.queryByRole("button", {
-            name: /update/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
         });
 
         expect(copyButton).toBeInTheDocument();
@@ -119,7 +131,7 @@ WithFiles.test(
 export const WithImages = meta.story({
     args: {
         parts: [
-            createMockTextMessagePart("Here are some photos:"),
+            createMockTextMessagePart(MOCK_CHAT_MESSAGE_HERE_ARE_PHOTOS),
             ...MOCK_IMAGE_PARTS_MULTIPLE,
         ],
     },
@@ -128,9 +140,11 @@ export const WithImages = meta.story({
 WithImages.test(
     "should not show update button when message has images",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const updateButton = canvas.queryByRole("button", {
-            name: /update/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
         });
 
         expect(copyButton).toBeInTheDocument();
@@ -145,8 +159,12 @@ export const Streaming = meta.story({
 });
 
 Streaming.test("should disable actions when streaming", async ({ canvas }) => {
-    const copyButton = canvas.getByRole("button", { name: /copy/i });
-    const updateButton = canvas.getByRole("button", { name: /update/i });
+    const copyButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+    });
+    const updateButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+    });
 
     expect(copyButton).toBeDisabled();
     expect(updateButton).toBeDisabled();
@@ -159,8 +177,12 @@ export const Submitted = meta.story({
 });
 
 Submitted.test("should disable actions when submitted", async ({ canvas }) => {
-    const copyButton = canvas.getByRole("button", { name: /copy/i });
-    const updateButton = canvas.getByRole("button", { name: /update/i });
+    const copyButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+    });
+    const updateButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+    });
 
     expect(copyButton).toBeDisabled();
     expect(updateButton).toBeDisabled();
@@ -177,9 +199,11 @@ export const NotOwner = meta.story({
 NotOwner.test(
     "should not show update button when user is not owner",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const updateButton = canvas.queryByRole("button", {
-            name: /update/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
         });
 
         expect(copyButton).toBeInTheDocument();
@@ -202,9 +226,11 @@ export const RateLimitExceeded = meta.story({
 RateLimitExceeded.test(
     "should not show update button when rate limit is exceeded",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const updateButton = canvas.queryByRole("button", {
-            name: /update/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
         });
 
         expect(copyButton).toBeInTheDocument();
@@ -221,8 +247,12 @@ export const Hidden = meta.story({
 Hidden.test(
     "should not render when canShowActions is false",
     async ({ canvas }) => {
-        const copyButton = canvas.queryByRole("button", { name: /copy/i });
-        const updateButton = canvas.queryByRole("button", { name: /update/i });
+        const copyButton = canvas.queryByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
+        const updateButton = canvas.queryByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+        });
 
         expect(copyButton).not.toBeInTheDocument();
         expect(updateButton).not.toBeInTheDocument();

@@ -1,5 +1,9 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_MESSAGE_HERE_ARE_SOURCES,
+    MOCK_CHAT_MESSAGE_MORE_INFORMATION,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_ADDITIONAL_SOURCE_PARTS,
     MOCK_SOURCE_PARTS,
     createMockTextMessagePart,
@@ -128,9 +132,9 @@ WithManySources.test(
 export const WithMixedParts = meta.story({
     args: {
         parts: [
-            createMockTextMessagePart("Here are some sources:"),
+            createMockTextMessagePart(MOCK_CHAT_MESSAGE_HERE_ARE_SOURCES),
             ...MOCK_SOURCE_PARTS,
-            createMockTextMessagePart("More information available."),
+            createMockTextMessagePart(MOCK_CHAT_MESSAGE_MORE_INFORMATION),
         ],
     },
     parameters: {

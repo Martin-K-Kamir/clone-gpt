@@ -1,3 +1,5 @@
+import { MOCK_APP_ROUTE_SIGNIN } from "#.storybook/lib/mocks/app";
+import { clickLinkAndVerify } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect } from "storybook/test";
 
@@ -10,9 +12,7 @@ const meta = preview.meta({
     },
 });
 
-export const Default = meta.story({
-    args: {},
-});
+export const Default = meta.story();
 
 Default.test("should render heading and description", async ({ canvas }) => {
     const heading = canvas.getByRole("heading", {
@@ -31,15 +31,6 @@ Default.test("should render log in button", async ({ canvas, userEvent }) => {
 
     expect(button).toBeInTheDocument();
     expect(button).toBeEnabled();
-    expect(button).toHaveAttribute("href", "/signin");
 
-    let clicked = false;
-    button.addEventListener("click", e => {
-        e.preventDefault();
-        clicked = true;
-    });
-
-    await userEvent.click(button);
-
-    expect(clicked).toBe(true);
+    await clickLinkAndVerify(button, userEvent, MOCK_APP_ROUTE_SIGNIN);
 });

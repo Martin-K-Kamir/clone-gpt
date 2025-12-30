@@ -1,4 +1,8 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+    MOCK_CHAT_BUTTON_DELETE_CHATS,
+} from "#.storybook/lib/mocks/chat";
 import { getSonnerToast } from "#.storybook/lib/utils/elements";
 import {
     findButtonByText,
@@ -86,7 +90,9 @@ export const Default = meta.story({
     render: args => (
         <ChatDeleteUserChatsDialog {...args}>
             <ChatDeleteAllDialogTrigger asChild>
-                <Button variant="destructive">Delete Chats</Button>
+                <Button variant="destructive">
+                    {MOCK_CHAT_BUTTON_DELETE_CHATS}
+                </Button>
             </ChatDeleteAllDialogTrigger>
         </ChatDeleteUserChatsDialog>
     ),
@@ -103,7 +109,9 @@ export const Default = meta.story({
 });
 
 Default.test("should open dialog", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", { name: /delete chats/i });
+    const trigger = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
+    });
     await userEvent.click(trigger);
 
     await waitForDialog("alertdialog");
@@ -119,13 +127,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -144,13 +154,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -171,13 +183,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -198,13 +212,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -225,13 +241,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -254,13 +272,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -280,13 +300,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -306,13 +328,15 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -328,7 +352,9 @@ export const WithoutToast = meta.story({
     render: args => (
         <ChatDeleteUserChatsDialog {...args}>
             <ChatDeleteAllDialogTrigger asChild>
-                <Button variant="destructive">Delete Chats</Button>
+                <Button variant="destructive">
+                    {MOCK_CHAT_BUTTON_DELETE_CHATS}
+                </Button>
             </ChatDeleteAllDialogTrigger>
         </ChatDeleteUserChatsDialog>
     ),
@@ -344,13 +370,15 @@ WithoutToast.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -371,7 +399,9 @@ export const WithRedirect = meta.story({
     render: args => (
         <ChatDeleteUserChatsDialog {...args}>
             <ChatDeleteAllDialogTrigger asChild>
-                <Button variant="destructive">Delete Chats</Button>
+                <Button variant="destructive">
+                    {MOCK_CHAT_BUTTON_DELETE_CHATS}
+                </Button>
             </ChatDeleteAllDialogTrigger>
         </ChatDeleteUserChatsDialog>
     ),
@@ -387,13 +417,15 @@ WithRedirect.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete chats/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHATS, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = findButtonByText("Delete All Chats");
+        const deleteButton = findButtonByText(
+            MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -428,7 +460,9 @@ export const WithCurrentPath = meta.story({
     render: args => (
         <ChatDeleteUserChatsDialog {...args}>
             <ChatDeleteAllDialogTrigger asChild>
-                <Button variant="destructive">Delete Chats</Button>
+                <Button variant="destructive">
+                    {MOCK_CHAT_BUTTON_DELETE_CHATS}
+                </Button>
             </ChatDeleteAllDialogTrigger>
         </ChatDeleteUserChatsDialog>
     ),
@@ -456,7 +490,9 @@ WithCurrentPath.test(
 
             await waitForDialog("alertdialog");
 
-            const deleteButton = findButtonByText("Delete All Chats");
+            const deleteButton = findButtonByText(
+                MOCK_CHAT_BUTTON_DELETE_ALL_CHATS,
+            );
             await userEvent.click(deleteButton);
 
             await waitFor(() => {

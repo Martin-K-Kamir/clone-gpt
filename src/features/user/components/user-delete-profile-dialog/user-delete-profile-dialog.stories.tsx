@@ -1,16 +1,26 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_USER_BUTTON_DELETE_MY_PROFILE,
+    MOCK_USER_BUTTON_DELETE_PROFILE,
+} from "#.storybook/lib/mocks/user-components";
+import { createMockDBUser } from "#.storybook/lib/mocks/users";
+import {
+    getAllButtonsInElement,
+    getSonnerToast,
+} from "#.storybook/lib/utils/elements";
+import {
+    waitForButtonInDialog,
+    waitForDialog,
+    waitForDialogToClose,
+    waitForSonnerToast,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
-
-import { SessionSyncProvider } from "@/features/auth/providers";
 
 import { deleteAllUserChats } from "@/features/chat/services/actions/delete-all-user-chats";
 
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import { UserSessionProvider } from "@/features/user/providers";
 import { deleteUser } from "@/features/user/services/actions/delete-user";
 
 import { api } from "@/lib/api-response";
@@ -21,30 +31,15 @@ import {
     UserDeleteProfileDialogTrigger,
 } from "./user-delete-profile-dialog";
 
-function getDeleteButton(dialog: Element | null) {
-    const buttons = dialog?.querySelectorAll("button");
-
-    if (!buttons) {
-        return null;
-    }
-
-    return Array.from(buttons).find(
-        button => button.textContent === "Delete Profile",
-    );
-}
+const mockDBUser = createMockDBUser();
 
 const meta = preview.meta({
     component: UserDeleteProfileDialog,
     decorators: [
-        Story => (
-            <QueryProvider>
-                <UserSessionProvider>
-                    <SessionSyncProvider>
-                        <Story />
-                        <Toaster />
-                    </SessionSyncProvider>
-                </UserSessionProvider>
-            </QueryProvider>
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
         ),
     ],
     argTypes: {
@@ -98,7 +93,9 @@ export const Default = meta.story({
     render: args => (
         <UserDeleteProfileDialog {...args}>
             <UserDeleteProfileDialogTrigger asChild>
-                <Button variant="destructive">Delete My Profile</Button>
+                <Button variant="destructive">
+                    {MOCK_USER_BUTTON_DELETE_MY_PROFILE}
+                </Button>
             </UserDeleteProfileDialogTrigger>
         </UserDeleteProfileDialog>
     ),
@@ -109,15 +106,7 @@ export const Default = meta.story({
             }),
         );
         mocked(deleteUser).mockResolvedValue(
-            api.success.user.delete({
-                id: "00000000-0000-0000-0000-000000000001",
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: USER_ROLE.USER,
-                password: null,
-                createdAt: new Date().toISOString(),
-            }),
+            api.success.user.delete(mockDBUser),
         );
     },
     afterEach: () => {
@@ -136,16 +125,13 @@ Default.test(
     "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="alertdialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("alertdialog");
     },
 );
 
@@ -153,15 +139,14 @@ Default.test(
     "should render Cancel and Delete Profile buttons",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
+        const dialog = await waitForDialog("alertdialog");
 
-            const buttons = dialog?.querySelectorAll("button");
+        await waitFor(() => {
+            const buttons = getAllButtonsInElement(dialog);
             expect(buttons).toHaveLength(2);
         });
     },
@@ -171,19 +156,17 @@ Default.test(
     "should delete chats and user when Delete Profile is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
@@ -196,19 +179,17 @@ Default.test(
     "should call onDelete callback when delete is initiated",
     async ({ canvas, userEvent, args }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(args.onDelete).toHaveBeenCalled();
@@ -220,19 +201,17 @@ Default.test(
     "should call onDeleteSuccess callback on successful deletion",
     async ({ canvas, userEvent, args }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(args.onDeleteSuccess).toHaveBeenCalled();
@@ -244,24 +223,19 @@ Default.test(
     "should show success toast on successful deletion",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -269,29 +243,24 @@ Default.test(
     "should close dialog after successful deletion",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
             expect(mocked(deleteUser)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).not.toBeInTheDocument();
-        });
+        await waitForDialogToClose("alertdialog");
     },
 );
 
@@ -314,18 +283,16 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const dialog = await waitForDialog("alertdialog");
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         expect(deleteButton).toBeDisabled();
 
@@ -339,7 +306,9 @@ export const WithChatDeletionError = meta.story({
     render: args => (
         <UserDeleteProfileDialog {...args}>
             <UserDeleteProfileDialogTrigger asChild>
-                <Button variant="destructive">Delete My Profile</Button>
+                <Button variant="destructive">
+                    {MOCK_USER_BUTTON_DELETE_MY_PROFILE}
+                </Button>
             </UserDeleteProfileDialogTrigger>
         </UserDeleteProfileDialog>
     ),
@@ -350,15 +319,7 @@ export const WithChatDeletionError = meta.story({
             }),
         );
         mocked(deleteUser).mockResolvedValue(
-            api.success.user.delete({
-                id: "00000000-0000-0000-0000-000000000001",
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: USER_ROLE.USER,
-                password: null,
-                createdAt: new Date().toISOString(),
-            }),
+            api.success.user.delete(mockDBUser),
         );
     },
     afterEach: () => {
@@ -377,31 +338,26 @@ WithChatDeletionError.test(
     "should handle chat deletion error",
     async ({ canvas, userEvent, args }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
-
             expect(args.onDeleteError).toHaveBeenCalled();
-
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
         });
+
+        await waitForSonnerToast();
+
+        await waitForDialog("alertdialog");
     },
 );
 
@@ -410,7 +366,9 @@ export const WithUserDeletionError = meta.story({
     render: args => (
         <UserDeleteProfileDialog {...args}>
             <UserDeleteProfileDialogTrigger asChild>
-                <Button variant="destructive">Delete My Profile</Button>
+                <Button variant="destructive">
+                    {MOCK_USER_BUTTON_DELETE_MY_PROFILE}
+                </Button>
             </UserDeleteProfileDialogTrigger>
         </UserDeleteProfileDialog>
     ),
@@ -440,30 +398,25 @@ WithUserDeletionError.test(
     "should handle user deletion error",
     async ({ canvas, userEvent, args }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
-
             expect(mocked(deleteUser)).toHaveBeenCalled();
-
             expect(args.onDeleteError).toHaveBeenCalled();
-
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
         });
+
+        await waitForDialog("alertdialog");
     },
 );
 
@@ -471,7 +424,9 @@ export const WithoutToast = meta.story({
     render: args => (
         <UserDeleteProfileDialog {...args}>
             <UserDeleteProfileDialogTrigger asChild>
-                <Button variant="destructive">Delete My Profile</Button>
+                <Button variant="destructive">
+                    {MOCK_USER_BUTTON_DELETE_MY_PROFILE}
+                </Button>
             </UserDeleteProfileDialogTrigger>
         </UserDeleteProfileDialog>
     ),
@@ -482,15 +437,7 @@ export const WithoutToast = meta.story({
             }),
         );
         mocked(deleteUser).mockResolvedValue(
-            api.success.user.delete({
-                id: "00000000-0000-0000-0000-000000000001",
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: USER_ROLE.USER,
-                password: null,
-                createdAt: new Date().toISOString(),
-            }),
+            api.success.user.delete(mockDBUser),
         );
     },
     afterEach: () => {
@@ -509,28 +456,24 @@ WithoutToast.test(
     "should not show toast when showToast is false",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /delete my profile/i,
+            name: new RegExp(MOCK_USER_BUTTON_DELETE_MY_PROFILE, "i"),
         });
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-            return dialog;
-        });
+        const dialog = await waitForDialog("alertdialog");
 
-        const deleteButton = getDeleteButton(dialog!);
-        expect(deleteButton).toBeInTheDocument();
-        await userEvent.click(deleteButton!);
+        const deleteButton = await waitForButtonInDialog(
+            dialog,
+            MOCK_USER_BUTTON_DELETE_PROFILE,
+        );
+        await userEvent.click(deleteButton);
 
         await waitFor(() => {
             expect(mocked(deleteAllUserChats)).toHaveBeenCalled();
             expect(mocked(deleteUser)).toHaveBeenCalled();
+
+            const toast = getSonnerToast();
+            expect(toast).not.toBeInTheDocument();
         });
-
-        await new Promise(resolve => setTimeout(resolve, 100));
-
-        const toast = document.querySelector("[data-sonner-toast]");
-        expect(toast).not.toBeInTheDocument();
     },
 );

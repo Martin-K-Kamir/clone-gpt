@@ -1,60 +1,26 @@
-import { FIXED_DATE } from "#.storybook/lib/mocks/chats";
+import {
+    type DataTableProduct,
+    type DataTableUser,
+    createMockDataTableProducts,
+    createMockDataTableUsers,
+} from "#.storybook/lib/mocks/data-table";
+import {
+    waitForSelectOptions,
+    waitForSkeletons,
+    waitForSkeletonsToDisappear,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { IconEdit, IconMail, IconTrash, IconUser } from "@tabler/icons-react";
 import { ColumnDef } from "@tanstack/react-table";
 import { useState } from "react";
-import { expect, waitFor } from "storybook/test";
+import { expect } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { DataTable, DataTableContent, DataTablePagination } from "./index";
 
-type User = {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    status: "active" | "inactive";
-    createdAt: Date;
-};
-
-type Product = {
-    id: string;
-    name: string;
-    price: number;
-    stock: number;
-    category: string;
-};
-
-// Sample data generators
-const generateUsers = (count: number): User[] => {
-    return Array.from({ length: count }, (_, i) => ({
-        id: `user-${i + 1}`,
-        name: `User ${i + 1}`,
-        email: `user${i + 1}@example.com`,
-        role: i % 3 === 0 ? "Admin" : i % 2 === 0 ? "Editor" : "Viewer",
-        status: i % 4 === 0 ? ("inactive" as const) : ("active" as const),
-        createdAt: new Date(FIXED_DATE.getTime() + i * 24 * 60 * 60 * 1000),
-    }));
-};
-
-const generateProducts = (count: number): Product[] => {
-    const categories = ["Electronics", "Clothing", "Books", "Home"];
-    return Array.from({ length: count }, (_, i) => ({
-        id: `product-${i + 1}`,
-        name: `Product ${i + 1}`,
-        price:
-            Math.round(
-                (10 + ((i * 37.5) % 1000) + ((i * 7) % 100) / 100) * 100,
-            ) / 100,
-        stock: (i * 7) % 100,
-        category: categories[i % categories.length],
-    }));
-};
-
-// Column definitions
-const userColumns: ColumnDef<User>[] = [
+const userColumns: ColumnDef<DataTableUser>[] = [
     {
         id: "name",
         accessorKey: "name",
@@ -156,7 +122,7 @@ const userColumns: ColumnDef<User>[] = [
     },
 ];
 
-const productColumns: ColumnDef<Product>[] = [
+const productColumns: ColumnDef<DataTableProduct>[] = [
     {
         id: "name",
         accessorKey: "name",
@@ -219,7 +185,7 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     render: () => {
-        const users = generateUsers(10);
+        const users = createMockDataTableUsers(10);
 
         return (
             <div className="bg-zinc-925 w-full max-w-5xl">
@@ -240,7 +206,7 @@ export const Default = meta.story({
 
 export const WithPagination = meta.story({
     render: () => {
-        const users = generateUsers(45);
+        const users = createMockDataTableUsers(45);
 
         return (
             <div className="bg-zinc-925 w-full max-w-5xl space-y-4">
@@ -289,13 +255,7 @@ WithPagination.test(
 
         await userEvent.click(select);
 
-        const options = await waitFor(() => {
-            const options = Array.from(
-                document.querySelectorAll("div[role='option']"),
-            );
-            return options;
-        });
-
+        const options = await waitForSelectOptions();
         await userEvent.click(options[1]);
 
         const rows2 = canvas.getAllByRole("row");
@@ -310,12 +270,7 @@ WithPagination.test(
 
         await userEvent.click(select);
 
-        const options2 = await waitFor(() => {
-            const options = Array.from(
-                document.querySelectorAll("div[role='option']"),
-            );
-            return options;
-        });
+        const options2 = await waitForSelectOptions();
         await userEvent.click(options2[options2.length - 1]);
 
         const rows3 = canvas.getAllByRole("row");
@@ -527,7 +482,7 @@ export const WithLoadingState = meta.story({
                 </Button>
                 <DataTable
                     columns={userColumns}
-                    data={isLoading ? [] : generateUsers(10)}
+                    data={isLoading ? [] : createMockDataTableUsers(10)}
                     isLoading={isLoading}
                     error={null}
                     options={{
@@ -546,13 +501,9 @@ WithLoadingState.test(
     async ({ canvas, userEvent }) => {
         expect(canvas.queryByText("User 1")).toBeNull();
 
-        await waitFor(() => {
-            const skeletons = document.querySelectorAll(
-                '[data-testid="skeleton"]',
-            );
-            expect(skeletons.length).toBeGreaterThan(0);
-            expect(skeletons[0]).toBeVisible();
-        });
+        const skeletons = await waitForSkeletons();
+        expect(skeletons.length).toBeGreaterThan(0);
+        expect(skeletons[0]).toBeVisible();
 
         await userEvent.click(
             canvas.getByRole("button", {
@@ -560,13 +511,7 @@ WithLoadingState.test(
             }),
         );
 
-        await waitFor(() => {
-            const skeletons = document.querySelectorAll(
-                '[data-testid="skeleton"]',
-            );
-            expect(skeletons.length).toBe(0);
-        });
-
+        await waitForSkeletonsToDisappear();
         expect(canvas.getByText("User 1")).toBeVisible();
     },
 );
@@ -625,7 +570,7 @@ export const WithEmptyState = meta.story({
 
 export const ProductsTable = meta.story({
     render: () => {
-        const products = generateProducts(25);
+        const products = createMockDataTableProducts(25);
 
         return (
             <div className="bg-zinc-925 w-full max-w-5xl space-y-4">
@@ -647,7 +592,7 @@ export const ProductsTable = meta.story({
 
 export const CustomPageSize = meta.story({
     render: () => {
-        const users = generateUsers(50);
+        const users = createMockDataTableUsers(50);
 
         return (
             <div className="bg-zinc-925 w-full max-w-5xl space-y-4">
@@ -669,7 +614,7 @@ export const CustomPageSize = meta.story({
 
 export const WithoutPagination = meta.story({
     render: () => {
-        const users = generateUsers(15);
+        const users = createMockDataTableUsers(15);
 
         return (
             <div className="bg-zinc-925 w-full max-w-5xl">
@@ -693,7 +638,7 @@ export const ManualPagination = meta.story({
         const [page, setPage] = useState(0);
         const pageSize = 10;
         const totalCount = 45;
-        const allUsers = generateUsers(totalCount);
+        const allUsers = createMockDataTableUsers(totalCount);
         const currentPageUsers = allUsers.slice(
             page * pageSize,
             (page + 1) * pageSize,
@@ -931,7 +876,7 @@ ManualPagination.test(
 
 export const MinimalPagination = meta.story({
     render: () => {
-        const users = generateUsers(30);
+        const users = createMockDataTableUsers(30);
 
         return (
             <div className="bg-zinc-925 w-full max-w-5xl space-y-4">

@@ -1,3 +1,11 @@
+import {
+    MOCK_AVATAR_ALT,
+    MOCK_AVATAR_FALLBACK,
+    MOCK_AVATAR_NONEXISTENT_URL,
+    MOCK_AVATAR_URL,
+    MOCK_AVATAR_USER_INITIALS,
+    MOCK_AVATAR_USER_NAME,
+} from "#.storybook/lib/mocks/avatars";
 import preview from "#.storybook/preview";
 
 import { Avatar, AvatarFallback, AvatarImage } from "./index";
@@ -12,9 +20,9 @@ type AvatarStoryArgs = {
 const meta = preview.meta({
     component: Avatar,
     args: {
-        src: "https://github.com/martin-k-kamir.png",
-        alt: "User avatar",
-        fallback: "CN",
+        src: MOCK_AVATAR_URL,
+        alt: MOCK_AVATAR_ALT,
+        fallback: MOCK_AVATAR_FALLBACK,
     } as AvatarStoryArgs,
     parameters: {
         a11y: {
@@ -76,9 +84,9 @@ export const Default = meta.story();
 
 export const WithImage = meta.story({
     args: {
-        src: "https://github.com/martin-k-kamir.png",
-        alt: "Martin Kamir",
-        fallback: "MK",
+        src: MOCK_AVATAR_URL,
+        alt: MOCK_AVATAR_USER_NAME,
+        fallback: MOCK_AVATAR_USER_INITIALS,
     } as AvatarStoryArgs,
 });
 
@@ -86,13 +94,13 @@ export const WithoutImage = meta.story({
     args: {
         src: "",
         alt: "",
-        fallback: "CN",
+        fallback: MOCK_AVATAR_FALLBACK,
     } as AvatarStoryArgs,
 });
 
 export const CustomFallback = meta.story({
     args: {
-        src: "https://github.com/nonexistent-user.png",
+        src: MOCK_AVATAR_NONEXISTENT_URL,
         alt: "User",
         fallback: "JD",
     } as AvatarStoryArgs,
@@ -100,18 +108,18 @@ export const CustomFallback = meta.story({
 
 export const SizeLg = meta.story({
     args: {
-        src: "https://github.com/martin-k-kamir.png",
-        alt: "User avatar",
-        fallback: "CN",
+        src: MOCK_AVATAR_URL,
+        alt: MOCK_AVATAR_ALT,
+        fallback: MOCK_AVATAR_FALLBACK,
         className: "size-16",
     } as AvatarStoryArgs,
 });
 
 export const SizeSm = meta.story({
     args: {
-        src: "https://github.com/martin-k-kamir.png",
-        alt: "User avatar",
-        fallback: "CN",
+        src: MOCK_AVATAR_URL,
+        alt: MOCK_AVATAR_ALT,
+        fallback: MOCK_AVATAR_FALLBACK,
         className: "size-6",
     } as AvatarStoryArgs,
 });

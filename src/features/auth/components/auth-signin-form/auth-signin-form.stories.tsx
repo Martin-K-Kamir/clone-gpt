@@ -1,4 +1,12 @@
 import { QueryProvider } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_AUTH_BUTTON_LOGIN,
+    MOCK_AUTH_EMAIL_DEFAULT,
+    MOCK_AUTH_EMAIL_INVALID,
+    MOCK_AUTH_PASSWORD_COMPLEX,
+    MOCK_AUTH_PASSWORD_SHORT,
+    MOCK_AUTH_PASSWORD_WRONG,
+} from "#.storybook/lib/mocks/auth-forms";
 import preview from "#.storybook/preview";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
@@ -72,7 +80,9 @@ export const Default = meta.story();
 Default.test("should render form with all fields", async ({ canvas }) => {
     const emailInput = canvas.getByLabelText(/email/i);
     const passwordInput = canvas.getByLabelText(/password/i);
-    const loginButton = canvas.getByRole("button", { name: "Login" });
+    const loginButton = canvas.getByRole("button", {
+        name: MOCK_AUTH_BUTTON_LOGIN,
+    });
     const googleButton = canvas.getByRole("button", {
         name: /login with google/i,
     });
@@ -99,7 +109,9 @@ Default.test(
     async ({ canvas, userEvent }) => {
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
@@ -119,28 +131,27 @@ Default.test(
 
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(
-            passwordInput,
-            "aasdia123ASDASD@!!!asiudasiud@123",
-        );
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_COMPLEX);
         await userEvent.click(loginButton);
 
         await waitFor(() => {
             expect(mocked(signInWithCredentials)).toHaveBeenCalledWith({
-                email: "test@example.com",
-                password: "aasdia123ASDASD@!!!asiudasiud@123",
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_COMPLEX,
             });
         });
 
         await waitFor(() => {
             expect(args.onSubmit).toHaveBeenCalledWith({
-                email: "test@example.com",
-                password: "aasdia123ASDASD@!!!asiudasiud@123",
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_COMPLEX,
             });
         });
     },
@@ -158,24 +169,21 @@ Default.test(
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(
-            passwordInput,
-            "aasdia123ASDASD@!!!asiudasiud@123",
-        );
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_COMPLEX);
         await userEvent.keyboard("{Enter}");
 
         await waitFor(() => {
             expect(mocked(signInWithCredentials)).toHaveBeenCalledWith({
-                email: "test@example.com",
-                password: "aasdia123ASDASD@!!!asiudasiud@123",
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_COMPLEX,
             });
         });
 
         await waitFor(() => {
             expect(args.onSubmit).toHaveBeenCalledWith({
-                email: "test@example.com",
-                password: "aasdia123ASDASD@!!!asiudasiud@123",
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_COMPLEX,
             });
         });
     },
@@ -190,21 +198,20 @@ Default.test(
 
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(
-            passwordInput,
-            "aasdia123ASDASD@!!!asiudasiud@123",
-        );
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_COMPLEX);
         await userEvent.click(loginButton);
 
         await waitFor(() => {
             expect(args.onSuccess).toHaveBeenCalledWith({
-                email: "test@example.com",
-                password: "aasdia123ASDASD@!!!asiudasiud@123",
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_COMPLEX,
             });
         });
     },
@@ -219,12 +226,14 @@ Default.test(
 
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "wrongpassword");
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_WRONG);
         await userEvent.click(loginButton);
 
         await waitFor(() => {
@@ -248,15 +257,14 @@ Default.test(
 
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(
-            passwordInput,
-            "aasdia123ASDASD@!!!asiudasiud@123",
-        );
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_COMPLEX);
         await userEvent.click(loginButton);
 
         expect(loginButton).toBeDisabled();
@@ -295,7 +303,9 @@ Default.test(
 
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
         const googleButton = canvas.getByRole("button", {
             name: /login with google/i,
         });
@@ -305,11 +315,8 @@ Default.test(
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(
-            passwordInput,
-            "aasdia123ASDASD@!!!asiudasiud@123",
-        );
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_COMPLEX);
         await userEvent.click(loginButton);
 
         expect(googleButton).toBeDisabled();
@@ -326,10 +333,12 @@ Default.test(
     "should show error for invalid email format",
     async ({ canvas, userEvent }) => {
         const emailInput = canvas.getByLabelText(/email/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
 
         await userEvent.clear(emailInput);
-        await userEvent.type(emailInput, "invalid-email");
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_INVALID);
         await userEvent.click(loginButton);
 
         await waitFor(() => {
@@ -344,12 +353,14 @@ Default.test(
     async ({ canvas, userEvent }) => {
         const emailInput = canvas.getByLabelText(/email/i);
         const passwordInput = canvas.getByLabelText(/password/i);
-        const loginButton = canvas.getByRole("button", { name: "Login" });
+        const loginButton = canvas.getByRole("button", {
+            name: MOCK_AUTH_BUTTON_LOGIN,
+        });
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "12345");
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_SHORT);
         await userEvent.click(loginButton);
 
         await waitFor(() => {

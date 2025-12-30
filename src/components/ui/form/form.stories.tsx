@@ -1,3 +1,10 @@
+import {
+    MOCK_FORM_EMAIL,
+    MOCK_FORM_EMAIL_INVALID,
+    MOCK_FORM_NAME,
+    MOCK_FORM_NAME_CHANGED,
+    MOCK_FORM_NAME_TEST,
+} from "#.storybook/lib/mocks/form";
 import preview from "#.storybook/preview";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -115,8 +122,8 @@ Default.test(
         const emailInput = canvas.getByPlaceholderText(/enter your email/i);
         const submitButton = canvas.getByRole("button", { name: /submit/i });
 
-        await userEvent.type(nameInput, "John Doe");
-        await userEvent.type(emailInput, "john@example.com");
+        await userEvent.type(nameInput, MOCK_FORM_NAME);
+        await userEvent.type(emailInput, MOCK_FORM_EMAIL);
         await userEvent.click(submitButton);
 
         await waitFor(() => {
@@ -207,11 +214,10 @@ export const WithErrors = meta.story({
             resolver: zodResolver(basicFormSchema),
             defaultValues: {
                 name: "",
-                email: "invalid-email",
+                email: MOCK_FORM_EMAIL_INVALID,
             },
         });
 
-        // Trigger validation errors
         form.trigger();
 
         const onSubmit = fn((values: z.infer<typeof basicFormSchema>) => {
@@ -392,8 +398,8 @@ ComplexForm.test(
         const nameInput = canvas.getByPlaceholderText(/enter your name/i);
         const resetButton = canvas.getByRole("button", { name: /reset/i });
 
-        await userEvent.type(nameInput, "Test Name");
-        expect(nameInput).toHaveValue("Test Name");
+        await userEvent.type(nameInput, MOCK_FORM_NAME_TEST);
+        expect(nameInput).toHaveValue(MOCK_FORM_NAME_TEST);
 
         await userEvent.click(resetButton);
 
@@ -408,8 +414,8 @@ export const WithDefaultValues = meta.story({
         const form = useForm<z.infer<typeof basicFormSchema>>({
             resolver: zodResolver(basicFormSchema),
             defaultValues: {
-                name: "John Doe",
-                email: "john.doe@example.com",
+                name: MOCK_FORM_NAME,
+                email: MOCK_FORM_EMAIL,
             },
         });
 
@@ -478,8 +484,8 @@ WithDefaultValues.test(
         const nameInput = canvas.getByPlaceholderText(/enter your name/i);
         const emailInput = canvas.getByPlaceholderText(/enter your email/i);
 
-        expect(nameInput).toHaveValue("John Doe");
-        expect(emailInput).toHaveValue("john.doe@example.com");
+        expect(nameInput).toHaveValue(MOCK_FORM_NAME);
+        expect(emailInput).toHaveValue(MOCK_FORM_EMAIL);
     },
 );
 
@@ -489,9 +495,9 @@ WithDefaultValues.test(
         const nameInput = canvas.getByPlaceholderText(/enter your name/i);
 
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Jane Smith");
+        await userEvent.type(nameInput, MOCK_FORM_NAME_CHANGED);
 
-        expect(nameInput).toHaveValue("Jane Smith");
+        expect(nameInput).toHaveValue(MOCK_FORM_NAME_CHANGED);
     },
 );
 
@@ -502,13 +508,13 @@ WithDefaultValues.test(
         const resetButton = canvas.getByRole("button", { name: /reset/i });
 
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Changed Name");
-        expect(nameInput).toHaveValue("Changed Name");
+        await userEvent.type(nameInput, MOCK_FORM_NAME_CHANGED);
+        expect(nameInput).toHaveValue(MOCK_FORM_NAME_CHANGED);
 
         await userEvent.click(resetButton);
 
         await waitFor(() => {
-            expect(nameInput).toHaveValue("John Doe");
+            expect(nameInput).toHaveValue(MOCK_FORM_NAME);
         });
     },
 );
@@ -539,8 +545,8 @@ export const WithDisabledFields = meta.story({
         const form = useForm<z.infer<typeof basicFormSchema>>({
             resolver: zodResolver(basicFormSchema),
             defaultValues: {
-                name: "John Doe",
-                email: "john.doe@example.com",
+                name: MOCK_FORM_NAME,
+                email: MOCK_FORM_EMAIL,
             },
         });
 

@@ -1,19 +1,21 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { MOCK_USER_BUTTON_OPEN_CHAT_PREFERENCES } from "#.storybook/lib/mocks/user-components";
+import {
+    MOCK_EMPTY_USER_CHAT_PREFERENCES,
+    MOCK_USER_CHAT_PREFERENCES,
+    createMockUser,
+} from "#.storybook/lib/mocks/users";
+import { createUserChatPreferencesHandler } from "#.storybook/lib/msw/handlers";
+import { clearAllQueries } from "#.storybook/lib/utils/query-client";
+import {
+    waitForDialog,
+    waitForElement,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HttpResponse, http } from "msw";
-import { useEffect } from "react";
-import { expect, mocked, waitFor } from "storybook/test";
+import { expect, mocked } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import type {
-    DBUserChatPreferences,
-    DBUserId,
-    UIUser,
-} from "@/features/user/lib/types";
-import { UserCacheSyncProvider } from "@/features/user/providers";
 import { upsertUserChatPreferences } from "@/features/user/services/actions/upsert-user-chat-preferences";
 
 import { api } from "@/lib/api-response";
@@ -23,78 +25,15 @@ import {
     UserChatPreferenceDialogTrigger,
 } from "./user-chat-preference-dialog";
 
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-const mockUser: UIUser = {
-    id: mockUserId,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: USER_ROLE.USER,
-    image: null,
-};
-
-const mockUserChatPreferences: DBUserChatPreferences = {
-    id: "00000000-0000-0000-0000-000000000010",
-    userId: mockUserId,
-    nickname: "Johnny",
-    role: "Software Engineer",
-    personality: "FRIENDLY",
-    characteristics: "Quick Wit, Direct",
-    extraInfo: "I love coding and playing guitar",
-    createdAt: new Date().toISOString(),
-};
-
-const emptyPreferences: DBUserChatPreferences = {
-    id: "00000000-0000-0000-0000-000000000011",
-    userId: mockUserId,
-    nickname: null,
-    role: null,
-    personality: "FRIENDLY",
-    characteristics: null,
-    extraInfo: null,
-    createdAt: new Date().toISOString(),
-};
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                gcTime: 0,
-                staleTime: 0,
-            },
-        },
-    });
-}
-
-const StoryWrapper = ({
-    Story,
-    storyKey,
-}: {
-    Story: React.ComponentType<any>;
-    storyKey?: string;
-}) => {
-    const queryClient = createQueryClient();
-
-    useEffect(() => {
-        queryClient.clear();
-    }, [queryClient, storyKey]);
-
-    return (
-        <QueryClientProvider client={queryClient} key={storyKey}>
-            <UserCacheSyncProvider>
-                <Story />
-                <Toaster />
-            </UserCacheSyncProvider>
-        </QueryClientProvider>
-    );
-};
+const mockUser = createMockUser();
 
 const meta = preview.meta({
     component: UserChatPreferenceDialog,
     decorators: [
-        (Story, context) => (
-            <StoryWrapper Story={Story} storyKey={context.name || context.id} />
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
         ),
     ],
     argTypes: {
@@ -148,26 +87,25 @@ export const Default = meta.story({
     render: args => (
         <UserChatPreferenceDialog {...args} user={mockUser}>
             <UserChatPreferenceDialogTrigger asChild>
-                <Button>Open Chat Preferences</Button>
+                <Button>{MOCK_USER_BUTTON_OPEN_CHAT_PREFERENCES}</Button>
             </UserChatPreferenceDialogTrigger>
         </UserChatPreferenceDialog>
     ),
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user/chat-preferences", () => {
-                    return HttpResponse.json(
-                        api.success.user.getChatPreferences(emptyPreferences),
-                    );
+                createUserChatPreferencesHandler({
+                    preferences: MOCK_EMPTY_USER_CHAT_PREFERENCES,
                 }),
             ],
         },
     },
     beforeEach: () => {
-        const queryClient = createQueryClient();
-        queryClient.clear();
+        clearAllQueries();
         mocked(upsertUserChatPreferences).mockResolvedValue(
-            api.success.user.updateChatPreferences(emptyPreferences),
+            api.success.user.updateChatPreferences(
+                MOCK_EMPTY_USER_CHAT_PREFERENCES,
+            ),
         );
     },
     afterEach: () => {
@@ -183,16 +121,13 @@ Default.test(
     "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open chat preferences/i,
+            name: new RegExp(MOCK_USER_BUTTON_OPEN_CHAT_PREFERENCES, "i"),
         });
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
     },
 );
 
@@ -200,17 +135,14 @@ Default.test(
     "should render form inside dialog when opened",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open chat preferences/i,
+            name: new RegExp(MOCK_USER_BUTTON_OPEN_CHAT_PREFERENCES, "i"),
         });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-            const form = document.querySelector("form");
-            expect(form).toBeInTheDocument();
-        });
+        const form = await waitForElement("form");
+        expect(form).toBeInTheDocument();
     },
 );
 
@@ -218,28 +150,23 @@ export const WithFilledData = meta.story({
     render: args => (
         <UserChatPreferenceDialog {...args} user={mockUser}>
             <UserChatPreferenceDialogTrigger asChild>
-                <Button>Open Chat Preferences</Button>
+                <Button>{MOCK_USER_BUTTON_OPEN_CHAT_PREFERENCES}</Button>
             </UserChatPreferenceDialogTrigger>
         </UserChatPreferenceDialog>
     ),
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user/chat-preferences", () => {
-                    return HttpResponse.json(
-                        api.success.user.getChatPreferences(
-                            mockUserChatPreferences,
-                        ),
-                    );
+                createUserChatPreferencesHandler({
+                    preferences: MOCK_USER_CHAT_PREFERENCES,
                 }),
             ],
         },
     },
     beforeEach: () => {
-        const queryClient = createQueryClient();
-        queryClient.clear();
+        clearAllQueries();
         mocked(upsertUserChatPreferences).mockResolvedValue(
-            api.success.user.updateChatPreferences(mockUserChatPreferences),
+            api.success.user.updateChatPreferences(MOCK_USER_CHAT_PREFERENCES),
         );
     },
     afterEach: () => {
@@ -255,13 +182,10 @@ WithFilledData.test(
     "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open chat preferences/i,
+            name: new RegExp(MOCK_USER_BUTTON_OPEN_CHAT_PREFERENCES, "i"),
         });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
     },
 );

@@ -1,3 +1,4 @@
+import { MOCK_APP_BUTTON_TRY_AGAIN } from "#.storybook/lib/mocks/app";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
@@ -32,7 +33,7 @@ Default.test(
     "should call reset when try again button is clicked",
     async ({ canvas, userEvent, args }) => {
         const button = canvas.getByRole("button", {
-            name: /try again/i,
+            name: new RegExp(MOCK_APP_BUTTON_TRY_AGAIN, "i"),
         });
 
         expect(button).toBeInTheDocument();

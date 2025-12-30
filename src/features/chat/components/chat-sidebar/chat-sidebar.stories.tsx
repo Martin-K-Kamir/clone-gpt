@@ -1,9 +1,15 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_BUTTON_NEW_CHAT,
+    MOCK_CHAT_BUTTON_SEARCH,
+    MOCK_CHAT_ERROR_FETCH_USER_CHATS,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_CHAT_ID,
     createMockChats,
     createMockPaginatedChats,
 } from "#.storybook/lib/mocks/chats";
+import { getSidebar } from "#.storybook/lib/utils/elements";
 import preview from "#.storybook/preview";
 import { Suspense } from "react";
 import { expect, mocked } from "storybook/test";
@@ -66,11 +72,15 @@ export const Default = meta.story({
 });
 
 Default.test("should render sidebar with all sections", async ({ canvas }) => {
-    const sidebar = document.querySelector('[data-slot="sidebar"]');
+    const sidebar = getSidebar();
     expect(sidebar).toBeInTheDocument();
 
-    const newChatButton = canvas.getByRole("link", { name: /new chat/i });
-    const searchButton = canvas.getByRole("button", { name: /search/i });
+    const newChatButton = canvas.getByRole("link", {
+        name: new RegExp(MOCK_CHAT_BUTTON_NEW_CHAT, "i"),
+    });
+    const searchButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_SEARCH, "i"),
+    });
     expect(newChatButton).toBeVisible();
     expect(searchButton).toBeVisible();
 
@@ -92,7 +102,7 @@ export const Skeleton = meta.story({
 });
 
 Skeleton.test("should render skeleton version", async ({ canvas }) => {
-    const sidebar = document.querySelector('[data-slot="sidebar"]');
+    const sidebar = getSidebar();
     expect(sidebar).toBeInTheDocument();
 
     const buttons = canvas.getAllByRole("button");
@@ -131,7 +141,7 @@ export const Error = meta.story({
     name: "Error",
     beforeEach: () => {
         mocked(getUserChatsDB).mockImplementation(async () => {
-            throw new globalThis.Error("Failed to fetch user chats");
+            throw new globalThis.Error(MOCK_CHAT_ERROR_FETCH_USER_CHATS);
         });
     },
     afterEach: () => {

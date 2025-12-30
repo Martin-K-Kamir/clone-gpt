@@ -1,5 +1,21 @@
 import { QueryProvider } from "#.storybook/lib/decorators/providers";
 import { createMockSignupUserData } from "#.storybook/lib/mocks/auth";
+import {
+    MOCK_AUTH_BUTTON_CREATE_ACCOUNT,
+    MOCK_AUTH_BUTTON_SIGNIN,
+    MOCK_AUTH_EMAIL_DEFAULT,
+    MOCK_AUTH_EMAIL_INVALID,
+    MOCK_AUTH_EMAIL_JANE,
+    MOCK_AUTH_NAME_DEFAULT,
+    MOCK_AUTH_NAME_JANE,
+    MOCK_AUTH_NAME_SHORT,
+    MOCK_AUTH_NAME_TEST,
+    MOCK_AUTH_PASSWORD_DEFAULT,
+    MOCK_AUTH_PASSWORD_DIFFERENT,
+    MOCK_AUTH_PASSWORD_JANE,
+    MOCK_AUTH_PASSWORD_SHORT,
+    MOCK_AUTH_PASSWORD_TEST,
+} from "#.storybook/lib/mocks/auth-forms";
 import preview from "#.storybook/preview";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
@@ -158,27 +174,27 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "John Doe");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "password123");
-        await userEvent.type(confirmPasswordInput, "password123");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_DEFAULT);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_DEFAULT);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
             expect(mocked(signUp)).toHaveBeenCalledWith({
-                name: "John Doe",
-                email: "test@example.com",
-                password: "password123",
-                confirmPassword: "password123",
+                name: MOCK_AUTH_NAME_DEFAULT,
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_DEFAULT,
+                confirmPassword: MOCK_AUTH_PASSWORD_DEFAULT,
             });
         });
 
         await waitFor(() => {
             expect(args.onSubmit).toHaveBeenCalledWith({
-                name: "John Doe",
-                email: "test@example.com",
-                password: "password123",
-                confirmPassword: "password123",
+                name: MOCK_AUTH_NAME_DEFAULT,
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_DEFAULT,
+                confirmPassword: MOCK_AUTH_PASSWORD_DEFAULT,
             });
         });
     },
@@ -196,27 +212,27 @@ Default.test(
         const passwordInput = canvas.getByLabelText(/^password$/i);
         const confirmPasswordInput = canvas.getByLabelText(/confirm password/i);
 
-        await userEvent.type(nameInput, "John Doe");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "password123");
-        await userEvent.type(confirmPasswordInput, "password123");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_DEFAULT);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_DEFAULT);
         await userEvent.keyboard("{Enter}");
 
         await waitFor(() => {
             expect(mocked(signUp)).toHaveBeenCalledWith({
-                name: "John Doe",
-                email: "test@example.com",
-                password: "password123",
-                confirmPassword: "password123",
+                name: MOCK_AUTH_NAME_DEFAULT,
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_DEFAULT,
+                confirmPassword: MOCK_AUTH_PASSWORD_DEFAULT,
             });
         });
 
         await waitFor(() => {
             expect(args.onSubmit).toHaveBeenCalledWith({
-                name: "John Doe",
-                email: "test@example.com",
-                password: "password123",
-                confirmPassword: "password123",
+                name: MOCK_AUTH_NAME_DEFAULT,
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_DEFAULT,
+                confirmPassword: MOCK_AUTH_PASSWORD_DEFAULT,
             });
         });
     },
@@ -228,8 +244,8 @@ Default.test(
         mocked(signUp).mockResolvedValueOnce(
             api.success.auth.signup(
                 createMockSignupUserData({
-                    email: "jane@example.com",
-                    name: "Jane Smith",
+                    email: MOCK_AUTH_EMAIL_JANE,
+                    name: MOCK_AUTH_NAME_JANE,
                 }),
             ),
         );
@@ -242,18 +258,18 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "Jane Smith");
-        await userEvent.type(emailInput, "jane@example.com");
-        await userEvent.type(passwordInput, "s52ij3n523ij423h4b23uhb2");
-        await userEvent.type(confirmPasswordInput, "s52ij3n523ij423h4b23uhb2");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_JANE);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_JANE);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_JANE);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_JANE);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
             expect(args.onSuccess).toHaveBeenCalledWith({
-                name: "Jane Smith",
-                email: "jane@example.com",
-                password: "s52ij3n523ij423h4b23uhb2",
-                confirmPassword: "s52ij3n523ij423h4b23uhb2",
+                name: MOCK_AUTH_NAME_JANE,
+                email: MOCK_AUTH_EMAIL_JANE,
+                password: MOCK_AUTH_PASSWORD_JANE,
+                confirmPassword: MOCK_AUTH_PASSWORD_JANE,
             });
         });
     },
@@ -263,7 +279,7 @@ Default.test(
     "should call onError callback on failed signup",
     async ({ canvas, userEvent, args }) => {
         mocked(signUp).mockResolvedValueOnce(
-            api.error.auth.emailExists("test@example.com"),
+            api.error.auth.emailExists(MOCK_AUTH_EMAIL_DEFAULT),
         );
 
         const nameInput = canvas.getByLabelText(/name/i);
@@ -274,10 +290,10 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "Test User");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "password123");
-        await userEvent.type(confirmPasswordInput, "password123");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_TEST);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_DEFAULT);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
@@ -297,7 +313,7 @@ Default.test(
                             resolve(
                                 api.success.auth.signup(
                                     createMockSignupUserData({
-                                        name: "Test User",
+                                        name: MOCK_AUTH_NAME_TEST,
                                     }),
                                 ),
                             ),
@@ -314,10 +330,10 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "Test User");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "asdoajdu123124ihusadaiusd");
-        await userEvent.type(confirmPasswordInput, "asdoajdu123124ihusadaiusd");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_TEST);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_TEST);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_TEST);
         await userEvent.click(createAccountButton);
 
         expect(createAccountButton).toBeDisabled();
@@ -367,7 +383,7 @@ Default.test(
                             resolve(
                                 api.success.auth.signup(
                                     createMockSignupUserData({
-                                        name: "Test User",
+                                        name: MOCK_AUTH_NAME_TEST,
                                     }),
                                 ),
                             ),
@@ -390,10 +406,10 @@ Default.test(
             name: /sign up with github/i,
         });
 
-        await userEvent.type(nameInput, "Test User");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "password123");
-        await userEvent.type(confirmPasswordInput, "password123");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_TEST);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_DEFAULT);
         await userEvent.click(createAccountButton);
 
         expect(googleButton).toBeDisabled();
@@ -414,7 +430,7 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(emailInput, "invalid-email");
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_INVALID);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
@@ -432,7 +448,7 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "A");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_SHORT);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
@@ -455,10 +471,10 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "John Doe");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "12345");
-        await userEvent.type(confirmPasswordInput, "12345");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_DEFAULT);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_SHORT);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_SHORT);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
@@ -481,10 +497,13 @@ Default.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "John Doe");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "password123");
-        await userEvent.type(confirmPasswordInput, "differentpassword");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_DEFAULT);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
+        await userEvent.type(
+            confirmPasswordInput,
+            MOCK_AUTH_PASSWORD_DIFFERENT,
+        );
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
@@ -503,7 +522,9 @@ export const WithoutSwitchToSignin = meta.story({
 WithoutSwitchToSignin.test(
     "should render signin link when onSwitchToSignin is undefined",
     async ({ canvas }) => {
-        const signinLink = canvas.getByRole("link", { name: /sign in/i });
+        const signinLink = canvas.getByRole("link", {
+            name: new RegExp(MOCK_AUTH_BUTTON_SIGNIN, "i"),
+        });
         expect(signinLink).toBeVisible();
         expect(signinLink).toHaveAttribute("href", "/signin");
     },
@@ -526,10 +547,10 @@ WithSwitchToSigninRedirect.test(
             name: /create account/i,
         });
 
-        await userEvent.type(nameInput, "Test User");
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "password123");
-        await userEvent.type(confirmPasswordInput, "password123");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_TEST);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_DEFAULT);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {

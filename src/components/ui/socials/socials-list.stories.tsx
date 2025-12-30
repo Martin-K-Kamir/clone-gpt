@@ -1,3 +1,13 @@
+import {
+    MOCK_SOCIALS_TEXT_BLOG_POST,
+    MOCK_SOCIALS_TEXT_DEFAULT,
+    MOCK_SOCIALS_TEXT_LONG,
+    MOCK_SOCIALS_TEXT_TRACKED,
+    MOCK_SOCIALS_URL_BLOG_POST,
+    MOCK_SOCIALS_URL_DEFAULT,
+    MOCK_SOCIALS_URL_LONG,
+    MOCK_SOCIALS_URL_TRACKED,
+} from "#.storybook/lib/mocks/socials";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
@@ -6,8 +16,8 @@ import { SocialsList } from "./socials-list";
 const meta = preview.meta({
     component: SocialsList,
     args: {
-        url: "https://example.com/my-article",
-        text: "Check out this amazing article!",
+        url: MOCK_SOCIALS_URL_DEFAULT,
+        text: MOCK_SOCIALS_TEXT_DEFAULT,
         onClick: fn(),
     },
     parameters: {
@@ -124,31 +134,28 @@ WithoutNativeShare.test(
 );
 
 export const ShareBlogPost = meta.story({
-    name: "Share Blog Post",
     args: {
-        url: "https://myblog.com/how-to-build-ai-chatbot",
-        text: "I just wrote a comprehensive guide on building AI chatbots. Check it out!",
+        url: MOCK_SOCIALS_URL_BLOG_POST,
+        text: MOCK_SOCIALS_TEXT_BLOG_POST,
     },
 });
 
 export const ShareLongMessage = meta.story({
-    name: "Share Long Message",
     args: {
-        url: "https://example.com/comprehensive-guide-to-modern-web-development",
-        text: "This is an incredibly comprehensive guide covering everything from HTML basics to advanced React patterns, TypeScript best practices, and modern CSS techniques. Highly recommend for both beginners and experienced developers!",
+        url: MOCK_SOCIALS_URL_LONG,
+        text: MOCK_SOCIALS_TEXT_LONG,
     },
 });
 
 export const WithClickHandler = meta.story({
-    name: "With Click Handler",
     parameters: {
         chromatic: {
             disableSnapshot: true,
         },
     },
     args: {
-        url: "https://example.com/tracked-share",
-        text: "Check this out!",
+        url: MOCK_SOCIALS_URL_TRACKED,
+        text: MOCK_SOCIALS_TEXT_TRACKED,
         onClick: fn(),
     },
 });

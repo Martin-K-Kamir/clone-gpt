@@ -1,11 +1,13 @@
 import {
     findButtonByText,
+    waitForAlertDialogDescription,
+    waitForAlertDialogTitle,
     waitForDialog,
     waitForDialogToClose,
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { useState } from "react";
-import { expect, fireEvent, fn, waitFor } from "storybook/test";
+import { expect, fireEvent, fn } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
 
@@ -110,14 +112,10 @@ Default.test(
         const dialog = await waitForDialog("alertdialog");
         expect(dialog).toBeInTheDocument();
 
-        const title = await waitFor(() =>
-            document.querySelector('[data-slot="alert-dialog-title"]'),
-        );
+        const title = await waitForAlertDialogTitle();
         expect(title).toBeInTheDocument();
 
-        const description = await waitFor(() =>
-            document.querySelector('[data-slot="alert-dialog-description"]'),
-        );
+        const description = await waitForAlertDialogDescription();
         expect(description).toBeInTheDocument();
 
         const cancelButton = findButtonByText(/cancel/i);
@@ -131,7 +129,7 @@ Default.test(
 );
 
 Default.test(
-    "should open and close alert dialog with escape key",
+    "should close alert dialog with escape key",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open alert dialog/i,
@@ -144,12 +142,6 @@ Default.test(
         expect(dialog).toBeInTheDocument();
 
         await userEvent.keyboard("{Escape}");
-
-        const cancelButton = findButtonByText(/cancel/i);
-        if (!cancelButton) {
-            throw new Error("Cancel button not found");
-        }
-        await userEvent.click(cancelButton);
 
         await waitForDialogToClose("alertdialog");
     },

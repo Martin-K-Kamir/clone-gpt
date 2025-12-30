@@ -1,25 +1,25 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_USER_MENU_LOG_IN,
+    MOCK_USER_MENU_LOG_OUT,
+    MOCK_USER_MENU_USER_SETTINGS,
+    MOCK_USER_NAME_GUEST,
+    MOCK_USER_NAME_LONG,
+} from "#.storybook/lib/mocks/user-components";
+import {
+    createMockDBUser,
+    createMockGuestUser,
+    createMockUser,
+} from "#.storybook/lib/mocks/users";
+import { createUserHandler } from "#.storybook/lib/msw/handlers";
+import { hasMenuItemWithText } from "#.storybook/lib/utils/elements";
+import { clearAllQueries } from "#.storybook/lib/utils/query-client";
+import { waitForDropdownMenu } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HttpResponse, http } from "msw";
-import { useEffect, useMemo } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
 
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
-
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import type { DBUserId, UIUser } from "@/features/user/lib/types";
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
 import { updateUserName } from "@/features/user/services/actions/update-user-name";
 
 import { api } from "@/lib/api-response";
@@ -27,80 +27,21 @@ import { getFirstTwoCapitalLetters } from "@/lib/utils";
 
 import { UserSidebarItemClient } from "./user-sidebar-item-client";
 
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
+const mockUser = createMockUser();
 const mockUserImage = "https://picsum.photos/id/107/200/200";
-const mockGuestUserName = "Guest User";
-const mockUser: UIUser = {
-    id: mockUserId,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: USER_ROLE.USER,
-    image: null,
-};
-
-const mockDBUser = {
-    id: mockUserId,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: USER_ROLE.USER,
-    image: null,
-    password: null,
-    createdAt: new Date().toISOString(),
-};
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                gcTime: 0,
-                staleTime: 0,
-            },
-        },
-    });
-}
-
-const StoryWrapper = ({
-    Story,
-    storyKey,
-}: {
-    Story: React.ComponentType<any>;
-    storyKey?: string;
-}) => {
-    const queryClient = useMemo(() => createQueryClient(), [storyKey]);
-
-    useEffect(() => {
-        queryClient.clear();
-    }, [queryClient, storyKey]);
-
-    return (
-        <QueryClientProvider client={queryClient} key={storyKey}>
-            <UserSessionProvider>
-                <SessionSyncProvider>
-                    <ChatOffsetProvider>
-                        <ChatCacheSyncProvider>
-                            <UserCacheSyncProvider>
-                                <SidebarProvider>
-                                    <div className="bg-zinc-925 w-64 p-4">
-                                        <Story />
-                                    </div>
-                                </SidebarProvider>
-                                <Toaster />
-                            </UserCacheSyncProvider>
-                        </ChatCacheSyncProvider>
-                    </ChatOffsetProvider>
-                </SessionSyncProvider>
-            </UserSessionProvider>
-        </QueryClientProvider>
-    );
-};
+const mockDBUser = createMockDBUser();
 
 const meta = preview.meta({
     component: UserSidebarItemClient,
     decorators: [
-        (Story, context) => (
-            <StoryWrapper Story={Story} storyKey={context.name || context.id} />
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <SidebarProvider>
+                    <div className="bg-zinc-925 w-64 p-4">
+                        <Story />
+                    </div>
+                </SidebarProvider>
+            </AppProviders>
         ),
     ],
     argTypes: {
@@ -121,14 +62,11 @@ const meta = preview.meta({
 export const Default = meta.story({
     parameters: {
         msw: {
-            handlers: [
-                http.get("/api/user", () => {
-                    return HttpResponse.json(api.success.user.get(mockDBUser));
-                }),
-            ],
+            handlers: [createUserHandler({ user: mockDBUser })],
         },
     },
     beforeEach: () => {
+        clearAllQueries();
         mocked(updateUserName).mockResolvedValue(
             api.success.user.updateName(mockUser.name),
         );
@@ -172,10 +110,7 @@ Default.test(
         const button = canvas.getByRole("button");
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const menu = document.querySelector('[role="menu"]');
-            expect(menu).toBeInTheDocument();
-        });
+        await waitForDropdownMenu();
     },
 );
 
@@ -183,18 +118,14 @@ export const WithImage = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user", () => {
-                    return HttpResponse.json(
-                        api.success.user.get({
-                            ...mockDBUser,
-                            image: mockUserImage,
-                        }),
-                    );
+                createUserHandler({
+                    user: { ...mockDBUser, image: mockUserImage },
                 }),
             ],
         },
     },
     beforeEach: () => {
+        clearAllQueries();
         mocked(updateUserName).mockResolvedValue(
             api.success.user.updateName(mockUser.name),
         );
@@ -225,32 +156,27 @@ export const WithGuestUser = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user", () => {
-                    return HttpResponse.json(
-                        api.success.user.get({
-                            ...mockDBUser,
-                            role: USER_ROLE.GUEST,
-                            name: mockGuestUserName,
-                        }),
-                    );
+                createUserHandler({
+                    user: {
+                        ...mockDBUser,
+                        role: mockUser.role,
+                        name: MOCK_USER_NAME_GUEST,
+                    },
                 }),
             ],
         },
     },
     beforeEach: () => {
+        clearAllQueries();
         mocked(updateUserName).mockResolvedValue(
-            api.success.user.updateName(mockGuestUserName),
+            api.success.user.updateName(MOCK_USER_NAME_GUEST),
         );
     },
     afterEach: () => {
         mocked(updateUserName).mockClear();
     },
     args: {
-        user: {
-            ...mockUser,
-            name: mockGuestUserName,
-            role: USER_ROLE.GUEST,
-        },
+        user: createMockGuestUser({ name: MOCK_USER_NAME_GUEST }),
     },
 });
 
@@ -261,7 +187,7 @@ WithGuestUser.test(
             const nameContainer = canvas.getByTestId(
                 "user-sidebar-item-name-container",
             );
-            const name = canvas.getByText(mockGuestUserName);
+            const name = canvas.getByText(MOCK_USER_NAME_GUEST);
 
             expect(nameContainer).toBeInTheDocument();
             expect(nameContainer.children).toHaveLength(1);
@@ -281,19 +207,11 @@ WithGuestUser.test(
         const button = canvas.getByRole("button");
         await userEvent.click(button);
 
-        await waitFor(() => {
-            const menu = document.querySelector('[role="menu"]');
-            expect(menu).toBeInTheDocument();
-        });
+        await waitForDropdownMenu();
 
-        const menuItems = document.querySelectorAll('[role="menuitem"]');
-        const menuTexts = Array.from(menuItems).map(item => item.textContent);
-
-        expect(menuTexts.some(text => text?.includes("Log in"))).toBe(true);
-        expect(menuTexts.some(text => text?.includes("User Settings"))).toBe(
-            false,
-        );
-        expect(menuTexts.some(text => text?.includes("Log out"))).toBe(false);
+        expect(hasMenuItemWithText(MOCK_USER_MENU_LOG_IN)).toBe(true);
+        expect(hasMenuItemWithText(MOCK_USER_MENU_USER_SETTINGS)).toBe(false);
+        expect(hasMenuItemWithText(MOCK_USER_MENU_LOG_OUT)).toBe(false);
     },
 );
 
@@ -301,22 +219,19 @@ export const WithLongName = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user", () => {
-                    return HttpResponse.json(
-                        api.success.user.get({
-                            ...mockDBUser,
-                            name: "Very Long User Name That Should Be Truncated",
-                        }),
-                    );
+                createUserHandler({
+                    user: {
+                        ...mockDBUser,
+                        name: MOCK_USER_NAME_LONG,
+                    },
                 }),
             ],
         },
     },
     beforeEach: () => {
+        clearAllQueries();
         mocked(updateUserName).mockResolvedValue(
-            api.success.user.updateName(
-                "Very Long User Name That Should Be Truncated",
-            ),
+            api.success.user.updateName(MOCK_USER_NAME_LONG),
         );
     },
     afterEach: () => {
@@ -325,7 +240,7 @@ export const WithLongName = meta.story({
     args: {
         user: {
             ...mockUser,
-            name: "Very Long User Name That Should Be Truncated",
+            name: MOCK_USER_NAME_LONG,
         },
     },
 });

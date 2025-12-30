@@ -1,4 +1,14 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_BUTTON_OPEN_SEARCH,
+    MOCK_CHAT_ERROR_FETCH_CHATS,
+    MOCK_CHAT_LOADING_TEXT,
+    MOCK_CHAT_SEARCH_QUERY_NONEXISTENT,
+    MOCK_CHAT_SEARCH_QUERY_NONEXISTENT_SHORT,
+    MOCK_CHAT_SEARCH_QUERY_REACT,
+    MOCK_CHAT_SEARCH_QUERY_TEST,
+    MOCK_CHAT_SEARCH_QUERY_TYPESCRIPT,
+} from "#.storybook/lib/mocks/chat";
 import { createMockChats } from "#.storybook/lib/mocks/chats";
 import {
     createEmptyUserChatsHandler,
@@ -7,8 +17,16 @@ import {
     createUserChatsHandler,
     createUserChatsSearchHandler,
 } from "#.storybook/lib/msw/handlers";
+import {
+    getAllSearchItems,
+    getAllSkeletons,
+} from "#.storybook/lib/utils/elements";
 import { clearAllQueries } from "#.storybook/lib/utils/query-client";
-import { waitForDialog } from "#.storybook/lib/utils/test-helpers";
+import {
+    waitForDialog,
+    waitForElement,
+    waitForSearchItems,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { Suspense } from "react";
@@ -26,11 +44,11 @@ const meta = preview.meta({
     decorators: [
         (Story, { parameters }) => (
             <AppProviders {...parameters.provider}>
-                <Suspense fallback={<div>Loading...</div>}>
+                <Suspense fallback={<div>{MOCK_CHAT_LOADING_TEXT}</div>}>
                     <Story />
                     <ChatSearchDialog>
                         <ChatSearchDialogTrigger>
-                            Open Search
+                            {MOCK_CHAT_BUTTON_OPEN_SEARCH}
                         </ChatSearchDialogTrigger>
                     </ChatSearchDialog>
                 </Suspense>
@@ -55,7 +73,7 @@ export const Default = meta.story({
                 }),
                 createUserChatsSearchHandler({
                     resultsPerQuery: 5,
-                    emptyQueries: ["nonexistentxyz123"],
+                    emptyQueries: [MOCK_CHAT_SEARCH_QUERY_NONEXISTENT],
                 }),
             ],
         },
@@ -68,7 +86,9 @@ export const Default = meta.story({
 Default.test(
     "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -78,113 +98,81 @@ Default.test(
 Default.test(
     "should show initial chats when dialog is open",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems();
     },
 );
 
 Default.test(
     "should display search results when query is entered",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const input = await waitFor(() => {
-            return document.querySelector('[data-slot="search-input"]');
-        });
+        const input = await waitForElement('[data-slot="search-input"]');
 
-        await userEvent.type(input!, "react");
+        await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_REACT);
 
-        await waitFor(() => {
-            const links = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(links.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems();
     },
 );
 
 Default.test(
     "should display search results with snippets",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const input = await waitFor(() => {
-            return document.querySelector('[data-slot="search-input"]');
-        });
+        const input = await waitForElement('[data-slot="search-input"]');
 
-        await userEvent.type(input!, "typescript");
+        await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_TYPESCRIPT);
 
-        await waitFor(() => {
-            const links = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(links.length).toBeGreaterThan(0);
-
-            const snippets = Array.from(
-                document.querySelectorAll('[data-slot="search-item"]'),
-            );
-            expect(snippets.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems();
     },
 );
 
 Default.test(
     "should show empty state when search returns no results",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const input = await waitFor(() => {
-            return document.querySelector('[data-slot="search-input"]');
-        });
+        const input = await waitForElement('[data-slot="search-input"]');
 
-        await userEvent.type(input!, "nonexistentxyz123");
+        await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_NONEXISTENT);
 
-        await waitFor(() => {
-            const emptyText = document.querySelector(
-                '[data-slot="search-empty"]',
-            );
-            expect(emptyText).toBeInTheDocument();
-        });
+        const emptyText = await waitForElement('[data-slot="search-empty"]');
+        expect(emptyText).toBeInTheDocument();
     },
 );
 
 Default.test(
     "should revert to initial chats when query is cleared",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const input = await waitFor(() => {
-            return document.querySelector('[data-slot="search-input"]');
-        });
+        const input = await waitForElement('[data-slot="search-input"]');
 
-        await userEvent.type(input!, "react");
+        await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_REACT);
 
-        await waitFor(() => {
-            const links = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(links.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems();
 
-        await userEvent.clear(input!);
+        await userEvent.clear(input);
 
-        await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems();
     },
 );
 
@@ -193,16 +181,12 @@ Default.test(
     async ({ canvas, userEvent }) => {
         getRouter().push.mockClear();
 
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const items = await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
-            return items;
-        });
+        const items = await waitForSearchItems();
 
         await userEvent.click(items[0]);
 
@@ -217,22 +201,16 @@ Default.test(
     async ({ canvas, userEvent }) => {
         getRouter().push.mockClear();
 
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const input = await waitFor(() => {
-            return document.querySelector('[data-slot="search-input"]');
-        });
+        const input = await waitForElement('[data-slot="search-input"]');
 
-        await userEvent.type(input!, "react");
+        await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_REACT);
 
-        const items = await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
-            return items;
-        });
+        const items = await waitForSearchItems();
 
         await userEvent.click(items[0]);
 
@@ -252,21 +230,18 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
+        await waitForSearchItems();
+
         await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
+            expect(mocked(getUserChatsByDate)).toHaveBeenCalled();
         });
 
-        await new Promise(resolve => setTimeout(resolve, 500));
-
-        expect(mocked(getUserChatsByDate)).toHaveBeenCalled();
-
-        const items = document.querySelectorAll('[data-slot="search-item"]');
+        const items = await waitForSearchItems();
         expect(items.length).toBeGreaterThan(0);
     },
 );
@@ -280,7 +255,7 @@ export const WithoutInitialData = meta.story({
                 }),
                 createUserChatsSearchHandler({
                     resultsPerQuery: 5,
-                    emptyQueries: ["nonexistent"],
+                    emptyQueries: [MOCK_CHAT_SEARCH_QUERY_NONEXISTENT_SHORT],
                 }),
             ],
         },
@@ -294,7 +269,9 @@ export const WithoutInitialData = meta.story({
 WithoutInitialData.test(
     "should call API when initial data is not provided from server",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
@@ -302,12 +279,7 @@ WithoutInitialData.test(
         expect(mocked(getUserChatsByDate)).toHaveBeenCalled();
         expect(mocked(getUserChatsByDate)).toHaveReturnedWith(undefined);
 
-        await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems();
     },
 );
 
@@ -325,13 +297,13 @@ export const Empty = meta.story({
 Empty.test(
     "should show empty state when no initial chats",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
         await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
+            const items = getAllSearchItems();
             expect(items.length).toBe(0);
         });
     },
@@ -340,7 +312,9 @@ Empty.test(
 export const Error = meta.story({
     parameters: {
         msw: {
-            handlers: [createErrorUserChatsHandler("Failed to fetch chats")],
+            handlers: [
+                createErrorUserChatsHandler(MOCK_CHAT_ERROR_FETCH_CHATS),
+            ],
         },
     },
     afterEach: () => {
@@ -349,24 +323,19 @@ export const Error = meta.story({
 });
 
 Error.test("should handle error gracefully", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", { name: "Open Search" });
+    const trigger = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+    });
     await userEvent.click(trigger);
 
-    const input = await waitFor(() => {
-        return document.querySelector('[data-slot="search-input"]');
+    const input = await waitForElement('[data-slot="search-input"]');
+
+    await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_TEST);
+
+    const error = await waitForElement('[data-slot="search-error"]', {
+        timeout: 10000,
     });
-
-    await userEvent.type(input!, "test");
-
-    await waitFor(
-        () => {
-            const emptyText = document.querySelector(
-                '[data-slot="search-error"]',
-            );
-            expect(emptyText).toBeInTheDocument();
-        },
-        { timeout: 10000 },
-    );
+    expect(error).toBeInTheDocument();
 });
 
 export const WithInfiniteScrolling = meta.story({
@@ -400,28 +369,18 @@ export const WithInfiniteScrolling = meta.story({
 WithInfiniteScrolling.test(
     "should progressively load more search results when scrolling",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const input = await waitFor(() => {
-            return document.querySelector('[data-slot="search-input"]');
-        });
+        const input = await waitForElement('[data-slot="search-input"]');
 
-        await userEvent.type(input!, "react");
+        await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_REACT);
 
-        await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems({ minCount: 25 });
 
-        const getExpectedLength = (pageNumber: number) => {
-            const resultsPerPage = 25;
-            return pageNumber * resultsPerPage;
-        };
-
-        let items = document.querySelectorAll('[data-slot="search-item"]');
+        let items = getAllSearchItems();
         expect(items.length).toBeGreaterThanOrEqual(25);
 
         const lastItem = items[items.length - 1];
@@ -429,43 +388,33 @@ WithInfiniteScrolling.test(
             lastItem.scrollIntoView({ behavior: "smooth", block: "end" });
         }
 
-        await waitFor(() => {
-            items = document.querySelectorAll('[data-slot="search-item"]');
-            expect(items.length).toBeGreaterThanOrEqual(50);
-        });
+        await waitForSearchItems({ minCount: 50 });
+        items = getAllSearchItems();
 
         const newLastItem = items[items.length - 1];
         if (newLastItem) {
             newLastItem.scrollIntoView({ behavior: "smooth", block: "end" });
         }
 
-        await waitFor(() => {
-            items = document.querySelectorAll('[data-slot="search-item"]');
-            expect(items.length).toBeGreaterThanOrEqual(75);
-        });
+        await waitForSearchItems({ minCount: 75 });
     },
 );
 
 WithInfiniteScrolling.test(
     "should show loading skeleton when fetching more search results",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: "Open Search" });
+        const trigger = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_SEARCH,
+        });
         await userEvent.click(trigger);
 
-        const input = await waitFor(() => {
-            return document.querySelector('[data-slot="search-input"]');
-        });
+        const input = await waitForElement('[data-slot="search-input"]');
 
-        await userEvent.type(input!, "react");
+        await userEvent.type(input, MOCK_CHAT_SEARCH_QUERY_REACT);
 
-        await waitFor(() => {
-            const items = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
-            expect(items.length).toBeGreaterThan(0);
-        });
+        await waitForSearchItems();
 
-        const items = document.querySelectorAll('[data-slot="search-item"]');
+        const items = getAllSearchItems();
         const lastItem = items[items.length - 1];
 
         if (lastItem) {
@@ -473,16 +422,12 @@ WithInfiniteScrolling.test(
         }
 
         await waitFor(() => {
-            const skeletons = document.querySelectorAll(
-                '[data-testid="skeleton"]',
-            );
+            const skeletons = getAllSkeletons();
             expect(skeletons.length).toBeGreaterThan(0);
         });
 
         await waitFor(() => {
-            const newItems = document.querySelectorAll(
-                '[data-slot="search-item"]',
-            );
+            const newItems = getAllSearchItems();
             expect(newItems.length).toBeGreaterThan(items.length);
         });
     },

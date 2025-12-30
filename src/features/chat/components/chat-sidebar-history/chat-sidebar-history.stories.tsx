@@ -1,5 +1,13 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_ERROR_FETCH_USER_CHATS,
+    MOCK_CHAT_TIME_PERIOD_OLDER,
+    MOCK_CHAT_TIME_PERIOD_THIS_MONTH,
+    MOCK_CHAT_TIME_PERIOD_THIS_WEEK,
+    MOCK_CHAT_TIME_PERIOD_TODAY,
+    MOCK_CHAT_TIME_PERIOD_YESTERDAY,
+} from "#.storybook/lib/mocks/chat";
+import {
     createMockChats,
     createMockPaginatedChats,
 } from "#.storybook/lib/mocks/chats";
@@ -81,7 +89,10 @@ Default.test("should render all chat items", async ({ canvas }) => {
 Default.test("should group chats by time periods", async ({ canvas }) => {
     await waitFor(() => {
         const labels = canvas.getAllByText(
-            /Today|Yesterday|This Week|This Month|Older/i,
+            new RegExp(
+                `${MOCK_CHAT_TIME_PERIOD_TODAY}|${MOCK_CHAT_TIME_PERIOD_YESTERDAY}|${MOCK_CHAT_TIME_PERIOD_THIS_WEEK}|${MOCK_CHAT_TIME_PERIOD_THIS_MONTH}|${MOCK_CHAT_TIME_PERIOD_OLDER}`,
+                "i",
+            ),
         );
         expect(labels.length).toBeGreaterThan(0);
     });
@@ -169,7 +180,7 @@ WithPagination.test(
 export const Error = meta.story({
     beforeEach: () => {
         mocked(getUserChats).mockImplementation(async () => {
-            throw new globalThis.Error("Failed to fetch user chats");
+            throw new globalThis.Error(MOCK_CHAT_ERROR_FETCH_USER_CHATS);
         });
     },
     afterEach: () => {

@@ -3,9 +3,9 @@ import {
     createFile,
 } from "#.storybook/lib/mocks/files";
 import { MOCK_CHAT_STATUS } from "#.storybook/lib/mocks/messages";
+import { MOCK_PROMPT_COMPOSER_INITIAL_VALUE } from "#.storybook/lib/mocks/prompt-composer";
 import { getFileInput } from "#.storybook/lib/utils/elements";
 import preview from "#.storybook/preview";
-import type { ChatStatus } from "ai";
 import { expect, fn, userEvent, waitFor } from "storybook/test";
 
 import { PromptComposer } from "./prompt-composer";
@@ -456,12 +456,14 @@ Default.test(
 
 export const WithInitialValue = meta.story({
     args: {
-        defaultValue: "This is a pre-filled message",
+        defaultValue: MOCK_PROMPT_COMPOSER_INITIAL_VALUE,
     },
 });
 
 WithInitialValue.test("should display initial value", async ({ canvas }) => {
-    const textarea = canvas.getByDisplayValue("This is a pre-filled message");
+    const textarea = canvas.getByDisplayValue(
+        MOCK_PROMPT_COMPOSER_INITIAL_VALUE,
+    );
     expect(textarea).toBeVisible();
 });
 
@@ -927,7 +929,7 @@ WithFileTypes.test("should have accept attribute set correctly", async () => {
 
 export const WithMaxFileSize = meta.story({
     args: {
-        maxFileSize: 5 * 1024 * 1024, // 5MB
+        maxFileSize: 5 * 1024 * 1024,
     },
 });
 
@@ -937,7 +939,7 @@ WithMaxFileSize.test(
         const fileInput = getFileInput();
         expect(fileInput).toBeInTheDocument();
 
-        expect(fileInput.getAttribute("max")).toBe("5242880"); // 5MB in bytes
+        expect(fileInput.getAttribute("max")).toBe("5242880");
     },
 );
 

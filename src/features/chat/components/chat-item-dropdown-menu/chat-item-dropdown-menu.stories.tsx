@@ -1,4 +1,10 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_BUTTON_DELETE,
+    MOCK_CHAT_BUTTON_OPEN_MENU,
+    MOCK_CHAT_BUTTON_RENAME,
+    MOCK_CHAT_BUTTON_SHARE,
+} from "#.storybook/lib/mocks/chat";
 import { createMockPrivateChat } from "#.storybook/lib/mocks/chats";
 import {
     waitForDialog,
@@ -93,7 +99,7 @@ export const Default = meta.story({
     render: args => (
         <ChatItemDropdownMenu {...args}>
             <ChatItemDropdownMenuTrigger asChild>
-                <Button variant="outline">Open Menu</Button>
+                <Button variant="outline">{MOCK_CHAT_BUTTON_OPEN_MENU}</Button>
             </ChatItemDropdownMenuTrigger>
         </ChatItemDropdownMenu>
     ),
@@ -102,7 +108,9 @@ export const Default = meta.story({
 Default.test(
     "should open dropdown menu when trigger is clicked",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /^open menu$/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(`^${MOCK_CHAT_BUTTON_OPEN_MENU}$`, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDropdownMenu();
@@ -113,7 +121,7 @@ Default.test(
     "should display all menu items when all options are enabled",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /^open menu$/i,
+            name: new RegExp(`^${MOCK_CHAT_BUTTON_OPEN_MENU}$`, "i"),
         });
         await userEvent.click(trigger);
 
@@ -129,7 +137,7 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const shareButton = await waitForMenuItemByText("Share");
+        const shareButton = await waitForMenuItemByText(MOCK_CHAT_BUTTON_SHARE);
         await userEvent.click(shareButton);
 
         await waitForDialog("dialog");
@@ -142,7 +150,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const deleteButton = await waitForMenuItemByText("Delete");
+        const deleteButton = await waitForMenuItemByText(
+            MOCK_CHAT_BUTTON_DELETE,
+        );
         await userEvent.click(deleteButton);
 
         await waitForDialog("alertdialog");
@@ -156,7 +166,9 @@ Default.test(
         const trigger = canvas.getByRole("button", { name: /^open menu$/i });
         await userEvent.click(trigger);
 
-        const renameButton = await waitForMenuItemByText("Rename");
+        const renameButton = await waitForMenuItemByText(
+            MOCK_CHAT_BUTTON_RENAME,
+        );
         await userEvent.click(renameButton);
 
         await waitFor(() => {
@@ -172,7 +184,7 @@ export const WithoutRename = meta.story({
     render: args => (
         <ChatItemDropdownMenu {...args}>
             <ChatItemDropdownMenuTrigger asChild>
-                <Button variant="outline">Open Menu</Button>
+                <Button variant="outline">{MOCK_CHAT_BUTTON_OPEN_MENU}</Button>
             </ChatItemDropdownMenuTrigger>
         </ChatItemDropdownMenu>
     ),
@@ -187,7 +199,7 @@ WithoutRename.test(
         const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
-            expect(item.textContent).not.toContain("Rename");
+            expect(item.textContent).not.toContain(MOCK_CHAT_BUTTON_RENAME);
         });
     },
 );
@@ -199,7 +211,7 @@ export const WithoutShare = meta.story({
     render: args => (
         <ChatItemDropdownMenu {...args}>
             <ChatItemDropdownMenuTrigger asChild>
-                <Button variant="outline">Open Menu</Button>
+                <Button variant="outline">{MOCK_CHAT_BUTTON_OPEN_MENU}</Button>
             </ChatItemDropdownMenuTrigger>
         </ChatItemDropdownMenu>
     ),
@@ -214,7 +226,7 @@ WithoutShare.test(
         const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
-            expect(item.textContent).not.toContain("Share");
+            expect(item.textContent).not.toContain(MOCK_CHAT_BUTTON_SHARE);
         });
     },
 );
@@ -226,7 +238,7 @@ export const WithoutDelete = meta.story({
     render: args => (
         <ChatItemDropdownMenu {...args}>
             <ChatItemDropdownMenuTrigger asChild>
-                <Button variant="outline">Open Menu</Button>
+                <Button variant="outline">{MOCK_CHAT_BUTTON_OPEN_MENU}</Button>
             </ChatItemDropdownMenuTrigger>
         </ChatItemDropdownMenu>
     ),
@@ -241,7 +253,7 @@ WithoutDelete.test(
         const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
-            expect(item.textContent).not.toContain("Delete");
+            expect(item.textContent).not.toContain(MOCK_CHAT_BUTTON_DELETE);
         });
     },
 );
@@ -254,7 +266,7 @@ export const OnlyRename = meta.story({
     render: args => (
         <ChatItemDropdownMenu {...args}>
             <ChatItemDropdownMenuTrigger asChild>
-                <Button variant="outline">Open Menu</Button>
+                <Button variant="outline">{MOCK_CHAT_BUTTON_OPEN_MENU}</Button>
             </ChatItemDropdownMenuTrigger>
         </ChatItemDropdownMenu>
     ),
@@ -269,8 +281,8 @@ OnlyRename.test(
         const menuItems = await waitForMenuItems();
 
         menuItems.forEach(item => {
-            expect(item.textContent).not.toContain("Share");
-            expect(item.textContent).not.toContain("Delete");
+            expect(item.textContent).not.toContain(MOCK_CHAT_BUTTON_SHARE);
+            expect(item.textContent).not.toContain(MOCK_CHAT_BUTTON_DELETE);
         });
     },
 );

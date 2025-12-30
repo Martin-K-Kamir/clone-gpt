@@ -1,4 +1,14 @@
-import { findButtonByText } from "#.storybook/lib/utils/test-helpers";
+import {
+    getSheetCloseButton,
+    getSheetContent,
+    getSheetOverlay,
+} from "#.storybook/lib/utils/elements";
+import {
+    findButtonByText,
+    waitForSheetContent,
+    waitForSheetContentToClose,
+    waitForSheetOverlay,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { useState } from "react";
 import { expect, fireEvent, fn, waitFor } from "storybook/test";
@@ -136,9 +146,7 @@ Default.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
     },
 );
@@ -153,9 +161,7 @@ Default.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
 
         const closeButton = findButtonByText(/cancel/i);
@@ -164,12 +170,7 @@ Default.test(
         }
         await userEvent.click(closeButton);
 
-        await waitFor(() => {
-            const sheetContent = document.querySelector(
-                '[data-slot="sheet-content"][data-state="open"]',
-            );
-            expect(sheetContent).not.toBeInTheDocument();
-        });
+        await waitForSheetContentToClose();
     },
 );
 
@@ -181,32 +182,14 @@ Default.test(
         });
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
 
-        const overlay = await waitFor(() => {
-            const overlay = document.querySelector(
-                '[data-slot="sheet-overlay"]',
-            );
-            if (!overlay) {
-                throw new Error("Overlay not found");
-            }
-            return overlay;
-        });
+        const overlay = await waitForSheetOverlay();
         expect(overlay).toBeInTheDocument();
         fireEvent.pointerDown(overlay);
 
-        await waitFor(
-            () => {
-                const sheetContent = document.querySelector(
-                    '[data-slot="sheet-content"][data-state="open"]',
-                );
-                expect(sheetContent).not.toBeInTheDocument();
-            },
-            { timeout: 1000 },
-        );
+        await waitForSheetContentToClose({ timeout: 1000 });
     },
 );
 
@@ -220,29 +203,16 @@ Default.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
 
-        const closeButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("close"),
-            );
-            if (!button) {
-                throw new Error("Close button not found");
-            }
-            return button;
-        });
+        const closeButton = getSheetCloseButton();
+        if (!closeButton) {
+            throw new Error("Close button not found");
+        }
         await userEvent.click(closeButton);
 
-        await waitFor(() => {
-            const sheetContent = document.querySelector(
-                '[data-slot="sheet-content"][data-state="open"]',
-            );
-            expect(sheetContent).not.toBeInTheDocument();
-        });
+        await waitForSheetContentToClose();
     },
 );
 
@@ -257,21 +227,13 @@ Default.test(
         await userEvent.click(trigger);
         expect(args.onOpenChange).toHaveBeenCalledWith(true);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
 
-        const closeButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("close"),
-            );
-            if (!button) {
-                throw new Error("Close button not found");
-            }
-            return button;
-        });
+        const closeButton = getSheetCloseButton();
+        if (!closeButton) {
+            throw new Error("Close button not found");
+        }
         await userEvent.click(closeButton);
 
         await waitFor(() => {
@@ -290,9 +252,7 @@ Default.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
         await waitFor(() => {
             expect(args.onViewChange).toHaveBeenCalledWith(
@@ -300,32 +260,22 @@ Default.test(
             );
         });
 
-        const closeButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("close"),
-            );
-            if (!button) {
-                throw new Error("Close button not found");
-            }
-            return button;
-        });
+        const closeButton = getSheetCloseButton();
+        if (!closeButton) {
+            throw new Error("Close button not found");
+        }
         await userEvent.click(closeButton);
 
         await waitFor(() => {
-            const sheetContent = document.querySelector(
-                '[data-slot="sheet-content"][data-state="open"]',
-            );
-            expect(sheetContent).not.toBeInTheDocument();
             expect(args.onViewChange).toHaveBeenCalledWith(
                 SHEET_VIEW_STATE.CLOSED,
             );
         });
+        await waitForSheetContentToClose();
     },
 );
 
 export const SideRight = meta.story({
-    name: "Side: Right",
     parameters: {
         a11y: {
             disable: true,
@@ -359,15 +309,12 @@ SideRight.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
     },
 );
 
 export const SideLeft = meta.story({
-    name: "Side: Left",
     render: () => (
         <Sheet control={SHEET_CONTROL_MODE.OPEN}>
             <SheetTrigger variant="outline">Open from Left</SheetTrigger>
@@ -396,15 +343,12 @@ SideLeft.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
     },
 );
 
 export const SideTop = meta.story({
-    name: "Side: Top",
     render: () => (
         <Sheet control={SHEET_CONTROL_MODE.OPEN}>
             <SheetTrigger variant="outline">Open from Top</SheetTrigger>
@@ -433,15 +377,12 @@ SideTop.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
     },
 );
 
 export const SideBottom = meta.story({
-    name: "Side: Bottom",
     parameters: {
         a11y: {
             disable: true,
@@ -475,15 +416,12 @@ SideBottom.test(
 
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
     },
 );
 
 export const AllSides = meta.story({
-    name: "All Sides Preview",
     render: () => (
         <div className="flex flex-wrap gap-4">
             <Sheet control={SHEET_CONTROL_MODE.OPEN}>
@@ -592,9 +530,7 @@ Controlled.test(
         });
         await userEvent.click(openButton);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
     },
 );
@@ -607,29 +543,16 @@ Controlled.test(
         });
         await userEvent.click(openButton);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
 
-        const closeButton = await waitFor(() => {
-            const buttons = Array.from(document.querySelectorAll("button"));
-            const button = buttons.find(btn =>
-                btn.textContent?.toLowerCase().includes("close"),
-            );
-            if (!button) {
-                throw new Error("Close button not found");
-            }
-            return button;
-        });
+        const closeButton = getSheetCloseButton();
+        if (!closeButton) {
+            throw new Error("Close button not found");
+        }
         await userEvent.click(closeButton);
 
-        await waitFor(() => {
-            const sheetContent = document.querySelector(
-                '[data-slot="sheet-content"][data-state="open"]',
-            );
-            expect(sheetContent).not.toBeInTheDocument();
-        });
+        await waitForSheetContentToClose();
     },
 );
 
@@ -641,37 +564,18 @@ Controlled.test(
         });
         await userEvent.click(trigger);
 
-        const sheetContent = await waitFor(() =>
-            document.querySelector('[data-slot="sheet-content"]'),
-        );
+        const sheetContent = await waitForSheetContent();
         expect(sheetContent).toBeInTheDocument();
 
-        const overlay = await waitFor(() => {
-            const overlay = document.querySelector(
-                '[data-slot="sheet-overlay"]',
-            );
-            if (!overlay) {
-                throw new Error("Overlay not found");
-            }
-            return overlay;
-        });
+        const overlay = await waitForSheetOverlay();
         expect(overlay).toBeInTheDocument();
         fireEvent.pointerDown(overlay);
 
-        await waitFor(
-            () => {
-                const sheetContent = document.querySelector(
-                    '[data-slot="sheet-content"][data-state="open"]',
-                );
-                expect(sheetContent).not.toBeInTheDocument();
-            },
-            { timeout: 1000 },
-        );
+        await waitForSheetContentToClose({ timeout: 1000 });
     },
 );
 
 export const LongContent = meta.story({
-    name: "Long Content",
     render: () => (
         <Sheet control={SHEET_CONTROL_MODE.OPEN}>
             <SheetTrigger variant="outline">Show Long Content</SheetTrigger>
@@ -726,7 +630,6 @@ export const LongContent = meta.story({
 });
 
 export const FormSheet = meta.story({
-    name: "Form Sheet",
     render: () => (
         <Sheet control={SHEET_CONTROL_MODE.OPEN}>
             <SheetTrigger>Open Form</SheetTrigger>
@@ -793,7 +696,6 @@ export const FormSheet = meta.story({
 });
 
 export const CustomWidth = meta.story({
-    name: "Custom Width",
     render: () => (
         <Sheet control={SHEET_CONTROL_MODE.OPEN}>
             <SheetTrigger variant="outline">Open Wide Sheet</SheetTrigger>

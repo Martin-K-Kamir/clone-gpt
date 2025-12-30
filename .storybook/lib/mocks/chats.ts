@@ -96,9 +96,14 @@ export function generateChatTitle(index: number): string {
     }
 }
 
-type CreateMockChatOverrides = Partial<DBChat> & { index?: number };
+type CreateMockChatOverrides = Partial<DBChat> & {
+    index?: number;
+    isOwner?: boolean;
+};
 
-export function createMockChat(overrides?: CreateMockChatOverrides): DBChat {
+export function createMockChat(
+    overrides?: CreateMockChatOverrides,
+): DBChat & WithIsOwner {
     const index = overrides?.index ?? 0;
     const fixedDate = new Date(FIXED_DATE);
     fixedDate.setDate(fixedDate.getDate() - index);
@@ -112,6 +117,7 @@ export function createMockChat(overrides?: CreateMockChatOverrides): DBChat {
         createdAt: date,
         updatedAt: date,
         visibleAt: date,
+        isOwner: true,
         ...overrides,
     } as const;
 }

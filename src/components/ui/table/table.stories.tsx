@@ -1,3 +1,8 @@
+import {
+    MOCK_EMPTY_STATE_MESSAGE,
+    MOCK_INVOICES,
+    MOCK_INVOICES_MANY,
+} from "#.storybook/lib/mocks/table";
 import preview from "#.storybook/preview";
 import { expect } from "storybook/test";
 
@@ -7,39 +12,6 @@ import { TableCell } from "./table-cell";
 import { TableHead } from "./table-head";
 import { TableHeader } from "./table-header";
 import { TableRow } from "./table-row";
-
-const invoices = [
-    {
-        invoice: "INV001",
-        status: "Paid",
-        method: "Credit Card",
-        amount: "$250.00",
-    },
-    {
-        invoice: "INV002",
-        status: "Pending",
-        method: "PayPal",
-        amount: "$150.00",
-    },
-    {
-        invoice: "INV003",
-        status: "Unpaid",
-        method: "Bank Transfer",
-        amount: "$350.00",
-    },
-    {
-        invoice: "INV004",
-        status: "Paid",
-        method: "Credit Card",
-        amount: "$450.00",
-    },
-    {
-        invoice: "INV005",
-        status: "Paid",
-        method: "PayPal",
-        amount: "$550.00",
-    },
-];
 
 const meta = preview.meta({
     component: Table,
@@ -73,7 +45,7 @@ export const Default = meta.story({
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {invoices.map(invoice => (
+                {MOCK_INVOICES.map(invoice => (
                     <TableRow key={invoice.invoice}>
                         <TableCell className="font-medium">
                             {invoice.invoice}
@@ -102,7 +74,7 @@ Default.test("should render table with correct structure", ({ canvas }) => {
 });
 
 Default.test("should display all invoices", ({ canvas }) => {
-    invoices.forEach(invoice => {
+    MOCK_INVOICES.forEach(invoice => {
         expect(canvas.getByText(invoice.invoice)).toBeVisible();
         expect(canvas.getByText(invoice.amount)).toBeVisible();
     });
@@ -125,7 +97,7 @@ export const Empty = meta.story({
                         colSpan={4}
                         className="h-24 text-center text-zinc-100"
                     >
-                        No results found.
+                        {MOCK_EMPTY_STATE_MESSAGE}
                     </TableCell>
                 </TableRow>
             </TableBody>
@@ -134,7 +106,7 @@ export const Empty = meta.story({
 });
 
 Empty.test("should display empty state message", ({ canvas }) => {
-    expect(canvas.getByText("No results found.")).toBeVisible();
+    expect(canvas.getByText(MOCK_EMPTY_STATE_MESSAGE)).toBeVisible();
 });
 
 export const ManyRows = meta.story({
@@ -144,13 +116,6 @@ export const ManyRows = meta.story({
         },
     },
     render: args => {
-        const manyInvoices = Array.from({ length: 20 }, (_, i) => ({
-            invoice: `INV${String(i + 1).padStart(3, "0")}`,
-            status: ["Paid", "Pending", "Unpaid"][i % 3],
-            method: ["Credit Card", "PayPal", "Bank Transfer"][i % 3],
-            amount: `$${(((i * 37.5) % 500) + 100).toFixed(2)}`,
-        }));
-
         return (
             <div className="max-h-[400px] overflow-auto">
                 <Table className="bg-zinc-925" {...args}>
@@ -163,7 +128,7 @@ export const ManyRows = meta.story({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {manyInvoices.map(invoice => (
+                        {MOCK_INVOICES_MANY.map(invoice => (
                             <TableRow key={invoice.invoice}>
                                 <TableCell className="font-medium">
                                     {invoice.invoice}

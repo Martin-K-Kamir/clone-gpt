@@ -1,3 +1,4 @@
+import { clickLinkAndVerify } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { FaLinkedin, FaRedditAlien, FaXTwitter } from "react-icons/fa6";
 import { expect, fn, waitFor } from "storybook/test";
@@ -221,10 +222,7 @@ OpenInNewTab.test(
 
         try {
             const link = canvas.getByRole("link", { name: "Share in New Tab" });
-            link.addEventListener("click", e => e.preventDefault(), {
-                once: true,
-            });
-            await userEvent.click(link);
+            await clickLinkAndVerify(link, userEvent);
 
             expect(mockOpen).not.toHaveBeenCalled();
         } finally {

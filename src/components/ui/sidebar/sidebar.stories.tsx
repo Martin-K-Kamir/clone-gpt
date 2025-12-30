@@ -1,14 +1,12 @@
+import {
+    MOCK_SIDEBAR_MENU_ITEMS,
+    MOCK_SIDEBAR_RECENT_CHATS,
+    MOCK_SIDEBAR_USER_NAME,
+} from "#.storybook/lib/mocks/sidebar";
 import { waitForElement } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import {
-    CalendarIcon,
-    HomeIcon,
-    InboxIcon,
-    SearchIcon,
-    SettingsIcon,
-    UsersIcon,
-} from "lucide-react";
-import { expect, waitFor } from "storybook/test";
+import { HomeIcon, InboxIcon, SettingsIcon, UsersIcon } from "lucide-react";
+import { expect } from "storybook/test";
 
 import { Sidebar } from "./sidebar";
 import { SidebarContent } from "./sidebar-content";
@@ -71,14 +69,6 @@ const meta = preview.meta({
     ],
 });
 
-const menuItems = [
-    { title: "Home", icon: HomeIcon },
-    { title: "Inbox", icon: InboxIcon },
-    { title: "Calendar", icon: CalendarIcon },
-    { title: "Search", icon: SearchIcon },
-    { title: "Settings", icon: SettingsIcon },
-];
-
 export const Default = meta.story({
     render: () => (
         <SidebarProvider>
@@ -97,7 +87,7 @@ export const Default = meta.story({
                             <SidebarGroupLabel>Application</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {menuItems.map(item => (
+                                    {MOCK_SIDEBAR_MENU_ITEMS.map(item => (
                                         <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton>
                                                 <item.icon />
@@ -143,7 +133,7 @@ Default.test(
         await userEvent.click(trigger);
 
         const sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
     },
 );
 
@@ -155,12 +145,12 @@ Default.test(
         await userEvent.click(trigger);
 
         let sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
 
         await userEvent.click(trigger);
 
         sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-            expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
+        expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
     },
 );
 
@@ -170,7 +160,7 @@ Default.test(
         await userEvent.keyboard("{Control>}b{/Control}");
 
         const sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
     },
 );
 
@@ -180,12 +170,12 @@ Default.test(
         await userEvent.keyboard("{Control>}b{/Control}");
 
         let sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-            expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
+        expect(sidebarWrapper).toHaveAttribute("data-state", "collapsed");
 
         await userEvent.keyboard("{Control>}b{/Control}");
 
         sidebarWrapper = await waitForElement('[data-slot="sidebar"]');
-            expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
+        expect(sidebarWrapper).toHaveAttribute("data-state", "expanded");
     },
 );
 
@@ -200,7 +190,6 @@ Default.test(
 );
 
 export const VariantSidebar = meta.story({
-    name: "Variant: Sidebar (Default)",
     render: () => (
         <SidebarProvider>
             <SidebarWrapper>
@@ -215,14 +204,16 @@ export const VariantSidebar = meta.story({
                             <SidebarGroupLabel>Navigation</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {menuItems.slice(0, 3).map(item => (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton>
-                                                <item.icon />
-                                                <span>{item.title}</span>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    ))}
+                                    {MOCK_SIDEBAR_MENU_ITEMS.slice(0, 3).map(
+                                        item => (
+                                            <SidebarMenuItem key={item.title}>
+                                                <SidebarMenuButton>
+                                                    <item.icon />
+                                                    <span>{item.title}</span>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        ),
+                                    )}
                                 </SidebarMenu>
                             </SidebarGroupContent>
                         </SidebarGroup>
@@ -241,7 +232,6 @@ export const VariantSidebar = meta.story({
 });
 
 export const VariantInset = meta.story({
-    name: "Variant: Inset",
     render: () => (
         <SidebarProvider>
             <SidebarWrapper>
@@ -256,14 +246,16 @@ export const VariantInset = meta.story({
                             <SidebarGroupLabel>Navigation</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {menuItems.slice(0, 3).map(item => (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton>
-                                                <item.icon />
-                                                <span>{item.title}</span>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    ))}
+                                    {MOCK_SIDEBAR_MENU_ITEMS.slice(0, 3).map(
+                                        item => (
+                                            <SidebarMenuItem key={item.title}>
+                                                <SidebarMenuButton>
+                                                    <item.icon />
+                                                    <span>{item.title}</span>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        ),
+                                    )}
                                 </SidebarMenu>
                             </SidebarGroupContent>
                         </SidebarGroup>
@@ -284,7 +276,6 @@ export const VariantInset = meta.story({
 });
 
 export const SideRight = meta.story({
-    name: "Side: Right",
     render: () => (
         <SidebarProvider>
             <SidebarWrapper>
@@ -305,14 +296,16 @@ export const SideRight = meta.story({
                             <SidebarGroupLabel>Details</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {menuItems.slice(0, 3).map(item => (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton>
-                                                <item.icon />
-                                                <span>{item.title}</span>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    ))}
+                                    {MOCK_SIDEBAR_MENU_ITEMS.slice(0, 3).map(
+                                        item => (
+                                            <SidebarMenuItem key={item.title}>
+                                                <SidebarMenuButton>
+                                                    <item.icon />
+                                                    <span>{item.title}</span>
+                                                </SidebarMenuButton>
+                                            </SidebarMenuItem>
+                                        ),
+                                    )}
                                 </SidebarMenu>
                             </SidebarGroupContent>
                         </SidebarGroup>
@@ -325,7 +318,6 @@ export const SideRight = meta.story({
 });
 
 export const CollapsibleOffcanvas = meta.story({
-    name: "Collapsible: Offcanvas",
     render: () => (
         <SidebarProvider defaultOpen={false}>
             <SidebarWrapper>
@@ -340,7 +332,7 @@ export const CollapsibleOffcanvas = meta.story({
                             <SidebarGroupLabel>Menu</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {menuItems.map(item => (
+                                    {MOCK_SIDEBAR_MENU_ITEMS.map(item => (
                                         <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton>
                                                 <item.icon />
@@ -366,7 +358,6 @@ export const CollapsibleOffcanvas = meta.story({
 });
 
 export const FullApplication = meta.story({
-    name: "Full Application Layout",
     render: () => (
         <SidebarProvider>
             <SidebarWrapper>
@@ -404,12 +395,7 @@ export const FullApplication = meta.story({
                             <SidebarGroupLabel>Recent</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
-                                    {[
-                                        "React hooks explained",
-                                        "TypeScript generics",
-                                        "CSS Grid layout",
-                                        "Next.js routing",
-                                    ].map(title => (
+                                    {MOCK_SIDEBAR_RECENT_CHATS.map(title => (
                                         <SidebarMenuItem key={title}>
                                             <SidebarMenuButton>
                                                 <InboxIcon />
@@ -432,7 +418,7 @@ export const FullApplication = meta.story({
                             <SidebarMenuItem>
                                 <SidebarMenuButton>
                                     <UsersIcon />
-                                    <span>John Doe</span>
+                                    <span>{MOCK_SIDEBAR_USER_NAME}</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>

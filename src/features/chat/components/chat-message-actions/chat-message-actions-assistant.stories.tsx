@@ -1,4 +1,13 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_BUTTON_COPY,
+    MOCK_CHAT_BUTTON_DOWNVOTE,
+    MOCK_CHAT_BUTTON_DOWNVOTED,
+    MOCK_CHAT_BUTTON_TRY_AGAIN,
+    MOCK_CHAT_BUTTON_UPVOTE,
+    MOCK_CHAT_BUTTON_UPVOTED,
+    MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
+} from "#.storybook/lib/mocks/chat";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_ASSISTANT_MESSAGE_ID,
@@ -31,8 +40,7 @@ const meta = preview.meta({
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         metadata: createMockAssistantMessageMetadata(),
     },
     beforeEach: () => {
@@ -48,13 +56,17 @@ const meta = preview.meta({
 export const Default = meta.story({});
 
 Default.test("should render all action buttons", async ({ canvas }) => {
-    const copyButton = canvas.getByRole("button", { name: /copy/i });
-    const regenerateButton = canvas.getByRole("button", {
-        name: /try again/i,
+    const copyButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
     });
-    const upvoteButton = canvas.getByRole("button", { name: /upvote/i });
+    const regenerateButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
+    });
+    const upvoteButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
+    });
     const downvoteButton = canvas.getByRole("button", {
-        name: /downvote/i,
+        name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
     });
 
     expect(copyButton).toBeInTheDocument();
@@ -64,18 +76,22 @@ Default.test("should render all action buttons", async ({ canvas }) => {
 });
 
 Default.test("should show tooltips on hover", async ({ canvas, userEvent }) => {
-    const copyButton = canvas.getByRole("button", { name: /copy/i });
+    const copyButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+    });
     await userEvent.hover(copyButton);
 
     const tooltip = await waitForTooltip();
     expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveTextContent("Copy");
+    expect(tooltip).toHaveTextContent(MOCK_CHAT_BUTTON_COPY);
 });
 
 Default.test(
     "should copy content when copy button is clicked",
     async ({ canvas, userEvent, args }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         await userEvent.click(copyButton);
 
         if (navigator.clipboard && navigator.clipboard.readText) {
@@ -88,7 +104,9 @@ Default.test(
 Default.test(
     "should upvote message when upvote button is clicked",
     async ({ canvas, userEvent }) => {
-        const upvoteButton = canvas.getByRole("button", { name: /upvote/i });
+        const upvoteButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
+        });
         await userEvent.click(upvoteButton);
 
         await waitFor(() => {
@@ -105,7 +123,7 @@ Default.test(
     "should downvote message when downvote button is clicked",
     async ({ canvas, userEvent }) => {
         const downvoteButton = canvas.getByRole("button", {
-            name: /downvote/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
         });
         await userEvent.click(downvoteButton);
 
@@ -123,8 +141,7 @@ export const Upvoted = meta.story({
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         metadata: createMockAssistantMessageMetadata({
             isUpvoted: true,
             isDownvoted: false,
@@ -133,14 +150,18 @@ export const Upvoted = meta.story({
 });
 
 Upvoted.test("should show upvoted state", async ({ canvas }) => {
-    const upvoteButton = canvas.getByRole("button", { name: /upvoted/i });
+    const upvoteButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_UPVOTED, "i"),
+    });
     expect(upvoteButton).toBeInTheDocument();
 });
 
 Upvoted.test(
     "should remove upvote when clicked again",
     async ({ canvas, userEvent }) => {
-        const upvoteButton = canvas.getByRole("button", { name: /upvoted/i });
+        const upvoteButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPVOTED, "i"),
+        });
         await userEvent.click(upvoteButton);
 
         await waitFor(() => {
@@ -157,8 +178,7 @@ export const Downvoted = meta.story({
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         metadata: createMockAssistantMessageMetadata({
             isUpvoted: false,
             isDownvoted: true,
@@ -167,7 +187,9 @@ export const Downvoted = meta.story({
 });
 
 Downvoted.test("should show downvoted state", async ({ canvas }) => {
-    const downvoteButton = canvas.getByRole("button", { name: /downvoted/i });
+    const downvoteButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTED, "i"),
+    });
     expect(downvoteButton).toBeInTheDocument();
 });
 
@@ -175,7 +197,7 @@ Downvoted.test(
     "should remove downvote when clicked again",
     async ({ canvas, userEvent }) => {
         const downvoteButton = canvas.getByRole("button", {
-            name: /downvoted/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTED, "i"),
         });
         await userEvent.click(downvoteButton);
 
@@ -193,21 +215,24 @@ export const Disabled = meta.story({
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         metadata: createMockAssistantMessageMetadata(),
         disabled: true,
     },
 });
 
 Disabled.test("should disable all buttons", async ({ canvas }) => {
-    const copyButton = canvas.getByRole("button", { name: /copy/i });
-    const regenerateButton = canvas.getByRole("button", {
-        name: /try again/i,
+    const copyButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
     });
-    const upvoteButton = canvas.getByRole("button", { name: /upvote/i });
+    const regenerateButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
+    });
+    const upvoteButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
+    });
     const downvoteButton = canvas.getByRole("button", {
-        name: /downvote/i,
+        name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
     });
 
     expect(copyButton).toBeDisabled();
@@ -219,13 +244,17 @@ Disabled.test("should disable all buttons", async ({ canvas }) => {
 Disabled.test(
     "should not trigger actions when disabled",
     async ({ canvas, userEvent }) => {
-        const upvoteButton = canvas.getByRole("button", { name: /upvote/i });
-        const downvoteButton = canvas.getByRole("button", {
-            name: /downvote/i,
+        const upvoteButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
         });
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const downvoteButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
+        });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const regenerateButton = canvas.getByRole("button", {
-            name: /try again/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
         });
 
         try {
@@ -266,17 +295,18 @@ export const WithoutCopy = meta.story({
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         metadata: createMockAssistantMessageMetadata(),
         showCopy: false,
     },
 });
 
 WithoutCopy.test("should not show copy button", async ({ canvas }) => {
-    const copyButton = canvas.queryByRole("button", { name: /copy/i });
+    const copyButton = canvas.queryByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+    });
     const regenerateButton = canvas.getByRole("button", {
-        name: /try again/i,
+        name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
     });
 
     expect(copyButton).not.toBeInTheDocument();
@@ -287,8 +317,7 @@ export const WithoutRegenerate = meta.story({
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         metadata: createMockAssistantMessageMetadata(),
         showRegenerate: false,
     },
@@ -298,9 +327,11 @@ WithoutRegenerate.test(
     "should not show regenerate button",
     async ({ canvas }) => {
         const regenerateButton = canvas.queryByRole("button", {
-            name: /try again/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
         });
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
 
         expect(regenerateButton).not.toBeInTheDocument();
         expect(copyButton).toBeInTheDocument();
@@ -311,8 +342,7 @@ export const WithoutVotes = meta.story({
     args: {
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         metadata: createMockAssistantMessageMetadata(),
         showUpvote: false,
         showDownvote: false,
@@ -321,12 +351,14 @@ export const WithoutVotes = meta.story({
 
 WithoutVotes.test("should not show vote buttons", async ({ canvas }) => {
     const upvoteButton = canvas.queryByRole("button", {
-        name: /upvote/i,
+        name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
     });
     const downvoteButton = canvas.queryByRole("button", {
-        name: /downvote/i,
+        name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
     });
-    const copyButton = canvas.getByRole("button", { name: /copy/i });
+    const copyButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+    });
 
     expect(upvoteButton).not.toBeInTheDocument();
     expect(downvoteButton).not.toBeInTheDocument();

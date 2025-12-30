@@ -1,4 +1,12 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_BUTTON_COPY,
+    MOCK_CHAT_BUTTON_DOWNVOTE,
+    MOCK_CHAT_BUTTON_SOURCES,
+    MOCK_CHAT_BUTTON_TRY_AGAIN,
+    MOCK_CHAT_BUTTON_UPVOTE,
+    MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
+} from "#.storybook/lib/mocks/chat";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_ASSISTANT_MESSAGE_ID,
@@ -37,13 +45,8 @@ const meta = preview.meta({
         canShowActions: true,
         chatId: MOCK_CHAT_ID,
         messageId: MOCK_ASSISTANT_MESSAGE_ID,
-        content:
-            "This is a sample assistant message that can be copied, regenerated, and voted on.",
-        parts: [
-            createMockTextMessagePart(
-                "This is a sample assistant message that can be copied, regenerated, and voted on.",
-            ),
-        ],
+        content: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
+        parts: [createMockTextMessagePart(MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT)],
         metadata: createMockAssistantMessageMetadata(),
     },
     beforeEach: () => {
@@ -102,15 +105,17 @@ export const NotOwner = meta.story({
 NotOwner.test(
     "should not show regenerate and vote buttons when user is not owner",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const regenerateButton = canvas.queryByRole("button", {
-            name: /try again/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
         });
         const upvoteButton = canvas.queryByRole("button", {
-            name: /upvote/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
         });
         const downvoteButton = canvas.queryByRole("button", {
-            name: /downvote/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
         });
 
         expect(copyButton).toBeInTheDocument();
@@ -136,12 +141,14 @@ export const RateLimitExceeded = meta.story({
 RateLimitExceeded.test(
     "should not show regenerate button when rate limit is exceeded",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const regenerateButton = canvas.queryByRole("button", {
-            name: /try again/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
         });
         const upvoteButton = canvas.getByRole("button", {
-            name: /upvote/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
         });
 
         expect(copyButton).toBeInTheDocument();
@@ -157,13 +164,17 @@ export const Disabled = meta.story({
 });
 
 Disabled.test("should disable all buttons", async ({ canvas }) => {
-    const copyButton = canvas.getByRole("button", { name: /copy/i });
-    const regenerateButton = canvas.getByRole("button", {
-        name: /try again/i,
+    const copyButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
     });
-    const upvoteButton = canvas.getByRole("button", { name: /upvote/i });
+    const regenerateButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
+    });
+    const upvoteButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
+    });
     const downvoteButton = canvas.getByRole("button", {
-        name: /downvote/i,
+        name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
     });
 
     expect(copyButton).toBeDisabled();
@@ -190,7 +201,7 @@ WithSources.test(
     "should open source dialog when source button is clicked",
     async ({ canvas, userEvent }) => {
         const sourceButton = canvas.getByRole("button", {
-            name: /sources/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_SOURCES, "i"),
         });
         await userEvent.click(sourceButton);
 

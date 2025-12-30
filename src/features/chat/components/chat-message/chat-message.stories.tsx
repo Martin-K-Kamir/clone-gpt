@@ -1,4 +1,22 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_BUTTON_CANCEL,
+    MOCK_CHAT_BUTTON_COPY,
+    MOCK_CHAT_BUTTON_DOWNVOTE,
+    MOCK_CHAT_BUTTON_READ_LESS,
+    MOCK_CHAT_BUTTON_READ_MORE,
+    MOCK_CHAT_BUTTON_TRY_AGAIN,
+    MOCK_CHAT_BUTTON_UPDATE,
+    MOCK_CHAT_BUTTON_UPVOTE,
+    MOCK_CHAT_MESSAGE_HERE_ARE_DOCUMENTS,
+    MOCK_CHAT_MESSAGE_HERE_ARE_FILES_IMAGES,
+    MOCK_CHAT_MESSAGE_HERE_ARE_IMAGES,
+    MOCK_CHAT_MESSAGE_ORIGINAL,
+    MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
+    MOCK_CHAT_MESSAGE_UPDATED,
+    MOCK_CHAT_MESSAGE_UPDATED_FULL,
+    MOCK_CHAT_MESSAGE_USER_HELP,
+} from "#.storybook/lib/mocks/chat";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_ASSISTANT_MESSAGE_WITH_GENERATED_FILE,
@@ -49,7 +67,7 @@ const meta = preview.meta({
 export const UserMessage = meta.story({
     args: {
         message: createMockUserMessage({
-            text: "Hello, how can you help me today?",
+            text: MOCK_CHAT_MESSAGE_USER_HELP,
         }),
         chatId: MOCK_CHAT_ID,
         status: MOCK_CHAT_STATUS.READY,
@@ -63,16 +81,20 @@ UserMessage.test("should render user message", async ({ canvas }) => {
 });
 
 UserMessage.test("should display user message text", async ({ canvas }) => {
-    const messageText = canvas.getByText(/hello, how can you help me today\?/i);
+    const messageText = canvas.getByText(
+        new RegExp(MOCK_CHAT_MESSAGE_USER_HELP, "i"),
+    );
     expect(messageText).toBeInTheDocument();
 });
 
 UserMessage.test(
     "should show action buttons for user message",
     async ({ canvas }) => {
-        const copyButton = canvas.getByRole("button", { name: /copy/i });
+        const copyButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+        });
         const updateButton = canvas.getByRole("button", {
-            name: /update/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
         });
         expect(copyButton).toBeInTheDocument();
         expect(updateButton).toBeInTheDocument();
@@ -93,7 +115,7 @@ UserMessageLong.test(
     "should truncate long user message and show expand button",
     async ({ canvas }) => {
         const expandButton = canvas.getByRole("button", {
-            name: /read more/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_READ_MORE, "i"),
         });
         expect(expandButton).toBeInTheDocument();
 
@@ -106,26 +128,26 @@ UserMessageLong.test(
     "should expand and collapse long message when button is clicked",
     async ({ canvas, userEvent }) => {
         const expandButton = canvas.getByRole("button", {
-            name: /read more/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_READ_MORE, "i"),
         });
 
         await userEvent.click(expandButton);
 
         await waitFor(() => {
             const collapseButton = canvas.getByRole("button", {
-                name: /read less/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_READ_LESS, "i"),
             });
             expect(collapseButton).toBeInTheDocument();
         });
 
         const collapseButton = canvas.getByRole("button", {
-            name: /read less/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_READ_LESS, "i"),
         });
         await userEvent.click(collapseButton);
 
         await waitFor(() => {
             const expandButtonAgain = canvas.getByRole("button", {
-                name: /read more/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_READ_MORE, "i"),
             });
             expect(expandButtonAgain).toBeInTheDocument();
         });
@@ -166,7 +188,7 @@ UserMessageWithFiles.test(
     async ({ canvas }) => {
         await waitFor(() => {
             const updateButton = canvas.queryByRole("button", {
-                name: /update/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
             });
             expect(updateButton).not.toBeInTheDocument();
         });
@@ -198,7 +220,7 @@ UserMessageWithImages.test(
     async ({ canvas }) => {
         await waitFor(() => {
             const updateButton = canvas.queryByRole("button", {
-                name: /update/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
             });
             expect(updateButton).not.toBeInTheDocument();
         });
@@ -224,7 +246,7 @@ export const UserMessageWithSingleImage = meta.story({
 export const UserMessageWithMultipleFiles = meta.story({
     args: {
         message: createMockUserMessageWithFiles({
-            text: "Here are multiple documents:",
+            text: MOCK_CHAT_MESSAGE_HERE_ARE_DOCUMENTS,
             files: createMockFileMessageParts(10, "document", "pdf"),
         }),
         chatId: MOCK_CHAT_ID,
@@ -235,7 +257,7 @@ export const UserMessageWithMultipleFiles = meta.story({
 export const UserMessageWithMultipleImages = meta.story({
     args: {
         message: createMockUserMessageWithFiles({
-            text: "Here are multiple images:",
+            text: MOCK_CHAT_MESSAGE_HERE_ARE_IMAGES,
             files: createMockImageMessageParts(10, "photo", "jpg"),
         }),
         chatId: MOCK_CHAT_ID,
@@ -246,7 +268,7 @@ export const UserMessageWithMultipleImages = meta.story({
 export const UserMessageWithFilesAndImages = meta.story({
     args: {
         message: createMockUserMessageWithFiles({
-            text: "Here are some files and images:",
+            text: MOCK_CHAT_MESSAGE_HERE_ARE_FILES_IMAGES,
             files: MOCK_FILE_AND_IMAGE_PARTS,
         }),
         chatId: MOCK_CHAT_ID,
@@ -283,7 +305,7 @@ UserMessageWithFilesAndImages.test(
 export const UserMessageUpdating = meta.story({
     args: {
         message: createMockUserMessage({
-            text: "Original message text",
+            text: MOCK_CHAT_MESSAGE_ORIGINAL,
         }),
         chatId: MOCK_CHAT_ID,
         status: MOCK_CHAT_STATUS.READY,
@@ -293,13 +315,15 @@ export const UserMessageUpdating = meta.story({
 UserMessageUpdating.test(
     "should show prompt composer when updating message",
     async ({ canvas, userEvent }) => {
-        const updateButton = canvas.getByRole("button", { name: /update/i });
+        const updateButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+        });
         await userEvent.click(updateButton);
 
         await waitFor(() => {
             const textarea = canvas.getByRole("textbox");
             expect(textarea).toBeInTheDocument();
-            expect(textarea).toHaveValue("Original message text");
+            expect(textarea).toHaveValue(MOCK_CHAT_MESSAGE_ORIGINAL);
         });
     },
 );
@@ -307,7 +331,9 @@ UserMessageUpdating.test(
 UserMessageUpdating.test(
     "should allow typing in the prompt composer",
     async ({ canvas, userEvent }) => {
-        const updateButton = canvas.getByRole("button", { name: /update/i });
+        const updateButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+        });
         await userEvent.click(updateButton);
 
         const textarea = await waitFor(() => {
@@ -317,16 +343,18 @@ UserMessageUpdating.test(
         });
 
         await userEvent.clear(textarea);
-        await userEvent.type(textarea, "Updated message text");
+        await userEvent.type(textarea, MOCK_CHAT_MESSAGE_UPDATED);
 
-        expect(textarea).toHaveValue("Updated message text");
+        expect(textarea).toHaveValue(MOCK_CHAT_MESSAGE_UPDATED);
     },
 );
 
 UserMessageUpdating.test(
     "should cancel update and return to message view",
     async ({ canvas, userEvent }) => {
-        const updateButton = canvas.getByRole("button", { name: /update/i });
+        const updateButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+        });
         await userEvent.click(updateButton);
 
         await waitFor(() => {
@@ -334,7 +362,9 @@ UserMessageUpdating.test(
             expect(textarea).toBeInTheDocument();
         });
 
-        const cancelButton = canvas.getByRole("button", { name: /cancel/i });
+        const cancelButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_CANCEL, "i"),
+        });
         await userEvent.click(cancelButton);
 
         await waitFor(() => {
@@ -342,7 +372,9 @@ UserMessageUpdating.test(
             expect(textarea).not.toBeInTheDocument();
         });
 
-        const messageText = canvas.getByText(/original message text/i);
+        const messageText = canvas.getByText(
+            new RegExp(MOCK_CHAT_MESSAGE_ORIGINAL, "i"),
+        );
         expect(messageText).toBeInTheDocument();
     },
 );
@@ -350,7 +382,9 @@ UserMessageUpdating.test(
 UserMessageUpdating.test(
     "should update message when update button is clicked",
     async ({ canvas, userEvent }) => {
-        const updateButton = canvas.getByRole("button", { name: /update/i });
+        const updateButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
+        });
         await userEvent.click(updateButton);
 
         const textarea = await waitFor(() => {
@@ -360,10 +394,10 @@ UserMessageUpdating.test(
         });
 
         await userEvent.clear(textarea);
-        await userEvent.type(textarea, "This is the updated message");
+        await userEvent.type(textarea, MOCK_CHAT_MESSAGE_UPDATED_FULL);
 
         const submitUpdateButton = canvas.getByRole("button", {
-            name: /update/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_UPDATE, "i"),
         });
         await userEvent.click(submitUpdateButton);
 
@@ -377,7 +411,7 @@ UserMessageUpdating.test(
 export const AssistantMessage = meta.story({
     args: {
         message: createMockAssistantMessage({
-            text: "Hello! I'm here to help you. How can I assist you today?",
+            text: MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT,
         }),
         chatId: MOCK_CHAT_ID,
         status: MOCK_CHAT_STATUS.READY,
@@ -394,7 +428,7 @@ AssistantMessage.test(
     "should display assistant message text",
     async ({ canvas }) => {
         const messageText = canvas.getByText(
-            /hello! i'm here to help you\. how can i assist you today\?/i,
+            new RegExp(MOCK_CHAT_MESSAGE_SAMPLE_ASSISTANT, "i"),
         );
         expect(messageText).toBeInTheDocument();
     },
@@ -404,15 +438,17 @@ AssistantMessage.test(
     "should show action buttons for assistant message when ready",
     async ({ canvas }) => {
         await waitFor(() => {
-            const copyButton = canvas.getByRole("button", { name: /copy/i });
+            const copyButton = canvas.getByRole("button", {
+                name: new RegExp(MOCK_CHAT_BUTTON_COPY, "i"),
+            });
             const regenerateButton = canvas.getByRole("button", {
-                name: /try again/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_TRY_AGAIN, "i"),
             });
             const upvoteButton = canvas.getByRole("button", {
-                name: /upvote/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_UPVOTE, "i"),
             });
             const downvoteButton = canvas.getByRole("button", {
-                name: /downvote/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_DOWNVOTE, "i"),
             });
             expect(copyButton).toBeInTheDocument();
             expect(regenerateButton).toBeInTheDocument();

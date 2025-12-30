@@ -1,6 +1,16 @@
 import {
+    getHighlightedDropdownMenuCheckboxItem,
+    getHighlightedDropdownMenuItem,
+    getHighlightedDropdownMenuRadioItem,
+} from "#.storybook/lib/utils/elements";
+import {
     waitForDropdownMenu,
+    waitForDropdownMenuCheckboxItemByText,
     waitForDropdownMenuItemByText,
+    waitForDropdownMenuRadioItemByText,
+    waitForDropdownMenuSubContent,
+    waitForDropdownMenuSubContentToClose,
+    waitForDropdownMenuSubTrigger,
     waitForDropdownMenuToClose,
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
@@ -183,51 +193,45 @@ Default.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Settings");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Copy");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Settings");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
     },
@@ -243,27 +247,21 @@ Default.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
     },
@@ -279,12 +277,6 @@ Default.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{arrowdown}");
@@ -294,20 +286,20 @@ Default.test(
         await userEvent.keyboard("{arrowdown}");
 
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Copy");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Copy");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Copy");
         });
     },
@@ -342,26 +334,12 @@ Default.test("should select item on click", async ({ canvas, userEvent }) => {
     const menu = await waitForDropdownMenu();
     expect(menu).toBeInTheDocument();
 
-    const profileItem = await waitFor(() => {
-        const items = Array.from(
-            document.querySelectorAll('[data-slot="dropdown-menu-item"]'),
-        );
-        const item = items.find(item => item.textContent?.includes("Profile"));
-        if (!item) {
-            throw new Error("Profile item not found");
-        }
-        return item;
-    });
+    const profileItem = await waitForDropdownMenuItemByText(/profile/i);
     expect(profileItem).toBeInTheDocument();
 
     await userEvent.click(profileItem);
 
-    await waitFor(() => {
-        const menu = document.querySelector(
-            '[data-slot="dropdown-menu-content"]',
-        );
-        expect(menu).not.toBeInTheDocument();
-    });
+    await waitForDropdownMenuToClose();
 });
 
 Default.test(
@@ -613,21 +591,11 @@ WithSubmenus.test(
         const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
-        const subTrigger = await waitFor(() => {
-            const trigger = document.querySelector(
-                '[data-slot="dropdown-menu-sub-trigger"]',
-            );
-            if (!trigger) {
-                throw new Error("Sub trigger not found");
-            }
-            return trigger;
-        });
+        const subTrigger = await waitForDropdownMenuSubTrigger();
 
         await userEvent.click(subTrigger);
 
-        const subMenu = await waitFor(() =>
-            document.querySelector('[data-slot="dropdown-menu-sub-content"]'),
-        );
+        const subMenu = await waitForDropdownMenuSubContent();
         expect(subMenu).toBeInTheDocument();
     },
 );
@@ -643,24 +611,10 @@ WithSubmenus.test(
         const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
-        const subTrigger = await waitFor(() => {
-            const trigger = document.querySelector(
-                '[data-slot="dropdown-menu-sub-trigger"]',
-            );
-            if (!trigger) {
-                throw new Error("Sub trigger not found");
-            }
-            return trigger;
-        });
+        const subTrigger = await waitForDropdownMenuSubTrigger();
 
         await userEvent.hover(subTrigger);
-
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContent();
     },
 );
 
@@ -675,46 +629,17 @@ WithSubmenus.test(
         const menu = await waitForDropdownMenu();
         expect(menu).toBeInTheDocument();
 
-        const subTrigger = await waitFor(() => {
-            const trigger = document.querySelector(
-                '[data-slot="dropdown-menu-sub-trigger"]',
-            );
-            if (!trigger) {
-                throw new Error("Sub trigger not found");
-            }
-            return trigger;
-        });
+        const subTrigger = await waitForDropdownMenuSubTrigger();
 
         await userEvent.hover(subTrigger);
 
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContent();
 
-        const profileItem = await waitFor(() => {
-            const items = Array.from(
-                document.querySelectorAll('[data-slot="dropdown-menu-item"]'),
-            );
-            const item = items.find(item =>
-                item.textContent?.includes("Profile"),
-            );
-            if (!item) {
-                throw new Error("Profile item not found");
-            }
-            return item;
-        });
+        const profileItem = await waitForDropdownMenuItemByText(/profile/i);
 
         await userEvent.hover(profileItem);
 
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContentToClose();
     },
 );
 
@@ -726,28 +651,13 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        const subTrigger = await waitFor(() => {
-            const trigger = document.querySelector(
-                '[data-slot="dropdown-menu-sub-trigger"]',
-            );
-            if (!trigger) {
-                throw new Error("Sub trigger not found");
-            }
-            return trigger;
-        });
-
+        const subTrigger = await waitForDropdownMenuSubTrigger();
         await userEvent.hover(subTrigger);
 
         fireEvent.pointerDown(document.body);
 
         await waitForDropdownMenuToClose();
-
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContentToClose();
     },
 );
 
@@ -759,27 +669,13 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        const subTrigger = await waitFor(() => {
-            const trigger = document.querySelector(
-                '[data-slot="dropdown-menu-sub-trigger"]',
-            );
-            if (!trigger) {
-                throw new Error("Sub trigger not found");
-            }
-            return trigger;
-        });
+        const subTrigger = await waitForDropdownMenuSubTrigger();
 
         await userEvent.hover(subTrigger);
         await userEvent.keyboard("{Escape}");
 
         await waitForDropdownMenuToClose();
-
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContentToClose();
     },
 );
 
@@ -796,12 +692,8 @@ WithSubmenus.test(
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{arrowright}");
 
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).toBeInTheDocument();
-        });
+        const subMenu = await waitForDropdownMenuSubContent();
+        expect(subMenu).toBeInTheDocument();
     },
 );
 
@@ -819,12 +711,7 @@ WithSubmenus.test(
         await userEvent.keyboard("{arrowright}");
         await userEvent.keyboard("{arrowleft}");
 
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContentToClose();
     },
 );
 
@@ -838,21 +725,15 @@ WithSubmenus.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Settings");
         });
 
@@ -860,31 +741,31 @@ WithSubmenus.test(
         await userEvent.keyboard("{arrowright}");
 
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Copy");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Download");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Copy");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
     },
@@ -900,21 +781,15 @@ WithSubmenus.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Settings");
         });
 
@@ -922,13 +797,13 @@ WithSubmenus.test(
         await userEvent.keyboard("{arrowright}");
 
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
     },
@@ -944,21 +819,15 @@ WithSubmenus.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Settings");
         });
 
@@ -966,25 +835,25 @@ WithSubmenus.test(
         await userEvent.keyboard("{arrowright}");
 
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Copy");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Download");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Download");
         });
     },
@@ -998,15 +867,7 @@ WithSubmenus.test(
         });
         await userEvent.click(trigger);
 
-        const subTrigger = await waitFor(() => {
-            const trigger = document.querySelector(
-                '[data-slot="dropdown-menu-sub-trigger"]',
-            );
-            if (!trigger) {
-                throw new Error("Sub trigger not found");
-            }
-            return trigger;
-        });
+        const subTrigger = await waitForDropdownMenuSubTrigger();
 
         await userEvent.click(subTrigger);
 
@@ -1015,12 +876,7 @@ WithSubmenus.test(
 
         await userEvent.click(editItem);
 
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContentToClose();
     },
 );
 
@@ -1037,12 +893,7 @@ WithSubmenus.test(
         await userEvent.keyboard("{arrowright}");
         await userEvent.keyboard("{enter}");
 
-        await waitFor(() => {
-            const subMenu = document.querySelector(
-                '[data-slot="dropdown-menu-sub-content"]',
-            );
-            expect(subMenu).not.toBeInTheDocument();
-        });
+        await waitForDropdownMenuSubContentToClose();
     },
 );
 
@@ -1110,30 +961,19 @@ WithCheckboxes.test(
         });
         await userEvent.click(trigger);
 
-        function findItem(text: string) {
-            const items = Array.from(
-                document.querySelectorAll(
-                    '[data-slot="dropdown-menu-checkbox-item"]',
-                ),
-            );
-            const item = items.find(item => item.textContent?.includes(text));
-            if (!item) {
-                throw new Error(`${text} item not found`);
-            }
-            return item;
-        }
-
-        const statusBarItem = await waitFor(() => findItem("Status Bar"));
+        const statusBarItem =
+            await waitForDropdownMenuCheckboxItemByText("Status Bar");
         expect(statusBarItem).toBeChecked();
 
-        const activityBarItem = await waitFor(() => findItem("Activity Bar"));
+        const activityBarItem =
+            await waitForDropdownMenuCheckboxItemByText("Activity Bar");
         expect(activityBarItem).not.toBeChecked();
 
         await userEvent.click(activityBarItem);
         expect(statusBarItem).toBeChecked();
         expect(activityBarItem).toBeChecked();
 
-        const panelItem = await waitFor(() => findItem("Panel"));
+        const panelItem = await waitForDropdownMenuCheckboxItemByText("Panel");
         expect(panelItem).not.toBeChecked();
     },
 );
@@ -1148,22 +988,10 @@ WithCheckboxes.test(
 
         await waitForDropdownMenu();
 
-        function findItem(text: string) {
-            const items = Array.from(
-                document.querySelectorAll(
-                    '[data-slot="dropdown-menu-checkbox-item"]',
-                ),
-            );
-            const item = items.find(item => item.textContent?.includes(text));
-            if (!item) {
-                throw new Error(`${text} item not found`);
-            }
-            return item;
-        }
-
         await userEvent.keyboard("{arrowdown}");
 
-        const statusBarItem = await waitFor(() => findItem("Status Bar"));
+        const statusBarItem =
+            await waitForDropdownMenuCheckboxItemByText("Status Bar");
         expect(statusBarItem).toBeChecked();
 
         await userEvent.keyboard("{enter}");
@@ -1181,39 +1009,33 @@ WithCheckboxes.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-checkbox-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuCheckboxItem();
             expect(highlighted).toHaveTextContent("Status Bar");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuCheckboxItem();
             expect(highlighted).toHaveTextContent("Activity Bar");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuCheckboxItem();
             expect(highlighted).toHaveTextContent("Panel");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuCheckboxItem();
             expect(highlighted).toHaveTextContent("Activity Bar");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuCheckboxItem();
             expect(highlighted).toHaveTextContent("Status Bar");
         });
     },
@@ -1277,33 +1099,20 @@ WithRadioGroups.test(
         });
         await userEvent.click(trigger);
 
-        function findItem(text: string) {
-            const items = Array.from(
-                document.querySelectorAll(
-                    '[data-slot="dropdown-menu-radio-item"]',
-                ),
-            );
-            const item = items.find(item => item.textContent?.includes(text));
-            if (!item) {
-                throw new Error(`${text} item not found`);
-            }
-            return item;
-        }
-
-        const topItem = await waitFor(() => findItem("Top"));
+        const topItem = await waitForDropdownMenuRadioItemByText("Top");
 
         await userEvent.click(topItem);
 
         expect(topItem).toBeChecked();
 
-        const bottomItem = await waitFor(() => findItem("Bottom"));
+        const bottomItem = await waitForDropdownMenuRadioItemByText("Bottom");
         expect(bottomItem).not.toBeChecked();
 
         await userEvent.click(bottomItem);
         expect(topItem).not.toBeChecked();
         expect(bottomItem).toBeChecked();
 
-        const rightItem = await waitFor(() => findItem("Right"));
+        const rightItem = await waitForDropdownMenuRadioItemByText("Right");
         expect(rightItem).not.toBeChecked();
 
         await userEvent.click(rightItem);
@@ -1323,22 +1132,9 @@ WithRadioGroups.test(
 
         await waitForDropdownMenu();
 
-        function findItem(text: string) {
-            const items = Array.from(
-                document.querySelectorAll(
-                    '[data-slot="dropdown-menu-radio-item"]',
-                ),
-            );
-            const item = items.find(item => item.textContent?.includes(text));
-            if (!item) {
-                throw new Error(`${text} item not found`);
-            }
-            return item;
-        }
-
         await userEvent.keyboard("{arrowdown}");
 
-        const topItem = await waitFor(() => findItem("Top"));
+        const topItem = await waitForDropdownMenuRadioItemByText("Top");
         expect(topItem).not.toBeChecked();
 
         await userEvent.keyboard("{enter}");
@@ -1356,39 +1152,33 @@ WithRadioGroups.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-radio-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuRadioItem();
             expect(highlighted).toHaveTextContent("Top");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuRadioItem();
             expect(highlighted).toHaveTextContent("Bottom");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuRadioItem();
             expect(highlighted).toHaveTextContent("Right");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuRadioItem();
             expect(highlighted).toHaveTextContent("Bottom");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuRadioItem();
             expect(highlighted).toHaveTextContent("Top");
         });
     },
@@ -1610,23 +1400,13 @@ DisabledItems.test(
         });
         await userEvent.click(trigger);
 
-        function findItem(text: string) {
-            const items = Array.from(
-                document.querySelectorAll('[data-slot="dropdown-menu-item"]'),
-            );
-            const item = items.find(item => item.textContent?.includes(text));
-            if (!item) {
-                throw new Error(`${text} item not found`);
-            }
-            return item;
-        }
-
-        const settingsItem = await waitFor(() =>
-            findItem("Settings (Disabled)"),
+        const settingsItem = await waitForDropdownMenuItemByText(
+            /settings \(disabled\)/i,
         );
         expect(settingsItem).toHaveAttribute("aria-disabled", "true");
 
-        const deleteItem = await waitFor(() => findItem("Delete (Disabled)"));
+        const deleteItem =
+            await waitForDropdownMenuItemByText(/delete \(disabled\)/i);
         expect(deleteItem).toHaveAttribute("aria-disabled", "true");
     },
 );
@@ -1641,33 +1421,27 @@ DisabledItems.test(
 
         await waitForDropdownMenu();
 
-        function getHighlightedItem() {
-            return document.querySelector(
-                '[data-slot="dropdown-menu-item"][data-highlighted]',
-            );
-        }
-
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
 
         await userEvent.keyboard("{arrowdown}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Edit");
         });
 
         await userEvent.keyboard("{arrowup}");
         await waitFor(() => {
-            const highlighted = getHighlightedItem();
+            const highlighted = getHighlightedDropdownMenuItem();
             expect(highlighted).toHaveTextContent("Profile");
         });
     },
@@ -1791,14 +1565,17 @@ export const SideTop = meta.story({
     ),
 });
 
-SideTop.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideTop.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "top");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "top");
+    },
+);
 
 export const SideLeft = meta.story({
     parameters: {
@@ -1831,14 +1608,17 @@ export const SideLeft = meta.story({
     ),
 });
 
-SideLeft.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideLeft.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "left");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "left");
+    },
+);
 
 export const SideRight = meta.story({
     parameters: {
@@ -1871,14 +1651,17 @@ export const SideRight = meta.story({
     ),
 });
 
-SideRight.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideRight.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "right");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "right");
+    },
+);
 
 export const AlignStart = meta.story({
     parameters: {
@@ -1913,14 +1696,17 @@ export const AlignStart = meta.story({
     ),
 });
 
-AlignStart.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+AlignStart.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-align", "start");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-align", "start");
+    },
+);
 
 export const AlignCenter = meta.story({
     parameters: {
@@ -1955,14 +1741,17 @@ export const AlignCenter = meta.story({
     ),
 });
 
-AlignCenter.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+AlignCenter.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-align", "center");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-align", "center");
+    },
+);
 
 export const AlignEnd = meta.story({
     parameters: {
@@ -1997,14 +1786,17 @@ export const AlignEnd = meta.story({
     ),
 });
 
-AlignEnd.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+AlignEnd.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-align", "end");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-align", "end");
+    },
+);
 
 export const SideTopAlignStart = meta.story({
     parameters: {
@@ -2039,15 +1831,18 @@ export const SideTopAlignStart = meta.story({
     ),
 });
 
-SideTopAlignStart.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideTopAlignStart.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "top");
-    expect(menu).toHaveAttribute("data-align", "start");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "top");
+        expect(menu).toHaveAttribute("data-align", "start");
+    },
+);
 
 export const SideTopAlignEnd = meta.story({
     parameters: {
@@ -2082,15 +1877,18 @@ export const SideTopAlignEnd = meta.story({
     ),
 });
 
-SideTopAlignEnd.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideTopAlignEnd.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "top");
-    expect(menu).toHaveAttribute("data-align", "end");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "top");
+        expect(menu).toHaveAttribute("data-align", "end");
+    },
+);
 
 export const SideRightAlignStart = meta.story({
     parameters: {
@@ -2123,15 +1921,18 @@ export const SideRightAlignStart = meta.story({
     ),
 });
 
-SideRightAlignStart.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideRightAlignStart.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "right");
-    expect(menu).toHaveAttribute("data-align", "start");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "right");
+        expect(menu).toHaveAttribute("data-align", "start");
+    },
+);
 
 export const SideRightAlignEnd = meta.story({
     parameters: {
@@ -2164,15 +1965,18 @@ export const SideRightAlignEnd = meta.story({
     ),
 });
 
-SideRightAlignEnd.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideRightAlignEnd.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "right");
-    expect(menu).toHaveAttribute("data-align", "end");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "right");
+        expect(menu).toHaveAttribute("data-align", "end");
+    },
+);
 
 export const SideLeftAlignStart = meta.story({
     parameters: {
@@ -2205,15 +2009,18 @@ export const SideLeftAlignStart = meta.story({
     ),
 });
 
-SideLeftAlignStart.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideLeftAlignStart.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "left");
-    expect(menu).toHaveAttribute("data-align", "start");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "left");
+        expect(menu).toHaveAttribute("data-align", "start");
+    },
+);
 
 export const SideLeftAlignEnd = meta.story({
     parameters: {
@@ -2246,12 +2053,15 @@ export const SideLeftAlignEnd = meta.story({
     ),
 });
 
-SideLeftAlignEnd.test("should open", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button");
-    await userEvent.click(trigger);
+SideLeftAlignEnd.test(
+    "should open dropdown menu when trigger is clicked",
+    async ({ canvas, userEvent }) => {
+        const trigger = canvas.getByRole("button");
+        await userEvent.click(trigger);
 
-    const menu = await waitForDropdownMenu();
-    expect(menu).toBeInTheDocument();
-    expect(menu).toHaveAttribute("data-side", "left");
-    expect(menu).toHaveAttribute("data-align", "end");
-});
+        const menu = await waitForDropdownMenu();
+        expect(menu).toBeInTheDocument();
+        expect(menu).toHaveAttribute("data-side", "left");
+        expect(menu).toHaveAttribute("data-align", "end");
+    },
+);

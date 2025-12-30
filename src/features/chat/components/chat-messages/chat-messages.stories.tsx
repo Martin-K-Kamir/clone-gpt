@@ -1,5 +1,11 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_BUTTON_SCROLL_TO_BOTTOM,
+    MOCK_CHAT_ERROR_DEFAULT,
+    MOCK_CHAT_ERROR_MESSAGE_SOMETHING_WRONG,
+    MOCK_CHAT_MESSAGE_CAUSE_ERROR,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_CONVERSATION_COMPLEX,
     MOCK_CONVERSATION_MULTIPLE,
     MOCK_CONVERSATION_SIMPLE,
@@ -23,6 +29,11 @@ import {
     createMockAssistantMessageWithTool,
     createMockUserMessage,
 } from "#.storybook/lib/mocks/messages";
+import { getScrollContainer } from "#.storybook/lib/utils/elements";
+import {
+    waitForScrollButton,
+    waitForScrollToBottom,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect, waitFor } from "storybook/test";
 
@@ -128,136 +139,50 @@ WithLongConversation.test("should render all messages", async ({ canvas }) => {
 WithLongConversation.test(
     "should scroll to bottom on first render",
     async () => {
-        // Find the scrollable container
-        const scrollContainer = document.querySelector(
-            '[class*="overflow-y-auto"]',
-        ) as HTMLElement;
+        const scrollContainer = getScrollContainer();
 
         expect(scrollContainer).toBeInTheDocument();
-
-        // Wait for auto-scroll to complete
-        await waitFor(
-            () => {
-                const scrollTop = scrollContainer.scrollTop;
-                const scrollHeight = scrollContainer.scrollHeight;
-                const clientHeight = scrollContainer.clientHeight;
-                const isAtBottom =
-                    Math.abs(scrollHeight - scrollTop - clientHeight) < 10; // Allow small margin for rounding
-
-                expect(isAtBottom).toBe(true);
-            },
-            { timeout: 2000 },
-        );
+        await waitForScrollToBottom(scrollContainer);
     },
 );
 
 WithLongConversation.test(
     "should show scroll bottom button when scrolled up",
     async ({ canvas }) => {
-        const scrollContainer = document.querySelector(
-            '[class*="overflow-y-auto"]',
-        ) as HTMLElement;
+        const scrollContainer = getScrollContainer();
 
         expect(scrollContainer).toBeInTheDocument();
+        await waitForScrollToBottom(scrollContainer);
 
-        // Wait for initial scroll to bottom
-        await waitFor(
-            () => {
-                const scrollTop = scrollContainer.scrollTop;
-                const scrollHeight = scrollContainer.scrollHeight;
-                const clientHeight = scrollContainer.clientHeight;
-                const isAtBottom =
-                    Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
-
-                expect(isAtBottom).toBe(true);
-            },
-            { timeout: 2000 },
-        );
-
-        // Scroll up
         scrollContainer.scrollTop = 0;
 
-        // Wait for scroll event to process
-        await waitFor(() => {
-            const scrollButton = canvas.getByRole("button", {
-                name: /scroll to bottom/i,
-            });
-            expect(scrollButton).toBeInTheDocument();
-            expect(scrollButton).toBeVisible();
-        });
+        await waitForScrollButton(canvas, MOCK_CHAT_BUTTON_SCROLL_TO_BOTTOM);
     },
 );
 
 WithLongConversation.test(
     "should scroll to bottom when scroll bottom button is clicked",
     async ({ canvas, userEvent }) => {
-        const scrollContainer = document.querySelector(
-            '[class*="overflow-y-auto"]',
-        ) as HTMLElement;
+        const scrollContainer = getScrollContainer();
 
         expect(scrollContainer).toBeInTheDocument();
+        await waitForScrollToBottom(scrollContainer);
 
-        // Wait for initial scroll to bottom
-        await waitFor(
-            () => {
-                const scrollTop = scrollContainer.scrollTop;
-                const scrollHeight = scrollContainer.scrollHeight;
-                const clientHeight = scrollContainer.clientHeight;
-                const isAtBottom =
-                    Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
-
-                expect(isAtBottom).toBe(true);
-            },
-            { timeout: 2000 },
-        );
-
-        // Scroll up
         scrollContainer.scrollTop = 0;
 
-        // Wait for scroll button to appear and be clickable
-        // The button has pointer-events-none when isAtBottom is true
-        // We need to wait for useScrollPosition to update
-        const scrollButton = await waitFor(
-            () => {
-                const button = canvas.getByRole("button", {
-                    name: /scroll to bottom/i,
-                });
-                expect(button).toBeInTheDocument();
-                expect(button).toBeEnabled();
-
-                // Check that pointer-events is not 'none'
-                const computedStyle = window.getComputedStyle(button);
-                expect(computedStyle.pointerEvents).not.toBe("none");
-                expect(computedStyle.opacity).not.toBe("0");
-
-                return button;
-            },
-            { timeout: 2000 },
+        const scrollButton = await waitForScrollButton(
+            canvas,
+            MOCK_CHAT_BUTTON_SCROLL_TO_BOTTOM,
+            { checkClickable: true },
         );
 
-        // Click the scroll bottom button
         await userEvent.click(scrollButton);
+        await waitForScrollToBottom(scrollContainer);
 
-        // Wait for smooth scroll to complete
-        await waitFor(
-            () => {
-                const scrollTop = scrollContainer.scrollTop;
-                const scrollHeight = scrollContainer.scrollHeight;
-                const clientHeight = scrollContainer.clientHeight;
-                const isAtBottom =
-                    Math.abs(scrollHeight - scrollTop - clientHeight) < 10;
-
-                expect(isAtBottom).toBe(true);
-            },
-            { timeout: 2000 },
-        );
-
-        // Button should be hidden again
         await waitFor(() => {
             const scrollButtonAfter = canvas.queryByRole("button", {
-                name: /scroll to bottom/i,
+                name: new RegExp(MOCK_CHAT_BUTTON_SCROLL_TO_BOTTOM, "i"),
             });
-            // Button might still be in DOM but hidden with opacity-0
             if (scrollButtonAfter) {
                 const computedStyle =
                     window.getComputedStyle(scrollButtonAfter);
@@ -375,17 +300,17 @@ export const WithError = meta.story({
     parameters: {
         provider: {
             messages: [
-                createMockUserMessage({ text: "This will cause an error" }),
+                createMockUserMessage({ text: MOCK_CHAT_MESSAGE_CAUSE_ERROR }),
             ],
             status: MOCK_CHAT_STATUS.ERROR,
-            error: new Error("Failed to process request"),
+            error: new Error(MOCK_CHAT_ERROR_DEFAULT),
         },
     },
 });
 
 WithError.test("should show error message", async ({ canvas }) => {
     const errorMessage = canvas.getByText(
-        /something went wrong\. please try again\./i,
+        new RegExp(MOCK_CHAT_ERROR_MESSAGE_SOMETHING_WRONG, "i"),
     );
     expect(errorMessage).toBeInTheDocument();
 });

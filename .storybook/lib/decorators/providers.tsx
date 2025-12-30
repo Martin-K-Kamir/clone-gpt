@@ -36,11 +36,17 @@ import { MOCK_CHAT_STATUS } from "../mocks/messages";
 import { MOCK_USER_ID } from "../mocks/users";
 import { createQueryClient } from "../utils/query-client";
 
-export function QueryProvider({ children }: { children: React.ReactNode }) {
+export function QueryProvider({
+    children,
+    queryProviderKey,
+}: {
+    children: React.ReactNode;
+    queryProviderKey?: string;
+}) {
     const queryClient = useMemo(() => createQueryClient(), []);
 
     return (
-        <QueryClientProvider client={queryClient}>
+        <QueryClientProvider client={queryClient} key={queryProviderKey}>
             {children}
         </QueryClientProvider>
     );
@@ -49,18 +55,23 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
 type UserSessionProviderProps = {
     children: React.ReactNode;
     user?: UIUser | null;
+    queryProviderKey?: string;
 };
 
 export function UserSessionProvider({
     children,
     user,
+    queryProviderKey,
 }: UserSessionProviderProps) {
     return (
-        <QueryProvider>
+        <QueryProvider queryProviderKey={queryProviderKey}>
             <UserSessionContext.Provider
                 value={{ user: user ?? null, setUser: fn() }}
             >
-                {children}
+                <UserCacheSyncProvider>
+                    {children}
+                    <Toaster />
+                </UserCacheSyncProvider>
             </UserSessionContext.Provider>
         </QueryProvider>
     );
@@ -83,6 +94,7 @@ type AppProvidersProps = {
     chatId?: DBChatId;
     error?: Error;
     user?: UIUser | null;
+    queryProviderKey?: string;
 };
 
 export function AppProviders({
@@ -102,6 +114,7 @@ export function AppProviders({
     chatId = MOCK_CHAT_ID,
     error,
     user,
+    queryProviderKey,
 }: AppProvidersProps) {
     const effectiveRateLimitMessages = rateLimitMessages ?? rateLimit;
     const [files, setFiles] = useState<File[]>(selectedFiles);
@@ -175,8 +188,10 @@ export function AppProviders({
     );
 
     return (
-        <QueryProvider>
-            <UserSessionProvider user={user}>
+        <QueryProvider queryProviderKey={queryProviderKey}>
+            <UserSessionContext.Provider
+                value={{ user: user ?? null, setUser: fn() }}
+            >
                 <SessionSyncProvider>
                     <ChatOffsetProvider>
                         <UserCacheSyncProvider>
@@ -225,7 +240,7 @@ export function AppProviders({
                         </UserCacheSyncProvider>
                     </ChatOffsetProvider>
                 </SessionSyncProvider>
-            </UserSessionProvider>
+            </UserSessionContext.Provider>
         </QueryProvider>
     );
 }

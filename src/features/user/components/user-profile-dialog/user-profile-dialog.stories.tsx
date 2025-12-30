@@ -1,23 +1,20 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_USER_BUTTON_DELETE_ALL_CHATS,
+    MOCK_USER_BUTTON_DELETE_PROFILE,
+    MOCK_USER_BUTTON_OPEN_PROFILE_SETTINGS,
+} from "#.storybook/lib/mocks/user-components";
+import { createMockUser } from "#.storybook/lib/mocks/users";
+import { getButtonByText } from "#.storybook/lib/utils/elements";
+import {
+    waitForDialog,
+    waitForElement,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
-import { expect, fireEvent, mocked, waitFor } from "storybook/test";
+import { expect, fireEvent, mocked } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 
-import { SessionSyncProvider } from "@/features/auth/providers";
-
-import {
-    ChatCacheSyncProvider,
-    ChatOffsetProvider,
-} from "@/features/chat/providers";
-
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import type { DBUserId, UIUser } from "@/features/user/lib/types";
-import {
-    UserCacheSyncProvider,
-    UserSessionProvider,
-} from "@/features/user/providers";
 import { updateUserName } from "@/features/user/services/actions/update-user-name";
 
 import { api } from "@/lib/api-response";
@@ -27,34 +24,15 @@ import {
     UserProfileDialogTrigger,
 } from "./user-profile-dialog";
 
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-const mockUser: UIUser = {
-    id: mockUserId,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: USER_ROLE.USER,
-    image: null,
-};
+const mockUser = createMockUser();
 
 const meta = preview.meta({
     component: UserProfileDialog,
     decorators: [
-        Story => (
-            <QueryProvider>
-                <UserSessionProvider>
-                    <SessionSyncProvider>
-                        <ChatOffsetProvider>
-                            <ChatCacheSyncProvider>
-                                <UserCacheSyncProvider>
-                                    <Story />
-                                    <Toaster />
-                                </UserCacheSyncProvider>
-                            </ChatCacheSyncProvider>
-                        </ChatOffsetProvider>
-                    </SessionSyncProvider>
-                </UserSessionProvider>
-            </QueryProvider>
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <Story />
+            </AppProviders>
         ),
     ],
     argTypes: {
@@ -119,7 +97,7 @@ export const Default = meta.story({
     render: args => (
         <UserProfileDialog {...args} user={mockUser}>
             <UserProfileDialogTrigger asChild>
-                <Button>Open Profile Settings</Button>
+                <Button>{MOCK_USER_BUTTON_OPEN_PROFILE_SETTINGS}</Button>
             </UserProfileDialogTrigger>
         </UserProfileDialog>
     ),
@@ -141,16 +119,13 @@ Default.test(
     "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open profile settings/i,
+            name: new RegExp(MOCK_USER_BUTTON_OPEN_PROFILE_SETTINGS, "i"),
         });
         expect(trigger).toBeVisible();
 
         await userEvent.click(trigger);
 
-        const dialog = await waitFor(() =>
-            document.querySelector('[role="dialog"]'),
-        );
-        expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
     },
 );
 
@@ -158,17 +133,14 @@ Default.test(
     "should render form inside dialog",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open profile settings/i,
+            name: new RegExp(MOCK_USER_BUTTON_OPEN_PROFILE_SETTINGS, "i"),
         });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
+        await waitForDialog("dialog");
 
-            const form = document.querySelector("form");
-            expect(form).toBeInTheDocument();
-        });
+        const form = await waitForElement("form");
+        expect(form).toBeInTheDocument();
     },
 );
 
@@ -176,26 +148,16 @@ Default.test(
     "should render delete profile dialog inside dialog",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open profile settings/i,
+            name: new RegExp(MOCK_USER_BUTTON_OPEN_PROFILE_SETTINGS, "i"),
         });
         await userEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
 
-        const buttons = document.querySelectorAll("button");
+        const button = getButtonByText(MOCK_USER_BUTTON_DELETE_PROFILE);
+        await userEvent.click(button);
 
-        const deleteProfileButton = Array.from(buttons).find(
-            button => button.textContent === "Delete Profile",
-        );
-        await userEvent.click(deleteProfileButton!);
-
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("alertdialog");
     },
 );
 
@@ -203,25 +165,18 @@ Default.test(
     "should render delete all chats dialog inside dialog",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open profile settings/i,
+            name: new RegExp(MOCK_USER_BUTTON_OPEN_PROFILE_SETTINGS, "i"),
         });
+
         fireEvent.click(trigger);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="dialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("dialog");
 
-        const buttons = document.querySelectorAll("button");
-
-        const deleteAllChatsButton = Array.from(buttons).find(
-            button => button.textContent === "Delete All Chats",
+        const deleteAllChatsButton = getButtonByText(
+            MOCK_USER_BUTTON_DELETE_ALL_CHATS,
         );
-        await userEvent.click(deleteAllChatsButton!);
+        await userEvent.click(deleteAllChatsButton);
 
-        await waitFor(() => {
-            const dialog = document.querySelector('[role="alertdialog"]');
-            expect(dialog).toBeInTheDocument();
-        });
+        await waitForDialog("alertdialog");
     },
 );

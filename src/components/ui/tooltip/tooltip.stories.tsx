@@ -290,7 +290,7 @@ WithDelay.test(
         const button = canvas.getByRole("button");
         await userEvent.hover(button);
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Check tooltip hasn't appeared yet (before delay)
         const tooltipBeforeDelay = getTooltip();
         expect(tooltipBeforeDelay).toBeNull();
 
@@ -353,9 +353,13 @@ WithDisabledTrigger.test(
             expect(error).toBeInstanceOf(Error);
         }
 
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        const tooltipContent = getTooltip();
-        expect(tooltipContent).toBeNull();
+        // Wait and verify tooltip doesn't appear
+        await waitFor(
+            () => {
+                const tooltipContent = getTooltip();
+                expect(tooltipContent).toBeNull();
+            },
+            { timeout: 500 },
+        );
     },
 );

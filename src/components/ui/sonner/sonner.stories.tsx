@@ -1,16 +1,39 @@
 import {
+    MOCK_SONNER_ACTION_LABEL,
+    MOCK_SONNER_ACTION_SUCCESS_MESSAGE,
+    MOCK_SONNER_CUSTOM_CONTENT_MESSAGE,
+    MOCK_SONNER_CUSTOM_STYLING_MESSAGE,
+    MOCK_SONNER_DESCRIPTION_WITH_DESCRIPTION,
+    MOCK_SONNER_MESSAGE_AUTO_DISMISS,
+    MOCK_SONNER_MESSAGE_DEFAULT,
+    MOCK_SONNER_MESSAGE_ERROR,
+    MOCK_SONNER_MESSAGE_INFO,
+    MOCK_SONNER_MESSAGE_LONG_DURATION,
+    MOCK_SONNER_MESSAGE_PERSISTENT,
+    MOCK_SONNER_MESSAGE_SUCCESS,
+    MOCK_SONNER_MESSAGE_SWIPE_DISMISS,
+    MOCK_SONNER_MESSAGE_WARNING,
+    MOCK_SONNER_MESSAGE_WITH_ACTION,
+    MOCK_SONNER_MESSAGE_WITH_CLOSE_BUTTON,
+    MOCK_SONNER_TITLE_WITH_DESCRIPTION,
+    MOCK_SONNER_UPLOAD_ERROR,
+    MOCK_SONNER_UPLOAD_LOADING,
+    MOCK_SONNER_UPLOAD_SUCCESS,
+} from "#.storybook/lib/mocks/sonner";
+import {
     getAllSonnerToasts,
     getSonnerToast,
     getSonnerToastByType,
 } from "#.storybook/lib/utils/elements";
 import {
+    swipeDismissElement,
     waitForSonnerToast,
     waitForSonnerToastByType,
     waitForSonnerToastToDisappear,
 } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { toast } from "sonner";
-import { expect, fireEvent, waitFor } from "storybook/test";
+import { expect, waitFor } from "storybook/test";
 
 import { Button } from "@/components/ui/button";
 
@@ -104,7 +127,7 @@ export const Default = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast("This is a default toast message");
+                    toast(MOCK_SONNER_MESSAGE_DEFAULT);
                 }}
             >
                 Show Toast
@@ -169,7 +192,7 @@ export const SwipeDismiss = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast("This is a swipe dismiss toast message");
+                    toast(MOCK_SONNER_MESSAGE_SWIPE_DISMISS);
                 }}
             >
                 Show Toast
@@ -189,36 +212,8 @@ SwipeDismiss.test(
         const toastElement = await waitForSonnerToast();
         expect(toastElement).toBeInTheDocument();
 
-        // Get toast position for swipe gesture
-        const rect = toastElement.getBoundingClientRect();
-        const startX = rect.left + rect.width / 2;
-        const startY = rect.top + rect.height / 2;
-        const swipeDistance = 200;
-
-        // Simulate swipe using PointerEvents (what Sonner listens for)
-        fireEvent.pointerDown(toastElement, {
-            clientX: startX,
-            clientY: startY,
-            pointerId: 1,
-            pointerType: "mouse",
-        });
-
-        // Move in steps to simulate drag
-        for (let i = 1; i <= 10; i++) {
-            fireEvent.pointerMove(toastElement, {
-                clientX: startX + (swipeDistance * i) / 10,
-                clientY: startY,
-                pointerId: 1,
-                pointerType: "mouse",
-            });
-        }
-
-        fireEvent.pointerUp(toastElement, {
-            clientX: startX + swipeDistance,
-            clientY: startY,
-            pointerId: 1,
-            pointerType: "mouse",
-        });
+        // Swipe dismiss the toast
+        await swipeDismissElement(toastElement, { direction: "right" });
 
         // Toast should be dismissed after swipe
         await waitForSonnerToastToDisappear();
@@ -230,47 +225,14 @@ SwipeDismiss.test(
     async ({ canvas, userEvent }) => {
         const button = canvas.getByRole("button", { name: /show toast/i });
 
-        // Create 3 toasts
         await userEvent.click(button);
         await userEvent.click(button);
         await userEvent.click(button);
 
-        // Wait for all toasts to appear
         await waitFor(() => {
             const toasts = getAllSonnerToasts();
             expect(toasts.length).toBe(3);
         });
-
-        // Helper function to swipe dismiss a toast
-        const swipeDismissToast = async (toast: Element) => {
-            const rect = toast.getBoundingClientRect();
-            const startX = rect.left + rect.width / 2;
-            const startY = rect.top + rect.height / 2;
-            const swipeDistance = 200;
-
-            fireEvent.pointerDown(toast, {
-                clientX: startX,
-                clientY: startY,
-                pointerId: 1,
-                pointerType: "mouse",
-            });
-
-            for (let i = 1; i <= 10; i++) {
-                fireEvent.pointerMove(toast, {
-                    clientX: startX + (swipeDistance * i) / 10,
-                    clientY: startY,
-                    pointerId: 1,
-                    pointerType: "mouse",
-                });
-            }
-
-            fireEvent.pointerUp(toast, {
-                clientX: startX + swipeDistance,
-                clientY: startY,
-                pointerId: 1,
-                pointerType: "mouse",
-            });
-        };
 
         // Dismiss each toast one by one
         for (let expectedCount = 3; expectedCount > 0; expectedCount--) {
@@ -279,21 +241,18 @@ SwipeDismiss.test(
 
             const frontToast = toasts[0];
 
-            // Hover to expand toasts
             await userEvent.hover(frontToast);
             expect(frontToast).toHaveAttribute("data-expanded", "true");
 
             // Swipe to dismiss
-            await swipeDismissToast(frontToast);
+            await swipeDismissElement(frontToast, { direction: "right" });
 
-            // Wait for toast to be dismissed
             await waitFor(() => {
                 const remainingToasts = getAllSonnerToasts();
                 expect(remainingToasts.length).toBe(expectedCount - 1);
             });
         }
 
-        // All toasts should be dismissed
         const finalToasts = getAllSonnerToasts();
         expect(finalToasts.length).toBe(0);
     },
@@ -304,7 +263,7 @@ export const Success = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast.success("Operation completed successfully!");
+                    toast.success(MOCK_SONNER_MESSAGE_SUCCESS);
                 }}
             >
                 Show Success Toast
@@ -330,7 +289,7 @@ export const Error = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast.error("Something went wrong!");
+                    toast.error(MOCK_SONNER_MESSAGE_ERROR);
                 }}
             >
                 Show Error Toast
@@ -357,7 +316,7 @@ export const Warning = meta.story({
             <Button
                 variant="outline"
                 onClick={() => {
-                    toast.warning("Please review before continuing");
+                    toast.warning(MOCK_SONNER_MESSAGE_WARNING);
                 }}
             >
                 Show Warning Toast
@@ -384,7 +343,7 @@ export const Info = meta.story({
             <Button
                 variant="secondary"
                 onClick={() => {
-                    toast.info("Here is some useful information");
+                    toast.info(MOCK_SONNER_MESSAGE_INFO);
                 }}
             >
                 Show Info Toast
@@ -415,8 +374,8 @@ export const WithDescription = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast("Event has been created", {
-                        description: "Monday, January 3rd at 6:00pm",
+                    toast(MOCK_SONNER_TITLE_WITH_DESCRIPTION, {
+                        description: MOCK_SONNER_DESCRIPTION_WITH_DESCRIPTION,
                     });
                 }}
             >
@@ -438,9 +397,11 @@ WithDescription.test(
 
         const toastElement = await waitForSonnerToast();
         expect(toastElement).toBeInTheDocument();
-        expect(toastElement.textContent).toContain("Event has been created");
         expect(toastElement.textContent).toContain(
-            "Monday, January 3rd at 6:00pm",
+            MOCK_SONNER_TITLE_WITH_DESCRIPTION,
+        );
+        expect(toastElement.textContent).toContain(
+            MOCK_SONNER_DESCRIPTION_WITH_DESCRIPTION,
         );
     },
 );
@@ -450,10 +411,13 @@ export const WithAction = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast("File deleted", {
+                    toast(MOCK_SONNER_MESSAGE_WITH_ACTION, {
                         action: {
-                            label: "Undo",
-                            onClick: () => toast.success("File restored!"),
+                            label: MOCK_SONNER_ACTION_LABEL,
+                            onClick: () =>
+                                toast.success(
+                                    MOCK_SONNER_ACTION_SUCCESS_MESSAGE,
+                                ),
                         },
                     });
                 }}
@@ -479,7 +443,7 @@ WithAction.test(
 
         const actionButton = toastElement.querySelector("button");
         expect(actionButton).toBeInTheDocument();
-        expect(actionButton?.textContent).toContain("Undo");
+        expect(actionButton?.textContent).toContain(MOCK_SONNER_ACTION_LABEL);
     },
 );
 
@@ -516,7 +480,7 @@ export const WithCloseButton = meta.story({
     render: () => (
         <Button
             onClick={() => {
-                toast("This toast has a close button", {
+                toast(MOCK_SONNER_MESSAGE_WITH_CLOSE_BUTTON, {
                     duration: Infinity,
                 });
             }}
@@ -566,7 +530,7 @@ export const CustomDuration = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast("This toast will last 10 seconds", {
+                    toast(MOCK_SONNER_MESSAGE_LONG_DURATION, {
                         duration: 10000,
                     });
                 }}
@@ -596,7 +560,7 @@ export const AutoDismiss = meta.story({
         <>
             <Button
                 onClick={() => {
-                    toast("This toast auto-dismisses in 1.5 seconds", {
+                    toast(MOCK_SONNER_MESSAGE_AUTO_DISMISS, {
                         duration: 1500,
                     });
                 }}
@@ -663,10 +627,10 @@ export const PromiseToast = meta.story({
                     );
 
                     toast.promise(promise, {
-                        loading: "Uploading file...",
+                        loading: MOCK_SONNER_UPLOAD_LOADING,
                         success: (data: { name: string }) =>
-                            `${data.name} has been uploaded`,
-                        error: "Upload failed",
+                            MOCK_SONNER_UPLOAD_SUCCESS(data.name),
+                        error: MOCK_SONNER_UPLOAD_ERROR,
                     });
                 }}
             >
@@ -714,19 +678,21 @@ export const RichColors = meta.story({
     ],
     render: () => (
         <div className="flex flex-wrap gap-2">
-            <Button onClick={() => toast.success("Success message")}>
+            <Button onClick={() => toast.success(MOCK_SONNER_MESSAGE_SUCCESS)}>
                 Success
             </Button>
-            <Button onClick={() => toast.error("Error message")}>Error</Button>
+            <Button onClick={() => toast.error(MOCK_SONNER_MESSAGE_ERROR)}>
+                Error
+            </Button>
             <Button
                 variant="outline"
-                onClick={() => toast.warning("Warning message")}
+                onClick={() => toast.warning(MOCK_SONNER_MESSAGE_WARNING)}
             >
                 Warning
             </Button>
             <Button
                 variant="secondary"
-                onClick={() => toast.info("Info message")}
+                onClick={() => toast.info(MOCK_SONNER_MESSAGE_INFO)}
             >
                 Info
             </Button>
@@ -929,7 +895,7 @@ export const DismissToast = meta.story({
                 <div className="flex gap-2">
                     <Button
                         onClick={() => {
-                            toastId = toast("Persistent toast", {
+                            toastId = toast(MOCK_SONNER_MESSAGE_PERSISTENT, {
                                 duration: Infinity,
                             });
                         }}

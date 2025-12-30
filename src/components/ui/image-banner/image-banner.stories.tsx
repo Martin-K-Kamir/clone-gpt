@@ -1,3 +1,19 @@
+import {
+    MOCK_IMAGE_BANNER_ALT_CUSTOM_FUNCTION,
+    MOCK_IMAGE_BANNER_ALT_CUSTOM_NAME,
+    MOCK_IMAGE_BANNER_ALT_CUSTOM_NODE,
+    MOCK_IMAGE_BANNER_ALT_DEFAULT,
+    MOCK_IMAGE_BANNER_ALT_WITHOUT_BUTTON,
+    MOCK_IMAGE_BANNER_DOWNLOAD_NAME,
+    MOCK_IMAGE_BANNER_URL_CUSTOM_FUNCTION,
+    MOCK_IMAGE_BANNER_URL_CUSTOM_NAME,
+    MOCK_IMAGE_BANNER_URL_CUSTOM_NODE,
+    MOCK_IMAGE_BANNER_URL_DEFAULT,
+    MOCK_IMAGE_BANNER_URL_SIZES,
+    MOCK_IMAGE_BANNER_URL_VARIANTS,
+    MOCK_IMAGE_BANNER_URL_WITHOUT_BUTTON,
+} from "#.storybook/lib/mocks/image-banner";
+import { setupDownloadMock } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { IconDownload } from "@tabler/icons-react";
 import { expect, userEvent, waitFor } from "storybook/test";
@@ -117,8 +133,8 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     args: {
-        src: "https://picsum.photos/id/237/800/600",
-        alt: "Dog image",
+        src: MOCK_IMAGE_BANNER_URL_DEFAULT,
+        alt: MOCK_IMAGE_BANNER_ALT_DEFAULT,
         width: 800,
         height: 600,
     },
@@ -126,43 +142,11 @@ export const Default = meta.story({
 
 Default.test(
     "should trigger download when download button is clicked",
-    async ({ canvas, step }) => {
-        const imageUrl = "https://picsum.photos/id/237/800/600";
-        let fetchCalled = false;
-        let downloadLinkCreated = false;
-
-        // Mock fetch to track if download was triggered
-        const originalFetch = window.fetch;
-        window.fetch = async (input: RequestInfo | URL) => {
-            if (typeof input === "string" && input === imageUrl) {
-                fetchCalled = true;
-                return new Response(
-                    new Blob(["test"], { type: "image/jpeg" }),
-                    {
-                        status: 200,
-                        headers: { "Content-Type": "image/jpeg" },
-                    },
-                );
-            }
-            return originalFetch(input);
-        };
-
-        // Track if download link is created
-        const originalCreateElement = document.createElement.bind(document);
-        document.createElement = function (
-            tagName: string,
-            options?: ElementCreationOptions,
-        ) {
-            const element = originalCreateElement(tagName, options);
-            if (tagName === "a") {
-                downloadLinkCreated = true;
-                // Prevent actual download
-                element.click = function () {
-                    // Mock click - don't actually download
-                };
-            }
-            return element;
-        };
+    async ({ canvas, step, args }) => {
+        const downloadMock = setupDownloadMock({
+            url: args.src,
+            contentType: "image/jpeg",
+        });
 
         try {
             await step("Find and click the download button", async () => {
@@ -180,24 +164,24 @@ Default.test(
             await step("Verify download was triggered", async () => {
                 await waitFor(
                     () => {
-                        expect(fetchCalled).toBe(true);
-                        expect(downloadLinkCreated).toBe(true);
+                        expect(downloadMock.flags.fetchCalled).toBe(true);
+                        expect(downloadMock.flags.downloadLinkCreated).toBe(
+                            true,
+                        );
                     },
                     { timeout: 3000 },
                 );
             });
         } finally {
-            // Cleanup
-            window.fetch = originalFetch;
-            document.createElement = originalCreateElement;
+            downloadMock.cleanup();
         }
     },
 );
 
 export const WithoutDownloadButton = meta.story({
     args: {
-        src: "https://picsum.photos/id/1015/800/600",
-        alt: "Image without download button",
+        src: MOCK_IMAGE_BANNER_URL_WITHOUT_BUTTON,
+        alt: MOCK_IMAGE_BANNER_ALT_WITHOUT_BUTTON,
         showDownloadButton: false,
         width: 800,
         height: 600,
@@ -206,9 +190,9 @@ export const WithoutDownloadButton = meta.story({
 
 export const CustomDownloadName = meta.story({
     args: {
-        src: "https://picsum.photos/id/1018/800/600",
-        alt: "Image with custom download name",
-        downloadName: "my-custom-image.jpg",
+        src: MOCK_IMAGE_BANNER_URL_CUSTOM_NAME,
+        alt: MOCK_IMAGE_BANNER_ALT_CUSTOM_NAME,
+        downloadName: MOCK_IMAGE_BANNER_DOWNLOAD_NAME,
         width: 800,
         height: 600,
     },
@@ -220,7 +204,7 @@ export const DifferentButtonVariants = meta.story({
             <div>
                 <p className="mb-2 text-sm text-zinc-100">Default variant</p>
                 <ImageBanner
-                    src="https://picsum.photos/id/1001/400/300"
+                    src={MOCK_IMAGE_BANNER_URL_VARIANTS.default}
                     alt="Default button variant"
                     buttonVariant="default"
                     width={400}
@@ -230,7 +214,7 @@ export const DifferentButtonVariants = meta.story({
             <div>
                 <p className="mb-2 text-sm text-zinc-100">Outline variant</p>
                 <ImageBanner
-                    src="https://picsum.photos/id/1002/400/300"
+                    src={MOCK_IMAGE_BANNER_URL_VARIANTS.outline}
                     alt="Outline button variant"
                     buttonVariant="outline"
                     width={400}
@@ -240,7 +224,7 @@ export const DifferentButtonVariants = meta.story({
             <div>
                 <p className="mb-2 text-sm text-zinc-100">Secondary variant</p>
                 <ImageBanner
-                    src="https://picsum.photos/id/1003/400/300"
+                    src={MOCK_IMAGE_BANNER_URL_VARIANTS.secondary}
                     alt="Secondary button variant"
                     buttonVariant="secondary"
                     width={400}
@@ -250,7 +234,7 @@ export const DifferentButtonVariants = meta.story({
             <div>
                 <p className="mb-2 text-sm text-zinc-100">Ghost variant</p>
                 <ImageBanner
-                    src="https://picsum.photos/id/1004/400/300"
+                    src={MOCK_IMAGE_BANNER_URL_VARIANTS.ghost}
                     alt="Ghost button variant"
                     buttonVariant="ghost"
                     width={400}
@@ -263,8 +247,8 @@ export const DifferentButtonVariants = meta.story({
 
 export const CustomDownloadButtonAsNode = meta.story({
     args: {
-        src: "https://picsum.photos/id/1011/800/600",
-        alt: "Image with custom download button",
+        src: MOCK_IMAGE_BANNER_URL_CUSTOM_NODE,
+        alt: MOCK_IMAGE_BANNER_ALT_CUSTOM_NODE,
         renderDownloadButton: (
             <Button variant="outline" className="absolute right-4 top-4 z-10">
                 <IconDownload />
@@ -278,8 +262,8 @@ export const CustomDownloadButtonAsNode = meta.story({
 
 export const CustomDownloadButtonAsFunction = meta.story({
     args: {
-        src: "https://picsum.photos/id/1012/800/600",
-        alt: "Image with custom download button function",
+        src: MOCK_IMAGE_BANNER_URL_CUSTOM_FUNCTION,
+        alt: MOCK_IMAGE_BANNER_ALT_CUSTOM_FUNCTION,
         renderDownloadButton: ({ src, alt }) => (
             <Button
                 variant="outline"
@@ -303,7 +287,7 @@ export const DifferentImageSizes = meta.story({
             <div>
                 <p className="mb-2 text-sm text-zinc-100">Square (1:1)</p>
                 <ImageBanner
-                    src="https://picsum.photos/id/1013/500/500"
+                    src={MOCK_IMAGE_BANNER_URL_SIZES.square}
                     alt="Square image"
                     width={500}
                     height={500}
@@ -313,7 +297,7 @@ export const DifferentImageSizes = meta.story({
             <div>
                 <p className="mb-2 text-sm text-zinc-100">Landscape (16:9)</p>
                 <ImageBanner
-                    src="https://picsum.photos/id/1014/800/450"
+                    src={MOCK_IMAGE_BANNER_URL_SIZES.landscape}
                     alt="Landscape image"
                     width={800}
                     height={450}
@@ -323,7 +307,7 @@ export const DifferentImageSizes = meta.story({
             <div>
                 <p className="mb-2 text-sm text-zinc-100">Portrait (9:16)</p>
                 <ImageBanner
-                    src="https://picsum.photos/id/1016/450/800"
+                    src={MOCK_IMAGE_BANNER_URL_SIZES.portrait}
                     alt="Portrait image"
                     width={450}
                     height={800}

@@ -3,6 +3,7 @@ import { HttpResponse, delay, http } from "msw";
 import {
     CHAT_VISIBILITY,
     QUERY_USER_CHATS_LIMIT,
+    QUERY_USER_SHARED_CHATS_DESKTOP_LIMIT,
 } from "../../../src/features/chat/lib/constants";
 import type {
     DBChatId,
@@ -22,6 +23,11 @@ import {
     MOCK_SOURCE_PREVIEWS,
     MOCK_SOURCE_SINGLE_PREVIEW,
 } from "../mocks/messages";
+import {
+    createMockDBUser,
+    createMockEmptyUserChatPreferences,
+    createMockUserChatPreferences,
+} from "../mocks/users";
 
 type ResourcePreviewsOptions = {
     previews?: typeof MOCK_SOURCE_PREVIEWS;
@@ -135,7 +141,6 @@ export function createUserChatsPaginatedHandler(
         const response = api.success.chat.get(mockData, {
             count: PLURAL.MULTIPLE,
         });
-
 
         return HttpResponse.json({ ...response });
     });
@@ -401,22 +406,99 @@ type SharedChatsOptions = {
 export function createSharedChatsHandler(options: SharedChatsOptions = {}) {
     const { chats, hasNextPage = false, delay } = options;
 
-    return http.get("/api/user-chats/shared", async () => {
+    return http.get("/api/user-chats/shared", async ({ request }) => {
         if (delay) {
             await new Promise(resolve => setTimeout(resolve, delay));
         }
 
-        const chatsData = chats || createMockChats({ length: 3 });
+        const url = new URL(request.url);
+        const limitParam = url.searchParams.get("limit");
+        const offsetParam = url.searchParams.get("offset");
+        const limit = limitParam
+            ? parseInt(limitParam, 10)
+            : QUERY_USER_SHARED_CHATS_DESKTOP_LIMIT;
+        const offset = offsetParam ? parseInt(offsetParam, 10) : 0;
+
+        const chatsData = chats || createMockChats({ length: 50 });
+        const paginatedChats = chatsData.slice(offset, offset + limit);
+        const hasNextPageResult =
+            hasNextPage !== undefined
+                ? hasNextPage
+                : offset + limit < chatsData.length;
 
         const response = api.success.chat.getShared(
             {
-                data: chatsData,
-                hasNextPage,
+                data: paginatedChats,
+                hasNextPage: hasNextPageResult,
                 totalCount: chatsData.length,
+                nextOffset: hasNextPageResult ? offset + limit : undefined,
             },
             { count: PLURAL.MULTIPLE },
         );
 
         return HttpResponse.json(response);
     });
+}
+
+export function createEmptySharedChatsHandler() {
+    return http.get("/api/user-chats/shared", () => {
+        const response = api.success.chat.getShared(
+            {
+                data: [],
+                hasNextPage: false,
+                totalCount: 0,
+            },
+            { count: PLURAL.MULTIPLE },
+        );
+        return HttpResponse.json(response);
+    });
+}
+
+type UserOptions = {
+    user?: ReturnType<typeof createMockDBUser>;
+    delay?: number;
+};
+
+export function createUserHandler(options: UserOptions = {}) {
+    const { user, delay } = options;
+
+    return http.get("/api/user", async () => {
+        if (delay) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+
+        const userData = user || createMockDBUser();
+
+        const response = api.success.user.get(userData);
+        return HttpResponse.json(response);
+    });
+}
+
+type UserChatPreferencesOptions = {
+    preferences?: ReturnType<typeof createMockUserChatPreferences>;
+    delay?: number | "infinite";
+};
+
+export function createUserChatPreferencesHandler(
+    options: UserChatPreferencesOptions = {},
+) {
+    const { preferences, delay: delayOption } = options;
+
+    return http.get("/api/user/chat-preferences", async () => {
+        if (delayOption === "infinite") {
+            await delay("infinite");
+        } else if (delayOption) {
+            await new Promise(resolve => setTimeout(resolve, delayOption));
+        }
+
+        const preferencesData =
+            preferences || createMockEmptyUserChatPreferences();
+
+        const response = api.success.user.getChatPreferences(preferencesData);
+        return HttpResponse.json(response);
+    });
+}
+
+export function createLoadingUserChatPreferencesHandler() {
+    return createUserChatPreferencesHandler({ delay: "infinite" });
 }

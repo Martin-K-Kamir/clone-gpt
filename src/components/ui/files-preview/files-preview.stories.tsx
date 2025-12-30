@@ -123,22 +123,25 @@ export const Default = meta.story({
 
 Default.test(
     "should not be able to scroll or drag when there are few items",
-    async ({ canvas }) => {
+    async ({ canvas, userEvent }) => {
         const list = canvas.getByRole("list");
 
         const initialScrollLeft = list.scrollLeft;
 
-        fireEvent.mouseDown(list, {
-            clientX: 100,
-            clientY: 0,
+        await userEvent.pointer({
+            target: list,
+            keys: "[MouseLeft>]",
+            coords: { x: 100, y: 0 },
         });
 
-        fireEvent.mouseMove(list, {
-            clientX: 200,
-            clientY: 0,
+        await userEvent.pointer({
+            target: list,
+            coords: { x: 200, y: 0 },
         });
 
-        fireEvent.mouseUp(list);
+        await userEvent.pointer({
+            keys: "[/MouseLeft]",
+        });
 
         expect(list.scrollLeft).toBe(initialScrollLeft);
         expect(list).not.toHaveClass("cursor-grab");
@@ -167,21 +170,24 @@ SingleImage.test(
 
 SingleImage.test(
     "should not be able to scroll or drag with a single item",
-    async ({ canvas }) => {
+    async ({ canvas, userEvent }) => {
         const list = canvas.getByRole("list");
         const initialScrollLeft = list.scrollLeft;
 
-        fireEvent.mouseDown(list, {
-            clientX: 100,
-            clientY: 0,
+        await userEvent.pointer({
+            target: list,
+            keys: "[MouseLeft>]",
+            coords: { x: 100, y: 0 },
         });
 
-        fireEvent.mouseMove(list, {
-            clientX: 200,
-            clientY: 0,
+        await userEvent.pointer({
+            target: list,
+            coords: { x: 200, y: 0 },
         });
 
-        fireEvent.mouseUp(list);
+        await userEvent.pointer({
+            keys: "[/MouseLeft]",
+        });
 
         expect(list.scrollLeft).toBe(initialScrollLeft);
     },

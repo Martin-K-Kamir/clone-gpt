@@ -1,6 +1,12 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import { createMockGuestSession } from "#.storybook/lib/mocks/auth";
 import {
+    MOCK_CHAT_BRAND_NAME,
+    MOCK_CHAT_BUTTON_LOG_IN,
+    MOCK_CHAT_BUTTON_OPEN_CHAT_ACTIONS,
+    MOCK_CHAT_BUTTON_SHARE,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_CHAT_ID,
     createMockChatWithOwner,
 } from "#.storybook/lib/mocks/chats";
@@ -53,7 +59,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default",
     args: {
         chatId: undefined,
     },
@@ -73,13 +78,14 @@ Default.test("should render header with all elements", async ({ canvas }) => {
     const sidebarTrigger = canvas.getByTestId("sidebar-trigger-button");
     expect(sidebarTrigger).toBeVisible();
 
-    const logoLink = canvas.getByRole("link", { name: /clonegpt/i });
+    const logoLink = canvas.getByRole("link", {
+        name: new RegExp(MOCK_CHAT_BRAND_NAME, "i"),
+    });
     expect(logoLink).toBeVisible();
     expect(logoLink).toHaveAttribute("href", "/");
 });
 
 export const WithChat = meta.story({
-    name: "With Chat",
     args: {
         chatId: MOCK_CHAT_ID,
     },
@@ -98,9 +104,11 @@ WithChat.test("should render header with chat actions", async ({ canvas }) => {
     const header = canvas.getByRole("banner");
     expect(header).toBeInTheDocument();
 
-    const shareButton = canvas.getByRole("button", { name: /share/i });
+    const shareButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_SHARE, "i"),
+    });
     const menuButton = canvas.getByRole("button", {
-        name: /open chat actions/i,
+        name: new RegExp(MOCK_CHAT_BUTTON_OPEN_CHAT_ACTIONS, "i"),
     });
     expect(shareButton).toBeVisible();
     expect(menuButton).toBeVisible();
@@ -142,7 +150,6 @@ WithChat.test(
 );
 
 export const NonOwnerChat = meta.story({
-    name: "Non-Owner Chat",
     args: {
         chatId: MOCK_CHAT_ID,
     },
@@ -163,9 +170,11 @@ NonOwnerChat.test(
         const header = canvas.getByRole("banner");
         expect(header).toBeInTheDocument();
 
-        const shareButton = canvas.queryByRole("button", { name: /share/i });
+        const shareButton = canvas.queryByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE, "i"),
+        });
         const menuButton = canvas.queryByRole("button", {
-            name: /open chat actions/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_OPEN_CHAT_ACTIONS, "i"),
         });
         expect(shareButton).not.toBeInTheDocument();
         expect(menuButton).not.toBeInTheDocument();
@@ -173,7 +182,6 @@ NonOwnerChat.test(
 );
 
 export const GuestUser = meta.story({
-    name: "Guest User",
     args: {
         chatId: undefined,
     },
@@ -192,7 +200,9 @@ GuestUser.test(
         const header = canvas.getByRole("banner");
         expect(header).toBeInTheDocument();
 
-        const logInButton = canvas.getByRole("button", { name: /log in/i });
+        const logInButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_LOG_IN, "i"),
+        });
         expect(logInButton).toBeVisible();
     },
 );
@@ -200,7 +210,9 @@ GuestUser.test(
 GuestUser.test(
     "should open sign in dialog when log in button is clicked",
     async ({ canvas }) => {
-        const logInButton = canvas.getByRole("button", { name: /log in/i });
+        const logInButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_LOG_IN, "i"),
+        });
         await userEvent.click(logInButton);
 
         const dialog = await waitForDialog();
@@ -211,9 +223,11 @@ GuestUser.test(
 GuestUser.test(
     "should not show share and menu buttons for guest user",
     async ({ canvas }) => {
-        const shareButton = canvas.queryByRole("button", { name: /share/i });
+        const shareButton = canvas.queryByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE, "i"),
+        });
         const menuButton = canvas.queryByRole("button", {
-            name: /open chat actions/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_OPEN_CHAT_ACTIONS, "i"),
         });
         expect(shareButton).not.toBeInTheDocument();
         expect(menuButton).not.toBeInTheDocument();
@@ -221,7 +235,6 @@ GuestUser.test(
 );
 
 export const GuestUserWithChat = meta.story({
-    name: "Guest User With Chat",
     args: {
         chatId: MOCK_CHAT_ID,
     },
@@ -243,12 +256,16 @@ GuestUserWithChat.test(
         const header = canvas.getByRole("banner");
         expect(header).toBeInTheDocument();
 
-        const logInButton = canvas.getByRole("button", { name: /log in/i });
+        const logInButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_LOG_IN, "i"),
+        });
         expect(logInButton).toBeVisible();
 
-        const shareButton = canvas.queryByRole("button", { name: /share/i });
+        const shareButton = canvas.queryByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SHARE, "i"),
+        });
         const menuButton = canvas.queryByRole("button", {
-            name: /open chat actions/i,
+            name: new RegExp(MOCK_CHAT_BUTTON_OPEN_CHAT_ACTIONS, "i"),
         });
         expect(shareButton).not.toBeInTheDocument();
         expect(menuButton).not.toBeInTheDocument();

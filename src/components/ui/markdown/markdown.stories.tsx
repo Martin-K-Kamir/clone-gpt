@@ -1,4 +1,27 @@
 import {
+    MARKDOWN_BLOCKQUOTES,
+    MARKDOWN_CODE_BLOCK_JAVASCRIPT,
+    MARKDOWN_CODE_BLOCK_PYTHON,
+    MARKDOWN_CODE_BLOCK_TYPESCRIPT,
+    MARKDOWN_COMPLEX_EXAMPLE,
+    MARKDOWN_DEFAULT,
+    MARKDOWN_HEADINGS,
+    MARKDOWN_HORIZONTAL_RULE,
+    MARKDOWN_IMAGES_DISABLED,
+    MARKDOWN_LINK_CUSTOM,
+    MARKDOWN_LINK_GITHUB,
+    MARKDOWN_LINK_REACT,
+    MARKDOWN_LISTS,
+    MARKDOWN_MIXED_CONTENT,
+    MARKDOWN_TABLE,
+    MARKDOWN_TEXT_FORMATTING,
+    MARKDOWN_WITH_IMAGES,
+} from "#.storybook/lib/mocks/markdown";
+import { getCodeBlockByLanguage } from "#.storybook/lib/utils/elements";
+import {
+    setupClipboardMock,
+    setupClipboardMockWithFallback,
+    setupDownloadLinkTracking,
     waitForDropdownMenu,
     waitForDropdownMenuItemByText,
 } from "#.storybook/lib/utils/test-helpers";
@@ -57,57 +80,25 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     args: {
-        content: "This is a **bold** text and this is *italic* text.",
+        content: MARKDOWN_DEFAULT,
     },
 });
 
 export const Headings = meta.story({
     args: {
-        content: `# Heading 1
-
-## Heading 2
-
-### Heading 3
-
-#### Heading 4
-
-##### Heading 5
-
-###### Heading 6`,
+        content: MARKDOWN_HEADINGS,
     },
 });
 
 export const TextFormatting = meta.story({
     args: {
-        content: `This is **bold text** and this is *italic text*.
-
-You can also use ***bold and italic*** together.
-
-Here's some \`inline code\` in a sentence.
-
-And here's ~~strikethrough text~~.`,
+        content: MARKDOWN_TEXT_FORMATTING,
     },
 });
 
 export const Lists = meta.story({
     args: {
-        content: `### Unordered List
-
-- First item
-- Second item
-- Third item
-  - Nested item
-  - Another nested item
-- Fourth item
-
-### Ordered List
-
-1. First item
-2. Second item
-3. Third item
-   1. Nested item
-   2. Another nested item
-4. Fourth item`,
+        content: MARKDOWN_LISTS,
     },
 });
 
@@ -115,44 +106,13 @@ export const CodeBlocks = meta.story({
     render: () => (
         <div className="space-y-6">
             <div>
-                <Markdown
-                    content={`\`\`\`javascript
-function greet(name) {
-    return \`Hello, \${name}!\`;
-}
-
-console.log(greet('World'));
-\`\`\``}
-                />
+                <Markdown content={MARKDOWN_CODE_BLOCK_JAVASCRIPT} />
             </div>
             <div>
-                <Markdown
-                    content={`\`\`\`typescript
-interface User {
-    id: string;
-    name: string;
-    email: string;
-}
-
-const user: User = {
-    id: '1',
-    name: 'John Doe',
-    email: 'john@example.com',
-};
-\`\`\``}
-                />
+                <Markdown content={MARKDOWN_CODE_BLOCK_TYPESCRIPT} />
             </div>
             <div>
-                <Markdown
-                    content={`\`\`\`python
-def fibonacci(n):
-    if n <= 1:
-        return n
-    return fibonacci(n-1) + fibonacci(n-2)
-
-print(fibonacci(10))
-\`\`\``}
-                />
+                <Markdown content={MARKDOWN_CODE_BLOCK_PYTHON} />
             </div>
         </div>
     ),
@@ -161,19 +121,7 @@ print(fibonacci(10))
 CodeBlocks.test(
     "should be able to copy code block contents to clipboard",
     async ({ canvas, userEvent, step }) => {
-        let clipboardText = "";
-        let clipboardWriteTextCalled = false;
-
-        // Mock clipboard API
-        const originalWriteText = navigator.clipboard.writeText.bind(
-            navigator.clipboard,
-        );
-
-        navigator.clipboard.writeText = async (text: string) => {
-            clipboardWriteTextCalled = true;
-            clipboardText = text;
-            return originalWriteText(text);
-        };
+        const clipboardMock = setupClipboardMock();
 
         try {
             await step("Find and click the copy button", async () => {
@@ -194,63 +142,39 @@ CodeBlocks.test(
                     // Wait for clipboard write to complete
                     await waitFor(
                         () => {
-                            expect(clipboardWriteTextCalled).toBe(true);
+                            expect(
+                                clipboardMock.flags.clipboardWriteTextCalled,
+                            ).toBe(true);
                         },
                         { timeout: 3000 },
                     );
 
-                    const blockCode = document.querySelector(
-                        ".language-javascript",
-                    );
+                    const blockCode = getCodeBlockByLanguage("javascript");
                     expect(blockCode).toBeInTheDocument();
 
                     expect(blockCode?.textContent?.trim()).toBe(
-                        clipboardText.trim(),
+                        clipboardMock.flags.clipboardText.trim(),
                     );
                 },
             );
         } finally {
-            // Cleanup
-            navigator.clipboard.writeText = originalWriteText;
+            clipboardMock.cleanup();
         }
     },
 );
 
 export const Tables = meta.story({
     args: {
-        content: `| Name | Age | City | Occupation |
-|------|-----|------|------------|
-| John Doe | 28 | New York | Developer |
-| Jane Smith | 32 | San Francisco | Designer |
-| Bob Johnson | 45 | Chicago | Manager |
-| Alice Williams | 29 | Boston | Engineer |`,
+        content: MARKDOWN_TABLE,
     },
 });
 
 Tables.test(
     "should be able to copy table contents to clipboard",
     async ({ canvas, userEvent, step }) => {
-        let clipboardText = "";
-        let clipboardWriteTextCalled = false;
-
-        // Mock clipboard API - make write fail to test fallback to writeText
-        const originalWrite = navigator.clipboard.write.bind(
-            navigator.clipboard,
-        );
-        const originalWriteText = navigator.clipboard.writeText.bind(
-            navigator.clipboard,
-        );
-
-        // Make write throw to trigger fallback to writeText
-        navigator.clipboard.write = async () => {
-            throw new Error("Clipboard write failed");
-        };
-
-        navigator.clipboard.writeText = async (text: string) => {
-            clipboardWriteTextCalled = true;
-            clipboardText = text;
-            return originalWriteText(text);
-        };
+        const clipboardMock = setupClipboardMockWithFallback({
+            makeWriteFail: true,
+        });
 
         try {
             await step("Find and click the copy button", async () => {
@@ -267,7 +191,9 @@ Tables.test(
                     // Wait for clipboard write to complete
                     await waitFor(
                         () => {
-                            expect(clipboardWriteTextCalled).toBe(true);
+                            expect(
+                                clipboardMock.flags.clipboardWriteTextCalled,
+                            ).toBe(true);
                         },
                         { timeout: 3000 },
                     );
@@ -279,13 +205,13 @@ Tables.test(
                     // The clipboard should contain the table's textContent
                     // which is all text nodes concatenated (without markdown formatting)
                     const expectedText = table.textContent || "";
-                    expect(clipboardText).toBe(expectedText);
+                    expect(clipboardMock.flags.clipboardText).toBe(
+                        expectedText,
+                    );
                 },
             );
         } finally {
-            // Cleanup
-            navigator.clipboard.write = originalWrite;
-            navigator.clipboard.writeText = originalWriteText;
+            clipboardMock.cleanup();
         }
     },
 );
@@ -293,26 +219,7 @@ Tables.test(
 Tables.test(
     "should be able to download table as CSV",
     async ({ canvas, userEvent, step }) => {
-        let downloadLinkCreated = false;
-        let downloadLinkClicked = false;
-
-        // Track if download link is created
-        const originalCreateElement = document.createElement.bind(document);
-        document.createElement = function (
-            tagName: string,
-            options?: ElementCreationOptions,
-        ) {
-            const element = originalCreateElement(tagName, options);
-            if (tagName === "a") {
-                downloadLinkCreated = true;
-                // Mock click to prevent actual download
-                element.click = function () {
-                    downloadLinkClicked = true;
-                    // Don't call original click to prevent actual download
-                };
-            }
-            return element;
-        };
+        const downloadTracking = setupDownloadLinkTracking();
 
         try {
             await step("Find and click the download button", async () => {
@@ -339,15 +246,18 @@ Tables.test(
             await step("Verify download was triggered", async () => {
                 await waitFor(
                     () => {
-                        expect(downloadLinkCreated).toBe(true);
-                        expect(downloadLinkClicked).toBe(true);
+                        expect(downloadTracking.flags.downloadLinkCreated).toBe(
+                            true,
+                        );
+                        expect(downloadTracking.flags.downloadLinkClicked).toBe(
+                            true,
+                        );
                     },
                     { timeout: 3000 },
                 );
             });
         } finally {
-            // Cleanup
-            document.createElement = originalCreateElement;
+            downloadTracking.cleanup();
         }
     },
 );
@@ -355,26 +265,7 @@ Tables.test(
 Tables.test(
     "should be able to download table as Excel",
     async ({ canvas, userEvent, step }) => {
-        let downloadLinkCreated = false;
-        let downloadLinkClicked = false;
-
-        // Track if download link is created
-        const originalCreateElement = document.createElement.bind(document);
-        document.createElement = function (
-            tagName: string,
-            options?: ElementCreationOptions,
-        ) {
-            const element = originalCreateElement(tagName, options);
-            if (tagName === "a") {
-                downloadLinkCreated = true;
-                // Mock click to prevent actual download
-                element.click = function () {
-                    downloadLinkClicked = true;
-                    // Don't call original click to prevent actual download
-                };
-            }
-            return element;
-        };
+        const downloadTracking = setupDownloadLinkTracking();
 
         try {
             await step("Find and click the download button", async () => {
@@ -401,14 +292,18 @@ Tables.test(
             await step("Verify download was triggered", async () => {
                 await waitFor(
                     () => {
-                        expect(downloadLinkCreated).toBe(true);
-                        expect(downloadLinkClicked).toBe(true);
+                        expect(downloadTracking.flags.downloadLinkCreated).toBe(
+                            true,
+                        );
+                        expect(downloadTracking.flags.downloadLinkClicked).toBe(
+                            true,
+                        );
                     },
                     { timeout: 3000 },
                 );
             });
         } finally {
-            document.createElement = originalCreateElement;
+            downloadTracking.cleanup();
         }
     },
 );
@@ -416,176 +311,46 @@ Tables.test(
 export const Links = meta.story({
     render: () => (
         <div className="space-y-4">
-            <Markdown content="Visit [GitHub](https://github.com) for open source projects." />
-            <Markdown content="Check out [React documentation](https://react.dev) to learn more." />
-            <Markdown content="Here's a link with [custom text](https://example.com) that opens in a new tab." />
+            <Markdown content={MARKDOWN_LINK_GITHUB} />
+            <Markdown content={MARKDOWN_LINK_REACT} />
+            <Markdown content={MARKDOWN_LINK_CUSTOM} />
         </div>
     ),
 });
 
 export const Blockquotes = meta.story({
     args: {
-        content: `> This is a blockquote.
-> It can span multiple lines.
-> 
-> And can include **formatting** like *italic* text.
-
-> You can also nest blockquotes:
-> > This is a nested blockquote.
-> > It's indented further.`,
+        content: MARKDOWN_BLOCKQUOTES,
     },
 });
 
 export const HorizontalRule = meta.story({
     args: {
-        content: `Content above the line
-
----
-
-Content below the line`,
+        content: MARKDOWN_HORIZONTAL_RULE,
     },
 });
 
 export const MixedContent = meta.story({
     args: {
-        content: `# Getting Started
-
-This guide will help you get started with our project.
-
-## Installation
-
-To install the package, run:
-
-\`\`\`bash
-npm install package-name
-\`\`\`
-
-## Features
-
-- **Feature 1**: Description of feature 1
-- **Feature 2**: Description of feature 2
-- **Feature 3**: Description of feature 3
-
-## Usage
-
-Here's a simple example:
-
-\`\`\`typescript
-import { Component } from 'package-name';
-
-function App() {
-    return <Component />;
-}
-\`\`\`
-
-## Data Table
-
-| Column 1 | Column 2 | Column 3 |
-|----------|----------|----------|
-| Value 1  | Value 2  | Value 3  |
-| Value 4  | Value 5  | Value 6  |
-
-> **Note**: This is an important note about the usage.
-
-For more information, visit our [documentation](https://example.com/docs).`,
+        content: MARKDOWN_MIXED_CONTENT,
     },
 });
 
 export const WithImages = meta.story({
     args: {
-        content: `# Image Example
-
-Here's an image:
-
-![Sample Image](https://picsum.photos/seed/markdown1/800/400)
-
-You can also add images with links:
-
-[![Linked Image](https://picsum.photos/seed/markdown2/600/300)](https://example.com)
-
-Here's another example with a different image:
-
-![Nature](https://picsum.photos/seed/markdown3/800/400)`,
+        content: MARKDOWN_WITH_IMAGES,
     },
 });
 
 export const ImagesDisabled = meta.story({
     args: {
-        content: `# Image Example (Disabled)
-
-This markdown contains an image, but image rendering is disabled:
-
-![Sample Image](https://picsum.photos/seed/markdown-disabled/800/400)
-
-The image should not be displayed.`,
+        content: MARKDOWN_IMAGES_DISABLED,
         disableImageRendering: true,
     },
 });
 
 export const ComplexExample = meta.story({
     args: {
-        content: `# Complete Markdown Guide
-
-This document demonstrates all the features of the Markdown component.
-
-## Text Formatting
-
-You can use **bold**, *italic*, ***bold and italic***, \`code\`, and ~~strikethrough~~.
-
-## Lists
-
-### Unordered List
-- Item 1
-- Item 2
-  - Nested item 2.1
-  - Nested item 2.2
-- Item 3
-
-### Ordered List
-1. First step
-2. Second step
-   1. Sub-step 2.1
-   2. Sub-step 2.2
-3. Third step
-
-## Code Examples
-
-### Inline Code
-Use \`console.log()\` for debugging.
-
-### Code Block
-\`\`\`javascript
-// Example function
-function calculateSum(a, b) {
-    return a + b;
-}
-
-const result = calculateSum(5, 3);
-console.log(result); // Output: 8
-\`\`\`
-
-## Tables
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Code Blocks | ✅ | With syntax highlighting |
-| Tables | ✅ | With copy/download |
-| Links | ✅ | External links open in new tab |
-| Images | ✅ | Can be disabled |
-
-## Blockquotes
-
-> "The best way to predict the future is to invent it."
-> — Alan Kay
-
-## Links
-
-- [GitHub](https://github.com)
-- [React](https://react.dev)
-- [TypeScript](https://www.typescriptlang.org/)
-
----
-
-**End of document**`,
+        content: MARKDOWN_COMPLEX_EXAMPLE,
     },
 });

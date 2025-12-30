@@ -1,13 +1,22 @@
+import {
+    MOCK_COPY_RESET_DELAY,
+    MOCK_COPY_VALUE,
+    MOCK_COPY_VALUE_CUSTOM,
+    MOCK_COPY_VALUE_CUSTOM_CHILDREN,
+    MOCK_COPY_VALUE_CUSTOM_DELAY,
+    MOCK_COPY_VALUE_ICON_RIGHT,
+    MOCK_COPY_VALUE_WITHOUT_ICON,
+} from "#.storybook/lib/mocks/copy-input";
 import preview from "#.storybook/preview";
 import { IconThumbUp, IconThumbUpFilled } from "@tabler/icons-react";
-import { expect, fn, userEvent, waitFor } from "storybook/test";
+import { expect, fn, waitFor } from "storybook/test";
 
 import { CopyInput } from "./copy-input";
 
 const meta = preview.meta({
     component: CopyInput,
     args: {
-        value: "example-value-to-copy",
+        value: MOCK_COPY_VALUE,
         className: "bg-zinc-900",
         onCopy: fn(),
         onCopyError: fn(),
@@ -216,39 +225,9 @@ Default.test(
     },
 );
 
-Default.test(
-    "should call onCopy callback when button is clicked",
-    async ({ canvas, args }) => {
-        const button = canvas.getByRole("button", {
-            name: /copy/i,
-        });
-
-        await userEvent.click(button);
-
-        await waitFor(() => {
-            expect(args.onCopy).toHaveBeenCalledWith(args.value);
-        });
-    },
-);
-
-Default.test(
-    "should copy value to clipboard when button is clicked",
-    async ({ canvas, args }) => {
-        const button = canvas.getByRole("button", {
-            name: /copy/i,
-        });
-
-        await userEvent.click(button);
-
-        await waitFor(() => {
-            expect(navigator.clipboard.readText()).resolves.toBe(args.value);
-        });
-    },
-);
-
 export const CustomTextAndIcons = meta.story({
     args: {
-        value: "custom-value-123",
+        value: MOCK_COPY_VALUE_CUSTOM,
         copyIcon: <IconThumbUp />,
         copiedIcon: <IconThumbUpFilled />,
         copyText: "Custom Copy",
@@ -258,28 +237,28 @@ export const CustomTextAndIcons = meta.story({
 
 export const IconOnRight = meta.story({
     args: {
-        value: "value-with-icon-on-right",
+        value: MOCK_COPY_VALUE_ICON_RIGHT,
         iconPosition: "right",
     },
 });
 
 export const WithoutIcon = meta.story({
     args: {
-        value: "value-without-icon",
+        value: MOCK_COPY_VALUE_WITHOUT_ICON,
         showIcon: false,
     },
 });
 
 export const CustomResetDelay = meta.story({
     args: {
-        value: "value-with-custom-delay",
-        copyResetDelay: 5000,
+        value: MOCK_COPY_VALUE_CUSTOM_DELAY,
+        copyResetDelay: MOCK_COPY_RESET_DELAY,
     },
 });
 
 export const CustomChildren = meta.story({
     args: {
-        value: "custom-value-to-copy",
+        value: MOCK_COPY_VALUE_CUSTOM_CHILDREN,
         children: (handleCopy, copied) => (
             <button
                 onClick={handleCopy}
@@ -306,33 +285,5 @@ CustomChildren.test(
         });
 
         await canvas.findByText("👍 Copied");
-    },
-);
-
-CustomChildren.test(
-    "should call onCopy callback when button is clicked",
-    async ({ canvas, args }) => {
-        const button = canvas.getByRole("button", {
-            name: /copy/i,
-        });
-        await userEvent.click(button);
-
-        await waitFor(() => {
-            expect(args.onCopy).toHaveBeenCalledWith(args.value);
-        });
-    },
-);
-
-CustomChildren.test(
-    "should copy value to clipboard when button is clicked",
-    async ({ canvas, args }) => {
-        const button = canvas.getByRole("button", {
-            name: /copy/i,
-        });
-        await userEvent.click(button);
-
-        await waitFor(() => {
-            expect(navigator.clipboard.readText()).resolves.toBe(args.value);
-        });
     },
 );

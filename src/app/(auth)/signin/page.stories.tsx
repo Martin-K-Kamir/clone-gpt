@@ -1,8 +1,12 @@
+import { QueryProvider } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_APP_LINK_SIGN_UP,
+    MOCK_APP_ROUTE_SIGNUP,
+} from "#.storybook/lib/mocks/app";
+import { getForm } from "#.storybook/lib/utils/elements";
+import { clickLinkAndVerify } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryProvider } from "@/providers/query-provider";
 import { expect, mocked } from "storybook/test";
-
-import { Toaster } from "@/components/ui/sonner";
 
 import { signInWithCredentials } from "@/features/auth/services/actions";
 
@@ -13,10 +17,9 @@ import Page from "./page";
 const meta = preview.meta({
     component: Page,
     decorators: [
-        Story => (
-            <QueryProvider>
+        (Story, { parameters }) => (
+            <QueryProvider {...parameters.provider}>
                 <Story />
-                <Toaster />
             </QueryProvider>
         ),
     ],
@@ -26,7 +29,6 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    args: {},
     beforeEach: () => {
         mocked(signInWithCredentials).mockResolvedValue(
             api.success.auth.signin(null),
@@ -46,25 +48,15 @@ Default.test("should render heading", async ({ canvas }) => {
 });
 
 Default.test("should render sign in form", async ({ canvas }) => {
-    const form = document.querySelector("form");
-    expect(form).toBeInTheDocument();
+    expect(getForm()).toBeInTheDocument();
 });
 
 Default.test("should render sign up link", async ({ canvas, userEvent }) => {
     const signUpLink = canvas.getByRole("link", {
-        name: /sign up/i,
+        name: new RegExp(MOCK_APP_LINK_SIGN_UP, "i"),
     });
     expect(signUpLink).toBeInTheDocument();
     expect(signUpLink).toBeEnabled();
-    expect(signUpLink).toHaveAttribute("href", "/signup");
 
-    let clicked = false;
-    signUpLink.addEventListener("click", e => {
-        e.preventDefault();
-        clicked = true;
-    });
-
-    await userEvent.click(signUpLink);
-
-    expect(clicked).toBe(true);
+    await clickLinkAndVerify(signUpLink, userEvent, MOCK_APP_ROUTE_SIGNUP);
 });

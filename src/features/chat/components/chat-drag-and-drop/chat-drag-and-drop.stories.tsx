@@ -1,5 +1,11 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_FILE_1,
+    MOCK_CHAT_FILE_2,
+    MOCK_CHAT_FILE_CONTENT_1,
+    MOCK_CHAT_FILE_CONTENT_2,
+} from "#.storybook/lib/mocks/chat";
+import {
     createFile,
     createMockDataTransfer,
 } from "#.storybook/lib/mocks/files";
@@ -108,8 +114,14 @@ Default.test("should call handleFileSelect on drop", async ({ canvas }) => {
     const container = canvas.getByTestId("chat-drag-and-drop");
     expect(container).toBeInTheDocument();
 
-    const file1 = createFile({ filename: "file1.txt", content: "content1" });
-    const file2 = createFile({ filename: "file2.txt", content: "content2" });
+    const file1 = createFile({
+        filename: MOCK_CHAT_FILE_1,
+        content: MOCK_CHAT_FILE_CONTENT_1,
+    });
+    const file2 = createFile({
+        filename: MOCK_CHAT_FILE_2,
+        content: MOCK_CHAT_FILE_CONTENT_2,
+    });
 
     const dropEvent = new DragEvent("drop", {
         bubbles: true,

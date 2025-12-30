@@ -4,11 +4,17 @@ import {
     MOCK_SOURCE_PREVIEWS,
 } from "#.storybook/lib/mocks/messages";
 import {
+    MOCK_SOURCE_URL_GITHUB,
+    MOCK_SOURCE_URL_REACT,
+    MOCK_SOURCE_URL_TAILWIND,
+} from "#.storybook/lib/mocks/source-previews";
+import {
     createEmptyResourcePreviewsHandler,
     createErrorResourcePreviewsHandler,
     createLoadingResourcePreviewsHandler,
     createResourcePreviewsHandler,
 } from "#.storybook/lib/msw/handlers";
+import { clickLinkAndVerify } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { type SourceUrlUIPart } from "ai";
 import { expect, waitFor } from "storybook/test";
@@ -134,32 +140,17 @@ Default.test(
 
         const links = canvas.getAllByRole("link");
 
-        expect(links[0]).toHaveAttribute(
-            "href",
-            "https://github.com/vercel/next.js",
-        );
-        expect(links[1]).toHaveAttribute(
-            "href",
-            "https://react.dev/reference/react",
-        );
-        expect(links[2]).toHaveAttribute(
-            "href",
-            "https://tailwindcss.com/docs",
-        );
+        expect(links[0]).toHaveAttribute("href", MOCK_SOURCE_URL_GITHUB);
+        expect(links[1]).toHaveAttribute("href", MOCK_SOURCE_URL_REACT);
+        expect(links[2]).toHaveAttribute("href", MOCK_SOURCE_URL_TAILWIND);
 
         links.forEach(link => {
             expect(link).toHaveAttribute("target", "_blank");
             expect(link).toHaveAttribute("rel", "noopener noreferrer");
         });
 
-        links.forEach(link => {
-            link.addEventListener("click", e => e.preventDefault(), {
-                once: true,
-            });
-        });
-
         for (const link of links) {
-            await userEvent.click(link);
+            await clickLinkAndVerify(link, userEvent);
             expect(link).toBeVisible();
         }
     },
@@ -205,15 +196,9 @@ Error.test("should show fallback links on error", async ({ canvas }) => {
         () => {
             const links = canvas.getAllByRole("link");
             expect(links).toHaveLength(3);
-            expect(
-                canvas.getByText("https://github.com/vercel/next.js"),
-            ).toBeVisible();
-            expect(
-                canvas.getByText("https://react.dev/reference/react"),
-            ).toBeVisible();
-            expect(
-                canvas.getByText("https://tailwindcss.com/docs"),
-            ).toBeVisible();
+            expect(canvas.getByText(MOCK_SOURCE_URL_GITHUB)).toBeVisible();
+            expect(canvas.getByText(MOCK_SOURCE_URL_REACT)).toBeVisible();
+            expect(canvas.getByText(MOCK_SOURCE_URL_TAILWIND)).toBeVisible();
         },
         { timeout: 5000 },
     );
@@ -232,32 +217,17 @@ Error.test(
 
         const links = canvas.getAllByRole("link");
 
-        expect(links[0]).toHaveAttribute(
-            "href",
-            "https://github.com/vercel/next.js",
-        );
-        expect(links[1]).toHaveAttribute(
-            "href",
-            "https://react.dev/reference/react",
-        );
-        expect(links[2]).toHaveAttribute(
-            "href",
-            "https://tailwindcss.com/docs",
-        );
+        expect(links[0]).toHaveAttribute("href", MOCK_SOURCE_URL_GITHUB);
+        expect(links[1]).toHaveAttribute("href", MOCK_SOURCE_URL_REACT);
+        expect(links[2]).toHaveAttribute("href", MOCK_SOURCE_URL_TAILWIND);
 
         links.forEach(link => {
             expect(link).toHaveAttribute("target", "_blank");
             expect(link).toHaveAttribute("rel", "noopener noreferrer");
         });
 
-        links.forEach(link => {
-            link.addEventListener("click", e => e.preventDefault(), {
-                once: true,
-            });
-        });
-
         for (const link of links) {
-            await userEvent.click(link);
+            await clickLinkAndVerify(link, userEvent);
             expect(link).toBeVisible();
         }
     },
@@ -279,7 +249,6 @@ Empty.test("should show empty state", async ({ canvas }) => {
 });
 
 export const DuplicateUrls = meta.story({
-    name: "Duplicate URLs",
     args: {
         sources: [
             mockSources[0],

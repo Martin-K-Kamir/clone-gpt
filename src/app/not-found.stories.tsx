@@ -1,3 +1,9 @@
+import {
+    MOCK_APP_BUTTON_GO_TO_HOME,
+    MOCK_APP_ERROR_404_NOT_FOUND,
+    MOCK_APP_ROUTE_HOME,
+} from "#.storybook/lib/mocks/app";
+import { clickLinkAndVerify } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect } from "storybook/test";
 
@@ -17,9 +23,9 @@ export const Default = meta.story({
 Default.test("should render heading and description", async ({ canvas }) => {
     const heading = canvas.getByRole("heading", {
         level: 1,
+        name: MOCK_APP_ERROR_404_NOT_FOUND,
     });
     expect(heading).toBeInTheDocument();
-    expect(heading.textContent.length).toBeGreaterThan(0);
 
     const description = canvas.getByRole("paragraph");
     expect(description).toBeInTheDocument();
@@ -28,20 +34,11 @@ Default.test("should render heading and description", async ({ canvas }) => {
 
 Default.test("should render go to home link", async ({ canvas, userEvent }) => {
     const link = canvas.getByRole("link", {
-        name: /go to home/i,
+        name: new RegExp(MOCK_APP_BUTTON_GO_TO_HOME, "i"),
     });
 
     expect(link).toBeInTheDocument();
     expect(link).toBeEnabled();
-    expect(link).toHaveAttribute("href", "/");
 
-    let clicked = false;
-    link.addEventListener("click", e => {
-        e.preventDefault();
-        clicked = true;
-    });
-
-    await userEvent.click(link);
-
-    expect(clicked).toBe(true);
+    await clickLinkAndVerify(link, userEvent, MOCK_APP_ROUTE_HOME);
 });

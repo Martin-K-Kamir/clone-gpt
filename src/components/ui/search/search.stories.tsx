@@ -1,5 +1,11 @@
-import { FIXED_DATE } from "#.storybook/lib/mocks/chats";
 import {
+    MOCK_GROUPED_SEARCH_RESULTS,
+    MOCK_INITIAL_SEARCH_DATA,
+    MOCK_SEARCH_RESULTS,
+    getSearchResults,
+} from "#.storybook/lib/mocks/search";
+import {
+    expectAriaSelected,
     waitForDialog,
     waitForDialogOverlay,
     waitForDialogToClose,
@@ -16,7 +22,6 @@ import {
     IconTrash,
     IconUser,
 } from "@tabler/icons-react";
-import { sub } from "date-fns";
 import React, { useState } from "react";
 import { expect, fn, waitFor } from "storybook/test";
 
@@ -94,163 +99,6 @@ const meta = preview.meta({
         },
     },
 });
-
-const today = FIXED_DATE;
-const yesterday = sub(FIXED_DATE, { days: 1 });
-const fixedDate1 = sub(FIXED_DATE, { days: 1 });
-const fixedDate2 = sub(FIXED_DATE, { days: 2 });
-const fixedDate3 = sub(FIXED_DATE, { days: 3 });
-
-// Mock data for search results
-const mockSearchResults: SearchResultsItemResult[] = [
-    {
-        id: "1",
-        title: "Getting Started with React",
-        snippet:
-            "Learn the basics of React and how to build your first component",
-        updatedAt: today.toISOString(),
-        createdAt: today.toISOString(),
-        href: "/chat/1",
-    },
-    {
-        id: "2",
-        title: "Advanced TypeScript Patterns",
-        snippet: "Explore advanced TypeScript patterns and best practices",
-        updatedAt: yesterday.toISOString(),
-        createdAt: yesterday.toISOString(),
-        href: "/chat/2",
-    },
-    {
-        id: "3",
-        title: "Building with Next.js",
-        snippet: "Create modern web applications with Next.js framework",
-        updatedAt: fixedDate1.toISOString(),
-        createdAt: fixedDate1.toISOString(),
-        href: "/chat/3",
-    },
-].sort((a, b) => {
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-});
-
-const groupedSearchResults = {
-    Recent: [
-        {
-            id: "1",
-            title: "Getting Started with React",
-            snippet:
-                "Learn the basics of React and how to build your first component",
-            updatedAt: today.toISOString(),
-            createdAt: today.toISOString(),
-            href: "/chat/1",
-        },
-        {
-            id: "2",
-            title: "Advanced TypeScript Patterns",
-            snippet: "Explore advanced TypeScript patterns and best practices",
-            updatedAt: yesterday.toISOString(),
-            createdAt: yesterday.toISOString(),
-            href: "/chat/2",
-        },
-        {
-            id: "3",
-            title: "Building with Next.js",
-            snippet: "Create modern web applications with Next.js framework",
-            updatedAt: fixedDate1.toISOString(),
-            createdAt: fixedDate2.toISOString(),
-            href: "/chat/3",
-        },
-        {
-            id: "7",
-            title: "React Server Components Explained",
-            snippet:
-                "Understanding the new React Server Components architecture and how to use them effectively",
-            updatedAt: today.toISOString(),
-            createdAt: today.toISOString(),
-            href: "/chat/7",
-        },
-        {
-            id: "8",
-            title: "Testing React Applications",
-            snippet:
-                "Best practices for unit testing, integration testing, and E2E testing with React",
-            updatedAt: yesterday.toISOString(),
-            createdAt: yesterday.toISOString(),
-            href: "/chat/8",
-        },
-    ].sort((a, b) => {
-        return (
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-    }),
-    Popular: [
-        {
-            id: "4",
-            title: "Understanding React Hooks",
-            snippet:
-                "Deep dive into useState, useEffect, and custom hooks patterns",
-            updatedAt: yesterday.toISOString(),
-            createdAt: yesterday.toISOString(),
-            href: "/chat/4",
-        },
-        {
-            id: "5",
-            title: "CSS-in-JS vs Tailwind CSS",
-            snippet:
-                "Comparing styling approaches for modern React applications",
-            updatedAt: fixedDate2.toISOString(),
-            createdAt: fixedDate2.toISOString(),
-            href: "/chat/5",
-        },
-        {
-            id: "6",
-            title: "State Management Best Practices",
-            snippet: "Exploring Zustand, Redux, and Context API use cases",
-            updatedAt: fixedDate2.toISOString(),
-            createdAt: fixedDate2.toISOString(),
-            href: "/chat/6",
-        },
-        {
-            id: "9",
-            title: "Performance Optimization in React",
-            snippet:
-                "Techniques for optimizing React applications including memoization, code splitting, and lazy loading",
-            updatedAt: fixedDate3.toISOString(),
-            createdAt: fixedDate3.toISOString(),
-            href: "/chat/9",
-        },
-        {
-            id: "10",
-            title: "GraphQL vs REST API",
-            snippet:
-                "Comparing GraphQL and REST API approaches for building modern applications",
-            updatedAt: fixedDate3.toISOString(),
-            createdAt: fixedDate3.toISOString(),
-            href: "/chat/10",
-        },
-        {
-            id: "11",
-            title: "Web Accessibility (a11y) Guide",
-            snippet:
-                "Making your React applications accessible to all users with ARIA attributes and semantic HTML",
-            updatedAt: fixedDate3.toISOString(),
-            createdAt: fixedDate3.toISOString(),
-            href: "/chat/11",
-        },
-        {
-            id: "12",
-            title: "Deploying Next.js to Production",
-            snippet:
-                "Step-by-step guide to deploying Next.js applications to Vercel, AWS, and other platforms",
-            updatedAt: fixedDate3.toISOString(),
-            createdAt: fixedDate3.toISOString(),
-            href: "/chat/12",
-        },
-    ].sort((a, b) => {
-        return (
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
-        );
-    }),
-};
 
 export const Default = meta.story({
     args: {
@@ -372,19 +220,6 @@ Default.test(
     async ({ canvas, userEvent, args }) => {
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         await userEvent.click(items[0]);
         expect(args.onSelect).toHaveBeenCalledWith("item-1");
         expectAriaSelected(items, 0);
@@ -405,19 +240,6 @@ Default.test(
         const input = canvas.getByRole("combobox");
         await userEvent.click(input);
         expect(input).toHaveFocus();
-
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
 
         const items = canvas.getAllByRole("option");
 
@@ -456,19 +278,6 @@ Default.test(
         await userEvent.click(input);
         expect(input).toHaveFocus();
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         const items = canvas.getAllByRole("option");
         await userEvent.keyboard("{arrowup}");
         expectAriaSelected(items, 0);
@@ -485,25 +294,11 @@ Default.test(
         await userEvent.click(input);
         expect(input).toHaveFocus();
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
         const items = canvas.getAllByRole("option");
 
-        await waitFor(() => {
-            items.forEach(async () => {
-                await userEvent.keyboard("{arrowdown}");
-            });
-        });
+        for (let i = 0; i < items.length - 1; i++) {
+            await userEvent.keyboard("{arrowdown}");
+        }
 
         expectAriaSelected(items, 7);
 
@@ -831,7 +626,7 @@ export const WithSearchResults = meta.story({
         nextjs: {
             appDirectory: true,
             router: {
-                pathname: "/chat/1", // Match the first item's href
+                pathname: "/chat/1",
             },
         },
     },
@@ -845,7 +640,7 @@ export const WithSearchResults = meta.story({
                     <SearchInput placeholder="Search chats..." />
                     <SearchList>
                         <SearchResultsList
-                            data={mockSearchResults}
+                            data={MOCK_SEARCH_RESULTS}
                             query={args.value}
                         />
                     </SearchList>
@@ -873,18 +668,9 @@ export const WithControlledSearchResults = meta.story({
     render: args => {
         const [value, setValue] = useState("");
 
-        // Filter search results based on search query
         const filteredResults = value
-            ? mockSearchResults.filter(
-                  result =>
-                      result.title
-                          .toLowerCase()
-                          .includes(value.toLowerCase()) ||
-                      result.snippet
-                          ?.toLowerCase()
-                          .includes(value.toLowerCase()),
-              )
-            : mockSearchResults;
+            ? getSearchResults(value)
+            : MOCK_SEARCH_RESULTS;
 
         const hasResults = filteredResults.length > 0;
 
@@ -962,29 +748,16 @@ WithControlledSearchResults.test(
     async ({ canvas, userEvent, args }) => {
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         await userEvent.click(items[0]);
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
         expectAriaSelected(items, 0);
 
         await userEvent.click(items[1]);
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[1]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[1]);
         expectAriaSelected(items, 1);
 
         await userEvent.click(items[2]);
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[2]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[2]);
         expectAriaSelected(items, 2);
     },
 );
@@ -998,25 +771,12 @@ WithControlledSearchResults.test(
 
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         await userEvent.click(items[0]);
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
         expectAriaSelected(items, 0);
 
         await userEvent.click(items[1]);
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[2]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[2]);
         expectAriaSelected(items, 1);
     },
 );
@@ -1031,31 +791,18 @@ WithControlledSearchResults.test(
 
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
         expectAriaSelected(items, 0);
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[1]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[1]);
         expectAriaSelected(items, 1);
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[2]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[2]);
         expectAriaSelected(items, 2);
     },
 );
@@ -1069,26 +816,13 @@ WithControlledSearchResults.test(
 
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
         expectAriaSelected(items, 0);
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[2]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[2]);
         expectAriaSelected(items, 1);
     },
 );
@@ -1097,19 +831,6 @@ WithControlledSearchResults.test(
     "should call onValueChange on hover",
     async ({ canvas, userEvent, args }) => {
         const items = canvas.getAllByRole("option");
-
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
 
         await userEvent.hover(items[0]);
         expect(args.onValueChange).toHaveBeenCalledWith("1");
@@ -1134,19 +855,6 @@ WithControlledSearchResults.test(
         await userEvent.keyboard("{backspace}");
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         expect(args.onValueChange).toHaveBeenCalledWith("1");
         expectAriaSelected(items, 0);
 
@@ -1168,19 +876,6 @@ WithControlledSearchResults.test(
         await userEvent.type(input, "G");
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         await userEvent.hover(items[0]);
         expect(args.onValueChange).toHaveBeenCalledWith("1");
         expectAriaSelected(items, 0);
@@ -1199,19 +894,6 @@ WithControlledSearchResults.test(
         await userEvent.type(input, "G");
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         expect(args.onValueChange).toHaveBeenCalledWith("1");
         expectAriaSelected(items, 0);
 
@@ -1224,33 +906,29 @@ WithControlledSearchResults.test(
 WithControlledSearchResults.test(
     "should navigate to item href on click",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to something that doesn't match any item's href
         window.history.replaceState({}, "", "/");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
 
         const items = canvas.getAllByRole("option");
 
         await userEvent.click(items[0]);
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[0].href,
+            MOCK_SEARCH_RESULTS[0].href,
         );
 
         await userEvent.click(items[1]);
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[1].href,
+            MOCK_SEARCH_RESULTS[1].href,
         );
 
         await userEvent.click(items[2]);
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[2].href,
+            MOCK_SEARCH_RESULTS[2].href,
         );
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1258,13 +936,10 @@ WithControlledSearchResults.test(
 WithControlledSearchResults.test(
     "should navigate to item href on enter key",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to something that doesn't match any item's href
         window.history.replaceState({}, "", "/");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
         const input = canvas.getByRole("combobox");
         await userEvent.click(input);
@@ -1273,22 +948,21 @@ WithControlledSearchResults.test(
 
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[0].href,
+            MOCK_SEARCH_RESULTS[0].href,
         );
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[1].href,
+            MOCK_SEARCH_RESULTS[1].href,
         );
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[2].href,
+            MOCK_SEARCH_RESULTS[2].href,
         );
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1300,28 +974,24 @@ WithControlledSearchResults.test(
         await userEvent.click(input);
         await userEvent.type(input, "G");
 
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to something that doesn't match any item's href
         window.history.replaceState({}, "", "/");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
 
         const items = canvas.getAllByRole("option");
 
         await userEvent.click(items[0]);
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[0].href,
+            MOCK_SEARCH_RESULTS[0].href,
         );
 
         await userEvent.click(items[1]);
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[2].href,
+            MOCK_SEARCH_RESULTS[2].href,
         );
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1333,27 +1003,23 @@ WithControlledSearchResults.test(
         await userEvent.click(input);
         await userEvent.type(input, "G");
 
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to something that doesn't match any item's href
         window.history.replaceState({}, "", "/");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
 
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[0].href,
+            MOCK_SEARCH_RESULTS[0].href,
         );
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[2].href,
+            MOCK_SEARCH_RESULTS[2].href,
         );
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1366,33 +1032,29 @@ WithControlledSearchResults.test(
         await userEvent.type(input, "G");
         await userEvent.keyboard("{backspace}");
 
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to something that doesn't match any item's href
         window.history.replaceState({}, "", "/");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
 
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[0].href,
+            MOCK_SEARCH_RESULTS[0].href,
         );
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[1].href,
+            MOCK_SEARCH_RESULTS[1].href,
         );
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
         expect(getRouter().push).toHaveBeenCalledWith(
-            mockSearchResults[2].href,
+            MOCK_SEARCH_RESULTS[2].href,
         );
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1400,13 +1062,10 @@ WithControlledSearchResults.test(
 WithControlledSearchResults.test(
     "should skip navigation on click when already on item page",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to match first item's href (/chat/1)
         window.history.replaceState({}, "", "/chat/1");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
 
         const items = canvas.getAllByRole("option");
@@ -1415,7 +1074,6 @@ WithControlledSearchResults.test(
 
         expect(getRouter().push).not.toHaveBeenCalled();
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1423,13 +1081,10 @@ WithControlledSearchResults.test(
 WithControlledSearchResults.test(
     "should skip navigation on enter when already on item page",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to match first item's href (/chat/1)
         window.history.replaceState({}, "", "/chat/1");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
 
         const input = canvas.getByRole("combobox");
@@ -1441,7 +1096,6 @@ WithControlledSearchResults.test(
 
         expect(getRouter().push).not.toHaveBeenCalled();
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1449,13 +1103,10 @@ WithControlledSearchResults.test(
 WithControlledSearchResults.test(
     "should skip navigation on filtered item click when already on item page",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
 
-        // Set pathname to match first item's href (/chat/1)
         window.history.replaceState({}, "", "/chat/1");
 
-        // Clear any previous router.push calls
         getRouter().push.mockClear();
 
         const input = canvas.getByRole("combobox");
@@ -1468,7 +1119,6 @@ WithControlledSearchResults.test(
 
         expect(getRouter().push).not.toHaveBeenCalled();
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -1481,25 +1131,12 @@ WithControlledSearchResults.test(
         await userEvent.type(input, "G");
         const items = canvas.getAllByRole("option");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         await userEvent.click(items[0]);
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
         expectAriaSelected(items, 0);
 
         await userEvent.click(items[1]);
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[2]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[2]);
         expectAriaSelected(items, 1);
     },
 );
@@ -1511,19 +1148,6 @@ WithControlledSearchResults.test(
         await userEvent.click(input);
         await userEvent.type(input, "G");
         await userEvent.keyboard("{backspace}");
-
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
 
         const items = canvas.getAllByRole("option");
 
@@ -1550,19 +1174,6 @@ WithControlledSearchResults.test(
         await userEvent.click(input);
         await userEvent.type(input, "G");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         const items = canvas.getAllByRole("option");
 
         expectAriaSelected(items, 0);
@@ -1583,19 +1194,6 @@ WithControlledSearchResults.test(
         await userEvent.type(input, "G");
         await userEvent.keyboard("{backspace}");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
-
         const items = canvas.getAllByRole("option");
         await userEvent.keyboard("{arrowup}");
         expectAriaSelected(items, 0);
@@ -1611,19 +1209,6 @@ WithControlledSearchResults.test(
         const input = canvas.getByRole("combobox");
         await userEvent.click(input);
         await userEvent.type(input, "G");
-
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
 
         const items = canvas.getAllByRole("option");
         await userEvent.keyboard("{arrowup}");
@@ -1642,25 +1227,11 @@ WithControlledSearchResults.test(
         await userEvent.type(input, "G");
         await userEvent.keyboard("{backspace}");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
         const items = canvas.getAllByRole("option");
 
-        await waitFor(() => {
-            items.forEach(async () => {
-                await userEvent.keyboard("{arrowdown}");
-            });
-        });
+        for (let i = 0; i < items.length - 1; i++) {
+            await userEvent.keyboard("{arrowdown}");
+        }
 
         expectAriaSelected(items, 2);
 
@@ -1676,25 +1247,11 @@ WithControlledSearchResults.test(
         await userEvent.click(input);
         await userEvent.type(input, "G");
 
-        function expectAriaSelected(
-            items: HTMLElement[],
-            selectedIndex: number,
-        ) {
-            items.forEach((item, index) => {
-                if (index === selectedIndex) {
-                    expect(item).toHaveAttribute("aria-selected", "true");
-                } else {
-                    expect(item).toHaveAttribute("aria-selected", "false");
-                }
-            });
-        }
         const items = canvas.getAllByRole("option");
 
-        await waitFor(() => {
-            items.forEach(async () => {
-                await userEvent.keyboard("{arrowdown}");
-            });
-        });
+        for (let i = 0; i < items.length - 1; i++) {
+            await userEvent.keyboard("{arrowdown}");
+        }
 
         expectAriaSelected(items, 1);
 
@@ -1712,23 +1269,23 @@ WithControlledSearchResults.test(
         await userEvent.keyboard("{backspace}");
 
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[1]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[1]);
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[2]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[2]);
 
         await userEvent.keyboard("{arrowup}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[1]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[1]);
 
         await userEvent.keyboard("{arrowup}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
     },
 );
 
@@ -1740,15 +1297,15 @@ WithControlledSearchResults.test(
         await userEvent.type(input, "G");
 
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
 
         await userEvent.keyboard("{arrowdown}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[2]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[2]);
 
         await userEvent.keyboard("{arrowup}");
         await userEvent.keyboard("{enter}");
-        expect(args.onSelect).toHaveBeenCalledWith(mockSearchResults[0]);
+        expect(args.onSelect).toHaveBeenCalledWith(MOCK_SEARCH_RESULTS[0]);
     },
 );
 
@@ -1807,7 +1364,7 @@ export const WithGroupedSearchResults = meta.story({
                     <SearchInput placeholder="Search chats..." />
                     <SearchList>
                         <SearchResultsList
-                            data={groupedSearchResults}
+                            data={MOCK_GROUPED_SEARCH_RESULTS}
                             query={value}
                         />
                     </SearchList>
@@ -1816,46 +1373,6 @@ export const WithGroupedSearchResults = meta.story({
         );
     },
 });
-
-// Initial data shown when no query
-const initialSearchData: SearchResultsItemResult[] = [
-    {
-        id: "initial-1",
-        title: "Welcome to CloneGPT",
-        snippet: "Get started with your first conversation",
-        updatedAt: today.toISOString(),
-        createdAt: today.toISOString(),
-        href: "/chat/initial-1",
-    },
-    {
-        id: "initial-2",
-        title: "Quick Start Guide",
-        snippet: "Learn how to use CloneGPT effectively",
-        updatedAt: yesterday.toISOString(),
-        createdAt: yesterday.toISOString(),
-        href: "/chat/initial-2",
-    },
-    {
-        id: "initial-3",
-        title: "Tips & Tricks",
-        snippet: "Discover advanced features and shortcuts",
-        updatedAt: fixedDate1.toISOString(),
-        createdAt: fixedDate1.toISOString(),
-        href: "/chat/initial-3",
-    },
-];
-
-// Function to get search results based on query (like useInfiniteSearchUserChats)
-const getSearchResults = (query: string): SearchResultsItemResult[] => {
-    if (!query) return [];
-
-    // Filter mockSearchResults based on query (simulating API search)
-    return mockSearchResults.filter(
-        result =>
-            result.title.toLowerCase().includes(query.toLowerCase()) ||
-            result.snippet?.toLowerCase().includes(query.toLowerCase()),
-    );
-};
 
 export const WithInitialAndSearchResults = meta.story({
     args: {
@@ -1868,12 +1385,10 @@ export const WithInitialAndSearchResults = meta.story({
             SearchResultsItemResult[]
         >([]);
 
-        // Simulate async search like the real component
         const handleSearch = (query: string) => {
             setValue(query);
             if (query) {
                 setIsSearching(true);
-                // Simulate API delay
                 setTimeout(() => {
                     const results = getSearchResults(query);
                     setSearchResults(results);
@@ -1885,7 +1400,7 @@ export const WithInitialAndSearchResults = meta.story({
             }
         };
 
-        const showInitialData = !value && initialSearchData;
+        const showInitialData = !value && MOCK_INITIAL_SEARCH_DATA;
         const hasSearchResults =
             value && !isSearching && searchResults.length > 0;
         const isEmpty = value && !isSearching && searchResults.length === 0;
@@ -1900,7 +1415,9 @@ export const WithInitialAndSearchResults = meta.story({
                     />
                     <SearchList>
                         {showInitialData && (
-                            <SearchResultsList data={initialSearchData} />
+                            <SearchResultsList
+                                data={MOCK_INITIAL_SEARCH_DATA}
+                            />
                         )}
 
                         {isSearching && <SearchGroupSkeleton length={3} />}
@@ -1981,7 +1498,7 @@ WithInitialAndSearchResults.test(
     "should navigate between search results with arrow keys",
     async ({ canvas, userEvent }) => {
         const input = canvas.getByRole("combobox");
-        await userEvent.type(input, "a"); // Search for items containing "a"
+        await userEvent.type(input, "a");
 
         await waitFor(
             () => {
@@ -2007,7 +1524,6 @@ WithInitialAndSearchResults.test(
 WithInitialAndSearchResults.test(
     "should navigate to item href on click",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
         window.history.replaceState({}, "", "/");
         getRouter().push.mockClear();
@@ -2028,7 +1544,6 @@ WithInitialAndSearchResults.test(
 
         expect(getRouter().push).toHaveBeenCalledWith("/chat/1");
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -2036,7 +1551,6 @@ WithInitialAndSearchResults.test(
 WithInitialAndSearchResults.test(
     "should navigate to item href on enter key",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
         window.history.replaceState({}, "", "/");
         getRouter().push.mockClear();
@@ -2056,7 +1570,6 @@ WithInitialAndSearchResults.test(
 
         expect(getRouter().push).toHaveBeenCalledWith("/chat/1");
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -2064,9 +1577,8 @@ WithInitialAndSearchResults.test(
 WithInitialAndSearchResults.test(
     "should skip navigation when already on item page",
     async ({ canvas, userEvent }) => {
-        // Save original pathname
         const originalPathname = window.location.pathname;
-        window.history.replaceState({}, "", "/chat/1"); // Match the React item's href
+        window.history.replaceState({}, "", "/chat/1");
         getRouter().push.mockClear();
 
         const input = canvas.getByRole("combobox");
@@ -2085,7 +1597,6 @@ WithInitialAndSearchResults.test(
 
         expect(getRouter().push).not.toHaveBeenCalled();
 
-        // Restore original pathname
         window.history.replaceState({}, "", originalPathname);
     },
 );
@@ -2095,10 +1606,8 @@ WithInitialAndSearchResults.test(
     async ({ canvas, userEvent }) => {
         const input = canvas.getByRole("combobox");
 
-        // First verify initial data is shown
         expect(canvas.getByText("Welcome to CloneGPT")).toBeVisible();
 
-        // Type a search query
         await userEvent.type(input, "React");
 
         await waitFor(
@@ -2111,7 +1620,6 @@ WithInitialAndSearchResults.test(
             { timeout: 1000 },
         );
 
-        // Clear the search
         await userEvent.clear(input);
 
         await waitFor(() => {
@@ -2127,11 +1635,7 @@ export const WithHighlightedResults = meta.story({
     render: args => {
         const query = args.value || "";
         const [value, setValue] = useState(query);
-        const reactResults = mockSearchResults.filter(
-            result =>
-                result.title.toLowerCase().includes(query.toLowerCase()) ||
-                result.snippet?.toLowerCase().includes(query.toLowerCase()),
-        );
+        const reactResults = getSearchResults(query);
 
         return (
             <div className="min-h-[400px] w-full max-w-xl rounded-2xl border border-zinc-700 bg-zinc-800">
@@ -2391,12 +1895,13 @@ export const InDialogWithGroupsAndItems = meta.story({
 });
 
 InDialogWithGroupsAndItems.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );
 
@@ -2527,12 +2032,13 @@ export const InDialogWithControlledSearch = meta.story({
 });
 
 InDialogWithControlledSearch.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );
 
@@ -2697,7 +2203,7 @@ export const InDialogWithSearchResults = meta.story({
                             <SearchInput placeholder="Search chats..." />
                             <SearchList>
                                 <SearchResultsList
-                                    data={mockSearchResults}
+                                    data={MOCK_SEARCH_RESULTS}
                                     query={value}
                                 />
                             </SearchList>
@@ -2727,18 +2233,9 @@ export const InDialogWithControlledSearchResults = meta.story({
         const [open, setOpen] = useState(false);
         const [value, setValue] = useState("");
 
-        // Filter search results based on search query
         const filteredResults = value
-            ? mockSearchResults.filter(
-                  result =>
-                      result.title
-                          .toLowerCase()
-                          .includes(value.toLowerCase()) ||
-                      result.snippet
-                          ?.toLowerCase()
-                          .includes(value.toLowerCase()),
-              )
-            : mockSearchResults;
+            ? getSearchResults(value)
+            : MOCK_SEARCH_RESULTS;
 
         const hasResults = filteredResults.length > 0;
 
@@ -2778,12 +2275,13 @@ export const InDialogWithControlledSearchResults = meta.story({
 });
 
 InDialogWithControlledSearchResults.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );
 
@@ -2814,7 +2312,7 @@ export const InDialogWithGroupedSearchResults = meta.story({
                             <SearchInput placeholder="Search chats..." />
                             <SearchList>
                                 <SearchResultsList
-                                    data={groupedSearchResults}
+                                    data={MOCK_GROUPED_SEARCH_RESULTS}
                                     query={value}
                                 />
                             </SearchList>
@@ -2827,12 +2325,13 @@ export const InDialogWithGroupedSearchResults = meta.story({
 });
 
 InDialogWithGroupedSearchResults.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );
 
@@ -2848,12 +2347,10 @@ export const InDialogWithInitialAndSearchResults = meta.story({
             SearchResultsItemResult[]
         >([]);
 
-        // Simulate async search like the real component
         const handleSearch = (query: string) => {
             setValue(query);
             if (query) {
                 setIsSearching(true);
-                // Simulate API delay
                 setTimeout(() => {
                     const results = getSearchResults(query);
                     setSearchResults(results);
@@ -2865,7 +2362,7 @@ export const InDialogWithInitialAndSearchResults = meta.story({
             }
         };
 
-        const showInitialData = !value && initialSearchData;
+        const showInitialData = !value && MOCK_INITIAL_SEARCH_DATA;
         const hasSearchResults =
             value && !isSearching && searchResults.length > 0;
         const isEmpty = value && !isSearching && searchResults.length === 0;
@@ -2891,7 +2388,7 @@ export const InDialogWithInitialAndSearchResults = meta.story({
                             <SearchList>
                                 {showInitialData && (
                                     <SearchResultsList
-                                        data={initialSearchData}
+                                        data={MOCK_INITIAL_SEARCH_DATA}
                                     />
                                 )}
 
@@ -2919,12 +2416,13 @@ export const InDialogWithInitialAndSearchResults = meta.story({
 });
 
 InDialogWithInitialAndSearchResults.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );
 
@@ -2936,11 +2434,7 @@ export const InDialogWithHighlightedResults = meta.story({
         const [open, setOpen] = useState(false);
         const query = args.value || "";
         const [value, setValue] = useState(query);
-        const reactResults = mockSearchResults.filter(
-            result =>
-                result.title.toLowerCase().includes(query.toLowerCase()) ||
-                result.snippet?.toLowerCase().includes(query.toLowerCase()),
-        );
+        const reactResults = getSearchResults(query);
 
         return (
             <>
@@ -2974,12 +2468,13 @@ export const InDialogWithHighlightedResults = meta.story({
 });
 
 InDialogWithHighlightedResults.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );
 
@@ -2988,18 +2483,9 @@ export const WithDialogTrigger = meta.story({
     render: args => {
         const [value, setValue] = useState("");
 
-        // Filter search results based on search query
         const filteredResults = value
-            ? mockSearchResults.filter(
-                  result =>
-                      result.title
-                          .toLowerCase()
-                          .includes(value.toLowerCase()) ||
-                      result.snippet
-                          ?.toLowerCase()
-                          .includes(value.toLowerCase()),
-              )
-            : mockSearchResults;
+            ? getSearchResults(value)
+            : MOCK_SEARCH_RESULTS;
 
         const hasResults = filteredResults.length > 0;
 
@@ -3099,12 +2585,10 @@ export const InDialogFullscreenWithInitialAndSearchResults = meta.story({
             SearchResultsItemResult[]
         >([]);
 
-        // Simulate async search like the real component
         const handleSearch = (query: string) => {
             setValue(query);
             if (query) {
                 setIsSearching(true);
-                // Simulate API delay
                 setTimeout(() => {
                     const results = getSearchResults(query);
                     setSearchResults(results);
@@ -3116,7 +2600,7 @@ export const InDialogFullscreenWithInitialAndSearchResults = meta.story({
             }
         };
 
-        const showInitialData = !value && initialSearchData;
+        const showInitialData = !value && MOCK_INITIAL_SEARCH_DATA;
         const hasSearchResults =
             value && !isSearching && searchResults.length > 0;
         const isEmpty = value && !isSearching && searchResults.length === 0;
@@ -3145,7 +2629,7 @@ export const InDialogFullscreenWithInitialAndSearchResults = meta.story({
                             <SearchList>
                                 {showInitialData && (
                                     <SearchResultsList
-                                        data={initialSearchData}
+                                        data={MOCK_INITIAL_SEARCH_DATA}
                                     />
                                 )}
 
@@ -3173,12 +2657,13 @@ export const InDialogFullscreenWithInitialAndSearchResults = meta.story({
 });
 
 InDialogFullscreenWithInitialAndSearchResults.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open fullscreen search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );
 
@@ -3190,18 +2675,9 @@ export const InDialogFullscreenLgWithControlledSearchResults = meta.story({
         const [open, setOpen] = useState(false);
         const [value, setValue] = useState("");
 
-        // Filter search results based on search query
         const filteredResults = value
-            ? mockSearchResults.filter(
-                  result =>
-                      result.title
-                          .toLowerCase()
-                          .includes(value.toLowerCase()) ||
-                      result.snippet
-                          ?.toLowerCase()
-                          .includes(value.toLowerCase()),
-              )
-            : mockSearchResults;
+            ? getSearchResults(value)
+            : MOCK_SEARCH_RESULTS;
 
         const hasResults = filteredResults.length > 0;
 
@@ -3248,11 +2724,12 @@ export const InDialogFullscreenLgWithControlledSearchResults = meta.story({
 });
 
 InDialogFullscreenLgWithControlledSearchResults.test(
-    "should open",
+    "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
             name: /open fullscreen lg search/i,
         });
         await userEvent.click(trigger);
+        await waitForDialog();
     },
 );

@@ -1,6 +1,5 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import preview from "#.storybook/preview";
-import type React from "react";
 import { expect } from "storybook/test";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";

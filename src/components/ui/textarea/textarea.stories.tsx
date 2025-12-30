@@ -1,3 +1,7 @@
+import {
+    MOCK_TEXTAREA_DEFAULT_VALUE,
+    MOCK_TEXTAREA_READONLY_VALUE,
+} from "#.storybook/lib/mocks/textarea";
 import preview from "#.storybook/preview";
 import { expect, fn } from "storybook/test";
 
@@ -190,16 +194,13 @@ WithError.test("should show error state", ({ canvas }) => {
 
 export const WithDefaultValue = meta.story({
     args: {
-        defaultValue:
-            "This is some pre-filled content in the textarea that the user might want to edit.",
+        defaultValue: MOCK_TEXTAREA_DEFAULT_VALUE,
     },
 });
 
 WithDefaultValue.test("should display default value", ({ canvas }) => {
     const textarea = canvas.getByRole("textbox");
-    expect(textarea).toHaveValue(
-        "This is some pre-filled content in the textarea that the user might want to edit.",
-    );
+    expect(textarea).toHaveValue(MOCK_TEXTAREA_DEFAULT_VALUE);
 });
 
 WithDefaultValue.test(
@@ -208,7 +209,7 @@ WithDefaultValue.test(
         const textarea = canvas.getByRole("textbox");
         await userEvent.type(textarea, " Hello World");
         expect(textarea).toHaveValue(
-            "This is some pre-filled content in the textarea that the user might want to edit. Hello World",
+            `${MOCK_TEXTAREA_DEFAULT_VALUE} Hello World`,
         );
     },
 );
@@ -216,7 +217,7 @@ WithDefaultValue.test(
 export const ReadOnly = meta.story({
     args: {
         readOnly: true,
-        value: "This content is read-only and cannot be edited.",
+        value: MOCK_TEXTAREA_READONLY_VALUE,
     },
 });
 
@@ -228,9 +229,7 @@ ReadOnly.test("should be read-only", ({ canvas }) => {
 ReadOnly.test("should not accept input", async ({ canvas, userEvent }) => {
     const textarea = canvas.getByRole("textbox");
     await userEvent.type(textarea, "Hello World");
-    expect(textarea).toHaveValue(
-        "This content is read-only and cannot be edited.",
-    );
+    expect(textarea).toHaveValue(MOCK_TEXTAREA_READONLY_VALUE);
 });
 
 export const MaxLength = meta.story({

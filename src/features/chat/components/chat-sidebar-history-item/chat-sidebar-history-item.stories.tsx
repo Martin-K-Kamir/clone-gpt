@@ -1,11 +1,20 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+    MOCK_CHAT_BUTTON_RENAME,
+    MOCK_CHAT_ERROR_RENAME_CHAT,
+    MOCK_CHAT_TITLE_NEW,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_CHAT_ID,
     createMockPrivateChat,
     generateChatId,
 } from "#.storybook/lib/mocks/chats";
 import { getQueryClient } from "#.storybook/lib/utils/query-client";
-import { waitForMenuItemByText } from "#.storybook/lib/utils/test-helpers";
+import {
+    clickLinkAndVerify,
+    waitForMenuItemByText,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect, mocked, waitFor } from "storybook/test";
 
@@ -157,24 +166,16 @@ Default.test("should be interactive", async ({ canvas, userEvent }) => {
     expect(link).toBeInTheDocument();
     expect(link).toBeEnabled();
 
-    let preventDefaultCalled = false;
-    const clickHandler = (e: MouseEvent) => {
-        e.preventDefault();
-        preventDefaultCalled = true;
-    };
-
-    link.addEventListener("click", clickHandler, { once: true });
-
-    await userEvent.click(link);
-
-    expect(preventDefaultCalled).toBe(true);
+    await clickLinkAndVerify(link, userEvent);
 });
 
 Default.test("should open dropdown menu", async ({ canvas, userEvent }) => {
     const listItem = canvas.getByRole("listitem");
     expect(listItem).toBeInTheDocument();
 
-    const button = canvas.getByRole("button", { name: "Open menu" });
+    const button = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+    });
     await userEvent.click(button);
 
     expect(button).toHaveAttribute("aria-expanded", "true");
@@ -186,10 +187,12 @@ Default.test("should render rename input", async ({ canvas, userEvent }) => {
     const listItem = canvas.getByRole("listitem");
     expect(listItem).toBeInTheDocument();
 
-    const button = canvas.getByRole("button", { name: "Open menu" });
+    const button = canvas.getByRole("button", {
+        name: MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+    });
     await userEvent.click(button);
 
-    const renameItem = await waitForMenuItemByText("Rename");
+    const renameItem = await waitForMenuItemByText(MOCK_CHAT_BUTTON_RENAME);
     await userEvent.click(renameItem);
 
     const input = canvas.getByRole("textbox");
@@ -208,15 +211,17 @@ Default.test(
         const listItem = canvas.getByRole("listitem");
         expect(listItem).toBeInTheDocument();
 
-        const button = canvas.getByRole("button", { name: "Open menu" });
+        const button = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+        });
         await userEvent.click(button);
 
-        const renameItem = await waitForMenuItemByText("Rename");
+        const renameItem = await waitForMenuItemByText(MOCK_CHAT_BUTTON_RENAME);
         await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
-        await userEvent.type(input, "New Chat Title");
+        await userEvent.type(input, MOCK_CHAT_TITLE_NEW);
 
         await userEvent.click(document.body);
 
@@ -228,11 +233,11 @@ Default.test(
         );
 
         const link = canvas.getByRole("link");
-        expect(link).toHaveTextContent("New Chat Title");
+        expect(link).toHaveTextContent(MOCK_CHAT_TITLE_NEW);
 
         expect(mocked(updateChatTitle)).toHaveBeenCalledWith({
             chatId: MOCK_CHAT_ID,
-            newTitle: "New Chat Title",
+            newTitle: MOCK_CHAT_TITLE_NEW,
         });
     },
 );
@@ -247,15 +252,17 @@ Default.test(
         const listItem = canvas.getByRole("listitem");
         expect(listItem).toBeInTheDocument();
 
-        const button = canvas.getByRole("button", { name: "Open menu" });
+        const button = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+        });
         await userEvent.click(button);
 
-        const renameItem = await waitForMenuItemByText("Rename");
+        const renameItem = await waitForMenuItemByText(MOCK_CHAT_BUTTON_RENAME);
         await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
-        await userEvent.type(input, "New Chat Title{Enter}");
+        await userEvent.type(input, `${MOCK_CHAT_TITLE_NEW}{Enter}`);
 
         await waitFor(
             () => {
@@ -266,12 +273,12 @@ Default.test(
 
         await waitFor(() => {
             const link = canvas.getByRole("link");
-            expect(link).toHaveTextContent("New Chat Title");
+            expect(link).toHaveTextContent(MOCK_CHAT_TITLE_NEW);
         });
 
         expect(mocked(updateChatTitle)).toHaveBeenCalledWith({
             chatId: MOCK_CHAT_ID,
-            newTitle: "New Chat Title",
+            newTitle: MOCK_CHAT_TITLE_NEW,
         });
     },
 );
@@ -280,21 +287,23 @@ Default.test(
     "should not change name when rename fails",
     async ({ canvas, userEvent }) => {
         mocked(updateChatTitle).mockResolvedValueOnce(
-            api.error.chat.rename(new Error("Failed to rename chat")),
+            api.error.chat.rename(new Error(MOCK_CHAT_ERROR_RENAME_CHAT)),
         );
 
         const listItem = canvas.getByRole("listitem");
         expect(listItem).toBeInTheDocument();
 
-        const button = canvas.getByRole("button", { name: "Open menu" });
+        const button = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+        });
         await userEvent.click(button);
 
-        const renameItem = await waitForMenuItemByText("Rename");
+        const renameItem = await waitForMenuItemByText(MOCK_CHAT_BUTTON_RENAME);
         await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
-        await userEvent.type(input, "New Chat Title");
+        await userEvent.type(input, MOCK_CHAT_TITLE_NEW);
 
         await userEvent.type(input, "{Enter}");
 
@@ -320,15 +329,17 @@ Default.test(
         const listItem = canvas.getByRole("listitem");
         expect(listItem).toBeInTheDocument();
 
-        const button = canvas.getByRole("button", { name: "Open menu" });
+        const button = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+        });
         await userEvent.click(button);
 
-        const renameItem = await waitForMenuItemByText("Rename");
+        const renameItem = await waitForMenuItemByText(MOCK_CHAT_BUTTON_RENAME);
         await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");
         await userEvent.clear(input);
-        await userEvent.type(input, "New Chat Title");
+        await userEvent.type(input, MOCK_CHAT_TITLE_NEW);
 
         await userEvent.type(input, "{Escape}");
 
@@ -354,10 +365,12 @@ Default.test(
         const listItem = canvas.getByRole("listitem");
         expect(listItem).toBeInTheDocument();
 
-        const button = canvas.getByRole("button", { name: "Open menu" });
+        const button = canvas.getByRole("button", {
+            name: MOCK_CHAT_BUTTON_OPEN_MENU_LOWERCASE,
+        });
         await userEvent.click(button);
 
-        const renameItem = await waitForMenuItemByText("Rename");
+        const renameItem = await waitForMenuItemByText(MOCK_CHAT_BUTTON_RENAME);
         await userEvent.click(renameItem);
 
         const input = canvas.getByRole("textbox");

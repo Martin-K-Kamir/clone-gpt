@@ -1,6 +1,6 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { MOCK_AUTH_BUTTON_SIGNOUT } from "#.storybook/lib/mocks/auth-forms";
 import preview from "#.storybook/preview";
-import React from "react";
 import { expect, fn, mocked, waitFor } from "storybook/test";
 
 import { SessionSyncContext } from "@/features/auth/providers";
@@ -16,7 +16,7 @@ let mockSignOutWithSync: ((props?: SyncActionProps) => Promise<void>) | null =
 const meta = preview.meta({
     component: AuthSignOutButton,
     args: {
-        children: "Log out",
+        children: MOCK_AUTH_BUTTON_SIGNOUT,
         onClick: fn(),
     },
     decorators: [
@@ -90,7 +90,7 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     args: {
-        children: "Log out",
+        children: MOCK_AUTH_BUTTON_SIGNOUT,
     },
 });
 
@@ -124,14 +124,14 @@ Default.test(
 
 export const WithCustomVariant = meta.story({
     args: {
-        children: "Log out",
+        children: MOCK_AUTH_BUTTON_SIGNOUT,
         variant: "outline",
     },
 });
 
 export const Disabled = meta.story({
     args: {
-        children: "Log out",
+        children: MOCK_AUTH_BUTTON_SIGNOUT,
         disabled: true,
     },
 });
@@ -160,7 +160,7 @@ Disabled.test(
 
 export const WithMockedSignOutWithSync = meta.story({
     args: {
-        children: "Log out",
+        children: MOCK_AUTH_BUTTON_SIGNOUT,
     },
     decorators: [
         Story => {

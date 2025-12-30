@@ -1,6 +1,17 @@
 import { QueryProvider } from "#.storybook/lib/decorators/providers";
 import { createMockSignupUserData } from "#.storybook/lib/mocks/auth";
 import {
+    MOCK_AUTH_BUTTON_CREATE_ACCOUNT,
+    MOCK_AUTH_BUTTON_LOGIN,
+    MOCK_AUTH_BUTTON_OPEN_LOGIN,
+    MOCK_AUTH_BUTTON_SIGNIN,
+    MOCK_AUTH_BUTTON_SIGNUP,
+    MOCK_AUTH_EMAIL_DEFAULT,
+    MOCK_AUTH_NAME_DEFAULT,
+    MOCK_AUTH_PASSWORD_DEFAULT,
+    MOCK_AUTH_PASSWORD_WRONG,
+} from "#.storybook/lib/mocks/auth-forms";
+import {
     findButtonByText,
     findInputByName,
     waitForDialog,
@@ -84,7 +95,7 @@ export const Default = meta.story({
     render: () => (
         <AuthSignInDialog>
             <AuthSignInDialogTrigger asChild>
-                <Button>Open Login Dialog</Button>
+                <Button>{MOCK_AUTH_BUTTON_OPEN_LOGIN}</Button>
             </AuthSignInDialogTrigger>
         </AuthSignInDialog>
     ),
@@ -94,7 +105,7 @@ Default.test(
     "should open dialog when trigger is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open login dialog/i,
+            name: new RegExp(MOCK_AUTH_BUTTON_OPEN_LOGIN, "i"),
         });
         expect(trigger).toBeVisible();
 
@@ -108,14 +119,14 @@ Default.test(
     "should render signin form by default when dialog opens",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open login dialog/i,
+            name: new RegExp(MOCK_AUTH_BUTTON_OPEN_LOGIN, "i"),
         });
         await userEvent.click(trigger);
 
         const dialog = await waitForDialog("dialog");
         expect(dialog).toBeInTheDocument();
 
-        const loginButton = findButtonByText("Login");
+        const loginButton = findButtonByText(MOCK_AUTH_BUTTON_LOGIN);
         expect(loginButton).toBeInTheDocument();
     },
 );
@@ -124,17 +135,19 @@ Default.test(
     "should switch to signup form when signup link is clicked",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open login dialog/i,
+            name: new RegExp(MOCK_AUTH_BUTTON_OPEN_LOGIN, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
 
-        const signupButton = findButtonByText("Sign up");
+        const signupButton = findButtonByText(MOCK_AUTH_BUTTON_SIGNUP);
         expect(signupButton).toBeInTheDocument();
         await userEvent.click(signupButton);
 
-        const createAccountButton = findButtonByText("Create Account");
+        const createAccountButton = findButtonByText(
+            MOCK_AUTH_BUTTON_CREATE_ACCOUNT,
+        );
         expect(createAccountButton).toBeInTheDocument();
     },
 );
@@ -143,25 +156,27 @@ Default.test(
     "should switch back to signin form from signup form",
     async ({ canvas, userEvent }) => {
         const trigger = canvas.getByRole("button", {
-            name: /open login dialog/i,
+            name: new RegExp(MOCK_AUTH_BUTTON_OPEN_LOGIN, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
 
-        const signupButton = findButtonByText("Sign up");
+        const signupButton = findButtonByText(MOCK_AUTH_BUTTON_SIGNUP);
         expect(signupButton).toBeInTheDocument();
         await userEvent.click(signupButton);
 
-        const createAccountButton = findButtonByText("Create Account");
+        const createAccountButton = findButtonByText(
+            MOCK_AUTH_BUTTON_CREATE_ACCOUNT,
+        );
         expect(createAccountButton).toBeInTheDocument();
 
-        const signinButton = findButtonByText("Sign in");
+        const signinButton = findButtonByText(MOCK_AUTH_BUTTON_SIGNIN);
         expect(signinButton).toBeInTheDocument();
 
         await userEvent.click(signinButton);
 
-        const loginButton = findButtonByText("Login");
+        const loginButton = findButtonByText(MOCK_AUTH_BUTTON_LOGIN);
         expect(loginButton).toBeInTheDocument();
     },
 );
@@ -174,7 +189,7 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /open login dialog/i,
+            name: new RegExp(MOCK_AUTH_BUTTON_OPEN_LOGIN, "i"),
         });
         await userEvent.click(trigger);
 
@@ -183,7 +198,7 @@ Default.test(
 
         const emailInput = findInputByName("email");
         const passwordInput = findInputByName("password");
-        const loginButton = findButtonByText("Login");
+        const loginButton = findButtonByText(MOCK_AUTH_BUTTON_LOGIN);
 
         expect(emailInput).toBeInTheDocument();
         expect(passwordInput).toBeInTheDocument();
@@ -191,8 +206,8 @@ Default.test(
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "password123");
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
         await userEvent.click(loginButton);
 
         await waitFor(() => {
@@ -211,7 +226,7 @@ Default.test(
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /open login dialog/i,
+            name: new RegExp(MOCK_AUTH_BUTTON_OPEN_LOGIN, "i"),
         });
         await userEvent.click(trigger);
 
@@ -220,7 +235,7 @@ Default.test(
 
         const emailInput = findInputByName("email");
         const passwordInput = findInputByName("password");
-        const loginButton = findButtonByText("Login");
+        const loginButton = findButtonByText(MOCK_AUTH_BUTTON_LOGIN);
 
         expect(emailInput).toBeInTheDocument();
         expect(passwordInput).toBeInTheDocument();
@@ -228,8 +243,8 @@ Default.test(
 
         await userEvent.clear(emailInput);
         await userEvent.clear(passwordInput);
-        await userEvent.type(emailInput, "test@example.com");
-        await userEvent.type(passwordInput, "wrongpassword");
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_WRONG);
         await userEvent.click(loginButton);
 
         await waitFor(() => {
@@ -247,19 +262,19 @@ Default.test(
         mocked(signUp).mockResolvedValueOnce(
             api.success.auth.signup(
                 createMockSignupUserData({
-                    email: "john@example.com",
+                    email: MOCK_AUTH_EMAIL_DEFAULT,
                 }),
             ),
         );
 
         const trigger = canvas.getByRole("button", {
-            name: /open login dialog/i,
+            name: new RegExp(MOCK_AUTH_BUTTON_OPEN_LOGIN, "i"),
         });
         await userEvent.click(trigger);
 
         await waitForDialog("dialog");
 
-        const signupButton = findButtonByText("Sign up");
+        const signupButton = findButtonByText(MOCK_AUTH_BUTTON_SIGNUP);
         expect(signupButton).toBeInTheDocument();
         await userEvent.click(signupButton);
 
@@ -267,24 +282,26 @@ Default.test(
         const emailInput = findInputByName("email");
         const passwordInput = findInputByName("password");
         const confirmPasswordInput = findInputByName("confirmPassword");
-        const createAccountButton = findButtonByText("Create Account");
+        const createAccountButton = findButtonByText(
+            MOCK_AUTH_BUTTON_CREATE_ACCOUNT,
+        );
 
-        await userEvent.type(nameInput, "John Doe");
-        await userEvent.type(emailInput, "john@example.com");
-        await userEvent.type(passwordInput, "password123");
-        await userEvent.type(confirmPasswordInput, "password123");
+        await userEvent.type(nameInput, MOCK_AUTH_NAME_DEFAULT);
+        await userEvent.type(emailInput, MOCK_AUTH_EMAIL_DEFAULT);
+        await userEvent.type(passwordInput, MOCK_AUTH_PASSWORD_DEFAULT);
+        await userEvent.type(confirmPasswordInput, MOCK_AUTH_PASSWORD_DEFAULT);
         await userEvent.click(createAccountButton);
 
         await waitFor(() => {
             expect(mocked(signUp)).toHaveBeenCalledWith({
-                name: "John Doe",
-                email: "john@example.com",
-                password: "password123",
-                confirmPassword: "password123",
+                name: MOCK_AUTH_NAME_DEFAULT,
+                email: MOCK_AUTH_EMAIL_DEFAULT,
+                password: MOCK_AUTH_PASSWORD_DEFAULT,
+                confirmPassword: MOCK_AUTH_PASSWORD_DEFAULT,
             });
         });
 
-        const loginButton = findButtonByText("Login");
+        const loginButton = findButtonByText(MOCK_AUTH_BUTTON_LOGIN);
         expect(loginButton).toBeInTheDocument();
     },
 );

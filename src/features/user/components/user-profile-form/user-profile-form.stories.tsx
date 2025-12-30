@@ -1,71 +1,34 @@
+import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_USER_FORM_NAME_ORIGINAL,
+    MOCK_USER_FORM_NAME_TOO_LONG,
+    MOCK_USER_FORM_NAME_UPDATED,
+} from "#.storybook/lib/mocks/user-components";
+import { createMockUser } from "#.storybook/lib/mocks/users";
+import {
+    waitForSonnerToast,
+    waitForTestId,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
-import { Toaster } from "@/components/ui/sonner";
-
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import type { DBUserId, UIUser } from "@/features/user/lib/types";
-import { UserCacheSyncProvider } from "@/features/user/providers";
 import { updateUserName } from "@/features/user/services/actions/update-user-name";
 
 import { api } from "@/lib/api-response";
 
 import { UserProfileForm } from "./user-profile-form";
 
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-const mockUser: UIUser = {
-    id: mockUserId,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: USER_ROLE.USER,
-    image: null,
-};
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                gcTime: 0,
-                staleTime: 0,
-            },
-        },
-    });
-}
-
-const StoryWrapper = ({
-    Story,
-    storyKey,
-}: {
-    Story: React.ComponentType<any>;
-    storyKey?: string;
-}) => {
-    const queryClient = createQueryClient();
-
-    useEffect(() => {
-        queryClient.clear();
-    }, [queryClient, storyKey]);
-
-    return (
-        <QueryClientProvider client={queryClient} key={storyKey}>
-            <UserCacheSyncProvider>
-                <div className="min-w-md bg-zinc-925 max-w-2xl p-6">
-                    <Story />
-                    <Toaster />
-                </div>
-            </UserCacheSyncProvider>
-        </QueryClientProvider>
-    );
-};
+const mockUser = createMockUser();
 
 const meta = preview.meta({
     component: UserProfileForm,
     decorators: [
-        (Story, context) => (
-            <StoryWrapper Story={Story} storyKey={context.name || context.id} />
+        (Story, { parameters }) => (
+            <AppProviders {...parameters.provider}>
+                <div className="min-w-md bg-zinc-925 max-w-2xl p-6">
+                    <Story />
+                </div>
+            </AppProviders>
         ),
     ],
     parameters: {
@@ -143,17 +106,16 @@ Default.test(
 Default.test(
     "should enable submit button when name is changed",
     async ({ canvas, userEvent }) => {
-        const nameInput = canvas.getByTestId("user-profile-form-name-input");
+        const nameInput = await waitForTestId(
+            canvas,
+            "user-profile-form-name-input",
+        );
         const updateButton = canvas.getByRole("button", {
             name: /update profile/i,
         });
 
-        await waitFor(() => {
-            expect(nameInput).toBeVisible();
-        });
-
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Jane Doe");
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_UPDATED);
 
         await waitFor(() => {
             expect(updateButton).toBeEnabled();
@@ -164,22 +126,21 @@ Default.test(
 Default.test(
     "should submit form with updated name",
     async ({ canvas, userEvent }) => {
-        const nameInput = canvas.getByTestId("user-profile-form-name-input");
+        const nameInput = await waitForTestId(
+            canvas,
+            "user-profile-form-name-input",
+        );
         const updateButton = canvas.getByRole("button", {
             name: /update profile/i,
         });
 
-        await waitFor(() => {
-            expect(nameInput).toBeVisible();
-        });
-
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Jane Doe");
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_UPDATED);
         await userEvent.click(updateButton);
 
         await waitFor(() => {
             expect(mocked(updateUserName)).toHaveBeenCalledWith({
-                newName: "Jane Doe",
+                newName: MOCK_USER_FORM_NAME_UPDATED,
             });
         });
     },
@@ -198,13 +159,10 @@ Default.test(
         });
 
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Jane Doe");
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_UPDATED);
         await userEvent.click(updateButton);
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -215,23 +173,27 @@ Default.test(
             () =>
                 new Promise(resolve =>
                     setTimeout(
-                        () => resolve(api.success.user.updateName("Jane Doe")),
+                        () =>
+                            resolve(
+                                api.success.user.updateName(
+                                    MOCK_USER_FORM_NAME_UPDATED,
+                                ),
+                            ),
                         100,
                     ),
                 ),
         );
 
-        const nameInput = canvas.getByTestId("user-profile-form-name-input");
+        const nameInput = await waitForTestId(
+            canvas,
+            "user-profile-form-name-input",
+        );
         const updateButton = canvas.getByRole("button", {
             name: /update profile/i,
         });
 
-        await waitFor(() => {
-            expect(nameInput).toBeVisible();
-        });
-
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Jane Doe");
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_UPDATED);
         await userEvent.click(updateButton);
 
         expect(updateButton).toBeDisabled();
@@ -245,47 +207,42 @@ Default.test(
             api.error.user.updateName(new Error("Failed to update name")),
         );
 
-        const nameInput = canvas.getByTestId("user-profile-form-name-input");
+        const nameInput = await waitForTestId(
+            canvas,
+            "user-profile-form-name-input",
+        );
         const updateButton = canvas.getByRole("button", {
             name: /update profile/i,
         });
 
-        await waitFor(() => {
-            expect(nameInput).toBeVisible();
-        });
-
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Jane Doe");
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_UPDATED);
         await userEvent.click(updateButton);
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeInTheDocument();
-        });
+        await waitForSonnerToast();
     },
 );
 
 Default.test(
     "should disable button again after reverting name to original",
     async ({ canvas, userEvent }) => {
-        const nameInput = canvas.getByTestId("user-profile-form-name-input");
+        const nameInput = await waitForTestId(
+            canvas,
+            "user-profile-form-name-input",
+        );
         const updateButton = canvas.getByRole("button", {
             name: /update profile/i,
         });
 
-        await waitFor(() => {
-            expect(nameInput).toBeVisible();
-        });
-
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, "Jane Doe");
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_UPDATED);
 
         await waitFor(() => {
             expect(updateButton).toBeEnabled();
         });
 
         await userEvent.clear(nameInput);
-        await userEvent.type(nameInput, mockUser.name);
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_ORIGINAL);
 
         await waitFor(() => {
             expect(updateButton).toBeDisabled();
@@ -296,16 +253,15 @@ Default.test(
 Default.test(
     "should show error message when name is too long",
     async ({ canvas, userEvent }) => {
-        const nameInput = canvas.getByTestId("user-profile-form-name-input");
+        const nameInput = await waitForTestId(
+            canvas,
+            "user-profile-form-name-input",
+        );
         const updateButton = canvas.getByRole("button", {
             name: /update profile/i,
         });
 
-        await waitFor(() => {
-            expect(nameInput).toBeVisible();
-        });
-
-        await userEvent.type(nameInput, "A".repeat(51));
+        await userEvent.type(nameInput, MOCK_USER_FORM_NAME_TOO_LONG);
         await userEvent.click(updateButton);
 
         await waitFor(() => {

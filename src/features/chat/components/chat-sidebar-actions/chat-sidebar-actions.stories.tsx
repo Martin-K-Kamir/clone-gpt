@@ -1,6 +1,13 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_CHAT_BUTTON_NEW_CHAT,
+    MOCK_CHAT_BUTTON_SEARCH,
+} from "#.storybook/lib/mocks/chat";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
-import { waitForElement } from "#.storybook/lib/utils/test-helpers";
+import {
+    clickLinkAndVerify,
+    waitForElement,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, waitFor } from "storybook/test";
@@ -41,8 +48,12 @@ export const Default = meta.story({
 });
 
 Default.test("should render both action buttons", async ({ canvas }) => {
-    const newChatButton = canvas.getByRole("link", { name: /new chat/i });
-    const searchButton = canvas.getByRole("button", { name: /search/i });
+    const newChatButton = canvas.getByRole("link", {
+        name: new RegExp(MOCK_CHAT_BUTTON_NEW_CHAT, "i"),
+    });
+    const searchButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_SEARCH, "i"),
+    });
 
     expect(newChatButton).toBeVisible();
     expect(searchButton).toBeVisible();
@@ -51,26 +62,20 @@ Default.test("should render both action buttons", async ({ canvas }) => {
 Default.test(
     "should navigate to home when clicking new chat button",
     async ({ canvas, userEvent }) => {
-        const newChatButton = canvas.getByRole("link", { name: /new chat/i });
+        const newChatButton = canvas.getByRole("link", {
+            name: new RegExp(MOCK_CHAT_BUTTON_NEW_CHAT, "i"),
+        });
 
-        let clickIntercepted = false;
-        const clickHandler = (e: MouseEvent) => {
-            e.preventDefault();
-            clickIntercepted = true;
-        };
-
-        newChatButton.addEventListener("click", clickHandler, { once: true });
-
-        await userEvent.click(newChatButton);
-
-        expect(clickIntercepted).toBe(true);
+        await clickLinkAndVerify(newChatButton, userEvent);
     },
 );
 
 Default.test(
     "should open search dialog when clicking search button",
     async ({ canvas, userEvent }) => {
-        const searchButton = canvas.getByRole("button", { name: /search/i });
+        const searchButton = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_SEARCH, "i"),
+        });
         await userEvent.click(searchButton);
 
         const dialog = await waitForElement('[data-slot="dialog-content"]');
@@ -80,8 +85,12 @@ Default.test(
 );
 
 Default.test("should be interactive", async ({ canvas, userEvent }) => {
-    const newChatButton = canvas.getByRole("link", { name: /new chat/i });
-    const searchButton = canvas.getByRole("button", { name: /search/i });
+    const newChatButton = canvas.getByRole("link", {
+        name: new RegExp(MOCK_CHAT_BUTTON_NEW_CHAT, "i"),
+    });
+    const searchButton = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_SEARCH, "i"),
+    });
 
     expect(newChatButton).toBeVisible();
     expect(searchButton).toBeVisible();

@@ -1,3 +1,4 @@
+import { getCheckedSelectItem } from "#.storybook/lib/utils/elements";
 import {
     waitForSelectContent,
     waitForSelectContentToClose,
@@ -166,9 +167,7 @@ Default.test(
         await userEvent.click(trigger);
 
         await waitFor(() => {
-            const selectedItem = document.querySelector(
-                '[data-slot="select-item"][data-state="checked"]',
-            );
+            const selectedItem = getCheckedSelectItem();
             expect(selectedItem).toBeInTheDocument();
             expect(selectedItem?.textContent).toContain("Apple");
 
@@ -345,9 +344,7 @@ WithDefaultValue.test(
         await userEvent.click(trigger);
 
         await waitFor(() => {
-            const selectedItem = document.querySelector(
-                '[data-slot="select-item"][data-state="checked"]',
-            );
+            const selectedItem = getCheckedSelectItem();
             expect(selectedItem).toBeInTheDocument();
             expect(selectedItem?.textContent).toContain("Banana");
 

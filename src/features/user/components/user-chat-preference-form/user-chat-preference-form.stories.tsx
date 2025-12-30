@@ -1,98 +1,49 @@
+import { UserSessionProvider } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_USER_CHARACTERISTIC_BUTTON_DIRECT,
+    MOCK_USER_CHARACTERISTIC_BUTTON_GEN_Z,
+    MOCK_USER_CHARACTERISTIC_BUTTON_QUICK_WIT,
+    MOCK_USER_FORM_NAME_TEST,
+    MOCK_USER_FORM_NICKNAME,
+    MOCK_USER_FORM_ROLE,
+    MOCK_USER_FORM_TEST_ID_CHARACTERISTIC_REFRESH_BUTTON,
+} from "#.storybook/lib/mocks/user-components";
+import {
+    MOCK_EMPTY_USER_CHAT_PREFERENCES,
+    MOCK_USER_CHAT_PREFERENCES,
+    createMockUser,
+} from "#.storybook/lib/mocks/users";
+import {
+    createLoadingUserChatPreferencesHandler,
+    createUserChatPreferencesHandler,
+} from "#.storybook/lib/msw/handlers";
+import { getAllCharacteristicButtons } from "#.storybook/lib/utils/elements";
+import { clearAllQueries } from "#.storybook/lib/utils/query-client";
+import {
+    waitForCharacteristicButtons,
+    waitForSonnerToast,
+    waitForTestId,
+} from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HttpResponse, http } from "msw";
-import { useEffect } from "react";
 import { expect, mocked, waitFor } from "storybook/test";
 
-import { Toaster } from "@/components/ui/sonner";
-
-import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
-import type {
-    DBUserChatPreferences,
-    DBUserId,
-    UIUser,
-} from "@/features/user/lib/types";
-import { UserCacheSyncProvider } from "@/features/user/providers";
 import { upsertUserChatPreferences } from "@/features/user/services/actions/upsert-user-chat-preferences";
 
 import { api } from "@/lib/api-response";
 
 import { UserChatPreferenceForm } from "./user-chat-preference-form";
 
-const mockUserId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-
-const mockUser: UIUser = {
-    id: mockUserId,
-    name: "John Doe",
-    email: "john.doe@example.com",
-    role: USER_ROLE.USER,
-    image: null,
-};
-
-const mockUserChatPreferences: DBUserChatPreferences = {
-    id: "00000000-0000-0000-0000-000000000010",
-    userId: mockUserId,
-    nickname: "Johnny",
-    role: "Software Engineer",
-    personality: "FRIENDLY",
-    characteristics: "Quick Wit, Direct",
-    extraInfo: "I love coding and playing guitar",
-    createdAt: new Date().toISOString(),
-};
-
-const emptyPreferences: DBUserChatPreferences = {
-    id: "00000000-0000-0000-0000-000000000011",
-    userId: mockUserId,
-    nickname: null,
-    role: null,
-    personality: "FRIENDLY",
-    characteristics: null,
-    extraInfo: null,
-    createdAt: new Date().toISOString(),
-};
-
-function createQueryClient() {
-    return new QueryClient({
-        defaultOptions: {
-            queries: {
-                retry: false,
-                gcTime: 0,
-                staleTime: 0,
-            },
-        },
-    });
-}
-
-const StoryWrapper = ({
-    Story,
-    storyKey,
-}: {
-    Story: React.ComponentType<any>;
-    storyKey?: string;
-}) => {
-    const queryClient = createQueryClient();
-
-    useEffect(() => {
-        queryClient.clear();
-    }, [queryClient, storyKey]);
-
-    return (
-        <QueryClientProvider client={queryClient} key={storyKey}>
-            <UserCacheSyncProvider>
-                <div className="min-w-md bg-zinc-925 max-w-2xl p-6">
-                    <Story />
-                    <Toaster />
-                </div>
-            </UserCacheSyncProvider>
-        </QueryClientProvider>
-    );
-};
+const mockUser = createMockUser();
 
 const meta = preview.meta({
     component: UserChatPreferenceForm,
     decorators: [
-        (Story, context) => (
-            <StoryWrapper Story={Story} storyKey={context.name || context.id} />
+        (Story, { parameters }) => (
+            <UserSessionProvider {...parameters.provider}>
+                <div className="min-w-md bg-zinc-925 max-w-2xl p-6">
+                    <Story />
+                </div>
+            </UserSessionProvider>
         ),
     ],
     parameters: {
@@ -104,6 +55,9 @@ const meta = preview.meta({
                     { id: "aria-valid-attr-value", enabled: false },
                 ],
             },
+        },
+        provider: {
+            queryProviderKey: "user-chat-preference-form",
         },
     },
     argTypes: {
@@ -119,24 +73,21 @@ const meta = preview.meta({
 });
 
 export const Default = meta.story({
-    name: "Default (Empty Form)",
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user/chat-preferences", () => {
-                    return HttpResponse.json(
-                        api.success.user.getChatPreferences(emptyPreferences),
-                    );
+                createUserChatPreferencesHandler({
+                    preferences: MOCK_EMPTY_USER_CHAT_PREFERENCES,
                 }),
             ],
         },
     },
     beforeEach: () => {
-        // Clear any cached query data
-        const queryClient = createQueryClient();
-        queryClient.clear();
+        clearAllQueries();
         mocked(upsertUserChatPreferences).mockResolvedValue(
-            api.success.user.updateChatPreferences(emptyPreferences),
+            api.success.user.updateChatPreferences(
+                MOCK_EMPTY_USER_CHAT_PREFERENCES,
+            ),
         );
     },
     afterEach: () => {
@@ -149,35 +100,34 @@ export const Default = meta.story({
 
 Default.test("should render all form fields", async ({ canvas }) => {
     await waitFor(() => {
-        expect(
-            canvas.getByTestId("user-chat-preference-form-nickname-input"),
-        ).toBeVisible();
-        expect(
-            canvas.getByTestId("user-chat-preference-form-role-input"),
-        ).toBeVisible();
-        expect(
-            canvas.getByTestId(
-                "user-chat-preference-form-personality-select-trigger",
-            ),
-        ).toBeVisible();
-        expect(
-            canvas.getByTestId(
-                "user-chat-preference-form-characteristics-textarea",
-            ),
-        ).toBeVisible();
-        expect(
-            canvas.getByTestId("user-chat-preference-form-extraInfo-textarea"),
-        ).toBeVisible();
+        const nicknameInput = canvas.getByTestId(
+            "user-chat-preference-form-nickname-input",
+        );
+        const roleInput = canvas.getByTestId(
+            "user-chat-preference-form-role-input",
+        );
+        const personalitySelectTrigger = canvas.getByTestId(
+            "user-chat-preference-form-personality-select-trigger",
+        );
+        const characteristicsTextarea = canvas.getByTestId(
+            "user-chat-preference-form-characteristics-textarea",
+        );
+        const extraInfoTextarea = canvas.getByTestId(
+            "user-chat-preference-form-extraInfo-textarea",
+        );
+
+        expect(nicknameInput).toBeVisible();
+        expect(roleInput).toBeVisible();
+        expect(personalitySelectTrigger).toBeVisible();
+        expect(characteristicsTextarea).toBeVisible();
+        expect(extraInfoTextarea).toBeVisible();
     });
 });
 
 Default.test("should render Save and Reset buttons", async ({ canvas }) => {
     await waitFor(() => {
-        const saveButton = canvas.getByRole("button", { name: /save/i });
-        const resetButton = canvas.getByRole("button", { name: /reset/i });
-
-        expect(saveButton).toBeVisible();
-        expect(resetButton).toBeVisible();
+        expect(canvas.getByRole("button", { name: /save/i })).toBeVisible();
+        expect(canvas.getByRole("button", { name: /reset/i })).toBeVisible();
     });
 });
 
@@ -192,21 +142,17 @@ Default.test("should load empty preferences from API", async ({ canvas }) => {
 Default.test(
     "should submit form with valid data",
     async ({ canvas, userEvent }) => {
-        const nicknameInput = canvas.getByTestId(
+        const nicknameInput = await waitForTestId(
+            canvas,
             "user-chat-preference-form-nickname-input",
         );
         const roleInput = canvas.getByTestId(
             "user-chat-preference-form-role-input",
         );
-        const saveButton = canvas.getByRole("button", { name: /save/i });
 
-        await waitFor(() => {
-            expect(nicknameInput).toBeVisible();
-        });
-
-        await userEvent.type(nicknameInput, "Jane");
-        await userEvent.type(roleInput, "Designer");
-        await userEvent.click(saveButton);
+        await userEvent.type(nicknameInput, MOCK_USER_FORM_NICKNAME);
+        await userEvent.type(roleInput, MOCK_USER_FORM_ROLE);
+        await userEvent.click(canvas.getByRole("button", { name: /save/i }));
 
         await waitFor(() => {
             expect(mocked(upsertUserChatPreferences)).toHaveBeenCalled();
@@ -224,7 +170,7 @@ Default.test(
                         () =>
                             resolve(
                                 api.success.user.updateChatPreferences(
-                                    mockUserChatPreferences,
+                                    MOCK_USER_CHAT_PREFERENCES,
                                 ),
                             ),
                         250,
@@ -232,16 +178,13 @@ Default.test(
                 ),
         );
 
-        const nicknameInput = canvas.getByTestId(
+        const nicknameInput = await waitForTestId(
+            canvas,
             "user-chat-preference-form-nickname-input",
         );
         const saveButton = canvas.getByRole("button", { name: /save/i });
 
-        await waitFor(() => {
-            expect(nicknameInput).toBeVisible();
-        });
-
-        await userEvent.type(nicknameInput, "Jane");
+        await userEvent.type(nicknameInput, MOCK_USER_FORM_NICKNAME);
         await userEvent.click(saveButton);
 
         expect(saveButton).toBeDisabled();
@@ -255,7 +198,8 @@ Default.test(
 Default.test(
     "should show success toast on successful submit",
     async ({ canvas, userEvent }) => {
-        const nicknameInput = canvas.getByTestId(
+        const nicknameInput = await waitForTestId(
+            canvas,
             "user-chat-preference-form-nickname-input",
         );
         const roleInput = canvas.getByTestId(
@@ -263,22 +207,15 @@ Default.test(
         );
         const saveButton = canvas.getByRole("button", { name: /save/i });
 
-        await waitFor(() => {
-            expect(nicknameInput).toBeVisible();
-        });
-
-        await userEvent.type(nicknameInput, "Jane");
-        await userEvent.type(roleInput, "Designer");
+        await userEvent.type(nicknameInput, MOCK_USER_FORM_NICKNAME);
+        await userEvent.type(roleInput, MOCK_USER_FORM_ROLE);
         await userEvent.click(saveButton);
 
         await waitFor(() => {
             expect(mocked(upsertUserChatPreferences)).toHaveBeenCalled();
         });
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeVisible();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -290,22 +227,16 @@ Default.test(
                 new Error("Failed to update preferences"),
             ),
         );
-        const nicknameInput = canvas.getByTestId(
+        const nicknameInput = await waitForTestId(
+            canvas,
             "user-chat-preference-form-nickname-input",
         );
         const saveButton = canvas.getByRole("button", { name: /save/i });
 
-        await waitFor(() => {
-            expect(nicknameInput).toBeVisible();
-        });
-
-        await userEvent.type(nicknameInput, "Test");
+        await userEvent.type(nicknameInput, MOCK_USER_FORM_NAME_TEST);
         await userEvent.click(saveButton);
 
-        await waitFor(() => {
-            const toast = document.querySelector("[data-sonner-toast]");
-            expect(toast).toBeVisible();
-        });
+        await waitForSonnerToast();
     },
 );
 
@@ -327,27 +258,22 @@ Default.test("should reset form fields", async ({ canvas, userEvent }) => {
 });
 
 Default.test("should display characteristic buttons", async () => {
-    await waitFor(() => {
-        const characteristicButtons = document.querySelectorAll(
-            "[data-testid^='user-chat-preference-form-characteristic-button-']",
-        );
-        expect(characteristicButtons.length).toBeGreaterThan(0);
-    });
+    await waitForCharacteristicButtons();
 });
 
 Default.test(
     "should add characteristic description to textarea when button is clicked",
     async ({ canvas, userEvent }) => {
         const genZButton = canvas.getByTestId(
-            "user-chat-preference-form-characteristic-button-GEN_Z",
+            MOCK_USER_CHARACTERISTIC_BUTTON_GEN_Z,
         );
 
         const directButton = canvas.getByTestId(
-            "user-chat-preference-form-characteristic-button-DIRECT",
+            MOCK_USER_CHARACTERISTIC_BUTTON_DIRECT,
         );
 
         const quickWitButton = canvas.getByTestId(
-            "user-chat-preference-form-characteristic-button-QUICK_WIT",
+            MOCK_USER_CHARACTERISTIC_BUTTON_QUICK_WIT,
         );
 
         await waitFor(() => {
@@ -361,23 +287,23 @@ Default.test(
         const characteristicsTextarea = canvas.getByTestId(
             "user-chat-preference-form-characteristics-textarea",
         ) as HTMLTextAreaElement;
-        const lenght1 = characteristicsTextarea.value.length;
+        const length1 = characteristicsTextarea.value.length;
 
-        expect(lenght1).toBeGreaterThan(0);
+        expect(length1).toBeGreaterThan(0);
         expect(genZButton).not.toBeVisible();
 
         await userEvent.click(directButton);
 
-        const lenght2 = characteristicsTextarea.value.length;
+        const length2 = characteristicsTextarea.value.length;
 
-        expect(lenght2).toBeGreaterThan(lenght1);
+        expect(length2).toBeGreaterThan(length1);
         expect(directButton).not.toBeVisible();
 
         await userEvent.click(quickWitButton);
 
-        const lenght3 = characteristicsTextarea.value.length;
+        const length3 = characteristicsTextarea.value.length;
 
-        expect(lenght3).toBeGreaterThan(lenght2);
+        expect(length3).toBeGreaterThan(length2);
         expect(quickWitButton).not.toBeVisible();
     },
 );
@@ -386,26 +312,23 @@ Default.test(
     "should remove characteristics when clicked and restore them on refresh",
     async ({ canvas, userEvent }) => {
         function getNumberOfCharacteristicsButtons() {
-            const characteristicButtons = document.querySelectorAll(
-                "[data-testid^='user-chat-preference-form-characteristic-button-']",
-            );
-            return characteristicButtons.length;
+            return getAllCharacteristicButtons().length;
         }
 
         const genZButton = canvas.getByTestId(
-            "user-chat-preference-form-characteristic-button-GEN_Z",
+            MOCK_USER_CHARACTERISTIC_BUTTON_GEN_Z,
         );
 
         const directButton = canvas.getByTestId(
-            "user-chat-preference-form-characteristic-button-DIRECT",
+            MOCK_USER_CHARACTERISTIC_BUTTON_DIRECT,
         );
 
         const quickWitButton = canvas.getByTestId(
-            "user-chat-preference-form-characteristic-button-QUICK_WIT",
+            MOCK_USER_CHARACTERISTIC_BUTTON_QUICK_WIT,
         );
 
         const refreshButton = canvas.getByTestId(
-            "user-chat-preference-form-characteristic-refresh-button",
+            MOCK_USER_FORM_TEST_ID_CHARACTERISTIC_REFRESH_BUTTON,
         );
 
         await waitFor(() => {
@@ -453,19 +376,18 @@ export const WithFilledData = meta.story({
     parameters: {
         msw: {
             handlers: [
-                http.get("/api/user/chat-preferences", () => {
-                    return HttpResponse.json(
-                        api.success.user.getChatPreferences(
-                            mockUserChatPreferences,
-                        ),
-                    );
+                createUserChatPreferencesHandler({
+                    preferences: MOCK_USER_CHAT_PREFERENCES,
                 }),
             ],
+        },
+        provider: {
+            queryProviderKey: "user-chat-preference-form-with-filled-data",
         },
     },
     beforeEach: () => {
         mocked(upsertUserChatPreferences).mockResolvedValue(
-            api.success.user.updateChatPreferences(mockUserChatPreferences),
+            api.success.user.updateChatPreferences(MOCK_USER_CHAT_PREFERENCES),
         );
     },
     afterEach: () => {
@@ -494,14 +416,14 @@ WithFilledData.test(
             );
 
             expect(nicknameInput).toHaveValue(
-                mockUserChatPreferences.nickname || "",
+                MOCK_USER_CHAT_PREFERENCES.nickname,
             );
-            expect(roleInput).toHaveValue(mockUserChatPreferences.role || "");
+            expect(roleInput).toHaveValue(MOCK_USER_CHAT_PREFERENCES.role);
             expect(characteristicsTextarea).toHaveValue(
-                mockUserChatPreferences.characteristics || "",
+                MOCK_USER_CHAT_PREFERENCES.characteristics,
             );
             expect(extraInfoTextarea).toHaveValue(
-                mockUserChatPreferences.extraInfo || "",
+                MOCK_USER_CHAT_PREFERENCES.extraInfo,
             );
         });
     },
@@ -511,21 +433,15 @@ export const LoadingState = meta.story({
     name: "Loading State",
     parameters: {
         msw: {
-            handlers: [
-                http.get("/api/user/chat-preferences", async () => {
-                    await new Promise(resolve => setTimeout(resolve, 5_000));
-                    return HttpResponse.json(
-                        api.success.user.getChatPreferences(
-                            mockUserChatPreferences,
-                        ),
-                    );
-                }),
-            ],
+            handlers: [createLoadingUserChatPreferencesHandler()],
+        },
+        provider: {
+            queryProviderKey: "user-chat-preference-form-loading-state",
         },
     },
     beforeEach: () => {
         mocked(upsertUserChatPreferences).mockResolvedValue(
-            api.success.user.updateChatPreferences(mockUserChatPreferences),
+            api.success.user.updateChatPreferences(MOCK_USER_CHAT_PREFERENCES),
         );
     },
     afterEach: () => {
@@ -537,12 +453,15 @@ export const LoadingState = meta.story({
 });
 
 LoadingState.test("should show loading state on inputs", async ({ canvas }) => {
-    expect(
-        canvas.getByTestId("user-chat-preference-form-nickname-input"),
-    ).toBeDisabled();
-    expect(
-        canvas.getByTestId("user-chat-preference-form-role-input"),
-    ).toBeDisabled();
+    const nicknameInput = canvas.getByTestId(
+        "user-chat-preference-form-nickname-input",
+    );
+    const roleInput = canvas.getByTestId(
+        "user-chat-preference-form-role-input",
+    );
+    const skeletons = canvas.getAllByTestId("skeleton");
 
-    expect(canvas.getAllByTestId("skeleton").length).toBeGreaterThan(0);
+    expect(nicknameInput).toBeDisabled();
+    expect(roleInput).toBeDisabled();
+    expect(skeletons.length).toBeGreaterThan(0);
 });

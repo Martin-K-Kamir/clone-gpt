@@ -1,3 +1,10 @@
+import { QueryProvider } from "#.storybook/lib/decorators/providers";
+import {
+    MOCK_APP_ERROR_CHAT_NOT_FOUND,
+    MOCK_APP_LINK_START_NEW_CHAT,
+    MOCK_APP_ROUTE_HOME,
+} from "#.storybook/lib/mocks/app";
+import { clickLinkAndVerify } from "#.storybook/lib/utils/test-helpers";
 import preview from "#.storybook/preview";
 import { expect } from "storybook/test";
 
@@ -5,17 +12,17 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 
 import Error from "./error";
 
-const StoryWrapper = ({ Story }: { Story: React.ComponentType }) => {
-    return (
-        <SidebarProvider>
-            <Story />
-        </SidebarProvider>
-    );
-};
-
 const meta = preview.meta({
     component: Error,
-    decorators: [Story => <StoryWrapper Story={Story} />],
+    decorators: [
+        (Story, { parameters }) => (
+            <QueryProvider {...parameters.provider}>
+                <SidebarProvider>
+                    <Story />
+                </SidebarProvider>
+            </QueryProvider>
+        ),
+    ],
     parameters: {
         layout: "fullscreen",
         a11y: {
@@ -31,14 +38,12 @@ const meta = preview.meta({
     },
 });
 
-export const Default = meta.story({
-    args: {},
-});
+export const Default = meta.story();
 
 Default.test("should render heading and description", async ({ canvas }) => {
     const heading = canvas.getByRole("heading", {
         level: 2,
-        name: /chat not found/i,
+        name: new RegExp(MOCK_APP_ERROR_CHAT_NOT_FOUND, "i"),
     });
     expect(heading).toBeInTheDocument();
     expect(heading.textContent.length).toBeGreaterThan(0);
@@ -52,21 +57,12 @@ Default.test(
     "should render start a new chat link",
     async ({ canvas, userEvent }) => {
         const link = canvas.getByRole("link", {
-            name: /start a new chat/i,
+            name: new RegExp(MOCK_APP_LINK_START_NEW_CHAT, "i"),
         });
 
         expect(link).toBeInTheDocument();
         expect(link).toBeEnabled();
-        expect(link).toHaveAttribute("href", "/");
 
-        let clicked = false;
-        link.addEventListener("click", e => {
-            e.preventDefault();
-            clicked = true;
-        });
-
-        await userEvent.click(link);
-
-        expect(clicked).toBe(true);
+        await clickLinkAndVerify(link, userEvent, MOCK_APP_ROUTE_HOME);
     },
 );

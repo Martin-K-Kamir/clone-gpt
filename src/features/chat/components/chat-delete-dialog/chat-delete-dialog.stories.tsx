@@ -1,5 +1,9 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
 import {
+    MOCK_CHAT_BUTTON_DELETE,
+    MOCK_CHAT_BUTTON_DELETE_CHAT,
+} from "#.storybook/lib/mocks/chat";
+import {
     MOCK_CHAT_ID,
     createMockPrivateChat,
 } from "#.storybook/lib/mocks/chats";
@@ -85,7 +89,9 @@ export const Default = meta.story({
     render: args => (
         <ChatDeleteDialog {...args}>
             <ChatDeleteDialogTrigger asChild>
-                <Button variant="destructive">Delete Chat</Button>
+                <Button variant="destructive">
+                    {MOCK_CHAT_BUTTON_DELETE_CHAT}
+                </Button>
             </ChatDeleteDialogTrigger>
         </ChatDeleteDialog>
     ),
@@ -122,7 +128,9 @@ export const Default = meta.story({
 });
 
 Default.test("should open dialog", async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole("button", { name: /delete chat/i });
+    const trigger = canvas.getByRole("button", {
+        name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+    });
     await userEvent.click(trigger);
 
     await waitForDialog("alertdialog");
@@ -131,7 +139,9 @@ Default.test("should open dialog", async ({ canvas, userEvent }) => {
 Default.test(
     "should display chat description",
     async ({ canvas, userEvent }) => {
-        const trigger = canvas.getByRole("button", { name: /delete chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
@@ -153,12 +163,16 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /delete chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        const deleteButton = await waitFor(() =>
+            findButtonByText(MOCK_CHAT_BUTTON_DELETE),
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -178,12 +192,16 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /delete chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        const deleteButton = await waitFor(() =>
+            findButtonByText(MOCK_CHAT_BUTTON_DELETE),
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -203,12 +221,16 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /delete chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        const deleteButton = await waitFor(() =>
+            findButtonByText(MOCK_CHAT_BUTTON_DELETE),
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -234,12 +256,16 @@ Default.test(
         queryClient.setQueryData([tag.userChat(MOCK_CHAT_ID)], mockChat);
         queryClient.setQueryData([tag.userInitialChatsSearch()], [mockChat]);
 
-        const trigger = canvas.getByRole("button", { name: /delete chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        const deleteButton = await waitFor(() =>
+            findButtonByText(MOCK_CHAT_BUTTON_DELETE),
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -270,12 +296,16 @@ Default.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /delete chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        const deleteButton = await waitFor(() =>
+            findButtonByText(MOCK_CHAT_BUTTON_DELETE),
+        );
         await userEvent.click(deleteButton);
 
         await waitFor(() => {
@@ -301,7 +331,9 @@ export const Active = meta.story({
     render: args => (
         <ChatDeleteDialog {...args}>
             <ChatDeleteDialogTrigger asChild>
-                <Button variant="destructive">Delete Chat</Button>
+                <Button variant="destructive">
+                    {MOCK_CHAT_BUTTON_DELETE_CHAT}
+                </Button>
             </ChatDeleteDialogTrigger>
         </ChatDeleteDialog>
     ),
@@ -318,12 +350,16 @@ Active.test(
             }),
         );
 
-        const trigger = canvas.getByRole("button", { name: /delete chat/i });
+        const trigger = canvas.getByRole("button", {
+            name: new RegExp(MOCK_CHAT_BUTTON_DELETE_CHAT, "i"),
+        });
         await userEvent.click(trigger);
 
         await waitForDialog("alertdialog");
 
-        const deleteButton = await waitFor(() => findButtonByText("Delete"));
+        const deleteButton = await waitFor(() =>
+            findButtonByText(MOCK_CHAT_BUTTON_DELETE),
+        );
         await userEvent.click(deleteButton);
 
         expect(getRouter().replace).toHaveBeenCalledWith("/");

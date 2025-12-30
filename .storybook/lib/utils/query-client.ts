@@ -1,9 +1,9 @@
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, type QueryClientConfig } from "@tanstack/react-query";
 
 import { tag } from "../../../src/lib/cache-tag";
 import { getQueryClient as getQueryClientFromApp } from "../../../src/providers/query-provider";
 
-export function createQueryClient() {
+export function createQueryClient(options?: QueryClientConfig) {
     return new QueryClient({
         defaultOptions: {
             queries: {
@@ -12,6 +12,7 @@ export function createQueryClient() {
                 refetchOnReconnect: false,
                 refetchOnWindowFocus: false,
                 refetchOnMount: false,
+                ...options?.defaultOptions?.queries,
             },
         },
     });

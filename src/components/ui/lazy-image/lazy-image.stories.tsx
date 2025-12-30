@@ -1,3 +1,15 @@
+import {
+    MOCK_LAZY_IMAGE_ALT_CUSTOM_ERROR,
+    MOCK_LAZY_IMAGE_ALT_CUSTOM_LOADER,
+    MOCK_LAZY_IMAGE_ALT_DEFAULT,
+    MOCK_LAZY_IMAGE_ALT_ERROR,
+    MOCK_LAZY_IMAGE_ALT_LOADING,
+    MOCK_LAZY_IMAGE_URL_CUSTOM_ERROR,
+    MOCK_LAZY_IMAGE_URL_CUSTOM_LOADER,
+    MOCK_LAZY_IMAGE_URL_DEFAULT,
+    MOCK_LAZY_IMAGE_URL_ERROR,
+    MOCK_LAZY_IMAGE_URL_LOADING,
+} from "#.storybook/lib/mocks/lazy-image";
 import preview from "#.storybook/preview";
 import { IconPhoto } from "@tabler/icons-react";
 
@@ -108,8 +120,8 @@ const meta = preview.meta({
 
 export const Default = meta.story({
     args: {
-        src: "https://picsum.photos/id/237/800/600",
-        alt: "A beautiful dog",
+        src: MOCK_LAZY_IMAGE_URL_DEFAULT,
+        alt: MOCK_LAZY_IMAGE_ALT_DEFAULT,
         width: 800,
         height: 600,
         classNameWrapper: "relative block size-full max-w-2xl",
@@ -118,8 +130,8 @@ export const Default = meta.story({
 
 export const LoadingState = meta.story({
     args: {
-        src: "https://picsum.photos/id/237/800/600",
-        alt: "Loading image",
+        src: MOCK_LAZY_IMAGE_URL_LOADING,
+        alt: MOCK_LAZY_IMAGE_ALT_LOADING,
         width: 800,
         height: 600,
         isLoaded: false,
@@ -129,8 +141,8 @@ export const LoadingState = meta.story({
 
 export const ErrorState = meta.story({
     args: {
-        src: "https://invalid-url-that-does-not-exist.com/image.jpg",
-        alt: "Error loading image",
+        src: MOCK_LAZY_IMAGE_URL_ERROR,
+        alt: MOCK_LAZY_IMAGE_ALT_ERROR,
         width: 800,
         height: 600,
         isError: true,
@@ -140,8 +152,8 @@ export const ErrorState = meta.story({
 
 export const CustomLoader = meta.story({
     args: {
-        src: "https://picsum.photos/id/1015/800/600",
-        alt: "Image with custom loader",
+        src: MOCK_LAZY_IMAGE_URL_CUSTOM_LOADER,
+        alt: MOCK_LAZY_IMAGE_ALT_CUSTOM_LOADER,
         width: 800,
         height: 600,
         isLoaded: false,
@@ -161,8 +173,8 @@ export const CustomLoader = meta.story({
 
 export const CustomError = meta.story({
     args: {
-        src: "https://invalid-url-that-does-not-exist.com/image.jpg",
-        alt: "Image with custom error",
+        src: MOCK_LAZY_IMAGE_URL_CUSTOM_ERROR,
+        alt: MOCK_LAZY_IMAGE_ALT_CUSTOM_ERROR,
         width: 800,
         height: 600,
         isError: true,

@@ -1,4 +1,5 @@
 import { AppProviders } from "#.storybook/lib/decorators/providers";
+import { MOCK_CHAT_MESSAGE_ABOUT_TO_SEND_FILES } from "#.storybook/lib/mocks/chat";
 import { MOCK_CHAT_ID } from "#.storybook/lib/mocks/chats";
 import {
     MOCK_CONVERSATION_BASIC,
@@ -219,7 +220,9 @@ export const WithFilesInComposer = meta.story({
         userId: MOCK_USER_ID,
         chatId: MOCK_CHAT_ID,
         messages: [
-            createMockUserMessage({ text: "I'm about to send some files" }),
+            createMockUserMessage({
+                text: MOCK_CHAT_MESSAGE_ABOUT_TO_SEND_FILES,
+            }),
         ],
         isOwner: true,
         visibility: CHAT_VISIBILITY.PRIVATE,
