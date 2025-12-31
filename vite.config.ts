@@ -40,6 +40,7 @@ export default defineConfig({
                     include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
                     exclude: ["**/*.stories.{js,ts,jsx,tsx}"],
                     environment: "node",
+                    setupFiles: ["./src/vitest.setup.ts"],
                 },
                 resolve: {
                     alias: {
