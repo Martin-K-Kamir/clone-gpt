@@ -6,7 +6,7 @@ import { useMemo } from "react";
 
 import { cn } from "@/lib/utils";
 
-import { getSourcePreviews } from "@/services/source";
+import { getSourcePreviews } from "@/services/get-source-previews";
 
 import { SourceListItem } from "./source-list-item";
 import { SourceListLinks } from "./source-list-links";
