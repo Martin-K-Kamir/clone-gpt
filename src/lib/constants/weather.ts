@@ -1,5 +1,5 @@
 import type { WeatherIconCodeDay, WeatherIconCodeNight } from "@/lib/types";
-import { objectValuesToTuple } from "@/lib/utils";
+import { objectValuesToTuple } from "@/lib/utils/object-values-to-tuple/object-values-to-tuple";
 
 import { TIME_OF_DAY } from "./time";
 

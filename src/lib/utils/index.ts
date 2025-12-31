@@ -1,7 +1,8 @@
 export * from "./cn";
+export * from "./celsius-to-fahrenheit";
+export * from "./fahrenheit-to-celsius";
 export * from "./get-first-two-capital-letters";
 export * from "./throttle";
-export * from "./debounce";
 export * from "./generate-size-number";
 export * from "./generate-size-percentage";
 export * from "./is-react-element";
@@ -20,6 +21,7 @@ export * from "./capitalize";
 export * from "./get-first-name";
 export * from "./create-infinite-cache-updater";
 export * from "./absolute-url";
+export * from "./convert-temperature";
 export * from "./create-cache-updater";
 export * from "./tab-scope";
 export * from "./merge-refs";

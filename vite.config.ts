@@ -9,16 +9,46 @@ const dirname =
         ? __dirname
         : path.dirname(fileURLToPath(import.meta.url));
 
-// More info at: https://storybook.js.org/docs/next/writing-tests/integrations/vitest-addon
 export default defineConfig({
     test: {
         globals: true,
         include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
-        // Let Storybook addon handle the environment and story discovery
-        // Stories are defined in .storybook/main.ts and will be discovered automatically
         watch: false,
         pool: "forks",
+        coverage: {
+            provider: "v8",
+            reporter: ["text", "json", "html"],
+            exclude: [
+                "node_modules/",
+                ".storybook/**",
+                "src/**/*.test.{ts,tsx}",
+                "src/**/*.spec.{ts,tsx}",
+                "src/**/*.stories.{ts,tsx}",
+                "**/*.d.ts",
+                "**/types/**",
+                "types/**",
+                "**/constants/**",
+                "**/index.ts",
+                "**/lib/ai/tools/**",
+            ],
+        },
         projects: [
+            // Default unit test project
+            {
+                test: {
+                    name: "unit",
+                    include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
+                    exclude: ["**/*.stories.{js,ts,jsx,tsx}"],
+                    environment: "node",
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(__dirname, "./src"),
+                        "#": path.resolve(__dirname, "."),
+                    },
+                },
+            },
+            // Storybook test project
             {
                 extends: true,
                 plugins: [
@@ -28,6 +58,17 @@ export default defineConfig({
                         configDir: path.join(dirname, ".storybook"),
                     }),
                 ],
+                define: {
+                    "process.env.NEXT_PUBLIC_SUPABASE_URL": JSON.stringify(
+                        process.env.NEXT_PUBLIC_SUPABASE_URL ||
+                            "https://mock.supabase.co",
+                    ),
+                    "process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY":
+                        JSON.stringify(
+                            process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY ||
+                                "mock-anon-key",
+                        ),
+                },
                 test: {
                     name: "storybook",
                     browser: {

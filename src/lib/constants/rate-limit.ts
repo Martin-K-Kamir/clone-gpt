@@ -1,4 +1,4 @@
-import { objectValuesToTuple } from "@/lib/utils";
+import { objectValuesToTuple } from "@/lib/utils/object-values-to-tuple/object-values-to-tuple";
 
 export const RATE_LIMIT_REASON = {
     MESSAGES: "messages",

@@ -93,7 +93,7 @@ Default.test("should render user email", async ({ canvas }) => {
 Default.test("should render avatar with fallback", async ({ canvas }) => {
     await waitFor(() => {
         const avatar = canvas.getByText(
-            getFirstTwoCapitalLetters(mockUser.name),
+            getFirstTwoCapitalLetters(mockUser.name) ?? "",
         );
         expect(avatar).toBeInTheDocument();
     });

@@ -3,6 +3,13 @@ import { setProjectAnnotations } from "@storybook/nextjs-vite";
 
 import projectAnnotations from "./preview";
 
+if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://mock.supabase.co";
+}
+if (!process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY) {
+    process.env.NEXT_PUBLIC_SUPABASE_SECRET_KEY = "mock-anon-key";
+}
+
 // This is an important step to apply the right configuration when testing your stories.
 // More info at: https://storybook.js.org/docs/api/portable-stories/portable-stories-vitest#setprojectannotations
 // @ts-expect-error - Storybook type mismatch, but works at runtime

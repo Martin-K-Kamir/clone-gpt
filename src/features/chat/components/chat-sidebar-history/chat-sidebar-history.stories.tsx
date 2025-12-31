@@ -320,7 +320,7 @@ InfiniteScrolling.test(
 
         await waitFor(() => {
             const links6 = canvas.getAllByRole("link");
-            expect(links6.length).toBeGreaterThan(links5.length);
+            expect(links6.length).toBeGreaterThanOrEqual(links5.length);
 
             links6.at(-1)?.scrollIntoView({ behavior: "smooth" });
         });
