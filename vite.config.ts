@@ -33,14 +33,16 @@ export default defineConfig({
             ],
         },
         projects: [
-            // Default unit test project
             {
                 test: {
                     name: "unit",
-                    include: ["src/**/*.{test,spec}.{js,ts,jsx,tsx}"],
-                    exclude: ["**/*.stories.{js,ts,jsx,tsx}"],
+                    include: ["src/**/*.test.{js,ts,jsx,tsx}"],
+                    exclude: [
+                        "**/*.stories.{js,ts,jsx,tsx}",
+                        "**/*.spec.{ts,tsx}",
+                    ],
                     environment: "node",
-                    setupFiles: ["./src/vitest.setup.ts"],
+                    setupFiles: ["./src/vitest/unit-setup.ts"],
                 },
                 resolve: {
                     alias: {
@@ -49,7 +51,24 @@ export default defineConfig({
                     },
                 },
             },
-            // Storybook test project
+            {
+                test: {
+                    name: "integration",
+                    include: ["src/**/*.spec.{ts,tsx}"],
+                    exclude: ["**/*.test.{ts,tsx}", "**/*.stories.{ts,tsx}"],
+                    environment: "node",
+                    setupFiles: ["./src/vitest/integration-setup.ts"],
+                    testTimeout: 15000,
+                    pool: "forks",
+                    maxWorkers: 1,
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(__dirname, "./src"),
+                        "#": path.resolve(__dirname, "."),
+                    },
+                },
+            },
             {
                 extends: true,
                 plugins: [

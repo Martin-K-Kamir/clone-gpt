@@ -1,8 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { toRelativeDate } from "./to-relative-date";
 
 describe("toRelativeDate", () => {
+    beforeEach(() => {
+        vi.setSystemTime(new Date("2024-06-15T12:00:00Z"));
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
     it("should return 'Today' for today's date", () => {
         const today = new Date();
         expect(toRelativeDate(today)).toBe("Today");
@@ -15,9 +23,7 @@ describe("toRelativeDate", () => {
     });
 
     it("should return formatted date for same year", () => {
-        const date = new Date();
-        date.setMonth(5);
-        date.setDate(15);
+        const date = new Date("2024-02-15T00:00:00Z");
         const result = toRelativeDate(date);
         expect(result).toMatch(/^\d{1,2} \w{3}$/);
     });

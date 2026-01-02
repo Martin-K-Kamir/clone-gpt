@@ -1,4 +1,4 @@
-import { server } from "@/vitest.setup";
+import { server } from "@/vitest/unit-setup";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it, vi } from "vitest";
 

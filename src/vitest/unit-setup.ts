@@ -3,12 +3,27 @@ import { afterAll, afterEach, beforeAll, beforeEach, vi } from "vitest";
 
 export const server = setupServer();
 
+vi.mock("next/cache", async () => {
+    const actual = await vi.importActual("next/cache");
+    return {
+        ...actual,
+        revalidateTag: vi.fn(),
+        cacheTag: vi.fn(),
+        updateTag: vi.fn(),
+    };
+});
+
+vi.mock("@/lib/utils/handle-api-error", () => ({
+    handleApiError: vi.fn((_err, fallback) => fallback()),
+}));
+
 beforeAll(() => {
     server.listen({ onUnhandledRequest: "error" });
 });
 
 afterEach(() => {
     server.resetHandlers();
+    vi.clearAllMocks();
 });
 
 afterAll(() => {
@@ -23,8 +38,4 @@ beforeEach(() => {
         }
         return originalFetch(input, init);
     });
-});
-
-afterEach(() => {
-    vi.restoreAllMocks();
 });

@@ -35,15 +35,11 @@ export async function getUserChatMessages({
     });
 }
 
-type UncachedGetUserChatMessagesProps = WithChatId &
-    WithUserId &
-    WithOptionalVerifyChatAccess;
-
 export async function uncachedGetUserChatMessages({
     chatId,
     userId,
     verifyChatAccess = true,
-}: UncachedGetUserChatMessagesProps) {
+}: GetUserChatMessagesProps) {
     assertIsDBChatId(chatId);
     assertIsDBUserId(userId);
 

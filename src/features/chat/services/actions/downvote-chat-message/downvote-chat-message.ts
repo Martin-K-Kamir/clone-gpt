@@ -49,14 +49,16 @@ export async function downvoteChatMessage({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const currentMetadata = (currentMessage?.metadata as any) || {};
 
+        const updatedMetadata = {
+            ...currentMetadata,
+            isDownvoted: downvote,
+            isUpvoted: false,
+        };
+
         const { data, error } = await supabase
             .from("messages")
             .update({
-                metadata: {
-                    ...currentMetadata,
-                    isDownvoted: downvote,
-                    isUpvoted: false,
-                },
+                metadata: updatedMetadata,
             })
             .eq("id", messageId)
             .eq("userId", userId)
