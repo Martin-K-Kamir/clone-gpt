@@ -21,7 +21,7 @@ describe("upsertUserChatPreferences", () => {
         vi.clearAllMocks();
     });
 
-    it("inserts preferences when missing, then updates", async () => {
+    it("saves preferences and updates existing ones", async () => {
         const userId = generateUserId() as DBUserId;
         const email = generateUserEmail();
 

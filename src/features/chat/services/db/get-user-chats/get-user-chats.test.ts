@@ -180,7 +180,7 @@ describe("getUserChats", () => {
         expect(result.hasNextPage).toBe(false);
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when fetch fails", async () => {
         mocks.from.mockImplementation(() => ({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

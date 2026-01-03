@@ -5,7 +5,7 @@ import { supabase } from "@/services/supabase";
 import { createUser } from "./create-user";
 
 describe("createUser", () => {
-    it("creates a user with default role user", async () => {
+    it("creates user with default role", async () => {
         const email = `test-user-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
 
         const user = await createUser({
@@ -24,7 +24,7 @@ describe("createUser", () => {
         }
     });
 
-    it("creates a user with explicit role admin", async () => {
+    it("creates user with explicit role", async () => {
         const email = `test-admin-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
 
         const user = await createUser({

@@ -74,7 +74,7 @@ describe("getChatVisibility", () => {
         expect(result?.visibility).toBe("private");
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when fetch fails", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -91,7 +91,7 @@ describe("getChatVisibility", () => {
         );
     });
 
-    it("throws when chat not found (PGRST116)", async () => {
+    it("throws when chat does not exist", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

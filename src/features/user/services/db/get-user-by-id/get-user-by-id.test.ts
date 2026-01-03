@@ -48,7 +48,7 @@ describe("getUserById", () => {
         expect(result).toEqual(mockUser);
     });
 
-    it("throws when not found (PGRST116)", async () => {
+    it("throws when record does not exist", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({

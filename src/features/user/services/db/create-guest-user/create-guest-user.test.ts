@@ -46,7 +46,7 @@ describe("createGuestUser", () => {
         expect(result.email).toContain("guest-");
     });
 
-    it("throws when supabase returns error", async () => {
+    it("throws when creation fails", async () => {
         mocks.from.mockReturnValue({
             insert: mocks.insert.mockReturnValue({
                 select: mocks.select.mockReturnValue({

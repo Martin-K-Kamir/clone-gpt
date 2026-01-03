@@ -38,7 +38,7 @@ describe("incrementUserFilesRateLimit", () => {
         ).rejects.toThrow();
     });
 
-    it("creates rate limit when missing and increments from zero", async () => {
+    it("increments file count for new user", async () => {
         mocks.getUserFilesRateLimit.mockResolvedValue(null);
         mocks.createUserFilesRateLimit.mockResolvedValue(undefined);
         mocks.updateUserFilesRateLimit.mockResolvedValue(undefined);
@@ -52,7 +52,7 @@ describe("incrementUserFilesRateLimit", () => {
         });
     });
 
-    it("increments from existing counters", async () => {
+    it("increments file count from existing value", async () => {
         mocks.getUserFilesRateLimit.mockResolvedValue({
             filesCounter: 5,
         });

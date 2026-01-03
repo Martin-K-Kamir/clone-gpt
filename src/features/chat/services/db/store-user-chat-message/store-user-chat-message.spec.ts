@@ -11,7 +11,7 @@ import { supabase } from "@/services/supabase";
 import { storeUserChatMessage } from "./store-user-chat-message";
 
 describe("storeUserChatMessage", () => {
-    it("stores a message in the database", async () => {
+    it("stores a message", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();

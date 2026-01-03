@@ -240,7 +240,7 @@ describe("getUserChatById", () => {
         expect(result).toBeNull();
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when fetch fails", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
             visibility: "private",

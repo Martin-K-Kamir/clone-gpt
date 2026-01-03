@@ -65,7 +65,7 @@ describe("upsertUserChatPreferences", () => {
         (auth as any).mockResolvedValue({ user: { id: constants.userId } });
     });
 
-    it("returns success when upsert works", async () => {
+    it("saves preferences successfully", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiSuccess as any,
         );
@@ -88,7 +88,7 @@ describe("upsertUserChatPreferences", () => {
         expect(result).toBe(apiSuccess);
     });
 
-    it("returns not found when supabase returns null", async () => {
+    it("returns not found when record does not exist", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiNotFound as any,
         );
@@ -111,7 +111,7 @@ describe("upsertUserChatPreferences", () => {
         expect(result).toBe(apiNotFound);
     });
 
-    it("returns api error on supabase error", async () => {
+    it("returns error when operation fails", async () => {
         mocks.from.mockImplementation(() => ({
             upsert: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({

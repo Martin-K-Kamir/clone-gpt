@@ -70,7 +70,7 @@ describe("deleteUserChatById", () => {
         mocks.deleteStorageDirectory.mockResolvedValue(undefined);
     });
 
-    it("returns success when delete works", async () => {
+    it("deletes chat successfully", async () => {
         const mkDelete = () =>
             ({
                 delete: vi.fn().mockReturnValue({

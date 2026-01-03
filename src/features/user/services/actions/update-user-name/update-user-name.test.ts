@@ -64,7 +64,7 @@ describe("updateUserName", () => {
         (auth as any).mockResolvedValue({ user: { id: constants.userId } });
     });
 
-    it("returns success when update works", async () => {
+    it("updates name successfully", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiSuccess as any,
         );
@@ -101,7 +101,7 @@ describe("updateUserName", () => {
         expect(result).toBe(apiError);
     });
 
-    it("returns not found when supabase returns null", async () => {
+    it("returns not found when record does not exist", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiNotFound as any,
         );
@@ -124,7 +124,7 @@ describe("updateUserName", () => {
         expect(result).toBe(apiNotFound);
     });
 
-    it("returns api error on supabase error", async () => {
+    it("returns error when update fails", async () => {
         mocks.from.mockImplementation(() => ({
             update: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

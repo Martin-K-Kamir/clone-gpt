@@ -9,7 +9,7 @@ import { incrementUserFilesRateLimit } from "./increment-user-files-rate-limit";
 const userId = "00000000-0000-0000-0000-000000000020" as DBUserId;
 
 describe("incrementUserFilesRateLimit", () => {
-    it("creates row when missing and increments files", async () => {
+    it("increments file count for new user", async () => {
         await supabase
             .from("user_files_rate_limits")
             .delete()
@@ -29,7 +29,7 @@ describe("incrementUserFilesRateLimit", () => {
         expect(data?.filesCounter).toBe(2);
     });
 
-    it("increments existing counters", async () => {
+    it("increments file count from existing value", async () => {
         await supabase
             .from("user_files_rate_limits")
             .delete()

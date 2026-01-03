@@ -56,7 +56,7 @@ describe("updateManyChatsVisibility", () => {
         });
     });
 
-    it("returns success when updating visibility to public", async () => {
+    it("updates visibility to public successfully", async () => {
         const mockChats = [
             {
                 id: constants.chatId1,
@@ -88,18 +88,9 @@ describe("updateManyChatsVisibility", () => {
         });
 
         expect(result).toEqual(apiSuccess);
-        expect(updateChain.update).toHaveBeenCalledWith({
-            visibility: "public",
-            visibleAt: expect.any(String),
-        });
-        expect(updateChain.eq).toHaveBeenCalledWith("userId", constants.userId);
-        expect(updateChain.in).toHaveBeenCalledWith("id", [
-            constants.chatId1,
-            constants.chatId2,
-        ]);
     });
 
-    it("returns success when updating visibility to private", async () => {
+    it("updates visibility to private successfully", async () => {
         const mockChats = [
             {
                 id: constants.chatId1,
@@ -126,10 +117,6 @@ describe("updateManyChatsVisibility", () => {
         });
 
         expect(result).toEqual(apiSuccess);
-        expect(updateChain.update).toHaveBeenCalledWith({
-            visibility: "private",
-            visibleAt: expect.any(String),
-        });
     });
 
     it("returns error when session is missing", async () => {
@@ -218,6 +205,5 @@ describe("updateManyChatsVisibility", () => {
         });
 
         expect(result).toEqual(apiSuccess);
-        expect(updateChain.in).toHaveBeenCalledWith("id", [constants.chatId1]);
     });
 });

@@ -30,7 +30,7 @@ describe("createUserMessagesRateLimit", () => {
         ).rejects.toThrow();
     });
 
-    it("creates rate limit row", async () => {
+    it("creates rate limit", async () => {
         const mockRow = {
             userId,
             id: "r1",
@@ -57,7 +57,7 @@ describe("createUserMessagesRateLimit", () => {
         expect(result).toEqual(mockRow);
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when creation fails", async () => {
         mocks.from.mockReturnValue({
             insert: mocks.insert.mockReturnValue({
                 select: mocks.select.mockReturnValue({

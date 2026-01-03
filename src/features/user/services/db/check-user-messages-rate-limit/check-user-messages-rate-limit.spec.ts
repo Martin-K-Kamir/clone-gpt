@@ -21,7 +21,7 @@ describe("checkUserMessagesRateLimit", () => {
         expect(result.tokensCounter).toBe(0);
     });
 
-    it("flags over-limit by messages when messagesCounter exceeds maxMessages", async () => {
+    it("returns over-limit status when message threshold exceeded", async () => {
         const userId = "00000000-0000-0000-0000-000000000002" as DBUserId;
 
         const result = await checkUserMessagesRateLimit({
@@ -38,7 +38,7 @@ describe("checkUserMessagesRateLimit", () => {
         );
     });
 
-    it("flags over-limit by tokens when tokensCounter exceeds maxTokens", async () => {
+    it("returns over-limit status when token threshold exceeded", async () => {
         const userId = "00000000-0000-0000-0000-000000000011" as DBUserId;
 
         const result = await checkUserMessagesRateLimit({

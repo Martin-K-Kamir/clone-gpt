@@ -103,7 +103,7 @@ describe("updateUserChatMessage", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("throws on update error", async () => {
+    it("throws when update fails", async () => {
         const message = {
             id: messageId,
             role: "user",

@@ -9,7 +9,7 @@ import { updateUserMessagesRateLimit } from "./update-user-messages-rate-limit";
 const userId = "00000000-0000-0000-0000-000000000031" as DBUserId;
 
 describe("updateUserMessagesRateLimit", () => {
-    it("updates counters and isOverLimit", async () => {
+    it("updates rate limit status", async () => {
         await supabase
             .from("user_messages_rate_limits")
             .delete()

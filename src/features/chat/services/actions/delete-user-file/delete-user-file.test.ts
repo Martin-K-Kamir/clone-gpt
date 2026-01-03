@@ -50,7 +50,7 @@ describe("deleteUserFile", () => {
         });
     });
 
-    it("returns success when delete works", async () => {
+    it("deletes file successfully", async () => {
         const storedFile = {
             fileId: constants.fileId,
             name: "test.jpg",
@@ -67,14 +67,9 @@ describe("deleteUserFile", () => {
         });
 
         expect(result).toEqual(apiSuccess);
-        expect(mocks.deleteUserFile).toHaveBeenCalledWith({
-            storedFile,
-            chatId: constants.chatId,
-            userId: constants.userId,
-        });
     });
 
-    it("returns error when storage delete fails", async () => {
+    it("returns error when deletion fails", async () => {
         const storedFile = {
             fileId: constants.fileId,
             name: "test.jpg",

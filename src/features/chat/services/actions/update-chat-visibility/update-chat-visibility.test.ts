@@ -51,7 +51,7 @@ describe("updateChatVisibility", () => {
         });
     });
 
-    it("returns success when updating visibility to public", async () => {
+    it("updates visibility to public successfully", async () => {
         const updatedChat = {
             visibility: "public" as const,
         };
@@ -79,7 +79,7 @@ describe("updateChatVisibility", () => {
         expect(result).toEqual(apiSuccess);
     });
 
-    it("returns success when updating visibility to private", async () => {
+    it("updates visibility to private successfully", async () => {
         const updatedChat = {
             visibility: "private" as const,
         };

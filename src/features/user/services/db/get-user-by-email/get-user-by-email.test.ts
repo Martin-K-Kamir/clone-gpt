@@ -44,7 +44,7 @@ describe("getUserByEmail", () => {
         expect(result).toEqual(mockUser);
     });
 
-    it("returns null when not found (PGRST116)", async () => {
+    it("returns null when record does not exist", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({

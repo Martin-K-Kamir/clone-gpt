@@ -272,7 +272,7 @@ describe("getUserChatsByDate", () => {
         expect(result).toHaveLength(0);
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when fetch fails", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

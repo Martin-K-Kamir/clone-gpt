@@ -19,7 +19,7 @@ describe("checkUserFilesRateLimit", () => {
         expect(result.filesCounter).toBe(0);
     });
 
-    it("flags over-limit when filesCounter exceeds maxFiles", async () => {
+    it("returns over-limit status when threshold exceeded", async () => {
         const userId = "00000000-0000-0000-0000-000000000010" as DBUserId;
 
         const result = await checkUserFilesRateLimit({

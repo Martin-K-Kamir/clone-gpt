@@ -30,6 +30,8 @@ export default defineConfig({
                 "**/constants/**",
                 "**/index.ts",
                 "**/lib/ai/tools/**",
+                "**/*.mock.ts",
+                "**/*.mocks.ts",
             ],
         },
         projects: [

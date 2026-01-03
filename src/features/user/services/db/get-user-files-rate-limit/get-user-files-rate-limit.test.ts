@@ -30,7 +30,7 @@ describe("getUserFilesRateLimit", () => {
         ).rejects.toThrow();
     });
 
-    it("returns rate limit row on success", async () => {
+    it("returns rate limit on success", async () => {
         const mockRow = {
             id: "r1",
             userId,
@@ -54,7 +54,7 @@ describe("getUserFilesRateLimit", () => {
         expect(result).toEqual(mockRow);
     });
 
-    it("returns null when not found (PGRST116)", async () => {
+    it("returns null when record does not exist", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({

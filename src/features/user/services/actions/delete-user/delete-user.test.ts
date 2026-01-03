@@ -59,7 +59,7 @@ describe("deleteUser", () => {
         (auth as any).mockResolvedValue({ user: { id: constants.userId } });
     });
 
-    it("returns success when all deletes pass", async () => {
+    it("deletes user and related data successfully", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiSuccess as any,
         );
@@ -99,7 +99,7 @@ describe("deleteUser", () => {
         expect(result).toBe(apiSuccess);
     });
 
-    it("returns api error when a delete fails", async () => {
+    it("returns error when deletion fails", async () => {
         const failingChain = {
             delete: vi.fn().mockReturnValue({
                 eq: vi.fn().mockResolvedValue({ error: { message: "boom" } }),

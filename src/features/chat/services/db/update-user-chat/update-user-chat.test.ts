@@ -124,7 +124,7 @@ describe("updateUserChat", () => {
         expect(result).toEqual(updatedChat);
     });
 
-    it("throws on update error", async () => {
+    it("throws when update fails", async () => {
         mocks.from.mockReturnValue({
             update: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

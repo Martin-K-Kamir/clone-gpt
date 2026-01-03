@@ -52,7 +52,7 @@ describe("downvoteChatMessage", () => {
         });
     });
 
-    it("returns success when downvoting a message", async () => {
+    it("downvotes message successfully", async () => {
         const mockMessage = {
             id: constants.messageId,
             chatId: constants.chatId,
@@ -95,7 +95,7 @@ describe("downvoteChatMessage", () => {
         expect(result).toEqual(apiSuccess);
     });
 
-    it("returns success when removing downvote from a message", async () => {
+    it("removes downvote successfully", async () => {
         const mockMessage = {
             id: constants.messageId,
             chatId: constants.chatId,

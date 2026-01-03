@@ -85,7 +85,7 @@ describe("createUserChat", () => {
         expect(result).toEqual(mockChat);
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when creation fails", async () => {
         mocks.from.mockImplementation(() => ({
             insert: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({

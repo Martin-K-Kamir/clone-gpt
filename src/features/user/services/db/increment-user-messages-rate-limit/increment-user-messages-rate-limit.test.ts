@@ -38,7 +38,7 @@ describe("incrementUserMessagesRateLimit", () => {
         ).rejects.toThrow();
     });
 
-    it("creates rate limit when missing and increments from zero", async () => {
+    it("increments message and token counts for new user", async () => {
         mocks.getUserMessagesRateLimit.mockResolvedValue(null);
         mocks.createUserMessagesRateLimit.mockResolvedValue(undefined);
         mocks.updateUserMessagesRateLimit.mockResolvedValue(undefined);
@@ -57,7 +57,7 @@ describe("incrementUserMessagesRateLimit", () => {
         });
     });
 
-    it("increments from existing counters", async () => {
+    it("increments message and token counts from existing values", async () => {
         mocks.getUserMessagesRateLimit.mockResolvedValue({
             messagesCounter: 5,
             tokensCounter: 50,

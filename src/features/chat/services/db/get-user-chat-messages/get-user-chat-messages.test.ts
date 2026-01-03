@@ -234,7 +234,7 @@ describe("getUserChatMessages", () => {
         expect(result.isOwner).toBe(true);
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when fetch fails", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
             visibility: "private",

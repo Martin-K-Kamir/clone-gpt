@@ -34,7 +34,7 @@ describe("updateUserMessagesRateLimit", () => {
         ).rejects.toThrow();
     });
 
-    it("returns updated row on success", async () => {
+    it("returns updated rate limit", async () => {
         const mockRow = {
             id: "r1",
             userId,
@@ -65,7 +65,7 @@ describe("updateUserMessagesRateLimit", () => {
         expect(result).toEqual(mockRow);
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when update fails", async () => {
         mocks.from.mockReturnValue({
             update: mocks.update.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({

@@ -112,7 +112,7 @@ describe("storeUserChatMessage", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("throws on insert error", async () => {
+    it("throws when storage fails", async () => {
         const message = {
             id: messageId,
             role: "user",

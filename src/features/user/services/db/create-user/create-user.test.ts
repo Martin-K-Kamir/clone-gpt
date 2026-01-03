@@ -84,7 +84,7 @@ describe("createUser", () => {
         expect(result?.role).toBe("admin");
     });
 
-    it("throws on supabase error", async () => {
+    it("throws when creation fails", async () => {
         mocks.from.mockReturnValue({
             insert: mocks.insert.mockReturnValue({
                 select: mocks.select.mockReturnValue({

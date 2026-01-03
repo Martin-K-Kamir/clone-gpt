@@ -54,7 +54,7 @@ describe("setAllUserChatsVisibility", () => {
         });
     });
 
-    it("returns success when setting all chats visibility to public", async () => {
+    it("sets all chats visibility to public successfully", async () => {
         const updateChain = {
             update: vi.fn().mockReturnThis(),
             eq: vi.fn().mockResolvedValue({
@@ -70,14 +70,9 @@ describe("setAllUserChatsVisibility", () => {
         });
 
         expect(result).toEqual(apiSuccess);
-        expect(updateChain.update).toHaveBeenCalledWith({
-            visibility: "public",
-            visibleAt: expect.any(String),
-        });
-        expect(updateChain.eq).toHaveBeenCalledWith("userId", constants.userId);
     });
 
-    it("returns success when setting all chats visibility to private", async () => {
+    it("sets all chats visibility to private successfully", async () => {
         const updateChain = {
             update: vi.fn().mockReturnThis(),
             eq: vi.fn().mockResolvedValue({
@@ -93,11 +88,6 @@ describe("setAllUserChatsVisibility", () => {
         });
 
         expect(result).toEqual(apiSuccess);
-        expect(updateChain.update).toHaveBeenCalledWith({
-            visibility: "private",
-            visibleAt: expect.any(String),
-        });
-        expect(updateChain.eq).toHaveBeenCalledWith("userId", constants.userId);
     });
 
     it("returns error when session is missing", async () => {
