@@ -1,8 +1,8 @@
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueMessageId,
-    generateUniqueUserId,
+    generateChatId,
+    generateMessageId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
@@ -14,12 +14,12 @@ import { duplicateUserChat } from "./duplicate-user-chat";
 
 describe("duplicateUserChat", () => {
     it("duplicates chat with messages", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const originalChatId = generateUniqueChatId();
-        const newChatId = generateUniqueChatId();
-        const messageId1 = generateUniqueMessageId();
-        const messageId2 = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const originalChatId = generateChatId();
+        const newChatId = generateChatId();
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,

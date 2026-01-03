@@ -1,7 +1,7 @@
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueUserId,
+    generateChatId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
@@ -11,9 +11,9 @@ import { updateUserChat } from "./update-user-chat";
 
 describe("updateUserChat", () => {
     it("updates chat title", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
 
         await supabase.from("users").insert({
             id: userId,
@@ -43,9 +43,9 @@ describe("updateUserChat", () => {
     });
 
     it("updates chat visibility", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
 
         await supabase.from("users").insert({
             id: userId,
@@ -74,9 +74,9 @@ describe("updateUserChat", () => {
     });
 
     it("updates both title and visibility", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
 
         await supabase.from("users").insert({
             id: userId,

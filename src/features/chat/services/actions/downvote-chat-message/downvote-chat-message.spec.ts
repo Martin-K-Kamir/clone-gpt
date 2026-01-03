@@ -1,6 +1,6 @@
 import {
-    generateUniqueChatId,
-    generateUniqueMessageId,
+    generateChatId,
+    generateMessageId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -37,8 +37,8 @@ describe("downvoteChatMessage", () => {
     });
 
     it("sets downvote to true when downvoting a message", async () => {
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("chats").insert({
             id: chatId,
@@ -78,8 +78,8 @@ describe("downvoteChatMessage", () => {
     });
 
     it("sets downvote to false when removing downvote from a message", async () => {
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("chats").insert({
             id: chatId,
@@ -119,8 +119,8 @@ describe("downvoteChatMessage", () => {
     });
 
     it("preserves existing metadata when updating downvote", async () => {
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("chats").insert({
             id: chatId,

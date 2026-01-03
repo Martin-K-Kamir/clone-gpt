@@ -1,8 +1,8 @@
 import { cleanupStorageForUser } from "@/vitest/helpers/cleanup-storage";
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueUserId,
+    generateChatId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -23,15 +23,15 @@ describe("uploadUserFiles", () => {
         vi.clearAllMocks();
     });
 
-    const userId = generateUniqueUserId();
-    const email = generateUniqueEmail();
+    const userId = generateUserId();
+    const email = generateUserEmail();
 
     afterEach(async () => {
         await cleanupStorageForUser(userId);
     });
 
     it("uploads files and returns processed files", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -105,7 +105,7 @@ describe("uploadUserFiles", () => {
     });
 
     it("handles image files with dimensions", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -162,7 +162,7 @@ describe("uploadUserFiles", () => {
     });
 
     it("returns error when session does not exist", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
         (auth as any).mockResolvedValue(null);
 
         const file = new File(["content"], "file.txt", {

@@ -16,10 +16,9 @@ import type { WithFiles } from "@/lib/types";
 import { getFileExtension, getFileImageDimensions } from "@/lib/utils";
 import { handleApiError } from "@/lib/utils/handle-api-error";
 
-export async function uploadUserFiles({
-    files,
-    chatId,
-}: WithFiles & WithChatId) {
+type UploadUserFilesProps = WithFiles & WithChatId;
+
+export async function uploadUserFiles({ files, chatId }: UploadUserFilesProps) {
     try {
         const session = await auth();
         assertSessionExists(session);

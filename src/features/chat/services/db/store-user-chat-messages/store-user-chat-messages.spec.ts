@@ -1,8 +1,8 @@
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueMessageId,
-    generateUniqueUserId,
+    generateChatId,
+    generateMessageId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
@@ -12,11 +12,11 @@ import { storeUserChatMessages } from "./store-user-chat-messages";
 
 describe("storeUserChatMessages", () => {
     it("stores multiple messages in the database", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId1 = generateUniqueMessageId();
-        const messageId2 = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,
@@ -64,10 +64,10 @@ describe("storeUserChatMessages", () => {
     });
 
     it("uses createdAt from message when preserveCreatedAt is true", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,
@@ -118,10 +118,10 @@ describe("storeUserChatMessages", () => {
     });
 
     it("uses createdAt from metadata when message createdAt is not provided and preserveCreatedAt is true", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,

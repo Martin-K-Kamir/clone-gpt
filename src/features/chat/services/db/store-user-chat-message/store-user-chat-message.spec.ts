@@ -1,8 +1,8 @@
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueMessageId,
-    generateUniqueUserId,
+    generateChatId,
+    generateMessageId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
@@ -12,10 +12,10 @@ import { storeUserChatMessage } from "./store-user-chat-message";
 
 describe("storeUserChatMessage", () => {
     it("stores a message in the database", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,
@@ -58,10 +58,10 @@ describe("storeUserChatMessage", () => {
     });
 
     it("uses createdAt from metadata when provided", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,
@@ -101,10 +101,10 @@ describe("storeUserChatMessage", () => {
     });
 
     it("filters out non-text parts when extracting content", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,

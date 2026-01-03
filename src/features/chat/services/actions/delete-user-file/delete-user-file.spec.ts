@@ -1,4 +1,4 @@
-import { generateUniqueChatId } from "@/vitest/helpers/generate-test-ids";
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
@@ -22,7 +22,7 @@ describe("deleteUserFile", () => {
     });
 
     it("returns success when file is deleted", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
 
         const storedFile = {
             fileId: "550e8400-e29b-41d4-a716-446655440000",

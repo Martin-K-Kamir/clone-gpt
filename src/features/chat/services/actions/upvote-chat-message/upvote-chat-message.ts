@@ -24,11 +24,13 @@ import { handleApiError } from "@/lib/utils/handle-api-error";
 
 import { supabase } from "@/services/supabase";
 
+type UpvoteChatMessageProps = WithUpvote & WithChatId & WithChatMessageId;
+
 export async function upvoteChatMessage({
     upvote,
     messageId,
     chatId,
-}: WithUpvote & WithChatId & WithChatMessageId) {
+}: UpvoteChatMessageProps) {
     try {
         const session = await auth();
         assertSessionExists(session);

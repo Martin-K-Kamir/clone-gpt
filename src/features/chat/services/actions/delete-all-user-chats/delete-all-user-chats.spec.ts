@@ -1,7 +1,7 @@
 import {
-    generateUniqueChatId,
-    generateUniqueMessageId,
-    generateUniqueUserId,
+    generateChatId,
+    generateMessageId,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -29,11 +29,11 @@ describe("deleteAllUserChats", () => {
     });
 
     it("deletes all user chats and messages", async () => {
-        const userId = generateUniqueUserId();
-        const chatId1 = generateUniqueChatId();
-        const chatId2 = generateUniqueChatId();
-        const messageId1 = generateUniqueMessageId();
-        const messageId2 = generateUniqueMessageId();
+        const userId = generateUserId();
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
 
         (auth as any).mockResolvedValue({
             user: { id: userId, name: "Test User" },

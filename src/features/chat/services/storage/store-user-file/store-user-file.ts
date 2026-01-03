@@ -7,11 +7,13 @@ import type { WithUserId } from "@/features/user/lib/types";
 import type { WithFile } from "@/lib/types";
 import { getFileExtension, removeFileExtension } from "@/lib/utils";
 
+type StoreUserFileProps = WithFile & WithChatId & WithUserId;
+
 export async function storeUserFile({
     file,
     userId,
     chatId,
-}: WithFile & WithChatId & WithUserId) {
+}: StoreUserFileProps) {
     const fileExtension = getFileExtension(file);
     const fileName = removeFileExtension(file);
 

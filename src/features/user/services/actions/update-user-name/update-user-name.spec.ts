@@ -1,6 +1,6 @@
 import {
-    generateUniqueEmail,
-    generateUniqueUserId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -22,8 +22,8 @@ describe("updateUserName", () => {
     });
 
     it("updates the user name", async () => {
-        const userId = generateUniqueUserId() as DBUserId;
-        const email = generateUniqueEmail();
+        const userId = generateUserId() as DBUserId;
+        const email = generateUserEmail();
 
         vi.mocked(auth).mockResolvedValue({
             user: {

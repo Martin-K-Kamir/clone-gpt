@@ -1,6 +1,6 @@
 import {
-    generateUniqueChatId,
-    generateUniqueMessageId,
+    generateChatId,
+    generateMessageId,
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
@@ -14,10 +14,10 @@ const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 
 describe("deleteUserChatMessagesStartingFrom", () => {
     it("deletes messages starting from target message", async () => {
-        const chatId = generateUniqueChatId();
-        const msg1 = generateUniqueMessageId();
-        const msg2 = generateUniqueMessageId();
-        const msg3 = generateUniqueMessageId();
+        const chatId = generateChatId();
+        const msg1 = generateMessageId();
+        const msg2 = generateMessageId();
+        const msg3 = generateMessageId();
 
         await supabase.from("chats").insert({
             id: chatId,
@@ -80,9 +80,9 @@ describe("deleteUserChatMessagesStartingFrom", () => {
     });
 
     it("deletes all messages when target is the first message", async () => {
-        const chatId = generateUniqueChatId();
-        const msg1 = generateUniqueMessageId();
-        const msg2 = generateUniqueMessageId();
+        const chatId = generateChatId();
+        const msg1 = generateMessageId();
+        const msg2 = generateMessageId();
 
         await supabase.from("chats").insert({
             id: chatId,
@@ -133,8 +133,8 @@ describe("deleteUserChatMessagesStartingFrom", () => {
     });
 
     it("throws when target message not found", async () => {
-        const chatId = generateUniqueChatId();
-        const missingMessageId = generateUniqueMessageId();
+        const chatId = generateChatId();
+        const missingMessageId = generateMessageId();
 
         await supabase.from("chats").insert({
             id: chatId,

@@ -16,10 +16,12 @@ import { deleteUserFile } from "@/features/chat/services/storage";
 import { api } from "@/lib/api-response";
 import { handleApiError } from "@/lib/utils/handle-api-error";
 
+type DeleteUserFilesProps = WithStoredUploadedFiles & WithChatId;
+
 export async function deleteUserFiles({
     storedFiles,
     chatId,
-}: WithStoredUploadedFiles & WithChatId) {
+}: DeleteUserFilesProps) {
     try {
         const session = await auth();
         assertIsStoredUploadedFiles(storedFiles);

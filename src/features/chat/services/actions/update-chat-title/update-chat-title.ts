@@ -21,10 +21,12 @@ import { handleApiError } from "@/lib/utils/handle-api-error";
 
 import { supabase } from "@/services/supabase";
 
+type UpdateChatTitleProps = WithNewTitle & WithChatId;
+
 export async function updateChatTitle({
     chatId,
     newTitle,
-}: WithNewTitle & WithChatId) {
+}: UpdateChatTitleProps) {
     const NEW_CHAT_MAX_TITLE_LENGHT = 25;
 
     try {

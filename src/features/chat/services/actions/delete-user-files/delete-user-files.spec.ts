@@ -1,8 +1,8 @@
 import { cleanupStorageForUser } from "@/vitest/helpers/cleanup-storage";
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueUserId,
+    generateChatId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -19,8 +19,8 @@ vi.mock("@/features/auth/services/auth", () => ({
 }));
 
 describe("deleteUserFiles", () => {
-    const userId = generateUniqueUserId();
-    const email = generateUniqueEmail();
+    const userId = generateUserId();
+    const email = generateUserEmail();
 
     beforeEach(async () => {
         vi.clearAllMocks();
@@ -31,7 +31,7 @@ describe("deleteUserFiles", () => {
     });
 
     it("deletes files and returns success response", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -107,7 +107,7 @@ describe("deleteUserFiles", () => {
     });
 
     it("returns error when session does not exist", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
         (auth as any).mockResolvedValue(null);
 
         const storedFiles = [

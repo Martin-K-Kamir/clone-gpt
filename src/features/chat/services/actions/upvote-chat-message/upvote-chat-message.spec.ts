@@ -1,8 +1,8 @@
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueMessageId,
-    generateUniqueUserId,
+    generateChatId,
+    generateMessageId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -26,10 +26,10 @@ describe("upvoteChatMessage", () => {
     });
 
     it("sets upvote to true when upvoting a message", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -86,10 +86,10 @@ describe("upvoteChatMessage", () => {
     });
 
     it("sets upvote to false when removing upvote from a message", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -146,10 +146,10 @@ describe("upvoteChatMessage", () => {
     });
 
     it("preserves existing metadata when updating upvote", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         (auth as any).mockResolvedValue({
             user: {

@@ -17,10 +17,12 @@ import { updateUserFilesRateLimit } from "@/features/user/services/db/update-use
 
 import { RATE_LIMIT_REASON } from "@/lib/constants";
 
+type CheckUserFilesRateLimitProps = WithUserId & WithUserRole;
+
 export async function checkUserFilesRateLimit({
     userId,
     userRole,
-}: WithUserId & WithUserRole): Promise<UserFilesRateLimitResult> {
+}: CheckUserFilesRateLimitProps): Promise<UserFilesRateLimitResult> {
     assertIsDBUserId(userId);
     if (userRole) {
         assertIsUserRole(userRole);

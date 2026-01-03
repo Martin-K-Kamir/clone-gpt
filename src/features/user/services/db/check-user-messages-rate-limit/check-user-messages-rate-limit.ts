@@ -20,10 +20,12 @@ import { updateUserMessagesRateLimit } from "@/features/user/services/db/update-
 import { RATE_LIMIT_REASON } from "@/lib/constants";
 import type { RateLimitReason } from "@/lib/types";
 
+type CheckUserMessagesRateLimitProps = WithUserId & WithUserRole;
+
 export async function checkUserMessagesRateLimit({
     userId,
     userRole,
-}: WithUserId & WithUserRole): Promise<UserMessagesRateLimitResult> {
+}: CheckUserMessagesRateLimitProps): Promise<UserMessagesRateLimitResult> {
     assertIsDBUserId(userId);
     if (userRole) {
         assertIsUserRole(userRole);

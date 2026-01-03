@@ -1,7 +1,7 @@
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueUserId,
+    generateChatId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -25,11 +25,11 @@ describe("setAllUserChatsVisibility", () => {
     });
 
     it("sets all user chats visibility to public", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId1 = generateUniqueChatId();
-        const chatId2 = generateUniqueChatId();
-        const chatId3 = generateUniqueChatId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
+        const chatId3 = generateChatId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -94,10 +94,10 @@ describe("setAllUserChatsVisibility", () => {
     });
 
     it("sets all user chats visibility to private", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId1 = generateUniqueChatId();
-        const chatId2 = generateUniqueChatId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -153,12 +153,12 @@ describe("setAllUserChatsVisibility", () => {
     });
 
     it("only updates chats owned by the authenticated user", async () => {
-        const userId1 = generateUniqueUserId();
-        const email1 = generateUniqueEmail();
-        const userId2 = generateUniqueUserId();
-        const email2 = generateUniqueEmail();
-        const chatId1 = generateUniqueChatId();
-        const chatId2 = generateUniqueChatId();
+        const userId1 = generateUserId();
+        const email1 = generateUserEmail();
+        const userId2 = generateUserId();
+        const email2 = generateUserEmail();
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
 
         (auth as any).mockResolvedValue({
             user: {
@@ -229,8 +229,8 @@ describe("setAllUserChatsVisibility", () => {
     });
 
     it("handles user with no chats", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
+        const userId = generateUserId();
+        const email = generateUserEmail();
 
         (auth as any).mockResolvedValue({
             user: {

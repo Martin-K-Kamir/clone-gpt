@@ -7,12 +7,17 @@ import type { WithUserId } from "@/features/user/lib/types";
 import type { WithName } from "@/lib/types";
 import { getMediaTypeExtension } from "@/lib/utils";
 
+type StoreGeneratedImageProps = WithGeneratedImage &
+    WithChatId &
+    WithUserId &
+    WithName;
+
 export async function storeGeneratedImage({
     generatedImage,
     name,
     chatId,
     userId,
-}: WithGeneratedImage & WithChatId & WithUserId & WithName) {
+}: StoreGeneratedImageProps) {
     const extension = getMediaTypeExtension(generatedImage.mediaType);
 
     const { id, publicUrl } = await uploadToStorage({

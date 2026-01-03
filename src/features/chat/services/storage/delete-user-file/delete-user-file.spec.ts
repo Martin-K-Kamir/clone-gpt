@@ -1,7 +1,7 @@
 import { cleanupStorageForUser } from "@/vitest/helpers/cleanup-storage";
 import {
-    generateUniqueChatId,
-    generateUniqueUserId,
+    generateChatId,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -13,8 +13,8 @@ import { supabase } from "@/services/supabase";
 import { deleteUserFile } from "./delete-user-file";
 
 describe("deleteUserFile", () => {
-    const userId = generateUniqueUserId();
-    const chatId = generateUniqueChatId();
+    const userId = generateUserId();
+    const chatId = generateChatId();
 
     afterEach(async () => {
         await cleanupStorageForUser(userId);

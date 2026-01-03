@@ -1,8 +1,8 @@
 import {
-    generateUniqueChatId,
-    generateUniqueEmail,
-    generateUniqueMessageId,
-    generateUniqueUserId,
+    generateChatId,
+    generateMessageId,
+    generateUserEmail,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
@@ -12,10 +12,10 @@ import { updateUserChatMessage } from "./update-user-chat-message";
 
 describe("updateUserChatMessage", () => {
     it("updates message content", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,
@@ -70,10 +70,10 @@ describe("updateUserChatMessage", () => {
     });
 
     it("filters out non-text parts when extracting content", async () => {
-        const userId = generateUniqueUserId();
-        const email = generateUniqueEmail();
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("users").insert({
             id: userId,

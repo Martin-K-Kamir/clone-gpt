@@ -1,6 +1,6 @@
 import {
-    generateUniqueChatId,
-    generateUniqueMessageId,
+    generateChatId,
+    generateMessageId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -36,8 +36,8 @@ describe("deleteUserChatById", () => {
     });
 
     it("deletes chat and its messages", async () => {
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         await supabase.from("chats").insert({
             id: chatId,
@@ -80,7 +80,7 @@ describe("deleteUserChatById", () => {
     });
 
     it("returns authorization error when user is not owner", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
 
         await supabase.from("chats").insert({
             id: chatId,

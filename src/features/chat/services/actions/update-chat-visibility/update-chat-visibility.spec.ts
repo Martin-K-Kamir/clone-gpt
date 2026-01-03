@@ -1,4 +1,4 @@
-import { generateUniqueChatId } from "@/vitest/helpers/generate-test-ids";
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
@@ -34,7 +34,7 @@ describe("updateChatVisibility", () => {
     });
 
     it("updates visibility to public", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
 
         await supabase.from("chats").insert({
             id: chatId,
@@ -64,7 +64,7 @@ describe("updateChatVisibility", () => {
     });
 
     it("updates visibility to private", async () => {
-        const chatId = generateUniqueChatId();
+        const chatId = generateChatId();
 
         await supabase.from("chats").insert({
             id: chatId,

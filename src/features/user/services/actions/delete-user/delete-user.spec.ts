@@ -1,7 +1,7 @@
 import {
-    generateUniqueChatId,
-    generateUniqueMessageId,
-    generateUniqueUserId,
+    generateChatId,
+    generateMessageId,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -31,9 +31,9 @@ describe("deleteUser", () => {
     });
 
     it("removes user and related data", async () => {
-        const userId = generateUniqueUserId() as DBUserId;
-        const chatId = generateUniqueChatId();
-        const messageId = generateUniqueMessageId();
+        const userId = generateUserId() as DBUserId;
+        const chatId = generateChatId();
+        const messageId = generateMessageId();
 
         const email = `delete-test-${Date.now()}@example.com`;
 

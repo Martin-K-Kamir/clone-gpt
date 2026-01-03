@@ -1,7 +1,7 @@
 import { cleanupStorageForUser } from "@/vitest/helpers/cleanup-storage";
 import {
-    generateUniqueChatId,
-    generateUniqueUserId,
+    generateChatId,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -10,8 +10,8 @@ import { STORAGE_BUCKET } from "@/features/chat/lib/constants/storage";
 import { uploadToStorage } from "./upload-to-storage";
 
 describe("uploadToStorage", () => {
-    const userId = generateUniqueUserId();
-    const chatId = generateUniqueChatId();
+    const userId = generateUserId();
+    const chatId = generateChatId();
 
     beforeEach(async () => {
         await cleanupStorageForUser(userId);

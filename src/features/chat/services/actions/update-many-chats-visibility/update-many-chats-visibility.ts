@@ -24,10 +24,12 @@ import { handleApiError } from "@/lib/utils/handle-api-error";
 
 import { supabase } from "@/services/supabase";
 
+type UpdateManyChatsVisibilityProps = WithVisibility & WithChatIds;
+
 export async function updateManyChatsVisibility({
     visibility,
     chatIds,
-}: WithVisibility & WithChatIds) {
+}: UpdateManyChatsVisibilityProps) {
     try {
         const session = await auth();
         assertSessionExists(session);

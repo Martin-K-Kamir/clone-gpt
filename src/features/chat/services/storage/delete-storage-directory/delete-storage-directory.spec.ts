@@ -1,7 +1,7 @@
 import { cleanupStorageForUser } from "@/vitest/helpers/cleanup-storage";
 import {
-    generateUniqueChatId,
-    generateUniqueUserId,
+    generateChatId,
+    generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -14,9 +14,9 @@ import { supabase } from "@/services/supabase";
 import { deleteStorageDirectory } from "./delete-storage-directory";
 
 describe("deleteStorageDirectory", () => {
-    const userId = generateUniqueUserId();
-    const chatId1 = generateUniqueChatId();
-    const chatId2 = generateUniqueChatId();
+    const userId = generateUserId();
+    const chatId1 = generateChatId();
+    const chatId2 = generateChatId();
 
     afterEach(async () => {
         await cleanupStorageForUser(userId);
@@ -121,7 +121,7 @@ describe("deleteStorageDirectory", () => {
             deleteStorageDirectory({
                 bucket: STORAGE_BUCKET.USER_FILES,
                 userId,
-                chatId: generateUniqueChatId(),
+                chatId: generateChatId(),
             }),
         ).resolves.not.toThrow();
     });
