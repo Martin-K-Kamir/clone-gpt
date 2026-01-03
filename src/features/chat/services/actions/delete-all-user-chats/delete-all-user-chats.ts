@@ -38,18 +38,20 @@ export async function deleteAllUserChats() {
 
         if (error) throw new Error("Failed to delete all user chats");
 
-        deleteStorageDirectory({
-            userId: session.user.id,
-            bucket: STORAGE_BUCKET.GENERATED_IMAGES,
-        });
-        deleteStorageDirectory({
-            userId: session.user.id,
-            bucket: STORAGE_BUCKET.GENERATED_FILES,
-        });
-        deleteStorageDirectory({
-            userId: session.user.id,
-            bucket: STORAGE_BUCKET.USER_FILES,
-        });
+        await Promise.all([
+            deleteStorageDirectory({
+                userId: session.user.id,
+                bucket: STORAGE_BUCKET.GENERATED_IMAGES,
+            }),
+            deleteStorageDirectory({
+                userId: session.user.id,
+                bucket: STORAGE_BUCKET.GENERATED_FILES,
+            }),
+            deleteStorageDirectory({
+                userId: session.user.id,
+                bucket: STORAGE_BUCKET.USER_FILES,
+            }),
+        ]);
 
         updateTag(tag.userChats(userId));
         updateTag(tag.userSharedChats(userId));

@@ -51,21 +51,23 @@ export async function deleteUserChatById({ chatId }: WithChatId) {
 
         if (error) throw new Error("Chat delete failed");
 
-        deleteStorageDirectory({
-            chatId,
-            userId: session.user.id,
-            bucket: STORAGE_BUCKET.GENERATED_IMAGES,
-        });
-        deleteStorageDirectory({
-            chatId,
-            userId: session.user.id,
-            bucket: STORAGE_BUCKET.GENERATED_FILES,
-        });
-        deleteStorageDirectory({
-            chatId,
-            userId: session.user.id,
-            bucket: STORAGE_BUCKET.USER_FILES,
-        });
+        await Promise.all([
+            deleteStorageDirectory({
+                chatId,
+                userId: session.user.id,
+                bucket: STORAGE_BUCKET.GENERATED_IMAGES,
+            }),
+            deleteStorageDirectory({
+                chatId,
+                userId: session.user.id,
+                bucket: STORAGE_BUCKET.GENERATED_FILES,
+            }),
+            deleteStorageDirectory({
+                chatId,
+                userId: session.user.id,
+                bucket: STORAGE_BUCKET.USER_FILES,
+            }),
+        ]);
 
         updateTag(tag.userChats(userId));
         updateTag(tag.userSharedChats(userId));

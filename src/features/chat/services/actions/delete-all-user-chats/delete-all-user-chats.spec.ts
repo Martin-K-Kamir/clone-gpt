@@ -1,11 +1,17 @@
+import { cleanupStorageForUser } from "@/vitest/helpers/cleanup-storage";
 import {
     generateChatId,
     generateMessageId,
+    generateUserEmail,
     generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
+
+import { STORAGE_BUCKET } from "@/features/chat/lib/constants/storage";
+import { hashId } from "@/features/chat/services/storage/hash-id/hash-id";
+import { uploadToStorage } from "@/features/chat/services/storage/upload-to-storage";
 
 import { supabase } from "@/services/supabase";
 
@@ -19,25 +25,43 @@ vi.mock("next/cache", () => ({
     updateTag: vi.fn(),
 }));
 
-vi.mock("@/features/chat/services/storage", () => ({
-    deleteStorageDirectory: vi.fn().mockResolvedValue(undefined),
-}));
-
 describe("deleteAllUserChats", () => {
-    beforeEach(() => {
+    const userId = generateUserId();
+    const email = generateUserEmail();
+
+    beforeEach(async () => {
         vi.clearAllMocks();
+        (auth as any).mockResolvedValue({
+            user: {
+                id: userId,
+                email,
+                name: "Test User",
+                image: null,
+                role: "user",
+            },
+        });
+
+        await supabase.from("users").upsert(
+            {
+                id: userId,
+                email,
+                name: "Test User",
+                role: "user",
+            },
+            { onConflict: "id" },
+        );
     });
 
-    it("deletes all user chats and messages", async () => {
-        const userId = generateUserId();
+    afterEach(async () => {
+        await cleanupStorageForUser(userId);
+        await supabase.from("users").delete().eq("id", userId);
+    });
+
+    it("deletes all user chats, messages, and storage files", async () => {
         const chatId1 = generateChatId();
         const chatId2 = generateChatId();
         const messageId1 = generateMessageId();
         const messageId2 = generateMessageId();
-
-        (auth as any).mockResolvedValue({
-            user: { id: userId, name: "Test User" },
-        });
 
         await supabase.from("chats").insert([
             {
@@ -83,6 +107,42 @@ describe("deleteAllUserChats", () => {
             },
         ]);
 
+        const fileContent = new Blob(["test file"], { type: "text/plain" });
+        const imageContent = new Uint8Array([
+            0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+        ]);
+        const generatedContent = Buffer.from("generated content", "utf8");
+
+        await uploadToStorage({
+            bucket: STORAGE_BUCKET.USER_FILES,
+            userId,
+            chatId: chatId1,
+            name: "user-file",
+            extension: "txt",
+            content: await fileContent.arrayBuffer(),
+            contentType: "text/plain",
+        });
+
+        await uploadToStorage({
+            bucket: STORAGE_BUCKET.GENERATED_IMAGES,
+            userId,
+            chatId: chatId1,
+            name: "generated-image",
+            extension: "png",
+            content: imageContent,
+            contentType: "image/png",
+        });
+
+        await uploadToStorage({
+            bucket: STORAGE_BUCKET.GENERATED_FILES,
+            userId,
+            chatId: chatId2,
+            name: "generated-file",
+            extension: "txt",
+            content: generatedContent,
+            contentType: "text/plain",
+        });
+
         const result = await deleteAllUserChats();
 
         expect(result.success).toBe(true);
@@ -100,5 +160,23 @@ describe("deleteAllUserChats", () => {
             .eq("userId", userId);
 
         expect(messagesAfter || []).toHaveLength(0);
+
+        const hashedUserId = hashId(userId);
+
+        const { data: userFiles } = await supabase.storage
+            .from(STORAGE_BUCKET.USER_FILES)
+            .list(hashedUserId);
+
+        const { data: generatedImages } = await supabase.storage
+            .from(STORAGE_BUCKET.GENERATED_IMAGES)
+            .list(hashedUserId);
+
+        const { data: generatedFiles } = await supabase.storage
+            .from(STORAGE_BUCKET.GENERATED_FILES)
+            .list(hashedUserId);
+
+        expect(userFiles || []).toHaveLength(0);
+        expect(generatedImages || []).toHaveLength(0);
+        expect(generatedFiles || []).toHaveLength(0);
     });
 });
