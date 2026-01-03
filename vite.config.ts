@@ -21,6 +21,7 @@ export default defineConfig({
             exclude: [
                 "node_modules/",
                 ".storybook/**",
+                "**/*.css",
                 "src/**/*.test.{ts,tsx}",
                 "src/**/*.spec.{ts,tsx}",
                 "src/**/*.stories.{ts,tsx}",
@@ -32,6 +33,8 @@ export default defineConfig({
                 "**/lib/ai/tools/**",
                 "**/*.mock.ts",
                 "**/*.mocks.ts",
+                "**/*.constants.ts",
+                "src/vitest/**",
             ],
         },
         projects: [
