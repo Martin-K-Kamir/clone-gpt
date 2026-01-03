@@ -11,11 +11,13 @@ import { getFileExtension, removeFileExtension } from "@/lib/utils";
 
 import { supabase } from "@/services/supabase";
 
+type DeleteUserFileProps = WithStoredUploadedFile & WithChatId & WithUserId;
+
 export async function deleteUserFile({
     storedFile,
     chatId,
     userId,
-}: WithStoredUploadedFile & WithChatId & WithUserId) {
+}: DeleteUserFileProps) {
     const fileId = storedFile.fileId;
     const fileName = removeFileExtension(storedFile.name);
     const fileExtension = getFileExtension(storedFile.name);

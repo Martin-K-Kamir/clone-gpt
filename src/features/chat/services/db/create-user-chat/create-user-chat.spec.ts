@@ -1,37 +1,62 @@
-import { beforeEach, describe, expect, it } from "vitest";
-
-import type { DBChatId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import {
+    generateUniqueChatId,
+    generateUniqueEmail,
+    generateUniqueUserId,
+} from "@/vitest/helpers/generate-test-ids";
+import { describe, expect, it } from "vitest";
 
 import { supabase } from "@/services/supabase";
 
 import { createUserChat } from "./create-user-chat";
 
-const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const seededChatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
-
 describe("createUserChat", () => {
-    beforeEach(async () => {
-        await supabase.from("messages").delete().eq("chatId", seededChatId);
-        await supabase.from("chats").delete().eq("id", seededChatId);
-    });
+    it("creates a new chat", async () => {
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
 
-    it("creates a chat", async () => {
-        const chatId = "30000000-0000-0000-0000-000000000999" as DBChatId;
-        await supabase.from("chats").delete().eq("id", chatId);
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
+        });
 
         const chat = await createUserChat({
             chatId,
             userId,
-            title: "Integration Test Chat",
+            title: "Test Chat",
         });
 
         expect(chat).not.toBeNull();
         expect(chat?.id).toBe(chatId);
         expect(chat?.userId).toBe(userId);
-        expect(chat?.title).toBe("Integration Test Chat");
+        expect(chat?.title).toBe("Test Chat");
+        expect(chat?.visibility).toBe("private");
+    });
 
-        await supabase.from("chats").delete().eq("id", chatId);
+    it("creates a chat with default private visibility", async () => {
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
+        });
+
+        const chat = await createUserChat({
+            chatId,
+            userId,
+            title: "Public Test Chat",
+        });
+
+        expect(chat).not.toBeNull();
+        expect(chat?.id).toBe(chatId);
+        expect(chat?.userId).toBe(userId);
+        expect(chat?.title).toBe("Public Test Chat");
+        expect(chat?.visibility).toBe("private");
     });
 });

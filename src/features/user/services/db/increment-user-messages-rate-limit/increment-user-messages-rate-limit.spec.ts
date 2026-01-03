@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { DBUserId } from "@/features/user/lib/types";
 
@@ -9,14 +9,12 @@ import { incrementUserMessagesRateLimit } from "./increment-user-messages-rate-l
 const userId = "00000000-0000-0000-0000-000000000021" as DBUserId;
 
 describe("incrementUserMessagesRateLimit", () => {
-    beforeEach(async () => {
+    it("creates row when missing and increments counters", async () => {
         await supabase
             .from("user_messages_rate_limits")
             .delete()
             .eq("userId", userId);
-    });
 
-    it("creates row when missing and increments counters", async () => {
         await incrementUserMessagesRateLimit({
             userId,
             increments: { messages: 2, tokens: 10 },
@@ -33,6 +31,11 @@ describe("incrementUserMessagesRateLimit", () => {
     });
 
     it("increments existing counters", async () => {
+        await supabase
+            .from("user_messages_rate_limits")
+            .delete()
+            .eq("userId", userId);
+
         await supabase.from("user_messages_rate_limits").insert({
             userId,
             messagesCounter: 5,

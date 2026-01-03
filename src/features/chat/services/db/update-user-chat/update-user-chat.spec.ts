@@ -1,38 +1,35 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBChatId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import {
+    generateUniqueChatId,
+    generateUniqueEmail,
+    generateUniqueUserId,
+} from "@/vitest/helpers/generate-test-ids";
+import { describe, expect, it } from "vitest";
 
 import { supabase } from "@/services/supabase";
 
 import { updateUserChat } from "./update-user-chat";
 
-const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
-
 describe("updateUserChat", () => {
-    beforeEach(async () => {
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-    });
-
     it("updates chat title", async () => {
-        await supabase.from("chats").upsert({
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
+        });
+
+        await supabase.from("chats").insert({
             id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
+            userId,
+            title: "Original Title",
             visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
         });
 
         const newTitle = "Updated Title";
@@ -46,13 +43,26 @@ describe("updateUserChat", () => {
     });
 
     it("updates chat visibility", async () => {
-        const { data: chatBefore } = await supabase
-            .from("chats")
-            .select("id")
-            .eq("id", chatId)
-            .single();
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
 
-        expect(chatBefore).not.toBeNull();
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
+        });
+
+        await supabase.from("chats").insert({
+            id: chatId,
+            userId,
+            title: "Test Chat",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
 
         const result = await updateUserChat({
             chatId,
@@ -64,25 +74,26 @@ describe("updateUserChat", () => {
     });
 
     it("updates both title and visibility", async () => {
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
         });
 
-        // Verify chat exists before update
-        const { data: chatBefore } = await supabase
-            .from("chats")
-            .select("id, userId")
-            .eq("id", chatId)
-            .single();
-
-        expect(chatBefore).not.toBeNull();
-        expect(chatBefore?.userId).toBe("00000000-0000-0000-0000-000000000001");
+        await supabase.from("chats").insert({
+            id: chatId,
+            userId,
+            title: "Original Title",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
 
         const newTitle = "Updated Title and Visibility";
         const result = await updateUserChat({

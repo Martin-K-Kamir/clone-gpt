@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { DBChatId } from "@/features/chat/lib/types";
 
@@ -6,33 +6,12 @@ import type { DBUserId } from "@/features/user/lib/types";
 
 import { ORDER_BY } from "@/lib/constants";
 
-import { supabase } from "@/services/supabase";
-
 import { getUserChats } from "./get-user-chats";
 
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
+const missingUserId = "00000000-0000-0000-0000-000000000999" as DBUserId;
 
 describe("getUserChats", () => {
-    beforeEach(async () => {
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000001" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000002" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Public Chat",
-            visibility: "public",
-            visibleAt: "2024-01-01T00:00:01Z",
-            createdAt: "2024-01-01T00:00:01Z",
-            updatedAt: "2024-01-01T00:00:01Z",
-        });
-    });
     it("returns seeded chats for user", async () => {
         const result = await getUserChats({ userId });
 
@@ -54,33 +33,13 @@ describe("getUserChats", () => {
     });
 
     it("respects offset parameter", async () => {
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000001" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000002" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Public Chat",
-            visibility: "public",
-            visibleAt: "2024-01-01T00:00:01Z",
-            createdAt: "2024-01-01T00:00:01Z",
-            updatedAt: "2024-01-01T00:00:01Z",
-        });
-
         const firstPage = await getUserChats({ userId, limit: 1, offset: 0 });
         const secondPage = await getUserChats({ userId, limit: 1, offset: 1 });
 
         if (
             firstPage.totalCount > 1 &&
             firstPage.hasNextPage &&
-            secondPage.data.length > 0 &&
-            firstPage.data[0].id !== secondPage.data[0].id
+            secondPage.data.length > 0
         ) {
             expect(firstPage.data[0].id).not.toBe(secondPage.data[0].id);
         }
@@ -119,8 +78,6 @@ describe("getUserChats", () => {
     });
 
     it("returns empty array for user with no chats", async () => {
-        const missingUserId =
-            "00000000-0000-0000-0000-000000000999" as DBUserId;
         const result = await getUserChats({ userId: missingUserId });
 
         expect(result.data).toHaveLength(0);

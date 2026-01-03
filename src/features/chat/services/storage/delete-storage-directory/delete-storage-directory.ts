@@ -8,11 +8,15 @@ import type { WithUserId } from "@/features/user/lib/types";
 
 import { supabase } from "@/services/supabase";
 
+type DeleteStorageDirectoryProps = WithStorageBucket &
+    WithUserId &
+    WithOptionalChatId;
+
 export async function deleteStorageDirectory({
     bucket,
     userId,
     chatId,
-}: WithUserId & WithOptionalChatId & WithStorageBucket) {
+}: DeleteStorageDirectoryProps) {
     const hashedUserId = hashId(userId);
     const hashedChatId = chatId ? hashId(chatId) : undefined;
     const rootPath = hashedChatId
@@ -55,9 +59,9 @@ export async function deleteStorageDirectory({
             }
         }
 
-        subfolders.forEach(async folderPath => {
-            await recursiveDelete(folderPath);
-        });
+        await Promise.all(
+            subfolders.map(folderPath => recursiveDelete(folderPath)),
+        );
     }
 
     await recursiveDelete(rootPath);

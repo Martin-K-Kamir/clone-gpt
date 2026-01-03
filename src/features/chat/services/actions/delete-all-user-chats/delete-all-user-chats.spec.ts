@@ -1,14 +1,15 @@
+import {
+    generateUniqueChatId,
+    generateUniqueMessageId,
+    generateUniqueUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
-import type { DBUserId } from "@/features/user/lib/types";
-
 import { supabase } from "@/services/supabase";
 
 import { deleteAllUserChats } from "./delete-all-user-chats";
-
-const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 
 vi.mock("@/features/auth/services/auth", () => ({
     auth: vi.fn(),
@@ -23,70 +24,81 @@ vi.mock("@/features/chat/services/storage", () => ({
 }));
 
 describe("deleteAllUserChats", () => {
-    beforeEach(async () => {
+    beforeEach(() => {
         vi.clearAllMocks();
+    });
+
+    it("deletes all user chats and messages", async () => {
+        const userId = generateUniqueUserId();
+        const chatId1 = generateUniqueChatId();
+        const chatId2 = generateUniqueChatId();
+        const messageId1 = generateUniqueMessageId();
+        const messageId2 = generateUniqueMessageId();
+
         (auth as any).mockResolvedValue({
             user: { id: userId, name: "Test User" },
         });
 
-        const testChatId = "30000000-0000-0000-0000-000000000999" as any;
-        await supabase.from("messages").delete().eq("chatId", testChatId);
-        await supabase.from("chats").delete().eq("id", testChatId);
+        await supabase.from("chats").insert([
+            {
+                id: chatId1,
+                userId,
+                title: "Test Chat 1",
+                visibility: "private",
+                visibleAt: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            },
+            {
+                id: chatId2,
+                userId,
+                title: "Test Chat 2",
+                visibility: "private",
+                visibleAt: new Date().toISOString(),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            },
+        ]);
 
-        await supabase.from("chats").upsert({
-            id: testChatId,
-            userId,
-            title: "Test Chat to Delete",
-            visibility: "private",
-            visibleAt: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-        });
-
-        await supabase.from("messages").upsert({
-            id: "40000000-0000-0000-0000-000000000999" as any,
-            chatId: testChatId,
-            userId,
-            role: "user",
-            content: "Test message",
-            metadata: {},
-            parts: [],
-            createdAt: new Date().toISOString(),
-        });
-    });
-
-    it("deletes all user chats and messages", async () => {
-        const { data: chatsBefore } = await supabase
-            .from("chats")
-            .select("id")
-            .eq("userId", userId);
-
-        const { data: messagesBefore } = await supabase
-            .from("messages")
-            .select("id")
-            .eq("userId", userId);
-
-        expect(chatsBefore?.length).toBeGreaterThan(0);
-        expect(messagesBefore?.length).toBeGreaterThan(0);
+        await supabase.from("messages").insert([
+            {
+                id: messageId1,
+                chatId: chatId1,
+                userId,
+                role: "user",
+                content: "Message 1",
+                metadata: {},
+                parts: [],
+                createdAt: new Date().toISOString(),
+            },
+            {
+                id: messageId2,
+                chatId: chatId2,
+                userId,
+                role: "user",
+                content: "Message 2",
+                metadata: {},
+                parts: [],
+                createdAt: new Date().toISOString(),
+            },
+        ]);
 
         const result = await deleteAllUserChats();
 
         expect(result.success).toBe(true);
 
-        // Verify test-specific chat and message were deleted
-        // Note: seed data may be restored by global hooks, so we only check test-specific IDs
-        const { data: testChatAfter } = await supabase
+        const { data: chatsAfter } = await supabase
             .from("chats")
             .select("id")
-            .eq("id", "30000000-0000-0000-0000-000000000999");
+            .eq("userId", userId);
 
-        const { data: testMessageAfter } = await supabase
+        expect(chatsAfter || []).toHaveLength(0);
+
+        const { data: messagesAfter } = await supabase
             .from("messages")
             .select("id")
-            .eq("id", "40000000-0000-0000-0000-000000000999");
+            .eq("userId", userId);
 
-        // Test-specific data should be deleted
-        expect(testChatAfter || []).toHaveLength(0);
-        expect(testMessageAfter || []).toHaveLength(0);
+        expect(messagesAfter || []).toHaveLength(0);
     });
 });

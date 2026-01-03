@@ -1,52 +1,38 @@
-import { waitForMessage } from "@/vitest/helpers/wait-for-data";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBChatId, DBChatMessageId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import {
+    generateUniqueChatId,
+    generateUniqueEmail,
+    generateUniqueMessageId,
+    generateUniqueUserId,
+} from "@/vitest/helpers/generate-test-ids";
+import { describe, expect, it } from "vitest";
 
 import { supabase } from "@/services/supabase";
 
 import { storeUserChatMessage } from "./store-user-chat-message";
 
-const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
-
 describe("storeUserChatMessage", () => {
-    beforeEach(async () => {
-        await supabase
-            .from("messages")
-            .delete()
-            .eq("chatId", chatId)
-            .gte("id", "40000000-0000-0000-0000-000000000100");
-
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-    });
-
     it("stores a message in the database", async () => {
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+        const messageId = generateUniqueMessageId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
         });
 
-        const messageId =
-            "40000000-0000-0000-0000-000000000100" as DBChatMessageId;
-
-        // Delete message if exists
-        await supabase.from("messages").delete().eq("id", messageId);
+        await supabase.from("chats").insert({
+            id: chatId,
+            userId,
+            title: "Test Chat",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
 
         const message = {
             id: messageId,
@@ -57,8 +43,11 @@ describe("storeUserChatMessage", () => {
 
         await storeUserChatMessage({ chatId, userId, message: message as any });
 
-        // Wait longer and retry more aggressively
-        const data = await waitForMessage(messageId, 15, 300);
+        const { data } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("id", messageId)
+            .single();
 
         expect(data).not.toBeNull();
         expect(data?.id).toBe(messageId);
@@ -69,19 +58,28 @@ describe("storeUserChatMessage", () => {
     });
 
     it("uses createdAt from metadata when provided", async () => {
-        // Ensure chat exists
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+        const messageId = generateUniqueMessageId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
         });
 
-        const messageId =
-            "40000000-0000-0000-0000-000000000101" as DBChatMessageId;
+        await supabase.from("chats").insert({
+            id: chatId,
+            userId,
+            title: "Test Chat",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
+
         const createdAt = "2024-01-01T00:00:00Z";
         const message = {
             id: messageId,
@@ -90,34 +88,40 @@ describe("storeUserChatMessage", () => {
             metadata: { createdAt },
         };
 
-        // Delete message if exists
-        await supabase.from("messages").delete().eq("id", messageId);
-
         await storeUserChatMessage({ chatId, userId, message: message as any });
 
-        const data = await waitForMessage(messageId, 10, 200);
+        const { data } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("id", messageId)
+            .single();
 
         expect(data).not.toBeNull();
         expect(data?.createdAt).toMatch(/^2024-01-01T00:00:00/);
     });
 
     it("filters out non-text parts when extracting content", async () => {
-        // Ensure chat exists
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+        const messageId = generateUniqueMessageId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
         });
 
-        const messageId =
-            "40000000-0000-0000-0000-000000000102" as DBChatMessageId;
-
-        // Delete message if exists
-        await supabase.from("messages").delete().eq("id", messageId);
+        await supabase.from("chats").insert({
+            id: chatId,
+            userId,
+            title: "Test Chat",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
 
         const message = {
             id: messageId,
@@ -132,7 +136,11 @@ describe("storeUserChatMessage", () => {
 
         await storeUserChatMessage({ chatId, userId, message: message as any });
 
-        const data = await waitForMessage(messageId, 15, 300);
+        const { data } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("id", messageId)
+            .single();
 
         expect(data).not.toBeNull();
         expect(data?.content).toBe("Hello World");

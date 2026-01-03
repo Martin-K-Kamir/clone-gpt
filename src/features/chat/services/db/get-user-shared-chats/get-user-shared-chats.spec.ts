@@ -1,38 +1,14 @@
-import { beforeEach, describe, expect, it } from "vitest";
-
-import type { DBChatId } from "@/features/chat/lib/types";
+import { describe, expect, it } from "vitest";
 
 import type { DBUserId } from "@/features/user/lib/types";
-
-import { supabase } from "@/services/supabase";
 
 import { getUserSharedChats } from "./get-user-shared-chats";
 
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
+const missingUserId = "00000000-0000-0000-0000-000000000999" as DBUserId;
 
 describe("getUserSharedChats", () => {
-    beforeEach(async () => {
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000002" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Public Chat",
-            visibility: "public",
-            visibleAt: "2024-01-01T00:00:01Z",
-            createdAt: "2024-01-01T00:00:01Z",
-            updatedAt: "2024-01-01T00:00:01Z",
-        });
-    });
     it("returns seeded public chats for user", async () => {
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000002" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Public Chat",
-            visibility: "public",
-            visibleAt: "2024-01-01T00:00:01Z",
-            createdAt: "2024-01-01T00:00:01Z",
-            updatedAt: "2024-01-01T00:00:01Z",
-        });
-
         const result = await getUserSharedChats({ userId });
 
         expect(result.data.length).toBeGreaterThan(0);
@@ -102,8 +78,6 @@ describe("getUserSharedChats", () => {
     });
 
     it("returns empty array for user with no public chats", async () => {
-        const missingUserId =
-            "00000000-0000-0000-0000-000000000999" as DBUserId;
         const result = await getUserSharedChats({ userId: missingUserId });
 
         expect(result.data).toHaveLength(0);

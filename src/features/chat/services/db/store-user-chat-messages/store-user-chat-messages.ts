@@ -68,7 +68,9 @@ export async function storeUserChatMessages({
         }),
     );
 
-    if (error) throw new Error("Failed to store chat message");
+    if (error) {
+        throw new Error(`Failed to store chat message: ${error.message}`);
+    }
 
     revalidateTag(tag.chatMessages(chatId), "max");
     revalidateTag(tag.userChat(chatId), "max");

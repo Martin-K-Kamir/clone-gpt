@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import type { DBUserId } from "@/features/user/lib/types";
 
@@ -9,11 +9,12 @@ import { updateUserMessagesRateLimit } from "./update-user-messages-rate-limit";
 const userId = "00000000-0000-0000-0000-000000000031" as DBUserId;
 
 describe("updateUserMessagesRateLimit", () => {
-    beforeEach(async () => {
+    it("updates counters and isOverLimit", async () => {
         await supabase
             .from("user_messages_rate_limits")
             .delete()
             .eq("userId", userId);
+
         await supabase.from("user_messages_rate_limits").insert({
             userId,
             messagesCounter: 0,
@@ -21,11 +22,8 @@ describe("updateUserMessagesRateLimit", () => {
             isOverLimit: false,
             periodStart: null,
             periodEnd: null,
-            updatedAt: new Date().toISOString(),
         });
-    });
 
-    it("updates counters and isOverLimit", async () => {
         await updateUserMessagesRateLimit({
             userId,
             updates: {

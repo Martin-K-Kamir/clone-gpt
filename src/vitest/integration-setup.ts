@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, vi } from "vitest";
+import { beforeEach, vi } from "vitest";
 
 import { restoreSeedData } from "./helpers/restore-seed-data";
 
@@ -12,5 +12,10 @@ vi.mock("next/cache", async () => {
 });
 
 beforeEach(async () => {
-    await restoreSeedData();
+    try {
+        await restoreSeedData();
+    } catch (error) {
+        console.error("Failed to restore seed data:", error);
+        throw error;
+    }
 });

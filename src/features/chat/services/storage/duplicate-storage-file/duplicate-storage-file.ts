@@ -10,13 +10,19 @@ import { getFileExtension } from "@/lib/utils";
 
 import { supabase } from "@/services/supabase";
 
+type DuplicateStorageFileProps = WithUrl &
+    WithChatId &
+    WithUserId &
+    WithName &
+    WithStorageBucket;
+
 export async function duplicateStorageFile({
     url,
     name,
     chatId,
     userId,
     bucket,
-}: WithUrl & WithChatId & WithUserId & WithName & WithStorageBucket) {
+}: DuplicateStorageFileProps) {
     const baseUrl = process.env.SUPABASE_STORAGE_URL!;
     if (!url.startsWith(baseUrl)) {
         throw new Error("Invalid storage URL");

@@ -1,38 +1,15 @@
-import { beforeEach, describe, expect, it } from "vitest";
-
-import type { DBChatId } from "@/features/chat/lib/types";
+import { describe, expect, it } from "vitest";
 
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { ORDER_BY } from "@/lib/constants";
 
-import { supabase } from "@/services/supabase";
-
 import { getUserChatsByDate } from "./get-user-chats-by-date";
 
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
+const missingUserId = "00000000-0000-0000-0000-000000000999" as DBUserId;
 
 describe("getUserChatsByDate", () => {
-    beforeEach(async () => {
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000001" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-        await supabase.from("chats").upsert({
-            id: "30000000-0000-0000-0000-000000000002" as DBChatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Public Chat",
-            visibility: "public",
-            visibleAt: "2024-01-01T00:00:01Z",
-            createdAt: "2024-01-01T00:00:01Z",
-            updatedAt: "2024-01-01T00:00:01Z",
-        });
-    });
     it("returns seeded chats for user", async () => {
         const result = await getUserChatsByDate({ userId });
 
@@ -122,8 +99,6 @@ describe("getUserChatsByDate", () => {
     });
 
     it("returns empty array for user with no chats", async () => {
-        const missingUserId =
-            "00000000-0000-0000-0000-000000000999" as DBUserId;
         const result = await getUserChatsByDate({ userId: missingUserId });
 
         expect(result).toHaveLength(0);

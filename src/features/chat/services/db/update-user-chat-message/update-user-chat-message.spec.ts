@@ -1,55 +1,48 @@
-import { waitForMessage } from "@/vitest/helpers/wait-for-data";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBChatId, DBChatMessageId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import {
+    generateUniqueChatId,
+    generateUniqueEmail,
+    generateUniqueMessageId,
+    generateUniqueUserId,
+} from "@/vitest/helpers/generate-test-ids";
+import { describe, expect, it } from "vitest";
 
 import { supabase } from "@/services/supabase";
 
 import { updateUserChatMessage } from "./update-user-chat-message";
 
-const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
-
 describe("updateUserChatMessage", () => {
-    beforeEach(async () => {
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+    it("updates message content", async () => {
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+        const messageId = generateUniqueMessageId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
         });
 
-        const messageId = "40000000-0000-0000-0000-000000000001";
-        await supabase.from("messages").upsert({
+        await supabase.from("chats").insert({
+            id: chatId,
+            userId,
+            title: "Test Chat",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
+
+        await supabase.from("messages").insert({
             id: messageId,
             chatId,
             userId,
             role: "user",
-            content: "Hello from seed user 1",
+            content: "Original content",
             metadata: {},
-            parts: [{ type: "text", text: "Hello from seed user 1" }],
-            createdAt: "2024-01-01T00:00:00Z",
-        });
-    });
-
-    it("updates message content", async () => {
-        const messageId =
-            "40000000-0000-0000-0000-000000000001" as DBChatMessageId;
-
-        await supabase.from("messages").upsert({
-            id: messageId,
-            chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            role: "user",
-            content: "Hello from seed user 1",
-            metadata: {},
-            parts: [{ type: "text", text: "Hello from seed user 1" }],
-            createdAt: "2024-01-01T00:00:00Z",
+            parts: [{ type: "text", text: "Original content" }],
+            createdAt: new Date().toISOString(),
         });
 
         const newContent = "Updated message content";
@@ -60,85 +53,55 @@ describe("updateUserChatMessage", () => {
             metadata: {},
         };
 
-        // Ensure chat exists
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-
-        // Delete existing message first to avoid seed data interference
-        await supabase.from("messages").delete().eq("id", messageId);
-
-        // Ensure message exists before update
-        await supabase.from("messages").upsert({
-            id: messageId,
-            chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            role: "user",
-            content: "Hello from seed user 1",
-            metadata: {},
-            parts: [{ type: "text", text: "Hello from seed user 1" }],
-            createdAt: "2024-01-01T00:00:00Z",
-        });
-
-        // Wait for upsert to complete
-        await new Promise(resolve => setTimeout(resolve, 200));
-
         await updateUserChatMessage({
             chatId,
             userId,
             message: message as any,
         });
 
-        // Wait for update to complete and verify content - more aggressive retry
-        let data = await waitForMessage(messageId, 15, 300);
-        let retries = 0;
-        while (data && data.content !== newContent && retries < 15) {
-            await new Promise(resolve => setTimeout(resolve, 300));
-            data = await waitForMessage(messageId, 15, 300);
-            retries++;
-        }
+        const { data } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("id", messageId)
+            .single();
 
         expect(data).not.toBeNull();
         expect(data?.content).toBe(newContent);
     });
 
     it("filters out non-text parts when extracting content", async () => {
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const chatId = generateUniqueChatId();
+        const messageId = generateUniqueMessageId();
+
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
         });
 
-        const messageId =
-            "40000000-0000-0000-0000-000000000001" as DBChatMessageId;
+        await supabase.from("chats").insert({
+            id: chatId,
+            userId,
+            title: "Test Chat",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
 
-        // Delete existing message first to avoid seed data interference
-        await supabase.from("messages").delete().eq("id", messageId);
-
-        // Ensure message exists before update
-        await supabase.from("messages").upsert({
+        await supabase.from("messages").insert({
             id: messageId,
             chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
+            userId,
             role: "user",
-            content: "Hello from seed user 1",
+            content: "Original",
             metadata: {},
-            parts: [{ type: "text", text: "Hello from seed user 1" }],
-            createdAt: "2024-01-01T00:00:00Z",
+            parts: [{ type: "text", text: "Original" }],
+            createdAt: new Date().toISOString(),
         });
-
-        // Wait longer for upsert to complete
-        await new Promise(resolve => setTimeout(resolve, 300));
 
         const message = {
             id: messageId,
@@ -157,14 +120,11 @@ describe("updateUserChatMessage", () => {
             message: message as any,
         });
 
-        // Wait for update to complete and verify content - more aggressive retry
-        let data = await waitForMessage(messageId, 15, 300);
-        let retries = 0;
-        while (data && data.content !== "Hello World" && retries < 15) {
-            await new Promise(resolve => setTimeout(resolve, 300));
-            data = await waitForMessage(messageId, 15, 300);
-            retries++;
-        }
+        const { data } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("id", messageId)
+            .single();
 
         expect(data).not.toBeNull();
         expect(data?.content).toBe("Hello World");

@@ -1,15 +1,13 @@
+import { generateUniqueChatId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
-
-import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { deleteUserFile } from "./delete-user-file";
 
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
 
 vi.mock("@/features/auth/services/auth", () => ({
     auth: vi.fn(),
@@ -24,6 +22,8 @@ describe("deleteUserFile", () => {
     });
 
     it("returns success when file is deleted", async () => {
+        const chatId = generateUniqueChatId();
+
         const storedFile = {
             fileId: "550e8400-e29b-41d4-a716-446655440000",
             name: "test.jpg",

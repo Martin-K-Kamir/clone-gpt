@@ -6,6 +6,13 @@ import type { WithUserId } from "@/features/user/lib/types";
 
 import type { WithContentType, WithExtension, WithName } from "@/lib/types";
 
+type StoredGeneratedFileProps = WithGeneratedFile &
+    WithChatId &
+    WithUserId &
+    WithName &
+    WithExtension &
+    WithContentType;
+
 export async function storeGeneratedFile({
     generatedFile,
     name,
@@ -13,12 +20,7 @@ export async function storeGeneratedFile({
     chatId,
     userId,
     contentType,
-}: WithGeneratedFile &
-    WithChatId &
-    WithUserId &
-    WithName &
-    WithExtension &
-    WithContentType) {
+}: StoredGeneratedFileProps) {
     const { id, publicUrl } = await uploadToStorage({
         userId,
         chatId,

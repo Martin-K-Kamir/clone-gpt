@@ -6,15 +6,17 @@ import { createUser } from "./create-user";
 
 describe("createUser", () => {
     it("creates a user with default role user", async () => {
-        const email = `int-user-${Date.now()}@example.com`;
+        const email = `test-user-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
+
         const user = await createUser({
             email,
-            name: "Integration User",
+            name: "Test User",
             password: null,
         });
 
-        expect(user).toBeTruthy();
+        expect(user).not.toBeNull();
         expect(user?.email).toBe(email);
+        expect(user?.name).toBe("Test User");
         expect(user?.role).toBe("user");
 
         if (user?.id) {
@@ -23,16 +25,18 @@ describe("createUser", () => {
     });
 
     it("creates a user with explicit role admin", async () => {
-        const email = `int-admin-${Date.now()}@example.com`;
+        const email = `test-admin-${Date.now()}-${Math.random().toString(36).substring(7)}@example.com`;
+
         const user = await createUser({
             email,
-            name: "Integration Admin",
+            name: "Test Admin",
             role: "admin",
             password: null,
         });
 
-        expect(user).toBeTruthy();
+        expect(user).not.toBeNull();
         expect(user?.email).toBe(email);
+        expect(user?.name).toBe("Test Admin");
         expect(user?.role).toBe("admin");
 
         if (user?.id) {

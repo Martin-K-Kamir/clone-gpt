@@ -9,6 +9,13 @@ import type { WithContentType, WithExtension, WithName } from "@/lib/types";
 
 import { supabase } from "@/services/supabase";
 
+type UploadToStorageProps = WithStorageBucket &
+    WithUserId &
+    WithChatId &
+    WithName &
+    WithExtension &
+    WithContentType & { content: ArrayBuffer | Uint8Array | Blob | File };
+
 export async function uploadToStorage({
     bucket,
     userId,
@@ -17,14 +24,7 @@ export async function uploadToStorage({
     extension,
     content,
     contentType,
-}: {
-    content: ArrayBuffer | Uint8Array | Blob | File;
-} & WithUserId &
-    WithChatId &
-    WithName &
-    WithExtension &
-    WithContentType &
-    WithStorageBucket) {
+}: UploadToStorageProps) {
     const id = randomUUID();
     const hashedUserId = hashId(userId);
     const hashedChatId = hashId(chatId);

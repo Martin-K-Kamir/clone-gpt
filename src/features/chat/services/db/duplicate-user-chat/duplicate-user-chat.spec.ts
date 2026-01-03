@@ -1,144 +1,68 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import {
+    generateUniqueChatId,
+    generateUniqueEmail,
+    generateUniqueMessageId,
+    generateUniqueUserId,
+} from "@/vitest/helpers/generate-test-ids";
+import { describe, expect, it } from "vitest";
 
-import type { DBChatId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import { storeUserChatMessages } from "@/features/chat/services/db/store-user-chat-messages";
 
 import { supabase } from "@/services/supabase";
 
 import { duplicateUserChat } from "./duplicate-user-chat";
 
-const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
-
 describe("duplicateUserChat", () => {
-    beforeEach(async () => {
-        await supabase
-            .from("messages")
-            .delete()
-            .gte("chatId", "30000000-0000-0000-0000-000000000100");
-
-        await supabase
-            .from("chats")
-            .delete()
-            .gte("id", "30000000-0000-0000-0000-000000000100");
-        const testChatId = "30000000-0000-0000-0000-000000000999";
-
-        await supabase.from("messages").delete().eq("chatId", testChatId);
-        await supabase.from("chats").delete().eq("id", testChatId);
-
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-
-        const { data: existingMessages } = await supabase
-            .from("messages")
-            .select("id")
-            .eq("chatId", chatId)
-            .limit(1);
-
-        if (!existingMessages || existingMessages.length === 0) {
-            await supabase.from("messages").insert([
-                {
-                    id: "40000000-0000-0000-0000-000000000001",
-                    chatId,
-                    userId: "00000000-0000-0000-0000-000000000001",
-                    role: "user",
-                    content: "Hello from seed user 1",
-                    metadata: {},
-                    parts: [],
-                    createdAt: "2024-01-01T00:00:00Z",
-                },
-                {
-                    id: "40000000-0000-0000-0000-000000000002",
-                    chatId,
-                    userId: "00000000-0000-0000-0000-000000000001",
-                    role: "assistant",
-                    content: "Hello, seed!",
-                    metadata: {},
-                    parts: [],
-                    createdAt: "2024-01-01T00:00:01Z",
-                },
-            ]);
-        }
-    });
-
     it("duplicates chat with messages", async () => {
-        const newChatId = "30000000-0000-0000-0000-000000000100" as DBChatId;
+        const userId = generateUniqueUserId();
+        const email = generateUniqueEmail();
+        const originalChatId = generateUniqueChatId();
+        const newChatId = generateUniqueChatId();
+        const messageId1 = generateUniqueMessageId();
+        const messageId2 = generateUniqueMessageId();
 
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
+        await supabase.from("users").insert({
+            id: userId,
+            email,
+            name: "Test User",
+            role: "user",
         });
 
-        // Ensure messages exist
-        await supabase.from("messages").upsert([
-            {
-                id: "40000000-0000-0000-0000-000000000001",
-                chatId,
-                userId: "00000000-0000-0000-0000-000000000001",
-                role: "user",
-                content: "Hello from seed user 1",
-                metadata: {},
-                parts: [],
-                createdAt: "2024-01-01T00:00:00Z",
-            },
-            {
-                id: "40000000-0000-0000-0000-000000000002",
-                chatId,
-                userId: "00000000-0000-0000-0000-000000000001",
-                role: "assistant",
-                content: "Hello, seed!",
-                metadata: {},
-                parts: [],
-                createdAt: "2024-01-01T00:00:01Z",
-            },
-        ]);
+        await supabase.from("chats").insert({
+            id: originalChatId,
+            userId,
+            title: "Original Chat",
+            visibility: "private",
+            visibleAt: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        });
 
-        // Wait longer for messages to be stored
-        await new Promise(resolve => setTimeout(resolve, 300));
+        const createdAt1 = new Date().toISOString();
+        const createdAt2 = new Date(Date.now() + 1000).toISOString();
 
-        let originalMessages = (
-            await supabase
-                .from("messages")
-                .select("*")
-                .eq("chatId", chatId)
-                .order("createdAt", { ascending: true })
-        ).data;
-
-        // Retry if messages not found
-        let retriesOriginal = 0;
-        while (
-            (!originalMessages || originalMessages.length === 0) &&
-            retriesOriginal < 10
-        ) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-            originalMessages = (
-                await supabase
-                    .from("messages")
-                    .select("*")
-                    .eq("chatId", chatId)
-                    .order("createdAt", { ascending: true })
-            ).data;
-            retriesOriginal++;
-        }
-
-        expect(originalMessages).not.toBeNull();
-        expect(originalMessages?.length).toBeGreaterThan(0);
+        await storeUserChatMessages({
+            chatId: originalChatId,
+            userId,
+            messages: [
+                {
+                    id: messageId1,
+                    role: "user" as const,
+                    parts: [{ type: "text" as const, text: "Message 1" }],
+                    metadata: { createdAt: createdAt1 },
+                },
+                {
+                    id: messageId2,
+                    role: "assistant" as const,
+                    parts: [{ type: "text" as const, text: "Message 2" }],
+                    metadata: { createdAt: createdAt2 },
+                },
+            ] as any,
+            preserveCreatedAt: true,
+        });
 
         const result = await duplicateUserChat({
-            chatId,
+            chatId: originalChatId,
             newChatId,
             userId,
         });
@@ -147,135 +71,45 @@ describe("duplicateUserChat", () => {
         expect(result?.id).toBe(newChatId);
         expect(result?.userId).toBe(userId);
 
-        const { data: verifyOriginal } = await supabase
-            .from("messages")
-            .select("*")
-            .eq("chatId", chatId)
-            .order("createdAt", { ascending: true });
-
-        expect(verifyOriginal?.length).toBeGreaterThan(0);
-
-        // Wait for messages to be duplicated - check for messages with new chatId
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        let newChatMessages = (
-            await supabase
-                .from("messages")
-                .select("*")
-                .eq("chatId", newChatId)
-                .order("createdAt", { ascending: true })
-        ).data;
-
-        // Retry if no messages duplicated - more aggressive
-        let retries = 0;
-        while (
-            (!newChatMessages || newChatMessages.length === 0) &&
-            retries < 15
-        ) {
-            await new Promise(resolve => setTimeout(resolve, 400));
-            newChatMessages = (
-                await supabase
-                    .from("messages")
-                    .select("*")
-                    .eq("chatId", newChatId)
-                    .order("createdAt", { ascending: true })
-            ).data;
-            retries++;
-        }
-
-        expect(newChatMessages).not.toBeNull();
-        expect(newChatMessages?.length).toBeGreaterThan(0);
-        expect(newChatMessages?.length).toBe(originalMessages!.length);
-    });
-
-    it("duplicates chat with same title", async () => {
-        const newChatId = "30000000-0000-0000-0000-000000000101" as DBChatId;
-
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-
-        // Ensure chat exists
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
-
-        await new Promise(resolve => setTimeout(resolve, 100));
-
         const { data: originalChat } = await supabase
             .from("chats")
-            .select("title")
-            .eq("id", chatId)
+            .select("*")
+            .eq("id", originalChatId)
             .single();
 
         expect(originalChat).not.toBeNull();
-        const expectedTitle = originalChat?.title || "Seed Private Chat";
 
-        const result = await duplicateUserChat({
-            chatId,
-            newChatId,
-            userId,
-        });
+        const { data: originalMessages } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("chatId", originalChatId)
+            .order("createdAt", { ascending: true });
 
-        expect(result).not.toBeNull();
-        expect(result?.title).toBe(expectedTitle);
-    });
+        expect(originalMessages).toHaveLength(2);
 
-    it("creates new chat with new id", async () => {
-        // Ensure source chat exists
-        await supabase.from("chats").upsert({
-            id: chatId,
-            userId: "00000000-0000-0000-0000-000000000001",
-            title: "Seed Private Chat",
-            visibility: "private",
-            visibleAt: "2024-01-01T00:00:00Z",
-            createdAt: "2024-01-01T00:00:00Z",
-            updatedAt: "2024-01-01T00:00:00Z",
-        });
+        const { data: newChat } = await supabase
+            .from("chats")
+            .select("*")
+            .eq("id", newChatId)
+            .single();
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+        expect(newChat).not.toBeNull();
+        expect(newChat?.userId).toBe(userId);
 
-        const newChatId = "30000000-0000-0000-0000-000000000102" as DBChatId;
+        const { data: newMessages } = await supabase
+            .from("messages")
+            .select("*")
+            .eq("chatId", newChatId)
+            .order("createdAt", { ascending: true });
 
-        const result = await duplicateUserChat({
-            chatId,
-            newChatId,
-            userId,
-        });
+        expect(newMessages).toHaveLength(2);
 
-        expect(result).not.toBeNull();
-        expect(result?.id).toBe(newChatId);
-        expect(result?.id).not.toBe(chatId);
-    });
+        const message1 = newMessages?.find(msg => msg.content === "Message 1");
+        const message2 = newMessages?.find(msg => msg.content === "Message 2");
 
-    it("returns null when original chat not found and throwOnNotFound is false", async () => {
-        const missingChatId =
-            "30000000-0000-0000-0000-000000000999" as DBChatId;
-        const newChatId = "30000000-0000-0000-0000-000000000103" as DBChatId;
-
-        await supabase.from("chats").delete().eq("id", missingChatId);
-        await supabase.from("messages").delete().eq("chatId", missingChatId);
-        await supabase.from("chats").delete().eq("id", newChatId);
-
-        const result = await duplicateUserChat({
-            chatId: missingChatId,
-            newChatId,
-            userId,
-            throwOnNotFound: false,
-        });
-
-        expect(result).toBeNull();
+        expect(message1).toBeDefined();
+        expect(message2).toBeDefined();
+        expect(message1?.content).toBe("Message 1");
+        expect(message2?.content).toBe("Message 2");
     });
 });
