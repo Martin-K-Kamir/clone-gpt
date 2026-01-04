@@ -1,9 +1,8 @@
-import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
-const { GET } = await import("./route");
+import { GET } from "./route";
 
 const mocks = vi.hoisted(() => ({
     getUserById: vi.fn(),

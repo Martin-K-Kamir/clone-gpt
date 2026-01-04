@@ -6,7 +6,7 @@ export * from "./use-download-table-as-csv";
 export * from "./use-download-table-as-xlsx";
 export * from "./use-debounced-effect";
 export * from "./use-element-dimensions";
-export * from "./use-event-listner";
+export * from "./use-event-listener";
 export * from "./use-has-mounted";
 export * from "./use-in-view";
 export * from "./use-mobile";

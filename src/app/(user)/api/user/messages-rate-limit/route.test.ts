@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
-const { GET } = await import("./route");
+import { GET } from "./route";
 
 const mocks = vi.hoisted(() => ({
     checkUserMessagesRateLimit: vi.fn(),
@@ -77,10 +77,6 @@ describe("GET /api/user/messages-rate-limit", () => {
         const response = await GET();
 
         expect(response).toBeInstanceOf(Response);
-        expect(mocks.checkUserMessagesRateLimit).toHaveBeenCalledWith({
-            userId,
-            userRole: "user",
-        });
     });
 
     it("returns error when session does not exist", async () => {

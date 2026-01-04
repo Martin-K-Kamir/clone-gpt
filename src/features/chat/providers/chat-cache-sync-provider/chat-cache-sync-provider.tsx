@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { createContext } from "react";
+import { createContext, useContext } from "react";
 import { useCallback, useMemo } from "react";
 
 import type {
@@ -800,4 +800,15 @@ export function ChatCacheSyncProvider({
     return (
         <ChatCacheSyncContext value={value}>{children}</ChatCacheSyncContext>
     );
+}
+
+export function useChatCacheSyncContext() {
+    const context = useContext(ChatCacheSyncContext);
+
+    if (!context) {
+        throw new Error(
+            "useChatCacheSyncContext must be used within a ChatCacheSyncProvider",
+        );
+    }
+    return context;
 }

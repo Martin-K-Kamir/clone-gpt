@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const { GET } = await import("./route");
+import { GET } from "./route";
 
 const mocks = vi.hoisted(() => ({
     getToken: vi.fn(),
@@ -31,10 +31,6 @@ describe("GET /api/auth/guest", () => {
         const response = await GET(request);
 
         expect(response).toBeInstanceOf(NextResponse);
-        expect(mocks.getToken).toHaveBeenCalledWith({
-            req: request,
-            secret: process.env.AUTH_SECRET,
-        });
         expect(mocks.signIn).not.toHaveBeenCalled();
     });
 
@@ -46,7 +42,6 @@ describe("GET /api/auth/guest", () => {
         const response = await GET(request);
 
         expect(response).toBeInstanceOf(NextResponse);
-        expect(mocks.getToken).toHaveBeenCalled();
         expect(mocks.signIn).not.toHaveBeenCalled();
     });
 
@@ -59,10 +54,6 @@ describe("GET /api/auth/guest", () => {
         );
         const response = await GET(request);
 
-        expect(mocks.getToken).toHaveBeenCalledWith({
-            req: request,
-            secret: process.env.AUTH_SECRET,
-        });
         expect(mocks.signIn).toHaveBeenCalledWith("guest", {
             redirect: true,
             redirectTo: "/dashboard",

@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
-const { POST } = await import("./route");
+import { POST } from "./route";
 
 const mocks = vi.hoisted(() => ({
     deleteUserFile: vi.fn(),

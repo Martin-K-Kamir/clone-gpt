@@ -2,16 +2,18 @@ import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import { CHAT_TOOL, STORAGE_BUCKET } from "@/features/chat/lib/constants";
 import type { ChatMessagePart, DBChatId } from "@/features/chat/lib/types";
+import { duplicateStorageFile } from "@/features/chat/services/storage";
 
 import { duplicateMessagePart } from "./duplicate-message-part";
-
-process.env.SUPABASE_STORAGE_URL = "https://storage.example.com";
 
 vi.mock("@/features/chat/services/storage", () => ({
     duplicateStorageFile: vi.fn(),
 }));
 
-const mockStorageUrl = "https://storage.example.com";
+const mockDuplicateStorageFile = vi.mocked(duplicateStorageFile);
+
+const mockStorageUrl =
+    process.env.SUPABASE_STORAGE_URL || "https://storage.example.com";
 
 describe("duplicateMessagePart", () => {
     const userId = "user-1" as any;
@@ -21,12 +23,8 @@ describe("duplicateMessagePart", () => {
         vi.clearAllMocks();
     });
 
-    it("should duplicate generate image tool part", async () => {
-        const { duplicateStorageFile } = await import(
-            "@/features/chat/services/storage"
-        );
-
-        vi.mocked(duplicateStorageFile).mockResolvedValue({
+    it("should return duplicate image part with updated URLs and IDs", async () => {
+        mockDuplicateStorageFile.mockResolvedValue({
             name: "new-image.png",
             fileId: "123e4567-e89b-12d3-a456-426614174000",
             fileUrl: `${mockStorageUrl}/${STORAGE_BUCKET.GENERATED_IMAGES}/new-image.png`,
@@ -57,12 +55,8 @@ describe("duplicateMessagePart", () => {
         });
     });
 
-    it("should duplicate generate file tool part", async () => {
-        const { duplicateStorageFile } = await import(
-            "@/features/chat/services/storage"
-        );
-
-        vi.mocked(duplicateStorageFile).mockResolvedValue({
+    it("should return duplicate file part with updated URLs and IDs", async () => {
+        mockDuplicateStorageFile.mockResolvedValue({
             name: "new-file.js",
             fileId: "123e4567-e89b-12d3-a456-426614174002",
             fileUrl: `${mockStorageUrl}/${STORAGE_BUCKET.GENERATED_FILES}/new-file.js`,
@@ -93,12 +87,8 @@ describe("duplicateMessagePart", () => {
         });
     });
 
-    it("should duplicate user file message part", async () => {
-        const { duplicateStorageFile } = await import(
-            "@/features/chat/services/storage"
-        );
-
-        vi.mocked(duplicateStorageFile).mockResolvedValue({
+    it("should return duplicate user file part with updated URL", async () => {
+        mockDuplicateStorageFile.mockResolvedValue({
             name: "new-document.pdf",
             fileId: "123e4567-e89b-12d3-a456-426614174003",
             fileUrl: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/new-document.pdf`,
@@ -161,11 +151,7 @@ describe("duplicateMessagePart", () => {
     });
 
     it("should preserve all properties when duplicating image part", async () => {
-        const { duplicateStorageFile } = await import(
-            "@/features/chat/services/storage"
-        );
-
-        vi.mocked(duplicateStorageFile).mockResolvedValue({
+        mockDuplicateStorageFile.mockResolvedValue({
             name: "new-image.png",
             fileId: "123e4567-e89b-12d3-a456-426614174001",
             fileUrl: `${mockStorageUrl}/${STORAGE_BUCKET.GENERATED_IMAGES}/new-image.png`,
@@ -199,12 +185,8 @@ describe("duplicateMessagePart", () => {
     });
 
     describe("type checking", () => {
-        it("should return ChatMessagePart", async () => {
-            const { duplicateStorageFile } = await import(
-                "@/features/chat/services/storage"
-            );
-
-            vi.mocked(duplicateStorageFile).mockResolvedValue({
+        it("should return ChatMessagePart type", async () => {
+            mockDuplicateStorageFile.mockResolvedValue({
                 name: "new-file.pdf",
                 fileId: "123e4567-e89b-12d3-a456-426614174000",
                 fileUrl: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/new-file.pdf`,

@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import { hashPassword } from "./hash-password";
@@ -15,12 +16,10 @@ describe("hashPassword", () => {
     });
 
     it("should return a string", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$salt",
         );
-        (bcrypt.default.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$hashedpassword",
         );
 
@@ -32,12 +31,10 @@ describe("hashPassword", () => {
     });
 
     it("should hash different passwords", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$salt",
         );
-        (bcrypt.default.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$hashedpassword",
         );
 
@@ -54,48 +51,43 @@ describe("hashPassword", () => {
     });
 
     it("should call bcrypt.genSalt with correct rounds", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$salt",
         );
-        (bcrypt.default.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$hashedpassword",
         );
 
         await hashPassword("test-password");
 
-        expect(
-            bcrypt.default.genSalt as ReturnType<typeof vi.fn>,
-        ).toHaveBeenCalledWith(10);
+        expect(bcrypt.genSalt as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
+            10,
+        );
     });
 
     it("should call bcrypt.hash with password and salt", async () => {
-        const bcrypt = await import("bcryptjs");
-
         const mockSalt = "$2a$10$salt";
-        (bcrypt.default.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             mockSalt,
         );
-        (bcrypt.default.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$hashedpassword",
         );
 
         const password = "test-password";
         await hashPassword(password);
 
-        expect(
-            bcrypt.default.hash as ReturnType<typeof vi.fn>,
-        ).toHaveBeenCalledWith(password, mockSalt);
+        expect(bcrypt.hash as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
+            password,
+            mockSalt,
+        );
     });
 
     it("should handle empty password", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$salt",
         );
-        (bcrypt.default.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$hashedpassword",
         );
 
@@ -106,12 +98,10 @@ describe("hashPassword", () => {
     });
 
     it("should handle long passwords", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$salt",
         );
-        (bcrypt.default.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$hashedpassword",
         );
 
@@ -123,12 +113,10 @@ describe("hashPassword", () => {
     });
 
     it("should handle special characters in password", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$salt",
         );
-        (bcrypt.default.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
+        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$hashedpassword",
         );
 

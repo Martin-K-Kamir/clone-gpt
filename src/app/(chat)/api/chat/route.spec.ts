@@ -5,7 +5,7 @@ import {
     generateUserId,
 } from "@/vitest/helpers/generate-test-ids";
 import { restoreSeedData } from "@/vitest/helpers/restore-seed-data";
-import { simulateReadableStream, streamText } from "ai";
+import { simulateReadableStream } from "ai";
 import { MockLanguageModelV2 } from "ai/test";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -13,6 +13,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { auth } from "@/features/auth/services/auth";
 
 import { CHAT_TRIGGER } from "@/features/chat/lib/constants";
+
+import { entitlementsByUserRole } from "@/features/user/lib/constants/entitlements";
 
 import { supabase } from "@/services/supabase";
 
@@ -307,9 +309,6 @@ describe("POST /api/chat", () => {
 
         if (!user) throw new Error("User not found");
 
-        const { entitlementsByUserRole } = await import(
-            "@/features/user/lib/constants/entitlements"
-        );
         const maxMessages = entitlementsByUserRole[user.role].maxMessages;
 
         const periodStart = new Date();

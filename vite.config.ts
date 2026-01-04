@@ -45,6 +45,11 @@ export default defineConfig({
                     exclude: [
                         "**/*.stories.{js,ts,jsx,tsx}",
                         "**/*.spec.{ts,tsx}",
+                        "src/hooks/**/*.test.{js,ts,jsx,tsx}",
+                        "src/components/**/*.test.{js,ts,jsx,tsx}",
+                        "src/providers/**/*.test.{js,ts,jsx,tsx}",
+                        "src/features/**/hooks/**/*.test.{js,ts,jsx,tsx}",
+                        "src/features/**/providers/**/*.test.{js,ts,jsx,tsx}",
                     ],
                     environment: "node",
                     setupFiles: ["./src/vitest/unit-setup.ts"],
@@ -66,6 +71,30 @@ export default defineConfig({
                     testTimeout: 15000,
                     pool: "forks",
                     maxWorkers: 1,
+                },
+                resolve: {
+                    alias: {
+                        "@": path.resolve(__dirname, "./src"),
+                        "#": path.resolve(__dirname, "."),
+                    },
+                },
+            },
+            {
+                test: {
+                    name: "react",
+                    include: [
+                        "src/hooks/**/*.test.{js,ts,jsx,tsx}",
+                        "src/components/**/*.test.{js,ts,jsx,tsx}",
+                        "src/providers/**/*.test.{js,ts,jsx,tsx}",
+                        "src/features/**/hooks/**/*.test.{js,ts,jsx,tsx}",
+                        "src/features/**/providers/**/*.test.{js,ts,jsx,tsx}",
+                    ],
+                    exclude: [
+                        "**/*.stories.{js,ts,jsx,tsx}",
+                        "**/*.spec.{ts,tsx}",
+                    ],
+                    environment: "jsdom",
+                    setupFiles: ["./src/vitest/react-setup.ts"],
                 },
                 resolve: {
                     alias: {

@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
 import { comparePassword } from "./compare-password";
@@ -14,11 +15,7 @@ describe("comparePassword", () => {
     });
 
     it("should return a boolean", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            true,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 
         const result = await comparePassword("password", "$2a$10$hashed");
 
@@ -27,11 +24,7 @@ describe("comparePassword", () => {
     });
 
     it("should return true when password matches", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            true,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 
         const result = await comparePassword(
             "correct-password",
@@ -43,11 +36,7 @@ describe("comparePassword", () => {
     });
 
     it("should return false when password does not match", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            false,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(false);
 
         const result = await comparePassword(
             "wrong-password",
@@ -59,28 +48,21 @@ describe("comparePassword", () => {
     });
 
     it("should call bcrypt.compare with correct arguments", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            true,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 
         const password = "test-password";
         const hashedPassword = "$2a$10$hashedpassword";
 
         await comparePassword(password, hashedPassword);
 
-        expect(
-            bcrypt.default.compare as ReturnType<typeof vi.fn>,
-        ).toHaveBeenCalledWith(password, hashedPassword);
+        expect(bcrypt.compare as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
+            password,
+            hashedPassword,
+        );
     });
 
     it("should handle empty password", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            false,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(false);
 
         const result = await comparePassword("", "$2a$10$hashedpassword");
 
@@ -89,11 +71,7 @@ describe("comparePassword", () => {
     });
 
     it("should handle empty hashed password", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            false,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(false);
 
         const result = await comparePassword("password", "");
 
@@ -102,11 +80,7 @@ describe("comparePassword", () => {
     });
 
     it("should handle special characters in password", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            true,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 
         const specialPassword = "!@#$%^&*()_+-=[]{}|;:,.<>?";
         const result = await comparePassword(
@@ -119,11 +93,7 @@ describe("comparePassword", () => {
     });
 
     it("should handle long passwords", async () => {
-        const bcrypt = await import("bcryptjs");
-
-        (bcrypt.default.compare as ReturnType<typeof vi.fn>).mockResolvedValue(
-            true,
-        );
+        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(true);
 
         const longPassword = "a".repeat(1000);
         const result = await comparePassword(
