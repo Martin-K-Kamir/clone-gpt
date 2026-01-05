@@ -78,6 +78,34 @@ General development guidelines and best practices. Covers:
 - Error handling
 - Accessibility
 
+### [testing-patterns.md](./testing-patterns.md)
+
+Testing patterns and best practices. Covers:
+
+- Test naming conventions (must start with "should")
+- Test structure and organization
+- Unit vs integration tests
+- Using constants and types from libs
+- Test helpers and ID generation
+- Mocking patterns
+- React component testing
+- Avoiding implementation details
+- Performance considerations
+
+### [storybook-patterns.md](./storybook-patterns.md)
+
+Storybook patterns and conventions. Covers:
+
+- Story structure and naming conventions
+- Test naming (must start with "should")
+- Mock data patterns (stable and fixed values)
+- Element queries and test helpers
+- Decorators and providers
+- MSW handlers for API mocking
+- Query client management
+- Common interaction patterns
+- Best practices for visual regression testing
+
 ## How to Use
 
 These rules are automatically used by Cursor's AI agents to:
@@ -108,4 +136,6 @@ When updating these rules:
 - Server actions patterns? → [server-actions.md](./server-actions.md)
 - TypeScript patterns? → [coding-standards.md](./coding-standards.md)
 - Feature organization? → [feature-structure.md](./feature-structure.md)
+- Testing patterns? → [testing-patterns.md](./testing-patterns.md)
+- Storybook patterns? → [storybook-patterns.md](./storybook-patterns.md)
 - General best practices? → [general.md](./general.md)
