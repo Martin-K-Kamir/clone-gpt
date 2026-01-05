@@ -36,11 +36,7 @@ export function ChatDeleteDialog({
     const chatIdFromPathname = getChatIdFromPathname(pathname);
 
     async function handleDelete() {
-        console.log("[handleDelete] chatIdFromPathname:", chatIdFromPathname);
-        console.log("[handleDelete] params.chatId:", params.chatId);
-        console.log("pathname:", pathname);
         if (chatIdFromPathname === chat.id || params.chatId === chat.id) {
-            console.log("[handleDelete] redirecting to home");
             router.replace("/");
         }
 

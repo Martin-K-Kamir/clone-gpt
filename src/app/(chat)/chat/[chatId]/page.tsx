@@ -65,6 +65,7 @@ export default async function Page(props: Props) {
             <ChatViewHeader chatId={chatId} />
 
             <ChatViewBody
+                key={chatId}
                 chatId={chatId}
                 userId={session.user.id}
                 messages={chatMessages.data}

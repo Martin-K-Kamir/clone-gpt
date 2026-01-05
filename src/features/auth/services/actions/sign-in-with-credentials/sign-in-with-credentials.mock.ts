@@ -10,11 +10,6 @@ export const signInWithCredentials = fn(
         password: string;
         redirectTo?: string;
     }) => {
-        console.log("[Storybook Mock] signInWithCredentials called", {
-            email,
-            password,
-            redirectTo,
-        });
         return {
             success: true,
             message: "Signed in successfully!",

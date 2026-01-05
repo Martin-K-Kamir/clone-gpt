@@ -73,30 +73,26 @@ export function ChatMessageToolbarAssistant({
     useEffect(() => {
         if (!canShowActions || isRateLimitPending) return;
 
-        const timeoutId = setTimeout(() => {
-            const buttons = [
-                copyButtonRef.current,
-                regenerateButtonRef.current,
-                upVoteButtonRef.current,
-                downVoteButtonRef.current,
-                resourceTriggerRef.current,
-            ];
+        const buttons = [
+            copyButtonRef.current,
+            regenerateButtonRef.current,
+            upVoteButtonRef.current,
+            downVoteButtonRef.current,
+            resourceTriggerRef.current,
+        ];
 
-            animate(
-                buttons.filter(Boolean),
-                {
-                    opacity: 1,
-                    scale: 1,
-                },
-                {
-                    delay: stagger(0.1, { startDelay: 0.1 }),
-                    duration: 0.15,
-                    ease: "easeOut",
-                },
-            );
-        }, 50);
-
-        return () => clearTimeout(timeoutId);
+        animate(
+            buttons.filter(Boolean),
+            {
+                opacity: 1,
+                scale: 1,
+            },
+            {
+                delay: stagger(0.1, { startDelay: 0.1 }),
+                duration: 0.15,
+                ease: "easeOut",
+            },
+        );
     }, [canShowActions, isRateLimitPending]);
 
     return (

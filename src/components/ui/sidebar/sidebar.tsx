@@ -46,7 +46,6 @@ export function Sidebar({
                     openMobile ? SHEET_VIEW_STATE.OPEN : SHEET_VIEW_STATE.CLOSED
                 }
                 onViewChange={view => {
-                    console.log("onViewChange", view);
                     if (view === SHEET_VIEW_STATE.OPEN) {
                         setOpenMobile(true);
                     } else {
