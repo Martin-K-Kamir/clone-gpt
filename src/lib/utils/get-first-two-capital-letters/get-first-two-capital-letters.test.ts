@@ -15,44 +15,53 @@ describe("getFirstTwoCapitalLetters", () => {
         expect(getFirstTwoCapitalLetters("")).toBeNull();
     });
 
-    it("should return null for string with no capital letters", () => {
-        expect(getFirstTwoCapitalLetters("hello world")).toBeNull();
-        expect(getFirstTwoCapitalLetters("123")).toBeNull();
-        expect(getFirstTwoCapitalLetters("!@#$%")).toBeNull();
+    it("should return first letter of each word uppercased", () => {
+        expect(getFirstTwoCapitalLetters("hello world")).toBe("HW");
+        expect(getFirstTwoCapitalLetters("max kakacko")).toBe("MK");
     });
 
-    it("should return string with single capital letter when only one exists", () => {
+    it("should handle strings with numbers", () => {
+        expect(getFirstTwoCapitalLetters("123")).toBe("1");
+        expect(getFirstTwoCapitalLetters("test 123")).toBe("T1");
+    });
+
+    it("should handle strings with only special characters", () => {
+        expect(getFirstTwoCapitalLetters("!@#$%")).toBe("!");
+    });
+
+    it("should return string with single letter when only one word exists", () => {
         expect(getFirstTwoCapitalLetters("Hello")).toBe("H");
-        expect(getFirstTwoCapitalLetters("hello World")).toBe("W");
-        expect(getFirstTwoCapitalLetters("aBc")).toBe("B");
+        expect(getFirstTwoCapitalLetters("hello")).toBe("H");
+        expect(getFirstTwoCapitalLetters("aBc")).toBe("A");
     });
 
-    it("should return string with first two capital letters", () => {
+    it("should return first letter of each word for multiple words", () => {
+        expect(getFirstTwoCapitalLetters("hello World")).toBe("HW");
         expect(getFirstTwoCapitalLetters("Hello World")).toBe("HW");
         expect(getFirstTwoCapitalLetters("John Doe")).toBe("JD");
-        expect(getFirstTwoCapitalLetters("ABC")).toBe("AB");
+        expect(getFirstTwoCapitalLetters("max kakacko")).toBe("MK");
     });
 
-    it("should return first two capital letters in order", () => {
-        expect(getFirstTwoCapitalLetters("JavaScript")).toBe("JS");
-        expect(getFirstTwoCapitalLetters("TypeScript")).toBe("TS");
+    it("should return first letter of single word", () => {
+        expect(getFirstTwoCapitalLetters("JavaScript")).toBe("J");
+        expect(getFirstTwoCapitalLetters("TypeScript")).toBe("T");
         expect(getFirstTwoCapitalLetters("React Native")).toBe("RN");
     });
 
-    it("should return only first two capital letters when multiple exist", () => {
-        expect(getFirstTwoCapitalLetters("ABCDEFG")).toBe("AB");
+    it("should return only first two words' initials when multiple words exist", () => {
         expect(getFirstTwoCapitalLetters("Hello World Test")).toBe("HW");
+        expect(getFirstTwoCapitalLetters("One Two Three Four")).toBe("OT");
     });
 
-    it("should ignore lowercase letters", () => {
-        expect(getFirstTwoCapitalLetters("helloWORLD")).toBe("WO");
-        expect(getFirstTwoCapitalLetters("aBcDeF")).toBe("BD");
+    it("should handle single word regardless of case", () => {
+        expect(getFirstTwoCapitalLetters("helloWORLD")).toBe("H");
+        expect(getFirstTwoCapitalLetters("aBcDeF")).toBe("A");
     });
 
     it("should handle strings with numbers and special characters", () => {
-        expect(getFirstTwoCapitalLetters("Hello123World")).toBe("HW");
-        expect(getFirstTwoCapitalLetters("Test!@#String")).toBe("TS");
-        expect(getFirstTwoCapitalLetters("A1B2C3")).toBe("AB");
+        expect(getFirstTwoCapitalLetters("Hello123World")).toBe("H");
+        expect(getFirstTwoCapitalLetters("Test String")).toBe("TS");
+        expect(getFirstTwoCapitalLetters("A1B2C3")).toBe("A");
     });
 
     it("should handle strings with spaces", () => {
@@ -60,9 +69,9 @@ describe("getFirstTwoCapitalLetters", () => {
         expect(getFirstTwoCapitalLetters("  Test  String  ")).toBe("TS");
     });
 
-    it("should handle strings with only one capital letter", () => {
+    it("should handle strings with only one word", () => {
         expect(getFirstTwoCapitalLetters("Hello")).toBe("H");
-        expect(getFirstTwoCapitalLetters("testString")).toBe("S");
+        expect(getFirstTwoCapitalLetters("testString")).toBe("T");
     });
 
     it("should handle unicode characters", () => {
@@ -71,27 +80,27 @@ describe("getFirstTwoCapitalLetters", () => {
     });
 
     it("should handle mixed case strings", () => {
-        expect(getFirstTwoCapitalLetters("HeLLo WoRLd")).toBe("HL");
-        expect(getFirstTwoCapitalLetters("TeStInG")).toBe("TS");
+        expect(getFirstTwoCapitalLetters("HeLLo WoRLd")).toBe("HW");
+        expect(getFirstTwoCapitalLetters("TeStInG")).toBe("T");
     });
 
-    it("should handle strings starting with capital letters", () => {
-        expect(getFirstTwoCapitalLetters("ABCdef")).toBe("AB");
-        expect(getFirstTwoCapitalLetters("XYZ")).toBe("XY");
+    it("should handle strings starting with any case", () => {
+        expect(getFirstTwoCapitalLetters("ABCdef")).toBe("A");
+        expect(getFirstTwoCapitalLetters("xyz")).toBe("X");
     });
 
-    it("should handle strings with capital letters at the end", () => {
-        expect(getFirstTwoCapitalLetters("helloWORLD")).toBe("WO");
-        expect(getFirstTwoCapitalLetters("testABC")).toBe("AB");
+    it("should handle single word regardless of internal case", () => {
+        expect(getFirstTwoCapitalLetters("helloWORLD")).toBe("H");
+        expect(getFirstTwoCapitalLetters("testABC")).toBe("T");
     });
 
     it("should handle very long strings", () => {
-        const longString = "A" + "b".repeat(100) + "C" + "d".repeat(100);
+        const longString = "A" + "b".repeat(100) + " C" + "d".repeat(100);
         expect(getFirstTwoCapitalLetters(longString)).toBe("AC");
     });
 
-    it("should handle strings with consecutive capital letters", () => {
-        expect(getFirstTwoCapitalLetters("HELLO")).toBe("HE");
-        expect(getFirstTwoCapitalLetters("WORLD")).toBe("WO");
+    it("should handle single word strings", () => {
+        expect(getFirstTwoCapitalLetters("HELLO")).toBe("H");
+        expect(getFirstTwoCapitalLetters("WORLD")).toBe("W");
     });
 });

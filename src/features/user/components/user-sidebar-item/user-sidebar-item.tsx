@@ -7,5 +7,10 @@ export async function UserSidebarItem() {
     const session = await auth();
     assertSessionExists(session);
 
-    return <UserSidebarItemClient user={session.user} />;
+    return (
+        <UserSidebarItemClient
+            key={`user-sidebar-item-${session.user.id}`}
+            user={session.user}
+        />
+    );
 }

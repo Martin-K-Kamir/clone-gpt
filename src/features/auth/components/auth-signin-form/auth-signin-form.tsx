@@ -45,10 +45,6 @@ export function AuthSignInForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm<z.infer<typeof signinSchema>>({
         resolver: zodResolver(signinSchema),
-        // defaultValues: {
-        //     email: "max@test1.cz",
-        //     password: "martin123",
-        // },
     });
 
     const canLinkToSignup = typeof onSwitchToSignup === "undefined";

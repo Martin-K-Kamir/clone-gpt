@@ -26,7 +26,13 @@ export async function ChatSidebarHistory(
             orderBy: QUERY_USER_CHATS_ORDER_BY,
         });
 
-        return <ChatSidebarHistoryClient initialData={data} {...props} />;
+        return (
+            <ChatSidebarHistoryClient
+                key={`chat-sidebar-history-${session.user.id}`}
+                initialData={data}
+                {...props}
+            />
+        );
     } catch (error) {
         return (
             <ChatSidebarHistoryError
