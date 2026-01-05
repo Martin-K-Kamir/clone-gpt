@@ -4,6 +4,58 @@
 
 This project uses **Vitest** for unit and integration testing, **@testing-library/react** for React component testing, and **MSW** for API mocking. All tests should follow these patterns and best practices.
 
+## Running Tests After Updates
+
+**CRITICAL**: After making any code changes, always run the relevant tests to ensure nothing is broken.
+
+### When to Run Tests
+
+Run tests after:
+
+- ✅ Adding new features or functionality
+- ✅ Modifying existing code
+- ✅ Refactoring code
+- ✅ Fixing bugs
+- ✅ Updating dependencies
+- ✅ Changing API contracts or data structures
+
+### How to Run Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode (recommended during development)
+npm run test:watch
+
+# Run specific test project
+npm run test:unit          # Unit tests only
+npm run test:react         # React component tests only
+npm run test:integration   # Integration tests only
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run tests for a specific file
+npm test path/to/file.test.ts
+```
+
+### Test Scope
+
+- **Unit tests** (`*.test.ts`): Run when modifying utilities, services, or business logic
+- **Integration tests** (`*.spec.ts`): Run when modifying database operations, API routes, or complex workflows
+- **React tests** (`*.test.tsx`): Run when modifying components or hooks
+- **Storybook tests**: Run when modifying UI components or stories
+
+### Best Practice
+
+1. **Before committing**: Run `npm test` to ensure all tests pass
+2. **During development**: Use `npm run test:watch` to get immediate feedback
+3. **Before PR**: Run full test suite including coverage: `npm run test:coverage`
+4. **After refactoring**: Run all test types to catch regressions
+
+**Note**: If tests fail after your changes, either fix the code or update the tests if the behavior change is intentional.
+
 ## Test Naming Conventions
 
 ### Test Names Must Start with "should"

@@ -16,7 +16,7 @@ src/app/
 Export named functions for HTTP methods:
 
 ```typescript
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
     // Handle GET request
@@ -25,7 +25,23 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
     // Handle POST request
 }
+
+// For dynamic routes, params is a Promise in Next.js 16+
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ chatId: string }> },
+) {
+    const { chatId } = await params;
+    // Use chatId
+}
 ```
+
+**Route Configuration**:
+
+- `preferredRegion`: Specify the deployment region (e.g., `"fra1"` for Frankfurt)
+- `maxDuration`: Optional, set for long-running operations (default is 10s, max is 280s for Hobby plan)
+
+**Note**: In Next.js 16+, `params` in dynamic routes is a Promise and must be awaited.
 
 ## Request Validation
 
@@ -45,7 +61,7 @@ export async function POST(request: NextRequest) {
     // Validate
     const result = requestSchema.safeParse(body);
     if (!result.success) {
-        return api.badRequest("Invalid request body", result.error);
+        return api.error.auth.validation(result.error).toResponse();
     }
 
     const { email, message } = result.data;
@@ -86,6 +102,7 @@ Use Promise.all for parallel operations:
 
 ```typescript
 const [requestBody, session] = await Promise.all([request.json(), auth()]);
+assertSessionExists(session);
 ```
 
 ## Response Patterns
@@ -94,34 +111,40 @@ Use the API response utilities from `@/lib/api-response`:
 
 ```typescript
 import { api } from "@/lib/api-response";
+import { PLURAL } from "@/lib/constants";
 
-// Success responses
-return api.ok(data);
-return api.created(data);
-return api.noContent();
+// Success responses - use feature-specific methods
+return api.success.chat.get(data, { count: PLURAL.SINGLE }).toResponse();
+return api.success.user.get(user).toResponse();
+return api.success.chat.create(chatId).toResponse();
 
-// Error responses
-return api.badRequest(message, details);
-return api.unauthorized(message);
-return api.forbidden(message);
-return api.notFound(message);
-return api.internalServerError(message, error);
+// Error responses - use feature-specific methods
+return api.error.chat.notFound().toResponse();
+return api.error.user.get(error).toResponse();
+return api.error.chat.delete(error, { count: PLURAL.SINGLE }).toResponse();
 ```
+
+**Important**: Always call `.toResponse()` at the end to convert the response object to a `Response` instance for API routes.
 
 ## Error Handling
 
 Always wrap route handlers in try-catch:
 
 ```typescript
+import { PLURAL } from "@/lib/constants";
 import { handleApiErrorResponse } from "@/lib/utils/handle-api-error";
 
 export async function POST(request: NextRequest) {
     try {
         // Route logic
-        return api.ok(result);
+        return api.success.chat
+            .get(result, { count: PLURAL.SINGLE })
+            .toResponse();
     } catch (error) {
         console.error("[route-name] error:", error);
-        return handleApiErrorResponse(error);
+        return handleApiErrorResponse(error, () =>
+            api.error.chat.get(error, { count: PLURAL.SINGLE }).toResponse(),
+        );
     }
 }
 ```
@@ -147,9 +170,9 @@ The prefix should match the route/feature name.
 ```typescript
 import { getUserChatById } from "@/features/chat/services/db";
 
-const chat = await getUserChatById(chatId, userId);
+const chat = await getUserChatById({ chatId, userId });
 if (!chat) {
-  return api.notFound("Chat not found");
+  return api.error.chat.notFound().toResponse();
 }
 ```
 

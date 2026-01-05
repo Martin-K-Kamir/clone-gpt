@@ -164,6 +164,8 @@ Before submitting code:
 - [ ] Components are properly typed
 - [ ] API routes validate input
 - [ ] Database queries are safe (no SQL injection)
+- [ ] **Tests pass** - Run `npm test` and ensure all tests pass
+- [ ] **New tests added** - If adding new features, add corresponding tests
 
 ## Common Patterns to Follow
 
@@ -224,6 +226,30 @@ const chats = await getUserChats(user.id);
 - **TypeScript**: Strict mode enabled
 - **Turbopack**: Used for faster dev builds (`--turbopack` flag)
 
+## Testing Workflow
+
+**IMPORTANT**: Always run tests after making code changes to ensure nothing is broken.
+
+### After Making Changes
+
+1. **Run relevant tests**: Use `npm test` or `npm run test:watch` during development
+2. **Check test results**: Ensure all tests pass before committing
+3. **Add tests for new features**: Write tests for new functionality
+4. **Update tests if behavior changes**: If you intentionally change behavior, update corresponding tests
+
+### Test Commands
+
+```bash
+npm test                    # Run all tests
+npm run test:watch          # Watch mode (recommended)
+npm run test:unit           # Unit tests only
+npm run test:react          # React tests only
+npm run test:integration    # Integration tests only
+npm run test:coverage       # With coverage report
+```
+
+See [testing-patterns.md](./testing-patterns.md) for detailed testing guidelines.
+
 ## Best Practices Summary
 
 1. **Type Safety**: Use TypeScript strictly, avoid `any`
@@ -235,3 +261,4 @@ const chats = await getUserChats(user.id);
 7. **Performance**: Optimize for both server and client performance
 8. **Accessibility**: Build accessible UIs from the start
 9. **Security**: Never trust client input, always validate and authenticate
+10. **Testing**: Always run tests after making changes and ensure they pass

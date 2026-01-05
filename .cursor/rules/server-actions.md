@@ -6,20 +6,36 @@ Server Actions are async functions that run on the server. They can be called di
 
 ## File Organization
 
-Server actions are organized by feature in `features/[feature]/services/actions.ts`:
+Server actions are organized by feature in individual files under `features/[feature]/services/actions/[action-name]/[action-name].ts`:
 
 ```
 features/
 ├── auth/
 │   └── services/
-│       └── actions.ts        # Auth server actions
+│       └── actions/
+│           ├── sign-in/
+│           │   └── sign-in.ts
+│           ├── sign-up/
+│           │   └── sign-up.ts
+│           └── sign-out/
+│               └── sign-out.ts
 ├── chat/
 │   └── services/
-│       └── actions.ts        # Chat server actions
+│       └── actions/
+│           ├── update-chat-title/
+│           │   └── update-chat-title.ts
+│           ├── delete-user-chat-by-id/
+│           │   └── delete-user-chat-by-id.ts
+│           └── ...
 └── user/
     └── services/
-        └── actions.ts        # User server actions
+        └── actions/
+            ├── update-user-name/
+            │   └── update-user-name.ts
+            └── ...
 ```
+
+Each action is in its own directory with a single file, following the pattern: `[action-name]/[action-name].ts`
 
 ## Creating Server Actions
 
@@ -106,36 +122,43 @@ export async function signUp(data: SignUpData) {
         }
 
         const { email, name, password } = validatedData.data;
-        // ...
+        // ... sign up logic
+        return api.success.auth.signup(null);
     } catch (error) {
-        // ...
+        return handleApiError(error, () => api.error.auth.signup(error));
     }
 }
 ```
 
 ### Response Pattern
 
-Always use the API response utilities:
+Always use the API response utilities. Server actions return the response object directly (no `.toResponse()` needed):
 
 ```typescript
 import { api } from "@/lib/api-response";
+import { PLURAL } from "@/lib/constants";
 
-// Success responses
+// Success responses - return response object directly
+return api.success.chat.rename(chatId);
 return api.success.chat.delete(chatId, { count: PLURAL.SINGLE });
 return api.success.user.updateName(user.name);
 return api.success.auth.signin(null);
 
-// Error responses
+// Error responses - return response object directly
+return api.error.chat.rename(error);
 return api.error.chat.delete(error, { count: PLURAL.SINGLE });
 return api.error.user.updateName(error);
 return api.error.auth.validation(error);
 ```
+
+**Note**: Server actions return the response object directly. API routes need to call `.toResponse()` to convert to a `Response` instance.
 
 ### Error Handling
 
 Wrap actions in try-catch and use `handleApiError`:
 
 ```typescript
+import { PLURAL } from "@/lib/constants";
 import { handleApiError } from "@/lib/utils/handle-api-error";
 
 export async function deleteUserChatById({ chatId }: WithChatId) {
@@ -144,7 +167,7 @@ export async function deleteUserChatById({ chatId }: WithChatId) {
         assertSessionExists(session);
         // ... action logic
 
-        return api.success.chat.delete(chatId);
+        return api.success.chat.delete(chatId, { count: PLURAL.SINGLE });
     } catch (error) {
         return handleApiError(error, () =>
             api.error.chat.delete(error, { count: PLURAL.SINGLE }),
@@ -177,6 +200,38 @@ export async function deleteUserChatById({ chatId }: WithChatId) {
         // User is authorized, proceed
     } catch (error) {
         // ...
+    }
+}
+```
+
+## Cache Tag Updates
+
+When mutating data, update relevant cache tags to invalidate cached data:
+
+```typescript
+import { updateTag } from "next/cache";
+
+import { tag } from "@/lib/cache-tag";
+
+export async function updateChatTitle({
+    chatId,
+    newTitle,
+}: WithNewTitle & WithChatId) {
+    try {
+        const session = await auth();
+        assertSessionExists(session);
+        const userId = session.user.id;
+
+        // ... update logic
+
+        // Update cache tags to invalidate related cached data
+        updateTag(tag.userChats(userId));
+        updateTag(tag.userChat(chatId));
+        updateTag(tag.userSharedChats(userId));
+
+        return api.success.chat.rename(chatId);
+    } catch (error) {
+        return handleApiError(error, () => api.error.chat.rename(error));
     }
 }
 ```
@@ -356,11 +411,10 @@ export async function uploadUserFiles({
         );
 
         if (!result.success) {
-            return api.error({
-                data: files,
-                message: result.error.errors.map(e => e.message).join("\n"),
-                status: HTTP_ERROR_STATUS.BAD_REQUEST,
-            });
+            return api.error.file.uploadMany(
+                { message: result.error.errors.map(e => e.message).join("\n") },
+                { count: files.length },
+            );
         }
 
         // Process files in parallel
@@ -435,11 +489,14 @@ Always type parameters and return values explicitly:
 ```typescript
 import type { WithChatId, WithNewTitle } from "@/features/chat/lib/types";
 
+import type { ApiResponse } from "@/lib/api-response";
+
 export async function updateChatTitle({
     chatId,
     newTitle,
-}: WithNewTitle & WithChatId): Promise<ApiResponse<Chat>> {
+}: WithNewTitle & WithChatId): Promise<ApiResponse<string>> {
     // TypeScript knows the parameter types
+    // Return type is ApiResponse<TData> where TData is the data type
     // Return type can be inferred from api.success/error
 }
 ```
@@ -477,5 +534,5 @@ export async function updateChatTitle({
 
 ## Server Actions vs Database Services
 
-- **Server Actions** (`services/actions.ts`): Handle business logic, validation, authentication, authorization, and return API responses
-- **Database Services** (`services/db.ts`): Handle raw database operations
+- **Server Actions** (`services/actions/[action-name]/[action-name].ts`): Handle business logic, validation, authentication, authorization, and return API responses. These are called from Client Components.
+- **Database Services** (`services/db/[operation-name]/[operation-name].ts`): Handle raw database operations. These can be called from Server Actions, API routes, or Server Components.

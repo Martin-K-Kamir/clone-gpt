@@ -2,11 +2,11 @@
 
 ## Project Structure
 
-This is a **Next.js 15** application using the **App Router** with a **feature-based architecture**.
+This is a **Next.js 16** application using the **App Router** with a **feature-based architecture**.
 
 ### Core Technologies
 
-- **Framework**: Next.js 15.5.1-canary with Turbopack
+- **Framework**: Next.js 16.1.0 with Turbopack
 - **Language**: TypeScript (strict mode enabled)
 - **Runtime**: Node.js (API routes use `runtime = "nodejs"`)
 - **UI**: React 19 with Server Components by default

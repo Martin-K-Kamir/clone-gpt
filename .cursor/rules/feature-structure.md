@@ -7,6 +7,10 @@ Each feature is self-contained with the following structure:
 ```
 features/[feature-name]/
 ├── components/          # Feature-specific React components
+│   └── [component-name]/
+│       ├── [component-name].tsx
+│       ├── [component-name]-[variant].tsx  # Sub-components
+│       └── index.ts
 ├── hooks/              # Feature-specific React hooks
 ├── lib/                # Feature utilities and configuration
 │   ├── asserts.ts      # Type assertion functions
@@ -16,8 +20,26 @@ features/[feature-name]/
 │   └── utils/          # Utility functions
 ├── providers/          # React context providers
 └── services/           # External integrations
-    ├── ai.ts          # AI-related services
-    └── db.ts          # Database operations
+    ├── actions/        # Server actions
+    │   └── [action-name]/
+    │       ├── [action-name].ts
+    │       └── index.ts
+    ├── ai/             # AI-related services
+    │   └── [operation-name]/
+    │       ├── [operation-name].ts
+    │       └── index.ts
+    ├── api/            # API service wrappers
+    │   └── [operation-name]/
+    │       ├── [operation-name].ts
+    │       └── index.ts
+    ├── db/             # Database operations
+    │   └── [operation-name]/
+    │       ├── [operation-name].ts
+    │       └── index.ts
+    └── storage/        # Storage operations (if needed)
+        └── [operation-name]/
+            ├── [operation-name].ts
+            └── index.ts
 ```
 
 ## Feature Isolation
@@ -72,7 +94,14 @@ features/auth/
 ```
 features/chat/
 ├── components/
-│   └── chat-message.tsx
+│   ├── chat-message/
+│   │   ├── chat-message.tsx
+│   │   ├── chat-message-assistant.tsx
+│   │   ├── chat-message-user.tsx
+│   │   └── index.ts
+│   └── chat-sidebar/
+│       ├── chat-sidebar.tsx
+│       └── index.ts
 ├── hooks/
 │   └── use-chat.ts
 ├── lib/
@@ -88,19 +117,35 @@ features/chat/
 ├── providers/
 │   └── chat-provider.tsx
 └── services/
-    ├── ai.ts                   # AI service functions
-    └── db.ts                   # Chat database operations
+    ├── actions/
+    │   ├── update-chat-title/
+    │   │   ├── update-chat-title.ts
+    │   │   └── index.ts
+    │   └── ...
+    ├── ai/
+    │   ├── generate-chat-title/
+    │   │   ├── generate-chat-title.ts
+    │   │   └── index.ts
+    │   └── ...
+    ├── db/
+    │   ├── get-user-chat-by-id/
+    │   │   ├── get-user-chat-by-id.ts
+    │   │   └── index.ts
+    │   └── ...
+    └── storage/
+        └── ...
 ```
 
 ## File Naming Conventions
 
 ### Feature Files
 
-- Components: `kebab-case.tsx` (e.g., `chat-message.tsx`)
-- Services: `kebab-case.ts` (e.g., `user-service.ts`)
-- Utils: `kebab-case.ts` (e.g., `format-date.ts`)
-- Types: `types.ts` or specific names (e.g., `chat-types.ts`)
-- Constants: `constants.ts` or directory with files
+- **Components**: Directory structure `[component-name]/[component-name].tsx` (e.g., `chat-message/chat-message.tsx`)
+- **Services**: Directory structure `[service-type]/[operation-name]/[operation-name].ts` (e.g., `db/get-user-chat-by-id/get-user-chat-by-id.ts`)
+- **Actions**: Directory structure `actions/[action-name]/[action-name].ts` (e.g., `actions/update-chat-title/update-chat-title.ts`)
+- **Utils**: `kebab-case.ts` (e.g., `format-date.ts`)
+- **Types**: `types.ts` or directory with files (e.g., `types/db.ts`, `types/ui.ts`)
+- **Constants**: `constants.ts` or directory with files
 
 ### Export Patterns
 
@@ -117,51 +162,115 @@ export type { Chat } from "./chat";
 
 ## Services Layer
 
-Services handle external integrations:
+Services handle external integrations. Each service operation is in its own directory:
 
-### Database Services (`services/db.ts`)
+### Service Organization
+
+Each service operation follows this structure:
+
+```
+services/[service-type]/[operation-name]/
+├── [operation-name].ts      # Implementation
+├── [operation-name].test.ts  # Unit tests
+├── [operation-name].spec.ts  # Integration tests
+├── [operation-name].mock.ts  # Mock implementations
+└── index.ts                  # Exports
+```
+
+### Database Services (`services/db/[operation-name]/[operation-name].ts`)
 
 - All Supabase queries go here
 - Functions are async and return typed data
+- Use object parameters (not positional)
 - Handle errors and null cases
 - Use feature-specific types
+- Use `"use server"` directive
+- Use `"use cache"` directive for cached functions
+- Use `cacheTag()` for cache tagging
 
 ```typescript
-// features/chat/services/db.ts
-import type { DBChatId, DBUserId } from "../lib/types";
+// features/chat/services/db/get-user-chat-by-id/get-user-chat-by-id.ts
+"use server";
 
-export async function getUserChatById(
-    chatId: DBChatId,
-    userId: DBUserId,
-): Promise<Chat | null> {
+import { cacheTag } from "next/cache";
+
+import type { DBChatId, WithChatId } from "@/features/chat/lib/types";
+
+import type { WithUserId } from "@/features/user/lib/types";
+
+import { tag } from "@/lib/cache-tag";
+
+import { supabase } from "@/services/supabase";
+
+// features/chat/services/db/get-user-chat-by-id/get-user-chat-by-id.ts
+
+// features/chat/services/db/get-user-chat-by-id/get-user-chat-by-id.ts
+
+type GetUserChatByIdProps = WithChatId & WithUserId;
+
+export async function getUserChatById({
+    chatId,
+    userId,
+}: GetUserChatByIdProps) {
+    "use cache";
+    cacheTag(tag.userChat(chatId));
+
+    return uncachedGetUserChatById({ chatId, userId });
+}
+
+export async function uncachedGetUserChatById({
+    chatId,
+    userId,
+}: GetUserChatByIdProps) {
     const { data, error } = await supabase
         .from("chats")
         .select("*")
         .eq("id", chatId)
-        .eq("user_id", userId)
-        .single();
+        .eq("userId", userId)
+        .maybeSingle();
 
-    if (error) {
-        console.error("[chat] db error:", error);
-        return null;
-    }
-
+    if (error) throw new Error("Failed to fetch user chat");
     return data;
 }
 ```
 
-### AI Services (`services/ai.ts`)
+**Pattern**: Provide both cached (`getUserChatById`) and uncached (`uncachedGetUserChatById`) versions. The cached version uses `"use cache"` and `cacheTag()`.
+
+### AI Services (`services/ai/[operation-name]/[operation-name].ts`)
 
 - AI-related operations
 - Prompt building
 - Model interactions
 
 ```typescript
-// features/chat/services/ai.ts
-export async function generateChatTitle(messages: Message[]): Promise<string> {
-    // AI logic
+// features/chat/services/ai/generate-chat-title/generate-chat-title.ts
+import { openai } from "@ai-sdk/openai";
+import { generateText } from "ai";
+
+import type { UIChatMessage } from "@/features/chat/lib/types";
+
+export async function generateChatTitle(messages: UIChatMessage[]) {
+    const result = await generateText({
+        model: openai("gpt-4o"),
+        messages: convertToModelMessages(messages),
+        // ... AI logic
+    });
+
+    return result.text.trim();
 }
 ```
+
+### API Services (`services/api/[operation-name]/[operation-name].ts`)
+
+- API route service wrappers
+- Used by Server Components to fetch data
+- Can use React Query on the client side
+
+### Storage Services (`services/storage/[operation-name]/[operation-name].ts`)
+
+- File storage operations
+- Supabase Storage interactions
+- File upload/download operations
 
 ## Types
 

@@ -6,6 +6,8 @@ UI components follow the shadcn/ui pattern with Radix UI primitives.
 
 ### Component File Organization
 
+**UI Components** (in `components/ui/`):
+
 For composite components, use a directory structure:
 
 ```
@@ -19,6 +21,28 @@ For simple components, a single file is acceptable:
 
 ```
 components/ui/[component-name].tsx
+```
+
+**Feature Components** (in `features/[feature]/components/`):
+
+Use directory structure with sub-components:
+
+```
+features/[feature]/components/[component-name]/
+├── [component-name].tsx           # Main component
+├── [component-name]-[variant].tsx  # Sub-components (e.g., chat-message-assistant.tsx)
+├── [component-name]-[part].tsx    # Component parts (e.g., chat-message-actions.tsx)
+└── index.ts                        # Public exports
+```
+
+Example:
+
+```
+features/chat/components/chat-message/
+├── chat-message.tsx
+├── chat-message-assistant.tsx
+├── chat-message-user.tsx
+└── index.ts
 ```
 
 ### Component Pattern
@@ -191,12 +215,24 @@ Use `index.ts` files for cleaner imports:
 // components/ui/button/index.ts
 export { Button, buttonVariants } from "./button";
 export type { ButtonProps } from "./button";
+
+// features/chat/components/chat-message/index.ts
+export { ChatMessage } from "./chat-message";
+export { ChatMessageAssistant } from "./chat-message-assistant";
+export { ChatMessageUser } from "./chat-message-user";
 ```
 
 Then import as:
 
 ```typescript
+// UI components
 import { Button } from "@/components/ui/button";
+
+// Feature components
+import {
+    ChatMessage,
+    ChatMessageAssistant,
+} from "@/features/chat/components/chat-message";
 ```
 
 ### Loading States
