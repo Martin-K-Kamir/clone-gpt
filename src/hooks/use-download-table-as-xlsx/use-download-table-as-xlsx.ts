@@ -1,7 +1,7 @@
 "use client";
 
+import ExcelJS from "exceljs";
 import { useCallback } from "react";
-import * as XLSX from "xlsx";
 
 import { FILE_EXTENSION, MIME_TYPE } from "@/lib/constants";
 import {
@@ -21,22 +21,21 @@ export function useDownloadTableAsXLSX(
 ) {
     const { filename = "table-data", sheetName = "Sheet1" } = options || {};
 
-    const downloadTableAsXLSX = useCallback(() => {
+    const downloadTableAsXLSX = useCallback(async () => {
         const table = validateTableElement(tableRef);
         if (!table) return false;
 
         try {
             const worksheetData = extractTableData(table);
 
-            const workbook = XLSX.utils.book_new();
-            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+            const workbook = new ExcelJS.Workbook();
+            const worksheet = workbook.addWorksheet(sheetName);
 
-            XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
-
-            const excelBuffer = XLSX.write(workbook, {
-                bookType: "xlsx",
-                type: "array",
+            worksheetData.forEach(row => {
+                worksheet.addRow(row);
             });
+
+            const excelBuffer = await workbook.xlsx.writeBuffer();
 
             return downloadFile(
                 excelBuffer,
