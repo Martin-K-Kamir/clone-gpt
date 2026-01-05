@@ -1,6 +1,10 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 
-import { CHAT_TOOL, STORAGE_BUCKET } from "@/features/chat/lib/constants";
+import {
+    CHAT_MESSAGE_TYPE,
+    CHAT_TOOL,
+    STORAGE_BUCKET,
+} from "@/features/chat/lib/constants";
 import type { ChatMessagePart } from "@/features/chat/lib/types";
 
 import { isGenerateImageToolPart } from "./is-generate-image-tool-part";
@@ -95,7 +99,7 @@ describe("isGenerateImageToolPart", () => {
 
     it("should return false for text part", () => {
         const part = {
-            type: "text",
+            type: CHAT_MESSAGE_TYPE.TEXT,
             text: "Hello",
         } as any;
 
@@ -121,7 +125,7 @@ describe("isGenerateImageToolPart", () => {
 
         it("should not narrow type when false", () => {
             const part: ChatMessagePart = {
-                type: "text",
+                type: CHAT_MESSAGE_TYPE.TEXT,
                 text: "Hello",
             } as any;
 

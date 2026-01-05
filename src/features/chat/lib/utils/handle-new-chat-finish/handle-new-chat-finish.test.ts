@@ -1,6 +1,13 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { INITIAL_QUERY_SEARCH_USER_CHATS_LIMIT } from "@/features/chat/lib/constants";
+import {
+    CHAT_VISIBILITY,
+    INITIAL_QUERY_SEARCH_USER_CHATS_LIMIT,
+} from "@/features/chat/lib/constants";
 import type { DBChat, DBChatId } from "@/features/chat/lib/types";
 import { getUserChatById } from "@/features/chat/services/api";
 
@@ -11,12 +18,13 @@ vi.mock("@/features/chat/services/api", () => ({
 }));
 
 describe("handleNewChatFinish", () => {
-    const chatId = "123e4567-e89b-12d3-a456-426614174000" as DBChatId;
+    const chatId = generateChatId();
+    const userId = generateUserId();
     const mockChat: DBChat = {
         id: chatId,
-        userId: "user-1" as any,
+        userId,
         title: "Test Chat",
-        visibility: "private" as any,
+        visibility: CHAT_VISIBILITY.PRIVATE,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         visibleAt: new Date().toISOString(),
@@ -67,8 +75,7 @@ describe("handleNewChatFinish", () => {
     });
 
     it("should handle different chat IDs", async () => {
-        const differentChatId =
-            "987fcdeb-51a2-43b4-c567-890123456789" as DBChatId;
+        const differentChatId = generateChatId();
         const differentChat: DBChat = {
             ...mockChat,
             id: differentChatId,

@@ -1,8 +1,10 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { server } from "@/vitest/unit-setup";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { DBUser, DBUserId } from "@/features/user/lib/types";
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+import type { DBUser } from "@/features/user/lib/types";
 
 import { ApiError } from "@/lib/classes";
 
@@ -10,12 +12,13 @@ import { getUser } from "./get-user";
 
 describe("getUser", () => {
     it("should return user data when API returns success", async () => {
+        const userId = generateUserId();
         const mockUser: DBUser = {
-            id: "user-123" as DBUserId,
+            id: userId,
             email: "user@example.com",
             name: "John Doe",
             image: "https://example.com/avatar.jpg",
-            role: "user",
+            role: USER_ROLE.USER,
             createdAt: "2024-01-01T00:00:00Z",
             password: null,
         };
@@ -37,19 +40,20 @@ describe("getUser", () => {
         const result = await getUser();
 
         expect(result).toEqual(mockUser);
-        expect(result.id).toBe("user-123");
+        expect(result.id).toBe(userId);
         expect(result.email).toBe("user@example.com");
         expect(result.name).toBe("John Doe");
-        expect(result.role).toBe("user");
+        expect(result.role).toBe(USER_ROLE.USER);
     });
 
     it("should return user data with null image", async () => {
+        const userId = generateUserId();
         const mockUser: DBUser = {
-            id: "user-456" as DBUserId,
+            id: userId,
             email: "test@example.com",
             name: "Jane Smith",
             image: null,
-            role: "admin",
+            role: USER_ROLE.ADMIN,
             createdAt: "2024-01-01T00:00:00Z",
             password: null,
         };
@@ -72,16 +76,17 @@ describe("getUser", () => {
 
         expect(result).toEqual(mockUser);
         expect(result.image).toBeNull();
-        expect(result.role).toBe("admin");
+        expect(result.role).toBe(USER_ROLE.ADMIN);
     });
 
     it("should return user data with guest role", async () => {
+        const userId = generateUserId();
         const mockUser: DBUser = {
-            id: "guest-123" as DBUserId,
+            id: userId,
             email: "guest@example.com",
             name: "Guest User",
             image: null,
-            role: "guest",
+            role: USER_ROLE.GUEST,
             createdAt: "2024-01-01T00:00:00Z",
             password: null,
         };
@@ -103,7 +108,7 @@ describe("getUser", () => {
         const result = await getUser();
 
         expect(result).toEqual(mockUser);
-        expect(result.role).toBe("guest");
+        expect(result.role).toBe(USER_ROLE.GUEST);
     });
 
     it("should throw ApiError when API returns error response (not ok)", async () => {

@@ -9,9 +9,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import { STORAGE_BUCKET } from "@/features/chat/lib/constants/storage";
 import { hashId } from "@/features/chat/services/storage/hash-id/hash-id";
 import { uploadToStorage } from "@/features/chat/services/storage/upload-to-storage";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { supabase } from "@/services/supabase";
 
@@ -37,7 +40,7 @@ describe("deleteAllUserChats", () => {
                 email,
                 name: "Test User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -46,7 +49,7 @@ describe("deleteAllUserChats", () => {
                 id: userId,
                 email,
                 name: "Test User",
-                role: "user",
+                role: USER_ROLE.USER,
             },
             { onConflict: "id" },
         );
@@ -57,7 +60,7 @@ describe("deleteAllUserChats", () => {
         await supabase.from("users").delete().eq("id", userId);
     });
 
-    it("deletes all user chats, messages, and storage files", async () => {
+    it("should delete all user chats, messages, and storage files", async () => {
         const chatId1 = generateChatId();
         const chatId2 = generateChatId();
         const messageId1 = generateMessageId();
@@ -68,7 +71,7 @@ describe("deleteAllUserChats", () => {
                 id: chatId1,
                 userId,
                 title: "Test Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -77,7 +80,7 @@ describe("deleteAllUserChats", () => {
                 id: chatId2,
                 userId,
                 title: "Test Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -89,7 +92,7 @@ describe("deleteAllUserChats", () => {
                 id: messageId1,
                 chatId: chatId1,
                 userId,
-                role: "user",
+                role: USER_ROLE.USER,
                 content: "Message 1",
                 metadata: {},
                 parts: [],
@@ -99,7 +102,7 @@ describe("deleteAllUserChats", () => {
                 id: messageId2,
                 chatId: chatId2,
                 userId,
-                role: "user",
+                role: USER_ROLE.USER,
                 content: "Message 2",
                 metadata: {},
                 parts: [],

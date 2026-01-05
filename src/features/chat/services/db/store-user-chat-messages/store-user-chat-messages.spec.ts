@@ -6,12 +6,16 @@ import {
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
+import { CHAT_ROLE, CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { storeUserChatMessages } from "./store-user-chat-messages";
 
 describe("storeUserChatMessages", () => {
-    it("stores multiple messages", async () => {
+    it("should store multiple messages", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -22,14 +26,14 @@ describe("storeUserChatMessages", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -38,13 +42,13 @@ describe("storeUserChatMessages", () => {
         const messages = [
             {
                 id: messageId1,
-                role: "user" as const,
+                role: CHAT_ROLE.USER,
                 parts: [{ type: "text" as const, text: "Message 1" }],
                 metadata: {},
             },
             {
                 id: messageId2,
-                role: "assistant" as const,
+                role: CHAT_ROLE.ASSISTANT,
                 parts: [{ type: "text" as const, text: "Message 2" }],
                 metadata: {},
             },
@@ -63,7 +67,7 @@ describe("storeUserChatMessages", () => {
         expect(data?.[1].id).toBe(messageId2);
     });
 
-    it("uses createdAt from message when preserveCreatedAt is true", async () => {
+    it("should use createdAt from message when preserveCreatedAt is true", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -73,14 +77,14 @@ describe("storeUserChatMessages", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -90,7 +94,7 @@ describe("storeUserChatMessages", () => {
         const messages = [
             {
                 id: messageId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 parts: [{ type: "text", text: "Test" }],
                 metadata: {},
                 createdAt,
@@ -117,7 +121,7 @@ describe("storeUserChatMessages", () => {
         }
     });
 
-    it("uses createdAt from metadata when message createdAt is not provided and preserveCreatedAt is true", async () => {
+    it("should use createdAt from metadata when message createdAt is not provided and preserveCreatedAt is true", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -127,14 +131,14 @@ describe("storeUserChatMessages", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -144,7 +148,7 @@ describe("storeUserChatMessages", () => {
         const messages = [
             {
                 id: messageId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 parts: [{ type: "text", text: "Test" }],
                 metadata: { createdAt },
             },

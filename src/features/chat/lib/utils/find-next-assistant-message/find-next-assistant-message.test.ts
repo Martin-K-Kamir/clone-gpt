@@ -1,32 +1,37 @@
+import { generateMessageId } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
-import { CHAT_ROLE } from "@/features/chat/lib/constants";
+import { CHAT_MESSAGE_TYPE, CHAT_ROLE } from "@/features/chat/lib/constants";
 import type { DBChatMessageId, UIChatMessage } from "@/features/chat/lib/types";
 
 import { findNextAssistantMessage } from "./find-next-assistant-message";
 
 describe("findNextAssistantMessage", () => {
     it("should return next assistant message after given index", () => {
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
+        const messageId3 = generateMessageId();
+        const messageId4 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
+                id: messageId1,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "Hello" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             },
             {
-                id: "msg-2" as DBChatMessageId,
+                id: messageId2,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "Hi" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hi" }],
             },
             {
-                id: "msg-3" as DBChatMessageId,
+                id: messageId3,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "How are you?" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "How are you?" }],
             },
             {
-                id: "msg-4" as DBChatMessageId,
+                id: messageId4,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "I'm fine" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "I'm fine" }],
             },
         ];
 
@@ -36,16 +41,18 @@ describe("findNextAssistantMessage", () => {
     });
 
     it("should return undefined when no assistant message exists after index", () => {
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
+                id: messageId1,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "Hello" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             },
             {
-                id: "msg-2" as DBChatMessageId,
+                id: messageId2,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "Hi" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hi" }],
             },
         ];
 
@@ -55,16 +62,18 @@ describe("findNextAssistantMessage", () => {
     });
 
     it("should return undefined when index is at last message", () => {
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
+                id: messageId1,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "Hello" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             },
             {
-                id: "msg-2" as DBChatMessageId,
+                id: messageId2,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "Hi" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hi" }],
             },
         ];
 
@@ -74,21 +83,24 @@ describe("findNextAssistantMessage", () => {
     });
 
     it("should skip user messages and return first assistant message", () => {
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
+        const messageId3 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
+                id: messageId1,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "First" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "First" }],
             },
             {
-                id: "msg-2" as DBChatMessageId,
+                id: messageId2,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "Second" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Second" }],
             },
             {
-                id: "msg-3" as DBChatMessageId,
+                id: messageId3,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "Third" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Third" }],
             },
         ];
 
@@ -98,21 +110,28 @@ describe("findNextAssistantMessage", () => {
     });
 
     it("should return first assistant message when multiple exist after index", () => {
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
+        const messageId3 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
+                id: messageId1,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "Hello" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             },
             {
-                id: "msg-2" as DBChatMessageId,
+                id: messageId2,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "First assistant" }],
+                parts: [
+                    { type: CHAT_MESSAGE_TYPE.TEXT, text: "First assistant" },
+                ],
             },
             {
-                id: "msg-3" as DBChatMessageId,
+                id: messageId3,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "Second assistant" }],
+                parts: [
+                    { type: CHAT_MESSAGE_TYPE.TEXT, text: "Second assistant" },
+                ],
             },
         ];
 
@@ -130,11 +149,12 @@ describe("findNextAssistantMessage", () => {
     });
 
     it("should return first assistant message when index is negative", () => {
+        const messageId = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
+                id: messageId,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "Hello" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             },
         ];
 
@@ -144,16 +164,18 @@ describe("findNextAssistantMessage", () => {
     });
 
     it("should not return message at the same index", () => {
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
+                id: messageId1,
                 role: CHAT_ROLE.USER,
-                parts: [{ type: "text", text: "Hello" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             },
             {
-                id: "msg-2" as DBChatMessageId,
+                id: messageId2,
                 role: CHAT_ROLE.ASSISTANT,
-                parts: [{ type: "text", text: "Hi" }],
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hi" }],
             },
         ];
 
@@ -164,16 +186,18 @@ describe("findNextAssistantMessage", () => {
 
     describe("type checking", () => {
         it("should return UIChatMessage or undefined", () => {
+            const messageId1 = generateMessageId();
+            const messageId2 = generateMessageId();
             const messages: UIChatMessage[] = [
                 {
-                    id: "msg-1" as DBChatMessageId,
+                    id: messageId1,
                     role: CHAT_ROLE.USER,
-                    parts: [{ type: "text", text: "Hello" }],
+                    parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
                 },
                 {
-                    id: "msg-2" as DBChatMessageId,
+                    id: messageId2,
                     role: CHAT_ROLE.ASSISTANT,
-                    parts: [{ type: "text", text: "Hi" }],
+                    parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hi" }],
                 },
             ];
 

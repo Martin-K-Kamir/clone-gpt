@@ -1,9 +1,14 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { ReactNode, createRef } from "react";
 import { useDebounceValue } from "usehooks-ts";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatSearchResult } from "@/features/chat/lib/types";
 import { searchUserChats } from "@/features/chat/services/api";
 
@@ -79,7 +84,7 @@ describe("useInfiniteSearchUserChats", () => {
         expect(typeof result.current.fetchNextPage).toBe("function");
     });
 
-    it("should indicate searching state when query is being typed and pending", () => {
+    it("should indicate searching state when query is being typed and pending", async () => {
         mockUseDebounceValue.mockReturnValue(["test", false] as any);
         mockSearchUserChats.mockResolvedValue({
             data: [],
@@ -93,7 +98,9 @@ describe("useInfiniteSearchUserChats", () => {
             },
         );
 
-        expect(result.current.isSearching).toBeDefined();
+        await waitFor(() => {
+            expect(result.current.isSearching).toBeDefined();
+        });
     });
 
     it("should indicate debouncing state when query differs from debounced query", () => {
@@ -110,16 +117,18 @@ describe("useInfiniteSearchUserChats", () => {
     });
 
     it("should fetch search results when debounced query is available", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const searchResults: DBChatSearchResult[] = [
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1",
                 snippet: "snippet 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
-                userId: "user-1" as any,
+                userId,
             },
         ];
 
@@ -145,16 +154,18 @@ describe("useInfiniteSearchUserChats", () => {
     });
 
     it("should add href property to search results from cache", () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const cachedResults: DBChatSearchResult[] = [
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1",
                 snippet: "snippet 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
-                userId: "user-1" as any,
+                userId,
             },
         ];
 
@@ -180,7 +191,7 @@ describe("useInfiniteSearchUserChats", () => {
         expect(result.current.searchResults).toEqual([
             {
                 ...cachedResults[0],
-                href: "/chat/chat-1",
+                href: `/chat/${chatId}`,
             },
         ]);
         expect(result.current.hasResults).toBe(true);

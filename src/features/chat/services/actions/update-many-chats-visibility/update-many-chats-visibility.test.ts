@@ -2,12 +2,17 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import type { DBChatId } from "@/features/chat/lib/types";
+
+import type { DBUserId } from "@/features/user/lib/types";
+
 import { updateManyChatsVisibility } from "./update-many-chats-visibility";
 
 const constants = vi.hoisted(() => ({
-    userId: "00000000-0000-0000-0000-000000000abc",
-    chatId1: "30000000-0000-0000-0000-000000000abc",
-    chatId2: "30000000-0000-0000-0000-000000000def",
+    userId: "00000000-0000-0000-0000-000000000001" as DBUserId,
+    chatId1: "30000000-0000-0000-0000-000000000001" as DBChatId,
+    chatId2: "30000000-0000-0000-0000-000000000002" as DBChatId,
 }));
 
 const mocks = vi.hoisted(() => ({
@@ -51,22 +56,22 @@ vi.mock("next/cache", () => ({
 describe("updateManyChatsVisibility", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
+        vi.mocked(auth).mockResolvedValue({
             user: { id: constants.userId, name: "Test User" },
-        });
+        } as any);
     });
 
-    it("updates visibility to public successfully", async () => {
+    it("should update visibility to public successfully", async () => {
         const mockChats = [
             {
                 id: constants.chatId1,
                 userId: constants.userId,
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
             },
             {
                 id: constants.chatId2,
                 userId: constants.userId,
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
             },
         ];
 
@@ -83,19 +88,19 @@ describe("updateManyChatsVisibility", () => {
         mocks.from.mockReturnValue(updateChain);
 
         const result = await updateManyChatsVisibility({
-            chatIds: [constants.chatId1, constants.chatId2] as any,
-            visibility: "public",
+            chatIds: [constants.chatId1, constants.chatId2],
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("updates visibility to private successfully", async () => {
+    it("should update visibility to private successfully", async () => {
         const mockChats = [
             {
                 id: constants.chatId1,
                 userId: constants.userId,
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
             },
         ];
 
@@ -112,25 +117,25 @@ describe("updateManyChatsVisibility", () => {
         mocks.from.mockReturnValue(updateChain);
 
         const result = await updateManyChatsVisibility({
-            chatIds: [constants.chatId1] as any,
-            visibility: "private",
+            chatIds: [constants.chatId1],
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("returns error when session is missing", async () => {
-        (auth as any).mockResolvedValueOnce(null);
+    it("should return error when session is missing", async () => {
+        vi.mocked(auth).mockResolvedValueOnce(null as any);
 
         const result = await updateManyChatsVisibility({
-            chatIds: [constants.chatId1] as any,
-            visibility: "public",
+            chatIds: [constants.chatId1],
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when update fails", async () => {
+    it("should return error when update fails", async () => {
         const updateChain = {
             update: vi.fn().mockReturnThis(),
             eq: vi.fn().mockReturnThis(),
@@ -144,46 +149,46 @@ describe("updateManyChatsVisibility", () => {
         mocks.from.mockReturnValue(updateChain);
 
         const result = await updateManyChatsVisibility({
-            chatIds: [constants.chatId1] as any,
-            visibility: "public",
+            chatIds: [constants.chatId1],
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chatIds is invalid", async () => {
+    it("should return error when chatIds is invalid", async () => {
         const result = await updateManyChatsVisibility({
             chatIds: ["not-a-uuid"] as any,
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when visibility is invalid", async () => {
+    it("should return error when visibility is invalid", async () => {
         const result = await updateManyChatsVisibility({
-            chatIds: [constants.chatId1] as any,
+            chatIds: [constants.chatId1],
             visibility: "invalid" as any,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chatIds is empty array", async () => {
+    it("should return error when chatIds is empty array", async () => {
         const result = await updateManyChatsVisibility({
             chatIds: [] as any,
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("handles single chatId", async () => {
+    it("should handle single chatId", async () => {
         const mockChats = [
             {
                 id: constants.chatId1,
                 userId: constants.userId,
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
             },
         ];
 
@@ -200,8 +205,8 @@ describe("updateManyChatsVisibility", () => {
         mocks.from.mockReturnValue(updateChain);
 
         const result = await updateManyChatsVisibility({
-            chatIds: [constants.chatId1] as any,
-            visibility: "public",
+            chatIds: [constants.chatId1],
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiSuccess);

@@ -13,7 +13,7 @@ describe("useThrottledEffect", () => {
         vi.useRealTimers();
     });
 
-    it("calls effect immediately on mount", () => {
+    it("should call effect immediately on mount", () => {
         const effect = vi.fn();
 
         renderHook(() => useThrottledEffect(effect, [], 100));
@@ -21,7 +21,7 @@ describe("useThrottledEffect", () => {
         expect(effect).toHaveBeenCalledTimes(1);
     });
 
-    it("throttles effect calls based on delay", () => {
+    it("should throttle effect calls based on delay", () => {
         const effect = vi.fn();
 
         const { rerender } = renderHook(
@@ -38,7 +38,7 @@ describe("useThrottledEffect", () => {
         expect(effect).toHaveBeenCalledTimes(2);
     });
 
-    it("calls effect immediately if delay has passed", () => {
+    it("should call effect immediately if delay has passed", () => {
         const effect = vi.fn();
 
         const { rerender } = renderHook(
@@ -54,7 +54,7 @@ describe("useThrottledEffect", () => {
         expect(effect).toHaveBeenCalledTimes(2);
     });
 
-    it("uses default delay of 300ms", () => {
+    it("should use default delay of 300ms", () => {
         const effect = vi.fn();
 
         const { rerender } = renderHook(
@@ -70,7 +70,7 @@ describe("useThrottledEffect", () => {
         expect(effect).toHaveBeenCalledTimes(2);
     });
 
-    it("calls cleanup function when effect is replaced", () => {
+    it("should call cleanup function when effect is replaced", () => {
         const cleanup1 = vi.fn();
         const cleanup2 = vi.fn();
         const effect1 = vi.fn(() => cleanup1);
@@ -90,7 +90,7 @@ describe("useThrottledEffect", () => {
         expect(effect2).toHaveBeenCalledTimes(1);
     });
 
-    it("does not call effect when dependencies do not change", () => {
+    it("should not call effect when dependencies do not change", () => {
         const effect = vi.fn();
         const deps = [1];
 
@@ -107,7 +107,7 @@ describe("useThrottledEffect", () => {
         expect(effect).toHaveBeenCalledTimes(1);
     });
 
-    it("cancels pending effect on unmount", () => {
+    it("should cancel pending effect on unmount", () => {
         const effect = vi.fn();
 
         const { unmount, rerender } = renderHook(

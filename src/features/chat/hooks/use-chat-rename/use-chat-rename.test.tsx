@@ -1,3 +1,4 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createRef } from "react";
 import { toast } from "sonner";
@@ -46,7 +47,7 @@ describe("useChatRename", () => {
 
     beforeEach(() => {
         vi.clearAllMocks();
-        chatId = "chat-123" as DBChatId;
+        chatId = generateChatId();
         initialTitle = "Original Title";
 
         const input = document.createElement("input");

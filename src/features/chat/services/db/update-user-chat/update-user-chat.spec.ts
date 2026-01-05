@@ -5,12 +5,16 @@ import {
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { updateUserChat } from "./update-user-chat";
 
 describe("updateUserChat", () => {
-    it("updates chat title", async () => {
+    it("should update chat title", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -19,14 +23,14 @@ describe("updateUserChat", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Original Title",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -42,7 +46,7 @@ describe("updateUserChat", () => {
         expect(result.title).toBe(newTitle);
     });
 
-    it("updates chat visibility", async () => {
+    it("should update chat visibility", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -51,14 +55,14 @@ describe("updateUserChat", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -67,13 +71,13 @@ describe("updateUserChat", () => {
         const result = await updateUserChat({
             chatId,
             userId,
-            data: { visibility: "public" },
+            data: { visibility: CHAT_VISIBILITY.PUBLIC },
         });
 
-        expect(result.visibility).toBe("public");
+        expect(result.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
-    it("updates both title and visibility", async () => {
+    it("should update both title and visibility", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -82,14 +86,14 @@ describe("updateUserChat", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Original Title",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -99,10 +103,10 @@ describe("updateUserChat", () => {
         const result = await updateUserChat({
             chatId,
             userId,
-            data: { title: newTitle, visibility: "private" },
+            data: { title: newTitle, visibility: CHAT_VISIBILITY.PRIVATE },
         });
 
         expect(result.title).toBe(newTitle);
-        expect(result.visibility).toBe("private");
+        expect(result.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 });

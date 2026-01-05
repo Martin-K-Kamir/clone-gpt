@@ -4,6 +4,9 @@ import {
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import { CHAT_ROLE } from "@/features/chat/lib/constants";
+
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { supabase } from "@/services/supabase";
@@ -13,7 +16,7 @@ import { deleteUserChatMessagesStartingFrom } from "./delete-user-chat-messages-
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 
 describe("deleteUserChatMessagesStartingFrom", () => {
-    it("deletes messages starting from target message", async () => {
+    it("should delete messages starting from target message", async () => {
         const chatId = generateChatId();
         const msg1 = generateMessageId();
         const msg2 = generateMessageId();
@@ -23,7 +26,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -34,7 +37,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
                 id: msg1,
                 chatId,
                 userId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 content: "Message 1",
                 metadata: {},
                 parts: [],
@@ -44,7 +47,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
                 id: msg2,
                 chatId,
                 userId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 content: "Message 2",
                 metadata: {},
                 parts: [],
@@ -54,7 +57,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
                 id: msg3,
                 chatId,
                 userId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 content: "Message 3",
                 metadata: {},
                 parts: [],
@@ -79,7 +82,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         expect(remaining?.[0].id).toBe(msg1);
     });
 
-    it("deletes all messages when target is the first message", async () => {
+    it("should delete all messages when target is the first message", async () => {
         const chatId = generateChatId();
         const msg1 = generateMessageId();
         const msg2 = generateMessageId();
@@ -88,7 +91,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -99,7 +102,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
                 id: msg1,
                 chatId,
                 userId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 content: "Message 1",
                 metadata: {},
                 parts: [],
@@ -109,7 +112,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
                 id: msg2,
                 chatId,
                 userId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 content: "Message 2",
                 metadata: {},
                 parts: [],
@@ -132,7 +135,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         expect(remaining || []).toHaveLength(0);
     });
 
-    it("throws when target message not found", async () => {
+    it("should throw when target message not found", async () => {
         const chatId = generateChatId();
         const missingMessageId = generateMessageId();
 
@@ -140,7 +143,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

@@ -1,3 +1,4 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react";
 import { useRouter } from "next/navigation";
@@ -5,11 +6,7 @@ import { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
-import type {
-    DBChat,
-    DBChatId,
-    DBChatVisibility,
-} from "@/features/chat/lib/types";
+import type { DBChat, DBChatVisibility } from "@/features/chat/lib/types";
 import {
     createChatsCacheUpdater,
     getChatIdFromPathname,
@@ -43,13 +40,10 @@ vi.mock("@/features/chat/lib/utils", () => ({
     getChatIdFromPathname: vi.fn(),
 }));
 
-vi.mock("@/lib/utils", async () => {
-    const actual = await vi.importActual("@/lib/utils");
-    return {
-        ...actual,
-        tabScope: vi.fn(),
-    };
-});
+vi.mock("@/lib/utils", () => ({
+    tabScope: vi.fn(),
+    objectValuesToTuple: vi.fn(obj => Object.values(obj)),
+}));
 
 const mockUseRouter = vi.mocked(useRouter);
 const mockUseBroadcastChannel = vi.mocked(useBroadcastChannel);
@@ -202,8 +196,9 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should add chat and return revert function", () => {
+        const chatId = generateChatId();
         const chat: DBChat = {
-            id: "chat-1" as DBChatId,
+            id: chatId,
             title: "Test Chat",
             visibility: CHAT_VISIBILITY.PRIVATE,
         } as any;
@@ -227,7 +222,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should update chat and return revert function", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
         const chat = { title: "Updated Title" };
 
         const { result } = renderHook(() => useChatCacheSyncContext(), {
@@ -250,7 +245,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should remove chat and return revert function", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
 
         const { result } = renderHook(() => useChatCacheSyncContext(), {
             wrapper: createWrapper,
@@ -274,7 +269,7 @@ describe("ChatCacheSyncProvider", () => {
 
     it("should redirect to home when removing current chat via broadcast message", () => {
         let capturedOnMessage: ((message: unknown) => void) | undefined;
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
 
         mockUseBroadcastChannel.mockImplementation((options: any) => {
             capturedOnMessage = options.onMessage;
@@ -333,7 +328,7 @@ describe("ChatCacheSyncProvider", () => {
 
     it("should redirect to home when clearing chats and current chat exists via broadcast message", () => {
         let capturedOnMessage: ((message: unknown) => void) | undefined;
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
 
         mockUseBroadcastChannel.mockImplementation((options: any) => {
             capturedOnMessage = options.onMessage;
@@ -361,7 +356,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should update chat visibility and return revert function", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
         const visibility: DBChatVisibility = CHAT_VISIBILITY.PUBLIC;
 
         const { result } = renderHook(() => useChatCacheSyncContext(), {
@@ -387,7 +382,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should update chat title and return revert function", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
         const newTitle = "New Title";
 
         const { result } = renderHook(() => useChatCacheSyncContext(), {
@@ -438,8 +433,9 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should add to initial user chats search", () => {
+        const chatId = generateChatId();
         const chat: DBChat = {
-            id: "chat-1" as DBChatId,
+            id: chatId,
             title: "Test",
         } as any;
         const limit = 10;
@@ -456,7 +452,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should update initial user chats search", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
         const updater = vi.fn();
 
         const { result } = renderHook(() => useChatCacheSyncContext(), {
@@ -471,7 +467,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should upsert initial user chats search and return revert function", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
         const chat: DBChat = {
             id: chatId,
             title: "Test",
@@ -501,7 +497,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should update initial user chats search title", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
         const newTitle = "New Title";
 
         const { result } = renderHook(() => useChatCacheSyncContext(), {
@@ -531,7 +527,7 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should remove from shared chats", () => {
-        const chatId = "chat-1" as DBChatId;
+        const chatId = generateChatId();
 
         const { result } = renderHook(() => useChatCacheSyncContext(), {
             wrapper: createWrapper,
@@ -564,8 +560,9 @@ describe("ChatCacheSyncProvider", () => {
     });
 
     it("should post message to other tabs when scope is otherTabs", () => {
+        const chatId = generateChatId();
         const chat: DBChat = {
-            id: "chat-1" as DBChatId,
+            id: chatId,
             title: "Test",
         } as any;
 
@@ -598,8 +595,9 @@ describe("ChatCacheSyncProvider", () => {
             wrapper: createWrapper,
         });
 
+        const chatId = generateChatId();
         const chat: DBChat = {
-            id: "chat-1" as DBChatId,
+            id: chatId,
             title: "Test",
         } as any;
 

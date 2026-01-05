@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { getUserSharedChats } from "./get-user-shared-chats";
@@ -21,13 +23,13 @@ describe("getUserSharedChats", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             getUserSharedChats({ userId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("throws when offset is invalid", async () => {
+    it("should throw when offset is invalid", async () => {
         await expect(
             getUserSharedChats({
                 userId,
@@ -36,7 +38,7 @@ describe("getUserSharedChats", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when limit is invalid", async () => {
+    it("should throw when limit is invalid", async () => {
         await expect(
             getUserSharedChats({
                 userId,
@@ -45,13 +47,13 @@ describe("getUserSharedChats", () => {
         ).rejects.toThrow();
     });
 
-    it("returns paginated public chats for user", async () => {
+    it("should return paginated public chats for user", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Public Chat 1",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: "2024-01-02T00:00:00Z",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
@@ -60,7 +62,7 @@ describe("getUserSharedChats", () => {
                 id: "chat-2",
                 userId,
                 title: "Public Chat 2",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: "2024-01-01T00:00:00Z",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
@@ -91,13 +93,13 @@ describe("getUserSharedChats", () => {
         expect(result.nextOffset).toBeUndefined();
     });
 
-    it("calculates hasNextPage correctly", async () => {
+    it("should calculate hasNextPage correctly", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Public Chat 1",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: "2024-01-01T00:00:00Z",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
@@ -131,13 +133,13 @@ describe("getUserSharedChats", () => {
         expect(result.nextOffset).toBe(1);
     });
 
-    it("sorts results by visibleAt descending", async () => {
+    it("should sort results by visibleAt descending", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Public Chat 1",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: "2024-01-01T00:00:00Z",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
@@ -146,7 +148,7 @@ describe("getUserSharedChats", () => {
                 id: "chat-2",
                 userId,
                 title: "Public Chat 2",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: "2024-01-02T00:00:00Z",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
@@ -178,13 +180,13 @@ describe("getUserSharedChats", () => {
         expect(dates[0]).toBeGreaterThanOrEqual(dates[1]);
     });
 
-    it("handles negative offset by setting it to 0", async () => {
+    it("should handle negative offset by setting it to 0", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Public Chat 1",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: "2024-01-01T00:00:00Z",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
@@ -212,13 +214,13 @@ describe("getUserSharedChats", () => {
         expect(result.data).toHaveLength(1);
     });
 
-    it("handles zero or negative limit by setting it to 1", async () => {
+    it("should handle zero or negative limit by setting it to 1", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Public Chat 1",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: "2024-01-01T00:00:00Z",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
@@ -246,7 +248,7 @@ describe("getUserSharedChats", () => {
         expect(result.data).toHaveLength(1);
     });
 
-    it("handles empty results", async () => {
+    it("should handle empty results", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -271,7 +273,7 @@ describe("getUserSharedChats", () => {
         expect(result.nextOffset).toBeUndefined();
     });
 
-    it("throws when fetch fails", async () => {
+    it("should throw when fetch fails", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

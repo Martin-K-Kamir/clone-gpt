@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ApiError, RateLimitError } from "@/lib/classes";
-import { HTTP_ERROR_STATUS, RATE_LIMIT_REASON } from "@/lib/constants";
+import {
+    HTTP_ERROR_STATUS,
+    HTTP_SUCCESS_STATUS,
+    RATE_LIMIT_REASON,
+} from "@/lib/constants";
 
 import { fetchWithErrorHandlers } from "./fetch-with-error-handlers";
 
@@ -25,7 +29,7 @@ describe("fetchWithErrorHandlers", () => {
     it("should return response when fetch succeeds", async () => {
         const mockResponse = {
             ok: true,
-            status: 200,
+            status: HTTP_SUCCESS_STATUS.OK,
         } as Response;
 
         vi.mocked(global.fetch).mockResolvedValue(mockResponse);
@@ -47,7 +51,7 @@ describe("fetchWithErrorHandlers", () => {
 
         const mockResponse = {
             ok: false,
-            status: 404,
+            status: HTTP_ERROR_STATUS.NOT_FOUND,
             json: vi.fn().mockResolvedValue(errorData),
         } as unknown as Response;
 
@@ -63,7 +67,7 @@ describe("fetchWithErrorHandlers", () => {
 
         const mockResponse = {
             ok: false,
-            status: 500,
+            status: HTTP_ERROR_STATUS.INTERNAL_SERVER_ERROR,
             json: vi.fn().mockResolvedValue({}),
         } as unknown as Response;
 
@@ -89,7 +93,7 @@ describe("fetchWithErrorHandlers", () => {
 
         const mockResponse = {
             ok: false,
-            status: 429,
+            status: HTTP_ERROR_STATUS.TOO_MANY_REQUESTS,
             json: vi.fn().mockResolvedValue(rateLimitError),
         } as unknown as Response;
 
@@ -108,7 +112,7 @@ describe("fetchWithErrorHandlers", () => {
 
         const mockResponse = {
             ok: false,
-            status: 400,
+            status: HTTP_ERROR_STATUS.BAD_REQUEST,
             json: vi.fn().mockResolvedValue(apiError),
         } as unknown as Response;
 
@@ -126,7 +130,7 @@ describe("fetchWithErrorHandlers", () => {
 
         const mockResponse = {
             ok: false,
-            status: 500,
+            status: HTTP_ERROR_STATUS.INTERNAL_SERVER_ERROR,
             json: vi.fn().mockResolvedValue(genericError),
         } as unknown as Response;
 
@@ -140,7 +144,7 @@ describe("fetchWithErrorHandlers", () => {
     it("should pass init options to fetch", async () => {
         const mockResponse = {
             ok: true,
-            status: 200,
+            status: HTTP_SUCCESS_STATUS.OK,
         } as Response;
 
         vi.mocked(global.fetch).mockResolvedValue(mockResponse);

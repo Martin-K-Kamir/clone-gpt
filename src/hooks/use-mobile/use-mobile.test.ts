@@ -54,7 +54,7 @@ describe("useIsMobile", () => {
         changeListener = null;
     });
 
-    it("returns false when width is at or above breakpoint", () => {
+    it("should return false when width is at or above breakpoint", () => {
         Object.defineProperty(window, "matchMedia", {
             writable: true,
             configurable: true,
@@ -66,7 +66,7 @@ describe("useIsMobile", () => {
         expect(result.current).toBe(false);
     });
 
-    it("returns true when width is below breakpoint", () => {
+    it("should return true when width is below breakpoint", () => {
         Object.defineProperty(window, "matchMedia", {
             writable: true,
             configurable: true,
@@ -78,7 +78,7 @@ describe("useIsMobile", () => {
         expect(result.current).toBe(true);
     });
 
-    it("updates when media query changes", async () => {
+    it("should update when media query changes", async () => {
         let capturedListener: ((event: MediaQueryListEvent) => void) | null =
             null;
 
@@ -129,7 +129,7 @@ describe("useIsMobile", () => {
         }
     });
 
-    it("removes event listener on unmount", () => {
+    it("should remove event listener on unmount", () => {
         const removeEventListener = vi.fn();
         Object.defineProperty(window, "matchMedia", {
             writable: true,

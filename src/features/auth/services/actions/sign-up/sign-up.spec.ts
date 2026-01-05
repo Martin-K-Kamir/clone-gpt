@@ -13,7 +13,7 @@ describe("signUp", () => {
         vi.clearAllMocks();
     });
 
-    it("creates user on success", async () => {
+    it("should create user on success", async () => {
         const email = generateUserEmail();
 
         const result = await signUp({
@@ -45,7 +45,7 @@ describe("signUp", () => {
         await supabase.from("users").delete().eq("email", email);
     });
 
-    it("returns error when validation fails", async () => {
+    it("should return error when validation fails", async () => {
         const result = await signUp({
             name: "A",
             email: "invalid-email",
@@ -56,7 +56,7 @@ describe("signUp", () => {
         expect(result.success).toBe(false);
     });
 
-    it("returns error when email already exists", async () => {
+    it("should return error when email already exists", async () => {
         const email = generateUserEmail();
         const userId = generateUserId();
 
@@ -80,7 +80,7 @@ describe("signUp", () => {
         await supabase.from("users").delete().eq("id", userId);
     });
 
-    it("returns error when passwords do not match", async () => {
+    it("should return error when passwords do not match", async () => {
         const email = generateUserEmail();
 
         const result = await signUp({
@@ -101,7 +101,7 @@ describe("signUp", () => {
         expect(user).toBeNull();
     });
 
-    it("hashes password before storing", async () => {
+    it("should store hashed password", async () => {
         const email = generateUserEmail();
 
         const result = await signUp({

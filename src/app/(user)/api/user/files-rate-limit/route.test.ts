@@ -1,3 +1,4 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
@@ -52,8 +53,7 @@ describe("GET /api/user/files-rate-limit", () => {
         vi.clearAllMocks();
     });
 
-    it("returns files rate limit successfully", async () => {
-        const userId = "00000000-0000-0000-0000-000000000001";
+    it("should return files rate limit successfully", async () => {
         const mockRateLimit = {
             filesCounter: 5,
             isOverLimit: false,
@@ -61,15 +61,7 @@ describe("GET /api/user/files-rate-limit", () => {
             periodEnd: new Date().toISOString(),
         };
 
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(createMockSessionWithUser());
 
         mocks.checkUserFilesRateLimit.mockResolvedValue(mockRateLimit);
 
@@ -78,7 +70,7 @@ describe("GET /api/user/files-rate-limit", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const response = await GET();
@@ -86,18 +78,8 @@ describe("GET /api/user/files-rate-limit", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when checkUserFilesRateLimit fails", async () => {
-        const userId = "00000000-0000-0000-0000-000000000001";
-
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+    it("should return error when checkUserFilesRateLimit fails", async () => {
+        (auth as any).mockResolvedValue(createMockSessionWithUser());
 
         mocks.checkUserFilesRateLimit.mockRejectedValue(
             new Error("Database error"),

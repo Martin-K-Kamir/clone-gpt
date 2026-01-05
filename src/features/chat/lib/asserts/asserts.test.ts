@@ -1,3 +1,7 @@
+import {
+    generateChatId,
+    generateMessageId,
+} from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
 import {
@@ -35,8 +39,8 @@ describe("assertIsDBChatId", () => {
     describe("valid UUIDs", () => {
         it("should not throw for valid UUID strings", () => {
             const validUUIDs = [
-                "550e8400-e29b-41d4-a716-446655440000",
-                "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
+                generateChatId(),
+                generateChatId(),
                 "00000000-0000-0000-0000-000000000000",
                 "ffffffff-ffff-ffff-ffff-ffffffffffff",
             ];
@@ -99,7 +103,7 @@ describe("assertIsDBChatId", () => {
 
     describe("type narrowing", () => {
         it("should narrow type correctly", () => {
-            const value: unknown = "550e8400-e29b-41d4-a716-446655440000";
+            const value: unknown = generateChatId();
             assertIsDBChatId(value);
             expectTypeOf(value).toEqualTypeOf<DBChatId>();
         });
@@ -110,11 +114,8 @@ describe("assertIsDBChatIds", () => {
     describe("valid UUID arrays", () => {
         it("should not throw for valid UUID arrays", () => {
             const validArrays = [
-                ["550e8400-e29b-41d4-a716-446655440000"],
-                [
-                    "550e8400-e29b-41d4-a716-446655440000",
-                    "6ba7b810-9dad-11d1-80b4-00c04fd430c8",
-                ],
+                [generateChatId()],
+                [generateChatId(), generateChatId()],
                 [],
             ];
 
@@ -128,7 +129,7 @@ describe("assertIsDBChatIds", () => {
         it("should throw AssertError for arrays with invalid UUIDs", () => {
             const invalidArrays = [
                 ["not-a-uuid"],
-                ["550e8400-e29b-41d4-a716-446655440000", "invalid"],
+                [generateChatId(), "invalid"],
                 [null],
                 [undefined],
                 [123],
@@ -173,7 +174,7 @@ describe("assertIsDBChatIds", () => {
 
     describe("type narrowing", () => {
         it("should narrow type correctly", () => {
-            const value: unknown = ["550e8400-e29b-41d4-a716-446655440000"];
+            const value: unknown = [generateChatId()];
             assertIsDBChatIds(value);
             expectTypeOf(value).toEqualTypeOf<DBChatId[]>();
         });
@@ -231,7 +232,7 @@ describe("assertIsDBChatMessageId", () => {
 
     describe("type narrowing", () => {
         it("should narrow type correctly", () => {
-            const value: unknown = "550e8400-e29b-41d4-a716-446655440000";
+            const value: unknown = generateChatId();
             assertIsDBChatMessageId(value);
             expectTypeOf(value).toEqualTypeOf<DBChatMessageId>();
         });
@@ -457,10 +458,10 @@ describe("assertIsDownvote", () => {
 
 describe("assertIsChatRequestBodyValid", () => {
     const createValidChatRequestBody = (): ChatRequestBody => ({
-        chatId: "550e8400-e29b-41d4-a716-446655440000" as DBChatId,
+        chatId: generateChatId(),
         trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         message: {
-            id: "6ba7b810-9dad-11d1-80b4-00c04fd430c8" as DBChatMessageId,
+            id: generateMessageId(),
             role: CHAT_ROLE.USER,
             metadata: {
                 role: "user",
@@ -488,9 +489,8 @@ describe("assertIsChatRequestBodyValid", () => {
         it("should not throw for valid request body with optional fields", () => {
             const validBody: ChatRequestBody = {
                 ...createValidChatRequestBody(),
-                messageId:
-                    "7ba7b810-9dad-11d1-80b4-00c04fd430c8" as DBChatMessageId,
-                newChatId: "8ba7b810-9dad-11d1-80b4-00c04fd430c8" as DBChatId,
+                messageId: generateMessageId(),
+                newChatId: generateChatId(),
                 body: {
                     regeneratedMessageRole: CHAT_ROLE.ASSISTANT,
                 },
@@ -524,13 +524,13 @@ describe("assertIsChatRequestBodyValid", () => {
 
         it("should throw AssertError for missing required fields", () => {
             const invalidBodies = [
-                { chatId: "550e8400-e29b-41d4-a716-446655440000" },
+                { chatId: generateChatId() },
                 {
-                    chatId: "550e8400-e29b-41d4-a716-446655440000",
+                    chatId: generateChatId(),
                     trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
                 },
                 {
-                    chatId: "550e8400-e29b-41d4-a716-446655440000",
+                    chatId: generateChatId(),
                     trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
                     message: {},
                 },

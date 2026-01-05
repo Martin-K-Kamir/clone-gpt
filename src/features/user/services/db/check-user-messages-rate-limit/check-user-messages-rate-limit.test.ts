@@ -1,7 +1,8 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { entitlementsByUserRole } from "@/features/user/lib/constants/entitlements";
-import type { DBUserId } from "@/features/user/lib/types";
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { RATE_LIMIT_REASON } from "@/lib/constants";
 
@@ -30,7 +31,7 @@ vi.mock("@/features/user/services/db/update-user-messages-rate-limit", () => ({
 (entitlementsByUserRole as any).user.maxMessages = 1;
 (entitlementsByUserRole as any).user.maxTokens = 1;
 
-const userId = "00000000-0000-0000-0000-000000000999" as DBUserId;
+const userId = generateUserId();
 const baseRateLimit = {
     messagesCounter: 0,
     tokensCounter: 0,
@@ -43,26 +44,29 @@ const baseRateLimit = {
 describe("checkUserMessagesRateLimit", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.mockGetUserById.mockResolvedValue({ id: userId, role: "user" });
+        mocks.mockGetUserById.mockResolvedValue({
+            id: userId,
+            role: USER_ROLE.USER,
+        });
     });
 
     afterEach(() => {
         vi.useRealTimers();
     });
 
-    it("creates a rate limit row when missing", async () => {
+    it("should create a rate limit row when missing", async () => {
         mocks.mockGetUserMessagesRateLimit.mockResolvedValue(null);
         mocks.mockCreateUserMessagesRateLimit.mockResolvedValue(baseRateLimit);
 
         const result = await checkUserMessagesRateLimit({
             userId,
-            userRole: "user",
+            userRole: USER_ROLE.USER,
         });
 
         expect(result.isOverLimit).toBe(false);
     });
 
-    it("flags over-limit by messages", async () => {
+    it("should flag over-limit by messages", async () => {
         mocks.mockGetUserMessagesRateLimit.mockResolvedValue({
             ...baseRateLimit,
             messagesCounter: entitlementsByUserRole.user.maxMessages,
@@ -70,7 +74,7 @@ describe("checkUserMessagesRateLimit", () => {
 
         const result = await checkUserMessagesRateLimit({
             userId,
-            userRole: "user",
+            userRole: USER_ROLE.USER,
         });
 
         expect(result.isOverLimit).toBe(true);
@@ -79,7 +83,7 @@ describe("checkUserMessagesRateLimit", () => {
         }
     });
 
-    it("flags over-limit by tokens", async () => {
+    it("should flag over-limit by tokens", async () => {
         mocks.mockGetUserMessagesRateLimit.mockResolvedValue({
             ...baseRateLimit,
             tokensCounter: entitlementsByUserRole.user.maxTokens,
@@ -87,7 +91,7 @@ describe("checkUserMessagesRateLimit", () => {
 
         const result = await checkUserMessagesRateLimit({
             userId,
-            userRole: "user",
+            userRole: USER_ROLE.USER,
         });
 
         expect(result.isOverLimit).toBe(true);
@@ -96,7 +100,7 @@ describe("checkUserMessagesRateLimit", () => {
         }
     });
 
-    it("resets counters when more than 24h has passed", async () => {
+    it("should reset counters when more than 24h has passed", async () => {
         const past = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
         mocks.mockGetUserMessagesRateLimit.mockResolvedValue({
             ...baseRateLimit,
@@ -107,7 +111,7 @@ describe("checkUserMessagesRateLimit", () => {
 
         const result = await checkUserMessagesRateLimit({
             userId,
-            userRole: "user",
+            userRole: USER_ROLE.USER,
         });
 
         expect(result.isOverLimit).toBe(false);

@@ -1,10 +1,12 @@
+import {
+    generateChatId,
+    generateMessageId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
-import type {
-    DBChatId,
-    DBChatMessageId,
-    UIChatMessage,
-} from "@/features/chat/lib/types";
+import { CHAT_MESSAGE_TYPE, CHAT_ROLE } from "@/features/chat/lib/constants";
+import type { UIChatMessage } from "@/features/chat/lib/types";
 
 import { duplicateMessages } from "./duplicate-messages";
 
@@ -17,16 +19,16 @@ vi.mock("../duplicate-message-parts", () => ({
 }));
 
 describe("duplicateMessages", () => {
-    const userId = "user-1" as any;
-    const newChatId = "chat-2" as DBChatId;
+    const userId = generateUserId();
+    const newChatId = generateChatId();
 
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
     it("should duplicate messages with new IDs", async () => {
-        const uuid1 = "123e4567-e89b-12d3-a456-426614174010";
-        const uuid2 = "123e4567-e89b-12d3-a456-426614174011";
+        const uuid1 = generateMessageId();
+        const uuid2 = generateMessageId();
         let callCount = 0;
         const uuidGenerator = vi.fn(() => {
             callCount++;
@@ -34,16 +36,18 @@ describe("duplicateMessages", () => {
         });
         vi.spyOn(global.crypto, "randomUUID").mockImplementation(uuidGenerator);
 
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
-                parts: [{ type: "text", text: "Hello" }],
+                id: messageId1,
+                role: CHAT_ROLE.USER,
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             } as UIChatMessage,
             {
-                id: "msg-2" as DBChatMessageId,
-                role: "assistant",
-                parts: [{ type: "text", text: "Hi there" }],
+                id: messageId2,
+                role: CHAT_ROLE.ASSISTANT,
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hi there" }],
             } as UIChatMessage,
         ];
 
@@ -56,16 +60,20 @@ describe("duplicateMessages", () => {
         expect(result).toHaveLength(2);
         expect(result[0].id).toBe(uuid1);
         expect(result[1].id).toBe(uuid2);
-        expect(result[0].role).toBe("user");
-        expect(result[1].role).toBe("assistant");
+        expect(result[0].role).toBe(CHAT_ROLE.USER);
+        expect(result[1].role).toBe(CHAT_ROLE.ASSISTANT);
     });
 
     it("should duplicate metadata for each message", async () => {
+        const messageId = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
-                metadata: { role: "user", createdAt: new Date().toISOString() },
+                id: messageId,
+                role: CHAT_ROLE.USER,
+                metadata: {
+                    role: CHAT_ROLE.USER,
+                    createdAt: new Date().toISOString(),
+                },
                 parts: [],
             } as UIChatMessage,
         ];
@@ -81,11 +89,12 @@ describe("duplicateMessages", () => {
     });
 
     it("should duplicate parts for each message", async () => {
+        const messageId = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
-                parts: [{ type: "text", text: "Hello" }],
+                id: messageId,
+                role: CHAT_ROLE.USER,
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" }],
             } as UIChatMessage,
         ];
 
@@ -100,11 +109,12 @@ describe("duplicateMessages", () => {
     });
 
     it("should preserve all message properties except id", async () => {
+        const messageId = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
-                parts: [{ type: "text", text: "Test" }],
+                id: messageId,
+                role: CHAT_ROLE.USER,
+                parts: [{ type: CHAT_MESSAGE_TYPE.TEXT, text: "Test" }],
             } as UIChatMessage,
         ];
 
@@ -114,7 +124,7 @@ describe("duplicateMessages", () => {
             newChatId,
         });
 
-        expect(result[0].role).toBe("user");
+        expect(result[0].role).toBe(CHAT_ROLE.USER);
         expect(result[0].parts).toEqual(messages[0].parts);
         expect(result[0].id).not.toBe(messages[0].id);
     });
@@ -130,8 +140,8 @@ describe("duplicateMessages", () => {
     });
 
     it("should generate unique IDs for each message", async () => {
-        const uuid1 = "123e4567-e89b-12d3-a456-426614174020";
-        const uuid2 = "123e4567-e89b-12d3-a456-426614174021";
+        const uuid1 = generateMessageId();
+        const uuid2 = generateMessageId();
         let callCount = 0;
         const uuidGenerator = vi.fn(() => {
             callCount++;
@@ -139,15 +149,17 @@ describe("duplicateMessages", () => {
         });
         vi.spyOn(global.crypto, "randomUUID").mockImplementation(uuidGenerator);
 
+        const messageId1 = generateMessageId();
+        const messageId2 = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
+                id: messageId1,
+                role: CHAT_ROLE.USER,
                 parts: [],
             } as UIChatMessage,
             {
-                id: "msg-2" as DBChatMessageId,
-                role: "assistant",
+                id: messageId2,
+                role: CHAT_ROLE.ASSISTANT,
                 parts: [],
             } as UIChatMessage,
         ];
@@ -163,13 +175,14 @@ describe("duplicateMessages", () => {
     });
 
     it("should handle messages with multiple parts", async () => {
+        const messageId = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
+                id: messageId,
+                role: CHAT_ROLE.USER,
                 parts: [
-                    { type: "text", text: "Hello" },
-                    { type: "text", text: "World" },
+                    { type: CHAT_MESSAGE_TYPE.TEXT, text: "Hello" },
+                    { type: CHAT_MESSAGE_TYPE.TEXT, text: "World" },
                 ],
             } as UIChatMessage,
         ];
@@ -185,10 +198,11 @@ describe("duplicateMessages", () => {
 
     describe("type checking", () => {
         it("should return UIChatMessage array", async () => {
+            const messageId = generateMessageId();
             const messages: UIChatMessage[] = [
                 {
-                    id: "msg-1" as DBChatMessageId,
-                    role: "user",
+                    id: messageId,
+                    role: CHAT_ROLE.USER,
                     parts: [],
                 } as UIChatMessage,
             ];

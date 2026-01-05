@@ -42,7 +42,7 @@ describe("useDragAndDrop", () => {
         }
     });
 
-    it("returns initial state and event handlers", () => {
+    it("should return initial state and event handlers", () => {
         const { result } = renderHook(() => useDragAndDrop());
 
         expect(result.current.isDragOver).toBe(false);
@@ -52,7 +52,7 @@ describe("useDragAndDrop", () => {
         expect(typeof result.current.handleDrop).toBe("function");
     });
 
-    it("sets isDragOver to true on drag enter and false on drop", async () => {
+    it("should set isDragOver to true on drag enter and false on drop", async () => {
         const { result } = renderHook(() => useDragAndDrop());
 
         result.current.handleDragEnter(
@@ -72,7 +72,7 @@ describe("useDragAndDrop", () => {
         });
     });
 
-    it("calls callbacks on drag events", () => {
+    it("should call callbacks on drag events", () => {
         const onDragEnter = vi.fn();
         const onDragOver = vi.fn();
         const onDragLeave = vi.fn();
@@ -108,7 +108,7 @@ describe("useDragAndDrop", () => {
         expect(onDrop).toHaveBeenCalledWith(dropEvent);
     });
 
-    it("does not set isDragOver to false when drag leaves to child element", async () => {
+    it("should not set isDragOver to false when drag leaves to child element", async () => {
         const { result } = renderHook(() => useDragAndDrop());
 
         result.current.handleDragEnter(
@@ -132,7 +132,7 @@ describe("useDragAndDrop", () => {
         expect(result.current.isDragOver).toBe(true);
     });
 
-    it("sets isDragOver to false when drag leaves to outside element", async () => {
+    it("should set isDragOver to false when drag leaves to outside element", async () => {
         const { result } = renderHook(() => useDragAndDrop());
 
         result.current.handleDragEnter(

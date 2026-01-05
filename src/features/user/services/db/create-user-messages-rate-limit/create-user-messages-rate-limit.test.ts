@@ -1,10 +1,9 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { createUserMessagesRateLimit } from "./create-user-messages-rate-limit";
 
-const userId = "00000000-0000-0000-0000-000000000abc" as DBUserId;
+const userId = generateUserId();
 
 const mocks = vi.hoisted(() => ({
     from: vi.fn(),
@@ -24,13 +23,13 @@ describe("createUserMessagesRateLimit", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             createUserMessagesRateLimit({ userId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("creates rate limit", async () => {
+    it("should create rate limit", async () => {
         const mockRow = {
             userId,
             id: "r1",
@@ -57,7 +56,7 @@ describe("createUserMessagesRateLimit", () => {
         expect(result).toEqual(mockRow);
     });
 
-    it("throws when creation fails", async () => {
+    it("should throw when creation fails", async () => {
         mocks.from.mockReturnValue({
             insert: mocks.insert.mockReturnValue({
                 select: mocks.select.mockReturnValue({

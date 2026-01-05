@@ -52,7 +52,7 @@ describe("useRateLimit", () => {
         );
     };
 
-    it("returns query result from useQuery", () => {
+    it("should return query result from useQuery", () => {
         const queryData: RateLimitResult<{ counter: number }> = {
             isOverLimit: false,
             counter: 50,
@@ -74,7 +74,7 @@ describe("useRateLimit", () => {
         expect(result.current.refetch).toBeDefined();
     });
 
-    it("calls onLimitExceeded when data indicates limit exceeded", () => {
+    it("should call onLimitExceeded when data indicates limit exceeded", () => {
         const onLimitExceeded = vi.fn();
         const rateLimitData: RateLimitResult<{ counter: number }> = {
             isOverLimit: true,
@@ -100,7 +100,7 @@ describe("useRateLimit", () => {
         expect(onLimitExceeded).toHaveBeenCalledWith(rateLimitData);
     });
 
-    it("calls onLimitAvailable when data indicates limit available", () => {
+    it("should call onLimitAvailable when data indicates limit available", () => {
         const onLimitAvailable = vi.fn();
         const rateLimitData: RateLimitResult<{ counter: number }> = {
             isOverLimit: false,
@@ -123,7 +123,7 @@ describe("useRateLimit", () => {
         expect(onLimitAvailable).toHaveBeenCalledWith(rateLimitData);
     });
 
-    it("does not call callbacks when data is undefined", () => {
+    it("should not call callbacks when data is undefined", () => {
         const onLimitExceeded = vi.fn();
         const onLimitAvailable = vi.fn();
 
@@ -143,7 +143,7 @@ describe("useRateLimit", () => {
         expect(onLimitAvailable).not.toHaveBeenCalled();
     });
 
-    it("sets timeout to refetch when period ends and calls onPeriodReset", () => {
+    it("should set timeout to refetch when period ends and call onPeriodReset", () => {
         const onPeriodReset = vi.fn();
         const now = Date.now();
         const periodEnd = new Date(now + 1000);
@@ -179,7 +179,7 @@ describe("useRateLimit", () => {
         expect(onPeriodReset).toHaveBeenCalled();
     });
 
-    it("does not set timeout when period has already ended", () => {
+    it("should not set timeout when period has already ended", () => {
         const onPeriodReset = vi.fn();
         const now = Date.now();
         const periodEnd = new Date(now - 1000);
@@ -215,7 +215,7 @@ describe("useRateLimit", () => {
         expect(onPeriodReset).not.toHaveBeenCalled();
     });
 
-    it("clears timeout on unmount", () => {
+    it("should clear timeout on unmount", () => {
         const onPeriodReset = vi.fn();
         const now = Date.now();
         const periodEnd = new Date(now + 5000);
@@ -253,7 +253,7 @@ describe("useRateLimit", () => {
         expect(onPeriodReset).not.toHaveBeenCalled();
     });
 
-    it("syncs query data when errorToSync is RateLimitError with matching reason", () => {
+    it("should sync query data when errorToSync is RateLimitError with matching reason", () => {
         const queryKey = ["test"];
         const periodStart = new Date();
         const periodEnd = new Date(Date.now() + 1000);
@@ -285,7 +285,7 @@ describe("useRateLimit", () => {
         });
     });
 
-    it("does not sync query data when errorToSync is RateLimitError with non-matching reason", () => {
+    it("should not sync query data when errorToSync is RateLimitError with non-matching reason", () => {
         const queryKey = ["test"];
         const periodStart = new Date();
         const periodEnd = new Date(Date.now() + 1000);

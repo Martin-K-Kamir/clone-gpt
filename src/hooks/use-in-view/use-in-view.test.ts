@@ -67,7 +67,7 @@ describe("useInView", () => {
         }
     };
 
-    it("returns false initially", () => {
+    it("should return false initially", () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -77,7 +77,7 @@ describe("useInView", () => {
         expect(result.current).toBe(false);
     });
 
-    it("observes element when ref is provided", () => {
+    it("should observe element when ref is provided", () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -87,7 +87,7 @@ describe("useInView", () => {
         expect(mockIntersectionObserver.observe).toHaveBeenCalledWith(element);
     });
 
-    it("does not observe when ref is null", () => {
+    it("should not observe when ref is null", () => {
         const ref = createRef<HTMLDivElement>();
 
         renderHook(() => useInView(ref));
@@ -95,7 +95,7 @@ describe("useInView", () => {
         expect(mockIntersectionObserver.observe).not.toHaveBeenCalled();
     });
 
-    it("sets inView to true when element intersects", async () => {
+    it("should set inView to true when element intersects", async () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -109,7 +109,7 @@ describe("useInView", () => {
         });
     });
 
-    it("sets inView to false when element does not intersect", async () => {
+    it("should set inView to false when element does not intersect", async () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -129,7 +129,7 @@ describe("useInView", () => {
         });
     });
 
-    it("calls onEnter callback when element enters view", async () => {
+    it("should call onEnter callback when element enters view", async () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -144,7 +144,7 @@ describe("useInView", () => {
         });
     });
 
-    it("calls onLeave callback when element leaves view", async () => {
+    it("should call onLeave callback when element leaves view", async () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -165,7 +165,7 @@ describe("useInView", () => {
         });
     });
 
-    it("does not call onEnter again if already in view", async () => {
+    it("should not call onEnter again if already in view", async () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -186,7 +186,7 @@ describe("useInView", () => {
         expect(onEnter).toHaveBeenCalledTimes(1);
     });
 
-    it("disconnects observer on unmount", () => {
+    it("should disconnect observer on unmount", () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -198,7 +198,7 @@ describe("useInView", () => {
         expect(mockIntersectionObserver.disconnect).toHaveBeenCalled();
     });
 
-    it("disconnects observer when triggerOnce is true and element enters view", async () => {
+    it("should disconnect observer when triggerOnce is true and element enters view", async () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -212,7 +212,7 @@ describe("useInView", () => {
         });
     });
 
-    it("does not call onLeave when triggerOnce is true", async () => {
+    it("should not call onLeave when triggerOnce is true", async () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -237,7 +237,7 @@ describe("useInView", () => {
         expect(result.current).toBe(true);
     });
 
-    it("passes threshold option to IntersectionObserver", () => {
+    it("should pass threshold option to IntersectionObserver", () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -250,7 +250,7 @@ describe("useInView", () => {
         );
     });
 
-    it("passes rootMargin option to IntersectionObserver", () => {
+    it("should pass rootMargin option to IntersectionObserver", () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         ref.current = element;
@@ -263,7 +263,7 @@ describe("useInView", () => {
         );
     });
 
-    it("updates observer when ref changes", () => {
+    it("should update observer when ref changes", () => {
         const ref1 = createRef<HTMLDivElement>();
         const element1 = document.createElement("div");
         ref1.current = element1;

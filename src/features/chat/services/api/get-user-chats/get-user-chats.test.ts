@@ -1,24 +1,29 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { server } from "@/vitest/unit-setup";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { DBChat, DBChatId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import type { DBChat } from "@/features/chat/lib/types";
 
 import { getUserChats } from "./get-user-chats";
 
 describe("getUserChats", () => {
     it("should return paginated chat data when API returns success without params", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-1" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId,
+                userId,
                 title: "Chat 1",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
             },
         ];
 
@@ -48,20 +53,22 @@ describe("getUserChats", () => {
             totalCount: 1,
         });
         expect(result.data).toHaveLength(1);
-        expect(result.data[0].id).toBe("chat-1");
+        expect(result.data[0].id).toBe(chatId);
         expect(result.data[0].title).toBe("Chat 1");
     });
 
     it("should return paginated chat data with offset and limit", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-2" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId,
+                userId,
                 title: "Chat 2",
                 createdAt: "2024-01-03T00:00:00Z",
                 updatedAt: "2024-01-04T00:00:00Z",
                 visibleAt: "2024-01-03T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
             },
         ];
 
@@ -104,15 +111,17 @@ describe("getUserChats", () => {
     });
 
     it("should return paginated chat data with orderBy", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-3" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId,
+                userId,
                 title: "Chat 3",
                 createdAt: "2024-01-05T00:00:00Z",
                 updatedAt: "2024-01-06T00:00:00Z",
                 visibleAt: "2024-01-05T00:00:00Z",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
             },
         ];
 
@@ -144,19 +153,21 @@ describe("getUserChats", () => {
             hasNextPage: false,
             totalCount: 1,
         });
-        expect(result.data[0].visibility).toBe("public");
+        expect(result.data[0].visibility).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
     it("should return paginated chat data with all params", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-4" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId,
+                userId,
                 title: "Chat 4",
                 createdAt: "2024-01-07T00:00:00Z",
                 updatedAt: "2024-01-08T00:00:00Z",
                 visibleAt: "2024-01-07T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
             },
         ];
 

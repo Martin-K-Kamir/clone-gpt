@@ -40,7 +40,7 @@ describe("useHorizontalScroll", () => {
         }
     });
 
-    it("returns event handlers and canScroll state", () => {
+    it("should return event handlers and canScroll state", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 100,
             configurable: true,
@@ -60,7 +60,7 @@ describe("useHorizontalScroll", () => {
         expect(result.current).toHaveProperty("canScroll");
     });
 
-    it("sets canScroll to false when element has no overflow", () => {
+    it("should set canScroll to false when element has no overflow", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 100,
             configurable: true,
@@ -75,7 +75,7 @@ describe("useHorizontalScroll", () => {
         expect(result.current.canScroll).toBe(false);
     });
 
-    it("sets canScroll to true when element has overflow", () => {
+    it("should set canScroll to true when element has overflow", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,
@@ -90,7 +90,7 @@ describe("useHorizontalScroll", () => {
         expect(result.current.canScroll).toBe(true);
     });
 
-    it("sets canScroll to false when ref.current is null", () => {
+    it("should set canScroll to false when ref.current is null", () => {
         const nullRef = {
             current: null,
         } as unknown as RefObject<HTMLDivElement>;
@@ -100,7 +100,7 @@ describe("useHorizontalScroll", () => {
         expect(result.current.canScroll).toBe(false);
     });
 
-    it("prevents default and scrolls horizontally on wheel when canScroll is true", () => {
+    it("should prevent default and scroll horizontally on wheel when canScroll is true", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,
@@ -136,7 +136,7 @@ describe("useHorizontalScroll", () => {
         expect(element.scrollLeft).toBe(50);
     });
 
-    it("does not prevent default or scroll when canScroll is false", () => {
+    it("should not prevent default or scroll when canScroll is false", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 100,
             configurable: true,
@@ -172,7 +172,7 @@ describe("useHorizontalScroll", () => {
         expect(element.scrollLeft).toBe(0);
     });
 
-    it("handles mouse down and sets cursor to grabbing", () => {
+    it("should handle mouse down and set cursor to grabbing", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,
@@ -210,7 +210,7 @@ describe("useHorizontalScroll", () => {
         expect(element.style.cursor).toBe("grabbing");
     });
 
-    it("does not handle mouse down when canScroll is false", () => {
+    it("should not handle mouse down when canScroll is false", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 100,
             configurable: true,
@@ -243,7 +243,7 @@ describe("useHorizontalScroll", () => {
         expect(element.style.cursor).not.toBe("grabbing");
     });
 
-    it("handles mouse leave and resets cursor", () => {
+    it("should handle mouse leave and reset cursor", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,
@@ -262,7 +262,7 @@ describe("useHorizontalScroll", () => {
         expect(element.style.cursor).toBe("grab");
     });
 
-    it("sets cursor to default when canScroll is false on mouse leave", () => {
+    it("should set cursor to default when canScroll is false on mouse leave", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 100,
             configurable: true,
@@ -281,7 +281,7 @@ describe("useHorizontalScroll", () => {
         expect(element.style.cursor).toBe("default");
     });
 
-    it("handles mouse up and resets cursor", () => {
+    it("should handle mouse up and reset cursor", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,
@@ -300,7 +300,7 @@ describe("useHorizontalScroll", () => {
         expect(element.style.cursor).toBe("grab");
     });
 
-    it("handles mouse move and scrolls when dragging", () => {
+    it("should handle mouse move and scroll when dragging", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,
@@ -353,7 +353,7 @@ describe("useHorizontalScroll", () => {
         expect(element.scrollLeft).toBe(-20);
     });
 
-    it("does not scroll when mouse move is called without dragging", () => {
+    it("should not scroll when mouse move is called without dragging", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,
@@ -387,7 +387,7 @@ describe("useHorizontalScroll", () => {
         expect(element.scrollLeft).toBe(20);
     });
 
-    it("cleans up observers on unmount", () => {
+    it("should clean up observers on unmount", () => {
         Object.defineProperty(element, "scrollWidth", {
             value: 200,
             configurable: true,

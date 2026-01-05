@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
@@ -32,7 +33,7 @@ describe("getUserChatById", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             getUserChatById({
                 chatId: "not-a-uuid" as any,
@@ -41,7 +42,7 @@ describe("getUserChatById", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             getUserChatById({
                 chatId,
@@ -50,7 +51,7 @@ describe("getUserChatById", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when chat access is denied", async () => {
+    it("should throw when chat access is denied", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: false,
             chatFound: true,
@@ -75,12 +76,12 @@ describe("getUserChatById", () => {
         ).rejects.toThrow("The chat is not accessible");
     });
 
-    it("returns chat when user is owner", async () => {
+    it("should return chat when user is owner", async () => {
         const mockChat = {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -88,7 +89,7 @@ describe("getUserChatById", () => {
 
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             chatFound: true,
             isOwner: true,
             isPrivate: true,
@@ -110,15 +111,17 @@ describe("getUserChatById", () => {
 
         expect(result).not.toBeNull();
         expect(result?.id).toBe(chatId);
-        expect((result as any).isOwner).toBe(true);
+        if (result) {
+            expect(result.isOwner).toBe(true);
+        }
     });
 
-    it("returns chat when user is not owner but has access", async () => {
+    it("should return chat when user is not owner but has access", async () => {
         const mockChat = {
             id: chatId,
-            userId: "00000000-0000-0000-0000-000000000def" as DBUserId,
+            userId: "00000000-0000-0000-0000-000000000002" as DBUserId,
             title: "Public Chat",
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -126,7 +129,7 @@ describe("getUserChatById", () => {
 
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
             chatFound: true,
             isOwner: false,
             isPrivate: false,
@@ -148,15 +151,17 @@ describe("getUserChatById", () => {
 
         expect(result).not.toBeNull();
         expect(result?.id).toBe(chatId);
-        expect((result as any).isOwner).toBe(false);
+        if (result) {
+            expect(result.isOwner).toBe(false);
+        }
     });
 
-    it("returns chat when verifyChatAccess is false", async () => {
+    it("should return chat when verifyChatAccess is false", async () => {
         const mockChat = {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -184,10 +189,10 @@ describe("getUserChatById", () => {
         expect(mocks.getChatAccess).not.toHaveBeenCalled();
     });
 
-    it("throws when chat not found and throwOnNotFound is true", async () => {
+    it("should throw when chat not found and throwOnNotFound is true", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             chatFound: true,
             isOwner: true,
             isPrivate: true,
@@ -210,10 +215,10 @@ describe("getUserChatById", () => {
         ).rejects.toThrow("Chat not found");
     });
 
-    it("returns null when chat not found and throwOnNotFound is false", async () => {
+    it("should return null when chat not found and throwOnNotFound is false", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             chatFound: true,
             isOwner: true,
             isPrivate: true,
@@ -240,10 +245,10 @@ describe("getUserChatById", () => {
         expect(result).toBeNull();
     });
 
-    it("throws when fetch fails", async () => {
+    it("should throw when fetch fails", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             chatFound: true,
             isOwner: true,
             isPrivate: true,

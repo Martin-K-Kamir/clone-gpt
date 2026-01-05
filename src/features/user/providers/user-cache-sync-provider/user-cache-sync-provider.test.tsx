@@ -1,13 +1,10 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react";
 import { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type {
-    DBUser,
-    DBUserChatPreferences,
-    DBUserId,
-} from "@/features/user/lib/types";
+import type { DBUser, DBUserChatPreferences } from "@/features/user/lib/types";
 
 import { tag } from "@/lib/cache-tag";
 import { tabScope } from "@/lib/utils";
@@ -73,7 +70,7 @@ describe("UserCacheSyncProvider", () => {
         });
     });
 
-    it("provides all cache sync functions", () => {
+    it("should provide all cache sync functions", () => {
         const { result } = renderHook(() => useUserCacheSyncContext(), {
             wrapper: createWrapper,
         });
@@ -85,7 +82,7 @@ describe("UserCacheSyncProvider", () => {
         );
     });
 
-    it("throws error when used outside provider", () => {
+    it("should throw error when used outside provider", () => {
         expect(() => {
             renderHook(() => useUserCacheSyncContext());
         }).toThrow(
@@ -93,8 +90,8 @@ describe("UserCacheSyncProvider", () => {
         );
     });
 
-    it("updateUserName updates user name for thisTab scope", () => {
-        const userId = "user-123" as DBUserId;
+    it("should update user name for thisTab scope when updateUserName is called", () => {
+        const userId = generateUserId();
         const newName = "New Name";
         const oldUser: DBUser = {
             id: userId,
@@ -121,8 +118,8 @@ describe("UserCacheSyncProvider", () => {
         expect(updatedUser?.name).toBe(newName);
     });
 
-    it("updateUserName broadcasts message for otherTabs scope", () => {
-        const userId = "user-123" as DBUserId;
+    it("should broadcast message for otherTabs scope when updateUserName is called", () => {
+        const userId = generateUserId();
         const newName = "New Name";
 
         mockTabScope.mockImplementation((scope, handlers) => {
@@ -149,8 +146,8 @@ describe("UserCacheSyncProvider", () => {
         });
     });
 
-    it("updateUserName returns revert function that restores previous name", () => {
-        const userId = "user-123" as DBUserId;
+    it("should return revert function that restores previous name when updateUserName is called", () => {
+        const userId = generateUserId();
         const oldName = "Old Name";
         const newName = "New Name";
         const oldUser: DBUser = {
@@ -188,8 +185,8 @@ describe("UserCacheSyncProvider", () => {
         expect(revertedUser?.name).toBe(oldName);
     });
 
-    it("revertLastUserUpdate restores previous user state for thisTab scope", () => {
-        const userId = "user-123" as DBUserId;
+    it("should restore previous user state for thisTab scope when revertLastUserUpdate is called", () => {
+        const userId = generateUserId();
         const oldName = "Old Name";
         const newName = "New Name";
         const oldUser: DBUser = {
@@ -225,7 +222,7 @@ describe("UserCacheSyncProvider", () => {
         expect(revertedUser?.name).toBe(oldName);
     });
 
-    it("revertLastUserUpdate broadcasts message for otherTabs scope", () => {
+    it("should broadcast message for otherTabs scope when revertLastUserUpdate is called", () => {
         mockTabScope.mockImplementation((scope, handlers) => {
             if (scope === "otherTabs") {
                 handlers.otherTabs?.();
@@ -245,7 +242,7 @@ describe("UserCacheSyncProvider", () => {
         });
     });
 
-    it("revertLastUserUpdate works with default scope", () => {
+    it("should work with default scope when revertLastUserUpdate is called", () => {
         const { result } = renderHook(() => useUserCacheSyncContext(), {
             wrapper: createWrapper,
         });
@@ -257,8 +254,8 @@ describe("UserCacheSyncProvider", () => {
         expect(mockTabScope).toHaveBeenCalled();
     });
 
-    it("updateUserChatPreferences updates preferences for thisTab scope", () => {
-        const userId = "user-123" as DBUserId;
+    it("should update preferences for thisTab scope when updateUserChatPreferences is called", () => {
+        const userId = generateUserId();
         const newNickname = "Test User";
         const preferences: Partial<DBUserChatPreferences> = {
             nickname: newNickname,
@@ -297,8 +294,8 @@ describe("UserCacheSyncProvider", () => {
         expect(updated?.nickname).toBe(newNickname);
     });
 
-    it("updateUserChatPreferences broadcasts message for otherTabs scope", () => {
-        const userId = "user-123" as DBUserId;
+    it("should broadcast message for otherTabs scope when updateUserChatPreferences is called", () => {
+        const userId = generateUserId();
         const preferences: Partial<DBUserChatPreferences> = {
             nickname: "Test User",
         };
@@ -327,8 +324,8 @@ describe("UserCacheSyncProvider", () => {
         });
     });
 
-    it("updates user name when receiving updateUserName broadcast message", () => {
-        const userId = "user-123" as DBUserId;
+    it("should update user name when receiving updateUserName broadcast message", () => {
+        const userId = generateUserId();
         const oldName = "Old Name";
         const newName = "New Name";
         const oldUser: DBUser = {
@@ -359,8 +356,8 @@ describe("UserCacheSyncProvider", () => {
         expect(updatedUser?.name).toBe(newName);
     });
 
-    it("reverts user state when receiving revertLastUserUpdate broadcast message", () => {
-        const userId = "user-123" as DBUserId;
+    it("should revert user state when receiving revertLastUserUpdate broadcast message", () => {
+        const userId = generateUserId();
         const oldName = "Old Name";
         const newName = "New Name";
         const oldUser: DBUser = {
@@ -401,8 +398,8 @@ describe("UserCacheSyncProvider", () => {
         expect(revertedUser?.name).toBe(oldName);
     });
 
-    it("updates preferences when receiving updateUserChatPreferences broadcast message", () => {
-        const userId = "user-123" as DBUserId;
+    it("should update preferences when receiving updateUserChatPreferences broadcast message", () => {
+        const userId = generateUserId();
         const oldNickname = "Old Nickname";
         const newNickname = "Updated Nickname";
         const preferences: Partial<DBUserChatPreferences> = {
@@ -445,7 +442,7 @@ describe("UserCacheSyncProvider", () => {
         expect(updated?.nickname).toBe(newNickname);
     });
 
-    it("throws error on unknown message type", () => {
+    it("should throw error on unknown message type", () => {
         let onMessageHandler: ((message: any) => void) | undefined;
 
         renderHook(() => useUserCacheSyncContext(), {

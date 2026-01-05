@@ -1,37 +1,17 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { type InfiniteData, QueryClient } from "@tanstack/react-query";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import type {
-    DBChat,
-    DBChatId,
-    DBChatVisibility,
-} from "@/features/chat/lib/types";
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import type { DBChat } from "@/features/chat/lib/types";
 
 import { tag } from "@/lib/cache-tag";
 import type { PaginatedData } from "@/lib/types";
 
 import { createChatsCacheUpdater } from "./create-chats-cache-updater";
-
-vi.mock("@/lib/utils", async () => {
-    const actual =
-        await vi.importActual<typeof import("@/lib/utils")>("@/lib/utils");
-    return {
-        ...actual,
-        createCacheUpdater: vi.fn((queryClient: QueryClient) => {
-            const actualUpdater = actual.createCacheUpdater(queryClient);
-            return actualUpdater;
-        }),
-        createInfiniteCacheUpdater: vi.fn(
-            (queryClient: QueryClient, queryKey: readonly unknown[]) => {
-                const actualUpdater = actual.createInfiniteCacheUpdater(
-                    queryClient,
-                    queryKey,
-                );
-                return actualUpdater;
-            },
-        ),
-    };
-});
 
 describe("createChatsCacheUpdater", () => {
     let queryClient: QueryClient;
@@ -52,21 +32,25 @@ describe("createChatsCacheUpdater", () => {
 
     describe("addToUserChats", () => {
         it("should add chat to user chats", () => {
+            const userId = generateUserId();
+            const existingChatId = generateChatId();
+            const newChatId = generateChatId();
+
             const existingChat: DBChat = {
-                id: "chat-0" as DBChatId,
-                userId: "user-1" as any,
+                id: existingChatId,
+                userId,
                 title: "Existing Chat",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
             };
 
             const newChat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: newChatId,
+                userId,
                 title: "Test Chat",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -95,19 +79,20 @@ describe("createChatsCacheUpdater", () => {
             >([tag.userChats()]);
 
             expect(data?.pages[0].data).toHaveLength(2);
-            expect(data?.pages[0].data[0].id).toBe("chat-1");
-            expect(data?.pages[0].data[1].id).toBe("chat-0");
+            expect(data?.pages[0].data[0].id).toBe(newChatId);
+            expect(data?.pages[0].data[1].id).toBe(existingChatId);
         });
     });
 
     describe("updateUserChat", () => {
         it("should update single user chat", () => {
-            const chatId = "chat-1" as DBChatId;
+            const chatId = generateChatId();
+            const userId = generateUserId();
             const originalChat: DBChat = {
                 id: chatId,
-                userId: "user-1" as any,
+                userId,
                 title: "Original Title",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -133,12 +118,13 @@ describe("createChatsCacheUpdater", () => {
 
     describe("updateUserChats", () => {
         it("should update chat in user chats list", () => {
-            const chatId = "chat-1" as DBChatId;
+            const chatId = generateChatId();
+            const userId = generateUserId();
             const originalChat: DBChat = {
                 id: chatId,
-                userId: "user-1" as any,
+                userId,
                 title: "Original Title",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -176,21 +162,24 @@ describe("createChatsCacheUpdater", () => {
 
     describe("removeFromUserChats", () => {
         it("should remove chat from user chats", () => {
+            const userId = generateUserId();
+            const chatId1 = generateChatId();
+            const chatId2 = generateChatId();
             const chat1: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId1,
+                userId,
                 title: "Chat 1",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
             };
 
             const chat2: DBChat = {
-                id: "chat-2" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId2,
+                userId,
                 title: "Chat 2",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -211,14 +200,14 @@ describe("createChatsCacheUpdater", () => {
                 },
             );
 
-            cacheUpdater.removeFromUserChats({ chatId: "chat-1" as DBChatId });
+            cacheUpdater.removeFromUserChats({ chatId: chatId1 });
 
             const data = queryClient.getQueryData<
                 InfiniteData<PaginatedData<DBChat[]>>
             >([tag.userChats()]);
 
             expect(data?.pages[0].data).toHaveLength(1);
-            expect(data?.pages[0].data[0].id).toBe("chat-2");
+            expect(data?.pages[0].data[0].id).toBe(chatId2);
         });
     });
 
@@ -238,14 +227,15 @@ describe("createChatsCacheUpdater", () => {
 
     describe("updateChatVisibility", () => {
         it("should update chat visibility", () => {
-            const chatId = "chat-1" as DBChatId;
-            const visibility = "public" as DBChatVisibility;
+            const chatId = generateChatId();
+            const userId = generateUserId();
+            const visibility = CHAT_VISIBILITY.PUBLIC;
 
             queryClient.setQueryData([tag.userChat(chatId)], {
                 id: chatId,
-                userId: "user-1" as any,
+                userId,
                 title: "Test",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -262,14 +252,15 @@ describe("createChatsCacheUpdater", () => {
 
     describe("updateChatTitle", () => {
         it("should update chat title", () => {
-            const chatId = "chat-1" as DBChatId;
+            const chatId = generateChatId();
+            const userId = generateUserId();
             const newTitle = "New Title";
 
             queryClient.setQueryData([tag.userChat(chatId)], {
                 id: chatId,
-                userId: "user-1" as any,
+                userId,
                 title: "Old Title",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -286,21 +277,23 @@ describe("createChatsCacheUpdater", () => {
 
     describe("removeFromUserSharedChats", () => {
         it("should remove chat from shared chats", () => {
-            const chatId = "chat-1" as DBChatId;
+            const userId = generateUserId();
+            const chatId1 = generateChatId();
+            const chatId2 = generateChatId();
             const chat1: DBChat = {
-                id: chatId,
-                userId: "user-1" as any,
+                id: chatId1,
+                userId,
                 title: "Chat 1",
-                visibility: "public" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
             };
             const chat2: DBChat = {
-                id: "chat-2" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId2,
+                userId,
                 title: "Chat 2",
-                visibility: "public" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -320,21 +313,22 @@ describe("createChatsCacheUpdater", () => {
 
             queryClient.setQueryData(queryKey, paginatedData);
 
-            cacheUpdater.removeFromUserSharedChats({ chatId });
+            cacheUpdater.removeFromUserSharedChats({ chatId: chatId1 });
 
             const updated =
                 queryClient.getQueryData<PaginatedData<DBChat[]>>(queryKey);
             expect(updated?.data).toHaveLength(1);
-            expect(updated?.data[0].id).toBe("chat-2");
+            expect(updated?.data[0].id).toBe(chatId2);
             expect(updated?.totalCount).toBe(1);
         });
 
         it("should handle pagination correctly", () => {
+            const userId = generateUserId();
             const chats: DBChat[] = Array.from({ length: 25 }, (_, i) => ({
-                id: `chat-${i + 1}` as DBChatId,
-                userId: "user-1" as any,
+                id: generateChatId(),
+                userId,
                 title: `Chat ${i + 1}`,
-                visibility: "public" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -364,8 +358,9 @@ describe("createChatsCacheUpdater", () => {
                 nextOffset: 20,
             });
 
+            const chatIdToRemove = chats[4].id;
             cacheUpdater.removeFromUserSharedChats({
-                chatId: "chat-5" as DBChatId,
+                chatId: chatIdToRemove,
             });
 
             const updated1 =
@@ -380,11 +375,13 @@ describe("createChatsCacheUpdater", () => {
 
     describe("removeAllUserSharedChats", () => {
         it("should remove all shared chats and save state for revert", () => {
+            const userId = generateUserId();
+            const chatId = generateChatId();
             const chat1: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId,
+                userId,
                 title: "Chat 1",
-                visibility: "public" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -416,21 +413,23 @@ describe("createChatsCacheUpdater", () => {
 
     describe("addToInitialUserChatsSearch", () => {
         it("should add chat to initial search results", () => {
+            const userId = generateUserId();
+            const chatId = generateChatId();
             const chat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId,
+                userId,
                 title: "New Chat",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
             };
 
             const existingChat: DBChat = {
-                id: "chat-2" as DBChatId,
-                userId: "user-1" as any,
+                id: generateChatId(),
+                userId,
                 title: "Existing Chat",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -447,15 +446,16 @@ describe("createChatsCacheUpdater", () => {
                 tag.userInitialChatsSearch(),
             ]);
             expect(updated).toHaveLength(2);
-            expect(updated?.[0].id).toBe("chat-1");
+            expect(updated?.[0].id).toBe(chatId);
         });
 
         it("should respect limit", () => {
+            const userId = generateUserId();
             const chats: DBChat[] = Array.from({ length: 5 }, (_, i) => ({
-                id: `chat-${i + 1}` as DBChatId,
-                userId: "user-1" as any,
+                id: generateChatId(),
+                userId,
                 title: `Chat ${i + 1}`,
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -464,10 +464,10 @@ describe("createChatsCacheUpdater", () => {
             queryClient.setQueryData([tag.userInitialChatsSearch()], chats);
 
             const newChat: DBChat = {
-                id: "chat-new" as DBChatId,
-                userId: "user-1" as any,
+                id: generateChatId(),
+                userId,
                 title: "New Chat",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -487,11 +487,13 @@ describe("createChatsCacheUpdater", () => {
 
     describe("updateInitialUserChatsSearch", () => {
         it("should update chat in initial search results", () => {
+            const userId = generateUserId();
+            const chatId = generateChatId();
             const chat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId,
+                userId,
                 title: "Original Title",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -500,7 +502,7 @@ describe("createChatsCacheUpdater", () => {
             queryClient.setQueryData([tag.userInitialChatsSearch()], [chat]);
 
             cacheUpdater.updateInitialUserChatsSearch({
-                chatId: "chat-1" as DBChatId,
+                chatId,
                 updater: old => ({ ...old, title: "Updated Title" }),
             });
 
@@ -513,11 +515,14 @@ describe("createChatsCacheUpdater", () => {
 
     describe("upsertInitialUserChatsSearch", () => {
         it("should insert chat when it does not exist", () => {
+            const userId = generateUserId();
+            const existingChatId = generateChatId();
+            const newChatId = generateChatId();
             const existingChat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: existingChatId,
+                userId,
                 title: "Existing",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -529,17 +534,17 @@ describe("createChatsCacheUpdater", () => {
             );
 
             const newChat: DBChat = {
-                id: "chat-2" as DBChatId,
-                userId: "user-1" as any,
+                id: newChatId,
+                userId,
                 title: "New",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
             };
 
             cacheUpdater.upsertInitialUserChatsSearch({
-                chatId: "chat-2" as DBChatId,
+                chatId: newChatId,
                 chat: newChat,
             });
 
@@ -547,15 +552,17 @@ describe("createChatsCacheUpdater", () => {
                 tag.userInitialChatsSearch(),
             ]);
             expect(updated).toHaveLength(2);
-            expect(updated?.[0].id).toBe("chat-2");
+            expect(updated?.[0].id).toBe(newChatId);
         });
 
         it("should update chat when it exists", () => {
+            const userId = generateUserId();
+            const chatId = generateChatId();
             const chat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId,
+                userId,
                 title: "Original",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -569,7 +576,7 @@ describe("createChatsCacheUpdater", () => {
             };
 
             cacheUpdater.upsertInitialUserChatsSearch({
-                chatId: "chat-1" as DBChatId,
+                chatId,
                 chat: updatedChat,
             });
 
@@ -582,11 +589,13 @@ describe("createChatsCacheUpdater", () => {
 
     describe("updateInitialUserChatsSearchTitle", () => {
         it("should update chat title in initial search", () => {
+            const userId = generateUserId();
+            const chatId = generateChatId();
             const chat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId,
+                userId,
                 title: "Original",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -595,7 +604,7 @@ describe("createChatsCacheUpdater", () => {
             queryClient.setQueryData([tag.userInitialChatsSearch()], [chat]);
 
             cacheUpdater.updateInitialUserChatsSearchTitle({
-                chatId: "chat-1" as DBChatId,
+                chatId,
                 newTitle: "New Title",
             });
 
@@ -608,11 +617,13 @@ describe("createChatsCacheUpdater", () => {
 
     describe("clearInitialUserChatsSearch", () => {
         it("should clear initial search results", () => {
+            const userId = generateUserId();
+            const chatId = generateChatId();
             const chat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId,
+                userId,
                 title: "Test",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -631,11 +642,14 @@ describe("createChatsCacheUpdater", () => {
 
     describe("revert functions", () => {
         it("should revert last chats update", () => {
+            const userId = generateUserId();
+            const originalChatId = generateChatId();
+            const newChatId = generateChatId();
             const originalChat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: originalChatId,
+                userId,
                 title: "Original Chat",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -657,10 +671,10 @@ describe("createChatsCacheUpdater", () => {
             );
 
             const newChat: DBChat = {
-                id: "chat-2" as DBChatId,
-                userId: "user-1" as any,
+                id: newChatId,
+                userId,
                 title: "New Chat",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
@@ -679,39 +693,38 @@ describe("createChatsCacheUpdater", () => {
                 InfiniteData<PaginatedData<DBChat[]>>
             >([tag.userChats()]);
             expect(reverted?.pages[0].data).toHaveLength(1);
-            expect(reverted?.pages[0].data[0].id).toBe("chat-1");
+            expect(reverted?.pages[0].data[0].id).toBe(originalChatId);
         });
 
         it("should revert last chat update", () => {
+            const userId = generateUserId();
+            const chatId = generateChatId();
             const originalChat: DBChat = {
-                id: "chat-1" as DBChatId,
-                userId: "user-1" as any,
+                id: chatId,
+                userId,
                 title: "Original Title",
-                visibility: "private" as DBChatVisibility,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
                 visibleAt: new Date().toISOString(),
             };
 
-            queryClient.setQueryData(
-                [tag.userChat("chat-1" as DBChatId)],
-                originalChat,
-            );
+            queryClient.setQueryData([tag.userChat(chatId)], originalChat);
 
             cacheUpdater.updateUserChat({
-                chatId: "chat-1" as DBChatId,
+                chatId,
                 chat: { title: "Updated Title" },
             });
 
             const afterUpdate = queryClient.getQueryData<DBChat>([
-                tag.userChat("chat-1" as DBChatId),
+                tag.userChat(chatId),
             ]);
             expect(afterUpdate?.title).toBe("Updated Title");
 
             cacheUpdater.revertLastChatUpdate();
 
             const reverted = queryClient.getQueryData<DBChat>([
-                tag.userChat("chat-1" as DBChatId),
+                tag.userChat(chatId),
             ]);
             expect(reverted?.title).toBe("Original Title");
         });

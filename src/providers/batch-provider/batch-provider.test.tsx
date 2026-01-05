@@ -37,7 +37,7 @@ describe("BatchProvider", () => {
             </BatchProvider>
         );
 
-    it("provides all batch methods and state", () => {
+    it("should provide all batch methods and state", () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -54,13 +54,13 @@ describe("BatchProvider", () => {
         expect(typeof result.current.isExecuting).toBe("boolean");
     });
 
-    it("throws error when useBatch is used outside provider", () => {
+    it("should throw error when useBatch is used outside provider", () => {
         expect(() => {
             renderHook(() => useBatch<string>());
         }).toThrow("useBatch must be used within a BatchProvider");
     });
 
-    it("adds items to batch", () => {
+    it("should add items to batch", () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -82,7 +82,7 @@ describe("BatchProvider", () => {
         expect(result.current.getBatchSize()).toBe(2);
     });
 
-    it("does not add duplicate items", () => {
+    it("should not add duplicate items", () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -99,7 +99,7 @@ describe("BatchProvider", () => {
         expect(result.current.getBatchSize()).toBe(1);
     });
 
-    it("removes items from batch", () => {
+    it("should remove items from batch", () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -122,7 +122,7 @@ describe("BatchProvider", () => {
         expect(result.current.getBatchSize()).toBe(1);
     });
 
-    it("clears all items from batch", () => {
+    it("should clear all items from batch", () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -146,7 +146,7 @@ describe("BatchProvider", () => {
         expect(result.current.getBatchSize()).toBe(0);
     });
 
-    it("executes batch after debounce delay", async () => {
+    it("should execute batch after debounce delay", async () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -171,7 +171,7 @@ describe("BatchProvider", () => {
         expect(mockOperation).toHaveBeenCalledWith(["item1"]);
     });
 
-    it("debounces batch execution", async () => {
+    it("should debounce batch execution", async () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -202,7 +202,7 @@ describe("BatchProvider", () => {
         expect(mockOperation).toHaveBeenCalledWith(["item1", "item2"]);
     });
 
-    it("calls onSuccess when operation succeeds", async () => {
+    it("should call onSuccess when operation succeeds", async () => {
         const mockOperation = vi.fn().mockResolvedValue("success-result");
         const onSuccess = vi.fn();
 
@@ -226,7 +226,7 @@ describe("BatchProvider", () => {
         expect(onSuccess).toHaveBeenCalledWith("success-result");
     });
 
-    it("calls onError when operation fails", async () => {
+    it("should call onError when operation fails", async () => {
         const error = new Error("operation failed");
         const mockOperation = vi.fn().mockRejectedValue(error);
         const onError = vi.fn();
@@ -251,7 +251,7 @@ describe("BatchProvider", () => {
         expect(onError).toHaveBeenCalledWith(error);
     });
 
-    it("clears batch after successful execution", async () => {
+    it("should clear batch after successful execution", async () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -275,7 +275,7 @@ describe("BatchProvider", () => {
         expect(result.current.getBatchSize()).toBe(0);
     });
 
-    it("does not execute when batch is empty", async () => {
+    it("should not execute when batch is empty", async () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -292,7 +292,7 @@ describe("BatchProvider", () => {
         expect(mockOperation).not.toHaveBeenCalled();
     });
 
-    it("manually executes batch", async () => {
+    it("should manually execute batch", async () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -314,7 +314,7 @@ describe("BatchProvider", () => {
         expect(mockOperation).toHaveBeenCalledWith(["item1", "item2"]);
     });
 
-    it("does not execute when already executing", async () => {
+    it("should not execute when already executing", async () => {
         let resolveOperation: (value: string) => void;
         const mockOperation = vi.fn().mockImplementation(
             () =>
@@ -350,7 +350,7 @@ describe("BatchProvider", () => {
         expect(mockOperation).toHaveBeenCalledTimes(1);
     });
 
-    it("clears timeout when batch is cleared", async () => {
+    it("should clear timeout when batch is cleared", async () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result } = renderHook(() => useBatch<string>(), {
@@ -379,7 +379,7 @@ describe("BatchProvider", () => {
         expect(mockOperation).not.toHaveBeenCalled();
     });
 
-    it("cleans up timeout on unmount", async () => {
+    it("should clean up timeout on unmount", async () => {
         const mockOperation = vi.fn().mockResolvedValue("result");
 
         const { result, unmount } = renderHook(() => useBatch<string>(), {
@@ -402,7 +402,7 @@ describe("BatchProvider", () => {
         expect(mockOperation).not.toHaveBeenCalled();
     });
 
-    it("handles custom data types", () => {
+    it("should handle custom data types", () => {
         type CustomData = { id: number; name: string };
         const mockOperation = vi
             .fn()

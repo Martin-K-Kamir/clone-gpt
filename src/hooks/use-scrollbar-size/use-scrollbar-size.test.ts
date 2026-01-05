@@ -16,14 +16,14 @@ describe("useScrollbarSize", () => {
         document.documentElement.style.cssText = originalStyle;
     });
 
-    it("returns 0 initially when ref is null", () => {
+    it("should return 0 initially when ref is null", () => {
         const ref = createRef<HTMLDivElement>();
         const { result } = renderHook(() => useScrollbarSize(ref));
 
         expect(result.current).toBe(0);
     });
 
-    it("returns 0 when element has no scrollbar", () => {
+    it("should return 0 when element has no scrollbar", () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";
@@ -39,7 +39,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element);
     });
 
-    it("returns scrollbar size when element has scrollbar", () => {
+    it("should return scrollbar size when element has scrollbar", () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";
@@ -60,7 +60,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element);
     });
 
-    it("sets CSS variable when scrollbar exists", () => {
+    it("should set CSS variable when scrollbar exists", () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";
@@ -87,7 +87,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element);
     });
 
-    it("removes CSS variable when no scrollbar", () => {
+    it("should remove CSS variable when no scrollbar", () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";
@@ -106,7 +106,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element);
     });
 
-    it("uses custom CSS variable name", () => {
+    it("should use custom CSS variable name", () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";
@@ -135,7 +135,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element);
     });
 
-    it("returns undefined when skipState is true", () => {
+    it("should return undefined when skipState is true", () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";
@@ -153,7 +153,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element);
     });
 
-    it("updates on window resize", async () => {
+    it("should update on window resize", async () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";
@@ -180,7 +180,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element);
     });
 
-    it("updates when ref changes", async () => {
+    it("should update when ref changes", async () => {
         const element1 = document.createElement("div");
         element1.style.width = "100px";
         element1.style.height = "100px";
@@ -218,7 +218,7 @@ describe("useScrollbarSize", () => {
         document.body.removeChild(element2);
     });
 
-    it("removes CSS variable when ref becomes null", () => {
+    it("should remove CSS variable when ref becomes null", () => {
         const element = document.createElement("div");
         element.style.width = "100px";
         element.style.height = "100px";

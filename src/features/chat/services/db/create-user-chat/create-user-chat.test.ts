@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
@@ -24,7 +25,7 @@ describe("createUserChat", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             createUserChat({
                 chatId: "not-a-uuid" as any,
@@ -34,7 +35,7 @@ describe("createUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             createUserChat({
                 chatId,
@@ -44,7 +45,7 @@ describe("createUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when title is invalid", async () => {
+    it("should throw when title is invalid", async () => {
         await expect(
             createUserChat({
                 chatId,
@@ -54,12 +55,12 @@ describe("createUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("creates chat on success", async () => {
+    it("should create chat on success", async () => {
         const mockChat = {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -85,7 +86,7 @@ describe("createUserChat", () => {
         expect(result).toEqual(mockChat);
     });
 
-    it("throws when creation fails", async () => {
+    it("should throw when creation fails", async () => {
         mocks.from.mockImplementation(() => ({
             insert: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({
@@ -106,7 +107,7 @@ describe("createUserChat", () => {
         ).rejects.toThrow("Chat insert failed");
     });
 
-    it("throws when data is null and throwOnNotFound is true", async () => {
+    it("should throw when data is null and throwOnNotFound is true", async () => {
         mocks.from.mockImplementation(() => ({
             insert: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({
@@ -128,7 +129,7 @@ describe("createUserChat", () => {
         ).rejects.toThrow("Chat not found");
     });
 
-    it("returns null when data is null and throwOnNotFound is false", async () => {
+    it("should return null when data is null and throwOnNotFound is false", async () => {
         mocks.from.mockImplementation(() => ({
             insert: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({

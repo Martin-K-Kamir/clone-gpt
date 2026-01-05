@@ -3,12 +3,7 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import { HTTP_ERROR_STATUS, HTTP_SUCCESS_STATUS } from "@/lib/constants/http";
 import type { HttpErrorStatus, HttpSuccessStatus } from "@/lib/types";
 
-import {
-    type ApiErrorResponse,
-    type ApiSuccessResponse,
-    createApiErrorResponse,
-    createApiSuccessResponse,
-} from "./responses";
+import { createApiErrorResponse, createApiSuccessResponse } from "./responses";
 
 describe("createApiSuccessResponse", () => {
     describe("basic functionality", () => {

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { createGuestUser } from "./create-guest-user";
 
 const mocks = vi.hoisted(() => ({
@@ -20,12 +22,12 @@ describe("createGuestUser", () => {
         vi.clearAllMocks();
     });
 
-    it("returns created guest user", async () => {
+    it("should return created guest user", async () => {
         const mockUser = {
             id: "user-1",
             email: "guest-123@example.com",
             name: "Guest",
-            role: "guest",
+            role: USER_ROLE.GUEST,
         };
 
         mocks.from.mockReturnValue({
@@ -42,11 +44,11 @@ describe("createGuestUser", () => {
         const result = await createGuestUser();
 
         expect(result).toEqual(mockUser);
-        expect(result.role).toBe("guest");
+        expect(result.role).toBe(USER_ROLE.GUEST);
         expect(result.email).toContain("guest-");
     });
 
-    it("throws when creation fails", async () => {
+    it("should throw when creation fails", async () => {
         mocks.from.mockReturnValue({
             insert: mocks.insert.mockReturnValue({
                 select: mocks.select.mockReturnValue({

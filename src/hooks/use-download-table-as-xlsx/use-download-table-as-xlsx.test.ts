@@ -44,14 +44,14 @@ describe("useDownloadTableAsXLSX", () => {
         (downloadFile as ReturnType<typeof vi.fn>).mockReturnValue(true);
     });
 
-    it("returns download function", () => {
+    it("should return download function", () => {
         const tableRef = createRef<HTMLTableElement>();
         const { result } = renderHook(() => useDownloadTableAsXLSX(tableRef));
 
         expect(typeof result.current.downloadTableAsXLSX).toBe("function");
     });
 
-    it("downloads table as XLSX successfully", () => {
+    it("should download table as XLSX successfully", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -74,7 +74,7 @@ describe("useDownloadTableAsXLSX", () => {
         );
     });
 
-    it("returns false when table ref is null", () => {
+    it("should return false when table ref is null", () => {
         const tableRef = createRef<HTMLTableElement>();
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
             null,
@@ -88,7 +88,7 @@ describe("useDownloadTableAsXLSX", () => {
         expect(downloadFile).not.toHaveBeenCalled();
     });
 
-    it("uses custom filename", () => {
+    it("should use custom filename", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -111,7 +111,7 @@ describe("useDownloadTableAsXLSX", () => {
         );
     });
 
-    it("uses custom sheet name", () => {
+    it("should use custom sheet name", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -131,7 +131,7 @@ describe("useDownloadTableAsXLSX", () => {
         expect(downloadFile).toHaveBeenCalled();
     });
 
-    it("returns false on error", () => {
+    it("should return false on error", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -151,7 +151,7 @@ describe("useDownloadTableAsXLSX", () => {
         expect(downloadFile).not.toHaveBeenCalled();
     });
 
-    it("updates when options change", () => {
+    it("should update when options change", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
@@ -12,7 +13,7 @@ const publicChatId = "30000000-0000-0000-0000-000000000002" as DBChatId;
 const otherUserId = "00000000-0000-0000-0000-000000000002" as DBUserId;
 
 describe("getUserChatMessages", () => {
-    it("returns seeded messages for user's own chat", async () => {
+    it("should return seeded messages for user's own chat", async () => {
         const result = await getUserChatMessages({ chatId, userId });
 
         expect(result).not.toBeNull();
@@ -24,7 +25,7 @@ describe("getUserChatMessages", () => {
         });
     });
 
-    it("returns messages for public chat accessible by other user", async () => {
+    it("should return messages for public chat accessible by other user", async () => {
         const result = await getUserChatMessages({
             chatId: publicChatId,
             userId: otherUserId,
@@ -32,11 +33,11 @@ describe("getUserChatMessages", () => {
 
         expect(result).not.toBeNull();
         expect(result.data.length).toBeGreaterThan(0);
-        expect(result.visibility).toBe("public");
+        expect(result.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
         expect(result.isOwner).toBe(false);
     });
 
-    it("returns empty array for non-existent chat", async () => {
+    it("should throw for non-existent chat", async () => {
         const missingChatId =
             "30000000-0000-0000-0000-000000000999" as DBChatId;
 
@@ -48,7 +49,7 @@ describe("getUserChatMessages", () => {
         ).rejects.toThrow();
     });
 
-    it("returns empty array when verifyChatAccess is false and chat doesn't exist", async () => {
+    it("should return empty array when verifyChatAccess is false and chat doesn't exist", async () => {
         const missingChatId =
             "30000000-0000-0000-0000-000000000999" as DBChatId;
 

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { createUser } from "./create-user";
 
 const mocks = vi.hoisted(() => ({
@@ -20,18 +22,18 @@ describe("createUser", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when validation fails", async () => {
+    it("should throw when validation fails", async () => {
         await expect(
             createUser({ email: "", name: "", password: null } as any),
         ).rejects.toThrow();
     });
 
-    it("creates user with default role", async () => {
+    it("should create user with default role", async () => {
         const mockUser = {
             id: "user-1",
             email: "a@example.com",
             name: "A",
-            role: "user",
+            role: USER_ROLE.USER,
         };
 
         mocks.from.mockReturnValue({
@@ -52,15 +54,15 @@ describe("createUser", () => {
         });
 
         expect(result).toEqual(mockUser);
-        expect(result?.role).toBe("user");
+        expect(result?.role).toBe(USER_ROLE.USER);
     });
 
-    it("creates user with explicit role", async () => {
+    it("should create user with explicit role", async () => {
         const mockUser = {
             id: "user-2",
             email: "b@example.com",
             name: "B",
-            role: "admin",
+            role: USER_ROLE.ADMIN,
         };
 
         mocks.from.mockReturnValue({
@@ -77,14 +79,14 @@ describe("createUser", () => {
         const result = await createUser({
             email: mockUser.email,
             name: mockUser.name,
-            role: "admin",
+            role: USER_ROLE.ADMIN,
             password: null,
         });
 
-        expect(result?.role).toBe("admin");
+        expect(result?.role).toBe(USER_ROLE.ADMIN);
     });
 
-    it("throws when creation fails", async () => {
+    it("should throw when creation fails", async () => {
         mocks.from.mockReturnValue({
             insert: mocks.insert.mockReturnValue({
                 select: mocks.select.mockReturnValue({

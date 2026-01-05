@@ -1,8 +1,10 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { ReactNode, createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { UIChat } from "@/features/chat/lib/types";
 import { useChatOffsetContext } from "@/features/chat/providers";
 import { getUserChats } from "@/features/chat/services/api";
@@ -62,11 +64,12 @@ describe("useInfiniteUserChats", () => {
     });
 
     it("should return chats from all pages", async () => {
+        const chatId = generateChatId();
         const chats: UIChat[] = [
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -216,12 +219,13 @@ describe("useInfiniteUserChats", () => {
     });
 
     it("should use initialData when provided", () => {
+        const chatId = generateChatId();
         const initialData = {
             data: [
                 {
-                    id: "chat-1" as any,
+                    id: chatId,
                     title: "Chat 1",
-                    visibility: "private" as any,
+                    visibility: CHAT_VISIBILITY.PRIVATE,
                     createdAt: "2024-01-01T00:00:00Z",
                     updatedAt: "2024-01-03T00:00:00Z",
                     visibleAt: "2024-01-01T00:00:00Z",

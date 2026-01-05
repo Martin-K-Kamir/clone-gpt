@@ -13,7 +13,7 @@ describe("useDebouncedEffect", () => {
         vi.useRealTimers();
     });
 
-    it("calls effect after delay", () => {
+    it("should call effect after delay", () => {
         const effect = vi.fn();
         renderHook(() => useDebouncedEffect(effect, [], 100));
 
@@ -22,7 +22,7 @@ describe("useDebouncedEffect", () => {
         expect(effect).toHaveBeenCalledTimes(1);
     });
 
-    it("does not call effect before delay completes", () => {
+    it("should not call effect before delay completes", () => {
         const effect = vi.fn();
         renderHook(() => useDebouncedEffect(effect, [], 100));
 
@@ -31,7 +31,7 @@ describe("useDebouncedEffect", () => {
         expect(effect).not.toHaveBeenCalled();
     });
 
-    it("cancels previous effect when dependencies change before delay", () => {
+    it("should cancel previous effect when dependencies change before delay", () => {
         const effect = vi.fn();
 
         const { rerender } = renderHook(
@@ -48,7 +48,7 @@ describe("useDebouncedEffect", () => {
         expect(effect).toHaveBeenCalledTimes(1);
     });
 
-    it("cancels effect on unmount", () => {
+    it("should cancel effect on unmount", () => {
         const effect = vi.fn();
 
         const { unmount } = renderHook(() =>
@@ -62,7 +62,7 @@ describe("useDebouncedEffect", () => {
         expect(effect).not.toHaveBeenCalled();
     });
 
-    it("re-runs effect when delay changes", () => {
+    it("should re-run effect when delay changes", () => {
         const effect = vi.fn();
 
         const { rerender } = renderHook(

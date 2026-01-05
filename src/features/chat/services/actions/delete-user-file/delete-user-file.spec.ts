@@ -21,7 +21,7 @@ describe("deleteUserFile", () => {
         });
     });
 
-    it("deletes file successfully", async () => {
+    it("should delete file successfully", async () => {
         const chatId = generateChatId();
 
         const storedFile = {

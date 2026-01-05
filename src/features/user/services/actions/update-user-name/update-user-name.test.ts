@@ -1,7 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { auth } from "@/features/auth/services/auth";
-
 import { handleApiError } from "@/lib/utils/handle-api-error";
 
 import { updateUserName } from "./update-user-name";
@@ -12,6 +10,7 @@ const constants = vi.hoisted(() => ({
 
 const mocks = vi.hoisted(() => ({
     from: vi.fn(),
+    auth: vi.fn(),
 }));
 
 vi.mock("@/services/supabase", () => ({
@@ -21,7 +20,7 @@ vi.mock("@/services/supabase", () => ({
 }));
 
 vi.mock("@/features/auth/services/auth", () => ({
-    auth: vi.fn().mockResolvedValue({ user: { id: constants.userId } }),
+    auth: mocks.auth,
 }));
 
 const apiSuccess = { ok: true, name: "New Name" };
@@ -61,10 +60,10 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 describe("updateUserName", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({ user: { id: constants.userId } });
+        mocks.auth.mockResolvedValue({ user: { id: constants.userId } } as any);
     });
 
-    it("updates name successfully", async () => {
+    it("should update name successfully", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiSuccess as any,
         );
@@ -87,21 +86,21 @@ describe("updateUserName", () => {
         expect(result).toBe(apiSuccess);
     });
 
-    it("returns api error when session is missing", async () => {
-        (auth as any).mockResolvedValue(null);
+    it("should return api error when session is missing", async () => {
+        mocks.auth.mockResolvedValue(null as any);
 
         const result = await updateUserName({ newName: "New Name" });
 
         expect(result).toBe(apiError);
     });
 
-    it("returns api error when name validation fails", async () => {
+    it("should return api error when name validation fails", async () => {
         const result = await updateUserName({ newName: "" });
 
         expect(result).toBe(apiError);
     });
 
-    it("returns not found when record does not exist", async () => {
+    it("should return not found when record does not exist", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiNotFound as any,
         );
@@ -124,7 +123,7 @@ describe("updateUserName", () => {
         expect(result).toBe(apiNotFound);
     });
 
-    it("returns error when update fails", async () => {
+    it("should return error when update fails", async () => {
         mocks.from.mockImplementation(() => ({
             update: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

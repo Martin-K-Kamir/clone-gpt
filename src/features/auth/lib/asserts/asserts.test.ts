@@ -1,3 +1,4 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
 import {
@@ -13,7 +14,7 @@ describe("assertSessionExists", () => {
         it("should not throw for valid session with all fields", () => {
             const validSession = {
                 user: {
-                    id: "550e8400-e29b-41d4-a716-446655440000",
+                    id: generateUserId(),
                     name: "John Doe",
                     image: "https://example.com/image.jpg",
                 },
@@ -25,7 +26,7 @@ describe("assertSessionExists", () => {
         it("should not throw for valid session without image", () => {
             const validSession = {
                 user: {
-                    id: "550e8400-e29b-41d4-a716-446655440000",
+                    id: generateUserId(),
                     name: "Jane Doe",
                 },
             };
@@ -36,7 +37,7 @@ describe("assertSessionExists", () => {
         it("should not throw for valid session with null image", () => {
             const validSession = {
                 user: {
-                    id: "550e8400-e29b-41d4-a716-446655440000",
+                    id: generateUserId(),
                     name: "Jane Doe",
                     image: null,
                 },
@@ -48,7 +49,7 @@ describe("assertSessionExists", () => {
         it("should narrow type to Session after assertion", () => {
             const validSession = {
                 user: {
-                    id: "550e8400-e29b-41d4-a716-446655440000",
+                    id: generateUserId(),
                     name: "John Doe",
                     image: "https://example.com/image.jpg",
                 },
@@ -111,7 +112,7 @@ describe("assertSessionExists", () => {
         it("should throw SessionInvalidError for missing user.name", () => {
             const invalidSession = {
                 user: {
-                    id: "550e8400-e29b-41d4-a716-446655440000",
+                    id: generateUserId(),
                 },
             };
 
@@ -149,7 +150,7 @@ describe("assertSessionExists", () => {
         it("should throw SessionInvalidError for wrong type in user.name", () => {
             const invalidSession = {
                 user: {
-                    id: "550e8400-e29b-41d4-a716-446655440000",
+                    id: generateUserId(),
                     name: 123,
                 },
             };
@@ -162,7 +163,7 @@ describe("assertSessionExists", () => {
         it("should throw SessionInvalidError for wrong type in user.image", () => {
             const invalidSession = {
                 user: {
-                    id: "550e8400-e29b-41d4-a716-446655440000",
+                    id: generateUserId(),
                     name: "John Doe",
                     image: 123,
                 },

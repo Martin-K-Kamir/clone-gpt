@@ -2,10 +2,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import type { DBUserId } from "@/features/user/lib/types";
+
 import { setAllUserChatsVisibility } from "./set-all-user-chats-visibility";
 
 const constants = vi.hoisted(() => ({
-    userId: "00000000-0000-0000-0000-000000000abc",
+    userId: "00000000-0000-0000-0000-000000000001" as DBUserId,
 }));
 
 const mocks = vi.hoisted(() => ({
@@ -49,12 +53,12 @@ vi.mock("next/cache", () => ({
 describe("setAllUserChatsVisibility", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
+        vi.mocked(auth).mockResolvedValue({
             user: { id: constants.userId, name: "Test User" },
-        });
+        } as any);
     });
 
-    it("sets all chats visibility to public successfully", async () => {
+    it("should set all chats visibility to public successfully", async () => {
         const updateChain = {
             update: vi.fn().mockReturnThis(),
             eq: vi.fn().mockResolvedValue({
@@ -66,13 +70,13 @@ describe("setAllUserChatsVisibility", () => {
         mocks.from.mockReturnValue(updateChain);
 
         const result = await setAllUserChatsVisibility({
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("sets all chats visibility to private successfully", async () => {
+    it("should set all chats visibility to private successfully", async () => {
         const updateChain = {
             update: vi.fn().mockReturnThis(),
             eq: vi.fn().mockResolvedValue({
@@ -84,23 +88,23 @@ describe("setAllUserChatsVisibility", () => {
         mocks.from.mockReturnValue(updateChain);
 
         const result = await setAllUserChatsVisibility({
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("returns error when session is missing", async () => {
-        (auth as any).mockResolvedValueOnce(null);
+    it("should return error when session is missing", async () => {
+        vi.mocked(auth).mockResolvedValueOnce(null as any);
 
         const result = await setAllUserChatsVisibility({
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when update fails", async () => {
+    it("should return error when update fails", async () => {
         const updateChain = {
             update: vi.fn().mockReturnThis(),
             eq: vi.fn().mockResolvedValue({
@@ -112,13 +116,13 @@ describe("setAllUserChatsVisibility", () => {
         mocks.from.mockReturnValue(updateChain);
 
         const result = await setAllUserChatsVisibility({
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when visibility is invalid", async () => {
+    it("should return error when visibility is invalid", async () => {
         const result = await setAllUserChatsVisibility({
             visibility: "invalid" as any,
         });

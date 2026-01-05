@@ -2,11 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import type { DBChatId } from "@/features/chat/lib/types";
+
+import type { DBUserId } from "@/features/user/lib/types";
+
 import { updateChatVisibility } from "./update-chat-visibility";
 
 const constants = vi.hoisted(() => ({
-    userId: "00000000-0000-0000-0000-000000000abc",
-    chatId: "30000000-0000-0000-0000-000000000abc",
+    userId: "00000000-0000-0000-0000-000000000001" as DBUserId,
+    chatId: "30000000-0000-0000-0000-000000000001" as DBChatId,
 }));
 
 const mocks = vi.hoisted(() => ({
@@ -46,14 +51,14 @@ vi.mock("@/lib/api-response", () => ({
 describe("updateChatVisibility", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
+        vi.mocked(auth).mockResolvedValue({
             user: { id: constants.userId, name: "Test User" },
-        });
+        } as any);
     });
 
-    it("updates visibility to public successfully", async () => {
+    it("should update visibility to public successfully", async () => {
         const updatedChat = {
-            visibility: "public" as const,
+            visibility: CHAT_VISIBILITY.PUBLIC,
         };
 
         mocks.from.mockReturnValue({
@@ -72,16 +77,16 @@ describe("updateChatVisibility", () => {
         });
 
         const result = await updateChatVisibility({
-            chatId: constants.chatId as any,
-            visibility: "public",
+            chatId: constants.chatId,
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("updates visibility to private successfully", async () => {
+    it("should update visibility to private successfully", async () => {
         const updatedChat = {
-            visibility: "private" as const,
+            visibility: CHAT_VISIBILITY.PRIVATE,
         };
 
         mocks.from.mockReturnValue({
@@ -100,25 +105,25 @@ describe("updateChatVisibility", () => {
         });
 
         const result = await updateChatVisibility({
-            chatId: constants.chatId as any,
-            visibility: "private",
+            chatId: constants.chatId,
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("returns error when session is missing", async () => {
-        (auth as any).mockResolvedValueOnce(null);
+    it("should return error when session is missing", async () => {
+        vi.mocked(auth).mockResolvedValueOnce(null as any);
 
         const result = await updateChatVisibility({
-            chatId: constants.chatId as any,
-            visibility: "public",
+            chatId: constants.chatId,
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chat update fails", async () => {
+    it("should return error when chat update fails", async () => {
         mocks.from.mockReturnValue({
             update: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -135,25 +140,25 @@ describe("updateChatVisibility", () => {
         });
 
         const result = await updateChatVisibility({
-            chatId: constants.chatId as any,
-            visibility: "public",
+            chatId: constants.chatId,
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chatId is invalid", async () => {
+    it("should return error when chatId is invalid", async () => {
         const result = await updateChatVisibility({
             chatId: "not-a-uuid" as any,
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when visibility is invalid", async () => {
+    it("should return error when visibility is invalid", async () => {
         const result = await updateChatVisibility({
-            chatId: constants.chatId as any,
+            chatId: constants.chatId,
             visibility: "invalid" as any,
         });
 

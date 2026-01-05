@@ -1,13 +1,16 @@
+import {
+    generateChatId,
+    generateMessageId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react";
 import { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useChat } from "@/features/chat/hooks";
-import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import { CHAT_ROLE, CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type {
-    DBChatId,
-    DBChatMessageId,
     DBChatVisibility,
     UIChatMessage,
 } from "@/features/chat/lib/types";
@@ -16,10 +19,7 @@ import {
     useUserFilesRateLimit,
     useUserMessagesRateLimit,
 } from "@/features/user/hooks";
-import type {
-    DBUserChatPreferences,
-    DBUserId,
-} from "@/features/user/lib/types";
+import type { DBUserChatPreferences } from "@/features/user/lib/types";
 
 import {
     ChatProvider,
@@ -47,8 +47,8 @@ const mockUseUserFilesRateLimit = vi.mocked(useUserFilesRateLimit);
 
 describe("ChatProvider", () => {
     let queryClient: QueryClient;
-    const userId = "user-1" as DBUserId;
-    const chatId = "chat-1" as DBChatId;
+    const userId = generateUserId();
+    const chatId = generateChatId();
     const initialMessages: UIChatMessage[] = [];
     const initialUserChatPreferences: DBUserChatPreferences | null = null;
 
@@ -195,10 +195,11 @@ describe("ChatProvider", () => {
     });
 
     it("should provide messages context with messages from useChat", () => {
+        const messageId = generateMessageId();
         const messages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
+                id: messageId,
+                role: CHAT_ROLE.USER,
                 content: "test",
             } as any,
         ];

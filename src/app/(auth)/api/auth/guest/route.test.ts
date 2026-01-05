@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { AUTH_CUSTOM_PROVIDER } from "@/features/auth/lib/constants";
+
 import { GET } from "./route";
 
 const mocks = vi.hoisted(() => ({
@@ -21,7 +23,7 @@ describe("GET /api/auth/guest", () => {
         vi.clearAllMocks();
     });
 
-    it("redirects to redirectUrl when token exists", async () => {
+    it("should redirect to redirectUrl when token exists", async () => {
         const mockToken = { id: "user-id", email: "test@example.com" };
         mocks.getToken.mockResolvedValue(mockToken);
 
@@ -34,7 +36,7 @@ describe("GET /api/auth/guest", () => {
         expect(mocks.signIn).not.toHaveBeenCalled();
     });
 
-    it("redirects to default '/' when token exists and no redirectUrl provided", async () => {
+    it("should redirect to default '/' when token exists and no redirectUrl provided", async () => {
         const mockToken = { id: "user-id", email: "test@example.com" };
         mocks.getToken.mockResolvedValue(mockToken);
 
@@ -45,7 +47,7 @@ describe("GET /api/auth/guest", () => {
         expect(mocks.signIn).not.toHaveBeenCalled();
     });
 
-    it("calls signIn with guest when token does not exist", async () => {
+    it("should call signIn with guest when token does not exist", async () => {
         mocks.getToken.mockResolvedValue(null);
         mocks.signIn.mockResolvedValue(new NextResponse());
 
@@ -54,21 +56,21 @@ describe("GET /api/auth/guest", () => {
         );
         const response = await GET(request);
 
-        expect(mocks.signIn).toHaveBeenCalledWith("guest", {
+        expect(mocks.signIn).toHaveBeenCalledWith(AUTH_CUSTOM_PROVIDER.GUEST, {
             redirect: true,
             redirectTo: "/dashboard",
         });
         expect(response).toBeInstanceOf(NextResponse);
     });
 
-    it("calls signIn with default redirectUrl when token does not exist and no redirectUrl provided", async () => {
+    it("should call signIn with default redirectUrl when token does not exist and no redirectUrl provided", async () => {
         mocks.getToken.mockResolvedValue(null);
         mocks.signIn.mockResolvedValue(new NextResponse());
 
         const request = new Request("http://localhost/api/auth/guest");
         const response = await GET(request);
 
-        expect(mocks.signIn).toHaveBeenCalledWith("guest", {
+        expect(mocks.signIn).toHaveBeenCalledWith(AUTH_CUSTOM_PROVIDER.GUEST, {
             redirect: true,
             redirectTo: "/",
         });

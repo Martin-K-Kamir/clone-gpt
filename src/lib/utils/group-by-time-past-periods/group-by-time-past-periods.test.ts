@@ -150,7 +150,7 @@ describe("groupByTimePastPeriods", () => {
         ];
 
         const result = groupByTimePastPeriods(
-            entries as any,
+            entries,
             now,
             (entry: CustomEntry) => entry.customDate,
         );

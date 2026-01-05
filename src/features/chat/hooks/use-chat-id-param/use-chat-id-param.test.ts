@@ -1,3 +1,4 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { renderHook } from "@testing-library/react";
 import { usePathname } from "next/navigation";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -16,7 +17,7 @@ describe("useChatIdParam", () => {
     });
 
     it("should return chat ID when pathname contains valid UUID", () => {
-        const chatId = "123e4567-e89b-12d3-a456-426614174000";
+        const chatId = generateChatId();
         mockUsePathname.mockReturnValue(`/chat/${chatId}`);
 
         const { result } = renderHook(() => useChatIdParam());
@@ -49,17 +50,15 @@ describe("useChatIdParam", () => {
     });
 
     it("should return chat ID for different valid UUID formats", () => {
-        const chatId1 = "123e4567-e89b-12d3-a456-426614174000";
-        const chatId2 = "987fcdeb-51a2-43f7-8c9d-1a2b3c4d5e6f";
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
 
         mockUsePathname.mockReturnValue(`/chat/${chatId1}`);
         const { result: result1 } = renderHook(() => useChatIdParam());
         expect(result1.current).toBe(chatId1);
 
         mockUsePathname.mockReturnValue(`/chat/${chatId2}`);
-        const { result: result2, rerender } = renderHook(() =>
-            useChatIdParam(),
-        );
+        const { result: result2 } = renderHook(() => useChatIdParam());
         expect(result2.current).toBe(chatId2);
     });
 });

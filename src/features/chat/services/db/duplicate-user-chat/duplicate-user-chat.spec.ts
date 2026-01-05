@@ -6,14 +6,17 @@ import {
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
+import { CHAT_ROLE, CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import { storeUserChatMessages } from "@/features/chat/services/db/store-user-chat-messages";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { supabase } from "@/services/supabase";
 
 import { duplicateUserChat } from "./duplicate-user-chat";
 
 describe("duplicateUserChat", () => {
-    it("duplicates chat with messages", async () => {
+    it("should duplicate chat with messages", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const originalChatId = generateChatId();
@@ -25,14 +28,14 @@ describe("duplicateUserChat", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: originalChatId,
             userId,
             title: "Original Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -47,13 +50,13 @@ describe("duplicateUserChat", () => {
             messages: [
                 {
                     id: messageId1,
-                    role: "user" as const,
+                    role: CHAT_ROLE.USER,
                     parts: [{ type: "text" as const, text: "Message 1" }],
                     metadata: { createdAt: createdAt1 },
                 },
                 {
                     id: messageId2,
-                    role: "assistant" as const,
+                    role: CHAT_ROLE.ASSISTANT,
                     parts: [{ type: "text" as const, text: "Message 2" }],
                     metadata: { createdAt: createdAt2 },
                 },

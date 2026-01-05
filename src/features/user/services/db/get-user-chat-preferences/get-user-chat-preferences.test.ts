@@ -1,10 +1,11 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { DBUserId } from "@/features/user/lib/types";
+import { AI_PERSONALITIES } from "@/features/chat/lib/constants/ai";
 
 import { getUserChatPreferences } from "./get-user-chat-preferences";
 
-const userId = "00000000-0000-0000-0000-000000000abc" as DBUserId;
+const userId = generateUserId();
 
 const mocks = vi.hoisted(() => ({
     from: vi.fn(),
@@ -24,16 +25,16 @@ describe("getUserChatPreferences", () => {
         vi.clearAllMocks();
     });
 
-    it("throws for invalid userId", async () => {
+    it("should throw for invalid userId", async () => {
         await expect(
             getUserChatPreferences({ userId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns preferences on success", async () => {
+    it("should return preferences on success", async () => {
         const mockPrefs = {
             userId,
-            personality: "FRIENDLY",
+            personality: AI_PERSONALITIES.FRIENDLY.id,
             nickname: "Alpha",
         };
 
@@ -53,7 +54,7 @@ describe("getUserChatPreferences", () => {
         expect(result).toEqual(mockPrefs);
     });
 
-    it("returns null when not found", async () => {
+    it("should return null when not found", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({

@@ -1,7 +1,19 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
+import {
+    generateChatId,
+    generateMessageId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
+
+import {
+    CHAT_ROLE,
+    CHAT_TRIGGER,
+    CHAT_VISIBILITY,
+} from "@/features/chat/lib/constants";
 
 import { POST } from "./route";
 
@@ -127,20 +139,13 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("POST /api/chat", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
-    const chatId = "30000000-0000-0000-0000-000000000001";
+    const mockSession = createMockSessionWithUser();
+    const userId = mockSession.user.id;
+    const chatId = generateChatId();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
 
         mocks.checkUserMessagesRateLimit.mockResolvedValue({
             isOverLimit: false,
@@ -168,10 +173,10 @@ describe("POST /api/chat", () => {
         mocks.streamText.mockReturnValue(mockStreamResult);
     });
 
-    it("returns streaming response successfully for new chat", async () => {
+    it("should return streaming response successfully for new chat", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
@@ -182,7 +187,7 @@ describe("POST /api/chat", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
         mocks.uncachedGetUserChatMessages.mockResolvedValue({
             data: [],
@@ -192,7 +197,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -205,10 +210,10 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns streaming response successfully for existing chat", async () => {
+    it("should return streaming response successfully for existing chat", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
@@ -217,7 +222,7 @@ describe("POST /api/chat", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             isOwner: true,
         });
         mocks.uncachedGetUserChatMessages.mockResolvedValue({
@@ -228,7 +233,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -241,12 +246,12 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
@@ -255,7 +260,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -268,7 +273,7 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when messages rate limit is exceeded", async () => {
+    it("should return error when messages rate limit is exceeded", async () => {
         mocks.checkUserMessagesRateLimit.mockResolvedValue({
             isOverLimit: true,
             periodStart: new Date().toISOString(),
@@ -277,8 +282,8 @@ describe("POST /api/chat", () => {
         });
 
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
@@ -287,7 +292,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -300,10 +305,10 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when files rate limit is exceeded", async () => {
+    it("should return error when files rate limit is exceeded", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [
                 {
@@ -325,7 +330,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -338,10 +343,10 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when chat creation fails", async () => {
+    it("should return error when chat creation fails", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
@@ -354,7 +359,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -367,19 +372,19 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when accessing private chat without ownership", async () => {
+    it("should return error when accessing private chat without ownership", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
 
         mocks.uncachedGetUserChatById.mockResolvedValue({
             id: chatId,
-            userId: "other-user-id",
+            userId: generateUserId(),
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             isOwner: false,
         });
 
@@ -387,7 +392,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -400,21 +405,21 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("handles chat duplication for public chats", async () => {
+    it("should handle chat duplication for public chats", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
 
-        const newChatId = "30000000-0000-0000-0000-000000000002";
+        const newChatId = generateChatId();
 
         mocks.uncachedGetUserChatById.mockResolvedValue({
             id: chatId,
-            userId: "other-user-id",
+            userId: generateUserId(),
             title: "Test Chat",
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
             isOwner: false,
         });
 
@@ -422,7 +427,7 @@ describe("POST /api/chat", () => {
             id: newChatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
 
         mocks.uncachedGetUserChatMessages.mockResolvedValue({
@@ -434,7 +439,7 @@ describe("POST /api/chat", () => {
             userChatPreferences: {},
             chatId,
             newChatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -447,21 +452,21 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when chat duplication fails", async () => {
+    it("should return error when chat duplication fails", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
 
-        const newChatId = "30000000-0000-0000-0000-000000000002";
+        const newChatId = generateChatId();
 
         mocks.uncachedGetUserChatById.mockResolvedValue({
             id: chatId,
-            userId: "other-user-id",
+            userId: generateUserId(),
             title: "Test Chat",
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
             isOwner: false,
         });
 
@@ -472,7 +477,7 @@ describe("POST /api/chat", () => {
             userChatPreferences: {},
             chatId,
             newChatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {
@@ -485,10 +490,10 @@ describe("POST /api/chat", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when streamText fails", async () => {
+    it("should return error when streamText fails", async () => {
         const message = {
-            id: "msg-1",
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             content: "Hello",
             parts: [],
         };
@@ -497,7 +502,7 @@ describe("POST /api/chat", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             isOwner: true,
         });
 
@@ -513,7 +518,7 @@ describe("POST /api/chat", () => {
             message,
             userChatPreferences: {},
             chatId,
-            trigger: "SUBMIT_MESSAGE",
+            trigger: CHAT_TRIGGER.SUBMIT_MESSAGE,
         };
 
         const request = new NextRequest("http://localhost/api/chat", {

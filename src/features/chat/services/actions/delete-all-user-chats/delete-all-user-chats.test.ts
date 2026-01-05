@@ -56,7 +56,7 @@ describe("deleteAllUserChats", () => {
         mocks.deleteStorageDirectory.mockResolvedValue(undefined);
     });
 
-    it("deletes all chats successfully", async () => {
+    it("should delete all chats successfully", async () => {
         const mkDelete = () =>
             ({
                 delete: vi.fn().mockReturnValue({
@@ -73,7 +73,7 @@ describe("deleteAllUserChats", () => {
         expect(mocks.deleteStorageDirectory).toHaveBeenCalledTimes(3);
     });
 
-    it("returns error when message delete fails", async () => {
+    it("should return error when message delete fails", async () => {
         const failingChain = {
             delete: vi.fn().mockReturnValue({
                 eq: vi.fn().mockResolvedValue({ error: { message: "fail" } }),
@@ -87,7 +87,7 @@ describe("deleteAllUserChats", () => {
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chat delete fails", async () => {
+    it("should return error when chat delete fails", async () => {
         const mkDelete = (shouldError: boolean) =>
             ({
                 delete: vi.fn().mockReturnValue({

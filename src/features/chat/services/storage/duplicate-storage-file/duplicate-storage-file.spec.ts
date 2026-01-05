@@ -21,7 +21,7 @@ describe("duplicateStorageFile", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("duplicates file to new location", async () => {
+    it("should duplicate file to new location", async () => {
         const content = new Blob(["original content"], { type: "text/plain" });
 
         const uploadResult = await uploadToStorage({
@@ -63,7 +63,7 @@ describe("duplicateStorageFile", () => {
         expect(fileNames).toContain("duplicated-file");
     });
 
-    it("works with different buckets", async () => {
+    it("should work with different buckets", async () => {
         const content = new Uint8Array([
             0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
         ]);
@@ -90,7 +90,7 @@ describe("duplicateStorageFile", () => {
         expect(result.fileId).not.toBe(uploadResult.id);
     });
 
-    it("throws error when URL is invalid", async () => {
+    it("should throw error when URL is invalid", async () => {
         await expect(
             duplicateStorageFile({
                 url: "https://invalid-domain.com/file.txt",
@@ -102,7 +102,7 @@ describe("duplicateStorageFile", () => {
         ).rejects.toThrow("Invalid storage URL");
     });
 
-    it("throws error when file does not exist", async () => {
+    it("should throw error when file does not exist", async () => {
         const fakeUrl = `${process.env.SUPABASE_STORAGE_URL}/user-files/non-existent/file.txt`;
 
         await expect(

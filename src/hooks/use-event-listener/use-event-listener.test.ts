@@ -20,7 +20,7 @@ describe("useEventListener", () => {
         vi.clearAllMocks();
     });
 
-    it("adds event listener to window when no element is provided", () => {
+    it("should add event listener to window when no element is provided", () => {
         const handler = vi.fn();
 
         renderHook(() => useEventListener("click", handler));
@@ -32,7 +32,7 @@ describe("useEventListener", () => {
         );
     });
 
-    it("removes event listener on unmount", () => {
+    it("should remove event listener on unmount", () => {
         const handler = vi.fn();
         const { unmount } = renderHook(() =>
             useEventListener("click", handler),
@@ -49,7 +49,7 @@ describe("useEventListener", () => {
         );
     });
 
-    it("calls handler when event is dispatched", () => {
+    it("should call handler when event is dispatched", () => {
         const handler = vi.fn();
         renderHook(() => useEventListener("click", handler));
 
@@ -61,7 +61,7 @@ describe("useEventListener", () => {
         expect(handler).toHaveBeenCalledWith(event);
     });
 
-    it("uses updated handler when handler changes", () => {
+    it("should use updated handler when handler changes", () => {
         const handler1 = vi.fn();
         const handler2 = vi.fn();
 
@@ -89,7 +89,7 @@ describe("useEventListener", () => {
         expect(handler2).toHaveBeenCalled();
     });
 
-    it("passes options to addEventListener", () => {
+    it("should pass options to addEventListener", () => {
         const handler = vi.fn();
         const options = { passive: true };
 
@@ -102,7 +102,7 @@ describe("useEventListener", () => {
         );
     });
 
-    it("adds event listener to provided element", () => {
+    it("should add event listener to provided element", () => {
         const handler = vi.fn();
         const element = document.createElement("div");
         const addEventListener = vi.fn();
@@ -119,7 +119,7 @@ describe("useEventListener", () => {
         );
     });
 
-    it("removes event listener from element on unmount", () => {
+    it("should remove event listener from element on unmount", () => {
         const handler = vi.fn();
         const element = document.createElement("div");
         const addEventListener = vi.fn();
@@ -142,7 +142,7 @@ describe("useEventListener", () => {
         );
     });
 
-    it("handles null element by using window", () => {
+    it("should handle null element by using window", () => {
         const handler = vi.fn();
 
         renderHook(() => useEventListener("click", handler, null));
@@ -154,7 +154,7 @@ describe("useEventListener", () => {
         );
     });
 
-    it("handles null element with options", () => {
+    it("should handle null element with options", () => {
         const handler = vi.fn();
         const options = { passive: true };
 
@@ -167,7 +167,7 @@ describe("useEventListener", () => {
         );
     });
 
-    it("updates event listener when element changes", () => {
+    it("should update event listener when element changes", () => {
         const handler = vi.fn();
         const element1 = document.createElement("div");
         const addEventListener1 = vi.fn();

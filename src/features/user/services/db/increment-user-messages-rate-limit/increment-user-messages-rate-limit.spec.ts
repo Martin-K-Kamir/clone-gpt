@@ -9,7 +9,7 @@ import { incrementUserMessagesRateLimit } from "./increment-user-messages-rate-l
 const userId = "00000000-0000-0000-0000-000000000021" as DBUserId;
 
 describe("incrementUserMessagesRateLimit", () => {
-    it("increments message and token counts for new user", async () => {
+    it("should increment message and token counts for new user", async () => {
         await supabase
             .from("user_messages_rate_limits")
             .delete()
@@ -30,7 +30,7 @@ describe("incrementUserMessagesRateLimit", () => {
         expect(data?.tokensCounter).toBe(10);
     });
 
-    it("increments message and token counts from existing values", async () => {
+    it("should increment message and token counts from existing values", async () => {
         await supabase
             .from("user_messages_rate_limits")
             .delete()

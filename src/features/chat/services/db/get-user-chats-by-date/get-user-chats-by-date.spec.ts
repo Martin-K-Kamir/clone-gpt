@@ -10,7 +10,7 @@ const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 const missingUserId = "00000000-0000-0000-0000-000000000999" as DBUserId;
 
 describe("getUserChatsByDate", () => {
-    it("returns seeded chats for user", async () => {
+    it("should return seeded chats for user", async () => {
         const result = await getUserChatsByDate({ userId });
 
         expect(result.length).toBeGreaterThan(0);
@@ -19,7 +19,7 @@ describe("getUserChatsByDate", () => {
         });
     });
 
-    it("filters chats by date range", async () => {
+    it("should filter chats by date range", async () => {
         const from = new Date("2000-01-01");
         const to = new Date("2100-12-31");
         const result = await getUserChatsByDate({ userId, from, to });
@@ -32,13 +32,13 @@ describe("getUserChatsByDate", () => {
         });
     });
 
-    it("respects limit parameter", async () => {
+    it("should respect limit parameter", async () => {
         const result = await getUserChatsByDate({ userId, limit: 1 });
 
         expect(result.length).toBeLessThanOrEqual(1);
     });
 
-    it("uses createdAt ordering by default", async () => {
+    it("should use createdAt ordering by default", async () => {
         const result = await getUserChatsByDate({ userId, limit: 10 });
 
         if (result.length > 1) {
@@ -51,7 +51,7 @@ describe("getUserChatsByDate", () => {
         }
     });
 
-    it("uses updatedAt ordering when specified", async () => {
+    it("should use updatedAt ordering when specified", async () => {
         const result = await getUserChatsByDate({
             userId,
             limit: 10,
@@ -68,7 +68,7 @@ describe("getUserChatsByDate", () => {
         }
     });
 
-    it("filters by date range when from is provided", async () => {
+    it("should filter by date range when from is provided", async () => {
         const from = new Date();
         from.setDate(from.getDate() - 365);
         const result = await getUserChatsByDate({ userId, from });
@@ -79,7 +79,7 @@ describe("getUserChatsByDate", () => {
         });
     });
 
-    it("filters by date range when to is provided", async () => {
+    it("should filter by date range when to is provided", async () => {
         const to = new Date();
         to.setDate(to.getDate() + 365);
         const result = await getUserChatsByDate({ userId, to });
@@ -90,7 +90,7 @@ describe("getUserChatsByDate", () => {
         });
     });
 
-    it("returns empty array for user with no chats in date range", async () => {
+    it("should return empty array for user with no chats in date range", async () => {
         const from = new Date("2100-01-01");
         const to = new Date("2100-12-31");
         const result = await getUserChatsByDate({ userId, from, to });
@@ -98,7 +98,7 @@ describe("getUserChatsByDate", () => {
         expect(result).toHaveLength(0);
     });
 
-    it("returns empty array for user with no chats", async () => {
+    it("should return empty array for user with no chats", async () => {
         const result = await getUserChatsByDate({ userId: missingUserId });
 
         expect(result).toHaveLength(0);

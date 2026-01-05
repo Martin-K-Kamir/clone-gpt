@@ -1,4 +1,7 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 
 import type { DBUserId } from "@/features/user/lib/types";
 
@@ -6,7 +9,7 @@ import { ORDER_BY } from "@/lib/constants";
 
 import { getUserChats } from "./get-user-chats";
 
-const userId = "00000000-0000-0000-0000-000000000abc" as DBUserId;
+const userId = generateUserId();
 
 const mocks = vi.hoisted(() => ({
     from: vi.fn(),
@@ -23,31 +26,31 @@ describe("getUserChats", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
-            getUserChats({ userId: "not-a-uuid" as any }),
+            getUserChats({ userId: "not-a-uuid" as DBUserId }),
         ).rejects.toThrow();
     });
 
-    it("throws when offset is invalid", async () => {
+    it("should throw when offset is invalid", async () => {
         await expect(
             getUserChats({ userId, offset: "not-a-number" as any }),
         ).rejects.toThrow();
     });
 
-    it("throws when limit is invalid", async () => {
+    it("should throw when limit is invalid", async () => {
         await expect(
             getUserChats({ userId, limit: "not-a-number" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns paginated chats on success", async () => {
+    it("should return paginated chats on success", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -56,7 +59,7 @@ describe("getUserChats", () => {
                 id: "chat-2",
                 userId,
                 title: "Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-02T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-02T00:00:00Z",
@@ -80,14 +83,14 @@ describe("getUserChats", () => {
         const result = await getUserChats({ userId });
 
         expect(result.data).toHaveLength(2);
-        expect((result.data[0] as any).isOwner).toBe(true);
-        expect((result.data[1] as any).isOwner).toBe(true);
+        expect((result.data[0] as any)?.isOwner).toBe(true);
+        expect((result.data[1] as any)?.isOwner).toBe(true);
         expect(result.totalCount).toBe(2);
         expect(result.hasNextPage).toBe(false);
         expect(result.nextOffset).toBeUndefined();
     });
 
-    it("calculates hasNextPage correctly", async () => {
+    it("should calculate hasNextPage correctly", async () => {
         const mockChats = [{ id: "chat-1", userId, title: "Chat 1" }];
 
         mocks.from.mockImplementation(() => ({
@@ -111,7 +114,7 @@ describe("getUserChats", () => {
         expect(result.nextOffset).toBe(1);
     });
 
-    it("handles empty results", async () => {
+    it("should handle empty results", async () => {
         mocks.from.mockImplementation(() => ({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -134,13 +137,13 @@ describe("getUserChats", () => {
         expect(result.nextOffset).toBeUndefined();
     });
 
-    it("returns paginated chats with custom orderBy", async () => {
+    it("should return paginated chats with custom orderBy", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -149,7 +152,7 @@ describe("getUserChats", () => {
                 id: "chat-2",
                 userId,
                 title: "Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-02T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-02T00:00:00Z",
@@ -180,7 +183,7 @@ describe("getUserChats", () => {
         expect(result.hasNextPage).toBe(false);
     });
 
-    it("throws when fetch fails", async () => {
+    it("should throw when fetch fails", async () => {
         mocks.from.mockImplementation(() => ({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

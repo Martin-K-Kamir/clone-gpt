@@ -9,6 +9,7 @@ import {
     deleteUserFiles,
     uploadUserFiles,
 } from "@/features/chat/services/actions";
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 
 import { getParseErrors } from "@/lib/utils";
 
@@ -51,7 +52,7 @@ const mockGetParseErrors = vi.mocked(getParseErrors);
 const mockToastError = vi.mocked(toast.error);
 
 describe("useChatFiles", () => {
-    const chatId = "chat-1" as DBChatId;
+    const chatId = generateChatId();
     let mockBeforeUnloadHandler: (() => void) | undefined;
     let originalSendBeacon: typeof navigator.sendBeacon;
 

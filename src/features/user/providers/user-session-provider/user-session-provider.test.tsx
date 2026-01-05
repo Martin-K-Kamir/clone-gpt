@@ -1,3 +1,4 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { act, renderHook } from "@testing-library/react";
 import { ReactNode } from "react";
 import { describe, expect, it } from "vitest";
@@ -14,7 +15,7 @@ describe("UserSessionProvider", () => {
         <UserSessionProvider>{children}</UserSessionProvider>
     );
 
-    it("provides initial user as null", () => {
+    it("should provide initial user as null", () => {
         const { result } = renderHook(() => useUserSessionContext(), {
             wrapper: createWrapper,
         });
@@ -23,9 +24,10 @@ describe("UserSessionProvider", () => {
         expect(typeof result.current.setUser).toBe("function");
     });
 
-    it("updates user when setUser is called", () => {
+    it("should update user when setUser is called", () => {
+        const userId = generateUserId();
         const mockUser: UIUser = {
-            id: "user-1",
+            id: userId,
             email: "test@example.com",
         } as UIUser;
 
@@ -40,9 +42,10 @@ describe("UserSessionProvider", () => {
         expect(result.current.user).toBe(mockUser);
     });
 
-    it("clears user when setUser is called with null", () => {
+    it("should clear user when setUser is called with null", () => {
+        const userId = generateUserId();
         const mockUser: UIUser = {
-            id: "user-1",
+            id: userId,
             email: "test@example.com",
         } as UIUser;
 
@@ -63,7 +66,7 @@ describe("UserSessionProvider", () => {
         expect(result.current.user).toBeNull();
     });
 
-    it("throws error when useUserSessionContext is used outside provider", () => {
+    it("should throw error when useUserSessionContext is used outside provider", () => {
         expect(() => {
             renderHook(() => useUserSessionContext());
         }).toThrow(

@@ -1,14 +1,19 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
 import { CHAT_MESSAGE_TYPE } from "@/features/chat/lib/constants";
-import type { DBChatId } from "@/features/chat/lib/types";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { uploadUserFiles } from "./upload-user-files";
 
-const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
-const userId = "00000000-0000-0000-0000-000000000001";
+const chatId = generateChatId();
+const userId = generateUserId();
 
 const mocks = vi.hoisted(() => ({
     storeUserFile: vi.fn(),
@@ -60,18 +65,18 @@ vi.mock("@/lib/api-response", () => ({
 describe("uploadUserFiles", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
+        vi.mocked(auth).mockResolvedValue({
             user: {
                 id: userId,
                 email: "test@example.com",
                 name: "Test User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
-        });
+        } as any);
     });
 
-    it("uploads files and returns success response", async () => {
+    it("should upload files and return success response", async () => {
         const file1 = new File(["content1"], "file1.pdf", {
             type: "application/pdf",
         });
@@ -122,7 +127,7 @@ describe("uploadUserFiles", () => {
         }
     });
 
-    it("handles image files and includes dimensions", async () => {
+    it("should handle image files and include dimensions", async () => {
         const imageFile = new File(["image content"], "image.png", {
             type: "image/png",
         });
@@ -159,8 +164,8 @@ describe("uploadUserFiles", () => {
         }
     });
 
-    it("returns error when session does not exist", async () => {
-        (auth as any).mockResolvedValue(null);
+    it("should return error when session does not exist", async () => {
+        vi.mocked(auth).mockResolvedValue(null as any);
 
         const file = new File(["content"], "file.pdf", {
             type: "application/pdf",
@@ -174,7 +179,7 @@ describe("uploadUserFiles", () => {
         expect(result.success).toBe(false);
     });
 
-    it("handles storage errors", async () => {
+    it("should handle storage errors", async () => {
         const file = new File(["content"], "file.pdf", {
             type: "application/pdf",
         });
@@ -189,7 +194,7 @@ describe("uploadUserFiles", () => {
         expect(result.success).toBe(false);
     });
 
-    it("handles multiple files with different types", async () => {
+    it("should handle multiple files with different types", async () => {
         const imageFile = new File(["image"], "image.jpg", {
             type: "image/jpeg",
         });

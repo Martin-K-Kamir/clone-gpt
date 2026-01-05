@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 
+import { CHAT_ROLE } from "@/features/chat/lib/constants";
 import type {
     AssistantChatMessageMetadata,
     UIChatMessage,
@@ -10,7 +11,7 @@ import { duplicateMessageMetadata } from "./duplicate-message-metadata";
 describe("duplicateMessageMetadata", () => {
     it("should reset assistant metadata fields", () => {
         const metadata: AssistantChatMessageMetadata = {
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             createdAt: new Date().toISOString(),
             model: "gpt-4o",
             totalTokens: 150,
@@ -21,7 +22,7 @@ describe("duplicateMessageMetadata", () => {
         const result = duplicateMessageMetadata(metadata);
 
         expect(result).toEqual({
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             createdAt: metadata.createdAt,
             model: "gpt-4o",
             totalTokens: 0,
@@ -32,7 +33,7 @@ describe("duplicateMessageMetadata", () => {
 
     it("should preserve other assistant metadata fields", () => {
         const metadata: AssistantChatMessageMetadata = {
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             createdAt: "2024-01-01T00:00:00.000Z",
             model: "custom-model",
             totalTokens: 500,
@@ -42,9 +43,9 @@ describe("duplicateMessageMetadata", () => {
 
         const result = duplicateMessageMetadata(metadata);
 
-        if (result && "role" in result && result.role === "assistant") {
+        if (result && "role" in result && result.role === CHAT_ROLE.ASSISTANT) {
             expect(result).toMatchObject({
-                role: "assistant",
+                role: CHAT_ROLE.ASSISTANT,
                 createdAt: "2024-01-01T00:00:00.000Z",
                 model: "custom-model",
             });
@@ -56,7 +57,7 @@ describe("duplicateMessageMetadata", () => {
 
     it("should return user metadata unchanged", () => {
         const metadata = {
-            role: "user" as const,
+            role: CHAT_ROLE.USER as const,
             createdAt: new Date().toISOString(),
         };
 
@@ -79,7 +80,7 @@ describe("duplicateMessageMetadata", () => {
 
     it("should handle assistant metadata with zero tokens", () => {
         const metadata: AssistantChatMessageMetadata = {
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             createdAt: new Date().toISOString(),
             model: "gpt-4o",
             totalTokens: 0,
@@ -99,7 +100,7 @@ describe("duplicateMessageMetadata", () => {
 
     it("should handle assistant metadata with large token count", () => {
         const metadata: AssistantChatMessageMetadata = {
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             createdAt: new Date().toISOString(),
             model: "gpt-4o",
             totalTokens: 1000000,
@@ -109,7 +110,7 @@ describe("duplicateMessageMetadata", () => {
 
         const result = duplicateMessageMetadata(metadata);
 
-        if (result && "role" in result && result.role === "assistant") {
+        if (result && "role" in result && result.role === CHAT_ROLE.ASSISTANT) {
             expect(result.totalTokens).toBe(0);
             expect(result.isUpvoted).toBe(false);
             expect(result.isDownvoted).toBe(false);
@@ -119,7 +120,7 @@ describe("duplicateMessageMetadata", () => {
     describe("type checking", () => {
         it("should return UIChatMessage metadata type", () => {
             const metadata: AssistantChatMessageMetadata = {
-                role: "assistant",
+                role: CHAT_ROLE.ASSISTANT,
                 createdAt: new Date().toISOString(),
                 model: "gpt-4o",
                 totalTokens: 150,

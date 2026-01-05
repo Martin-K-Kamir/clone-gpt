@@ -56,10 +56,12 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 describe("deleteUser", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({ user: { id: constants.userId } });
+        vi.mocked(auth).mockResolvedValue({
+            user: { id: constants.userId },
+        } as any);
     });
 
-    it("deletes user and related data successfully", async () => {
+    it("should delete user and related data successfully", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiSuccess as any,
         );
@@ -99,7 +101,7 @@ describe("deleteUser", () => {
         expect(result).toBe(apiSuccess);
     });
 
-    it("returns error when deletion fails", async () => {
+    it("should return error when deletion fails", async () => {
         const failingChain = {
             delete: vi.fn().mockReturnValue({
                 eq: vi.fn().mockResolvedValue({ error: { message: "boom" } }),
@@ -113,16 +115,18 @@ describe("deleteUser", () => {
         expect(result).toBe(apiError);
     });
 
-    it("returns api error when session is missing", async () => {
-        (auth as any).mockResolvedValueOnce(null);
+    it("should return api error when session is missing", async () => {
+        vi.mocked(auth).mockResolvedValueOnce(null as any);
 
         const result = await deleteUser();
 
         expect(result).toBe(apiError);
     });
 
-    it("returns api error when userId is invalid", async () => {
-        (auth as any).mockResolvedValueOnce({ user: { id: "not-a-uuid" } });
+    it("should return api error when userId is invalid", async () => {
+        vi.mocked(auth).mockResolvedValueOnce({
+            user: { id: "not-a-uuid" },
+        } as any);
 
         const result = await deleteUser();
 

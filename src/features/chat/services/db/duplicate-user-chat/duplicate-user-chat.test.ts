@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
@@ -43,7 +44,7 @@ describe("duplicateUserChat", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             duplicateUserChat({
                 chatId: "not-a-uuid" as any,
@@ -53,7 +54,7 @@ describe("duplicateUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when newChatId is invalid", async () => {
+    it("should throw when newChatId is invalid", async () => {
         await expect(
             duplicateUserChat({
                 chatId,
@@ -63,7 +64,7 @@ describe("duplicateUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             duplicateUserChat({
                 chatId,
@@ -73,7 +74,7 @@ describe("duplicateUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("returns null when original chat not found and throwOnNotFound is false", async () => {
+    it("should return null when original chat not found and throwOnNotFound is false", async () => {
         mocks.getUserChatById.mockResolvedValue(null);
 
         const result = await duplicateUserChat({
@@ -87,12 +88,12 @@ describe("duplicateUserChat", () => {
         expect(mocks.createUserChat).not.toHaveBeenCalled();
     });
 
-    it("duplicates chat with messages", async () => {
+    it("should duplicate chat with messages", async () => {
         const originalChat = {
             id: chatId,
             userId,
             title: "Original Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             visibleAt: new Date().toISOString(),
@@ -132,7 +133,7 @@ describe("duplicateUserChat", () => {
             id: newChatId,
             userId,
             title: "Original Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             visibleAt: new Date().toISOString(),
@@ -155,12 +156,12 @@ describe("duplicateUserChat", () => {
         expect(result).toEqual(newChat);
     });
 
-    it("duplicates chat without messages", async () => {
+    it("should duplicate chat without messages", async () => {
         const originalChat = {
             id: chatId,
             userId,
             title: "Empty Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             visibleAt: new Date().toISOString(),
@@ -170,7 +171,7 @@ describe("duplicateUserChat", () => {
             id: newChatId,
             userId,
             title: "Empty Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             visibleAt: new Date().toISOString(),

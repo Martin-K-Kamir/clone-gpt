@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { searchUserChats } from "./search-user-chats";
@@ -22,29 +24,29 @@ describe("searchUserChats", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             searchUserChats({ userId: "not-a-uuid" as any, query }),
         ).rejects.toThrow();
     });
 
-    it("throws when query is empty", async () => {
+    it("should throw when query is empty", async () => {
         await expect(searchUserChats({ userId, query: "" })).rejects.toThrow();
     });
 
-    it("throws when limit is invalid", async () => {
+    it("should throw when limit is invalid", async () => {
         await expect(
             searchUserChats({ userId, query, limit: "not-a-number" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns chats matching by title", async () => {
+    it("should return chats matching by title", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Test Chat",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -76,14 +78,14 @@ describe("searchUserChats", () => {
         expect(result.cursor).toBeUndefined();
     });
 
-    it("returns chats matching by message content", async () => {
+    it("should return chats matching by message content", async () => {
         const mockMessages = [{ chatId: "chat-1", content: "test message" }];
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -116,13 +118,13 @@ describe("searchUserChats", () => {
         expect(result.data[0].id).toBe("chat-1");
     });
 
-    it("respects limit parameter", async () => {
+    it("should respect limit parameter", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Test Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -131,7 +133,7 @@ describe("searchUserChats", () => {
                 id: "chat-2",
                 userId,
                 title: "Test Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-02T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-02T00:00:00Z",
@@ -165,7 +167,7 @@ describe("searchUserChats", () => {
         expect(result.cursor).toBeDefined();
     });
 
-    it("returns empty array when no matches found", async () => {
+    it("should return empty array when no matches found", async () => {
         const calls: any[] = [];
         mocks.from.mockImplementation(() => {
             const mockChain = {
@@ -194,7 +196,7 @@ describe("searchUserChats", () => {
         expect(result.cursor).toBeUndefined();
     });
 
-    it("throws on message query error", async () => {
+    it("should throw on message query error", async () => {
         const calls: any[] = [];
         mocks.from.mockImplementation(() => {
             const mockChain = {
@@ -217,7 +219,7 @@ describe("searchUserChats", () => {
         );
     });
 
-    it("throws on chat query error", async () => {
+    it("should throw on chat query error", async () => {
         const calls: any[] = [];
         mocks.from.mockImplementation(() => {
             const mockChain = {

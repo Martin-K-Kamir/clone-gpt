@@ -428,9 +428,9 @@ describe("assertIsUserRole", () => {
         });
 
         it("should accept all enum values", () => {
-            expect(() => assertIsUserRole("guest")).not.toThrow();
-            expect(() => assertIsUserRole("user")).not.toThrow();
-            expect(() => assertIsUserRole("admin")).not.toThrow();
+            expect(() => assertIsUserRole(USER_ROLE.GUEST)).not.toThrow();
+            expect(() => assertIsUserRole(USER_ROLE.USER)).not.toThrow();
+            expect(() => assertIsUserRole(USER_ROLE.ADMIN)).not.toThrow();
         });
     });
 

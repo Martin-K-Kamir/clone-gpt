@@ -7,6 +7,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { updateManyChatsVisibility } from "./update-many-chats-visibility";
@@ -24,7 +28,7 @@ describe("updateManyChatsVisibility", () => {
         vi.clearAllMocks();
     });
 
-    it("updates visibility to public for multiple chats", async () => {
+    it("should update visibility to public for multiple chats", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId1 = generateChatId();
@@ -36,7 +40,7 @@ describe("updateManyChatsVisibility", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -44,7 +48,7 @@ describe("updateManyChatsVisibility", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert([
@@ -52,7 +56,7 @@ describe("updateManyChatsVisibility", () => {
                 id: chatId1,
                 userId,
                 title: "Test Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -61,7 +65,7 @@ describe("updateManyChatsVisibility", () => {
                 id: chatId2,
                 userId,
                 title: "Test Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -70,7 +74,7 @@ describe("updateManyChatsVisibility", () => {
 
         const result = await updateManyChatsVisibility({
             chatIds: [chatId1, chatId2],
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result.success).toBe(true);
@@ -84,7 +88,7 @@ describe("updateManyChatsVisibility", () => {
         expect(chats?.every(chat => chat.visibility === "public")).toBe(true);
     });
 
-    it("updates visibility to private for multiple chats", async () => {
+    it("should update visibility to private for multiple chats", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId1 = generateChatId();
@@ -96,7 +100,7 @@ describe("updateManyChatsVisibility", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -104,7 +108,7 @@ describe("updateManyChatsVisibility", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert([
@@ -112,7 +116,7 @@ describe("updateManyChatsVisibility", () => {
                 id: chatId1,
                 userId,
                 title: "Test Chat 1",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -121,7 +125,7 @@ describe("updateManyChatsVisibility", () => {
                 id: chatId2,
                 userId,
                 title: "Test Chat 2",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -130,7 +134,7 @@ describe("updateManyChatsVisibility", () => {
 
         const result = await updateManyChatsVisibility({
             chatIds: [chatId1, chatId2],
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
 
         expect(result.success).toBe(true);
@@ -141,10 +145,12 @@ describe("updateManyChatsVisibility", () => {
             .in("id", [chatId1, chatId2]);
 
         expect(chats).toHaveLength(2);
-        expect(chats?.every(chat => chat.visibility === "private")).toBe(true);
+        expect(
+            chats?.every(chat => chat.visibility === CHAT_VISIBILITY.PRIVATE),
+        ).toBe(true);
     });
 
-    it("only updates chats owned by the user", async () => {
+    it("should only update chats owned by the user", async () => {
         const userId1 = generateUserId();
         const email1 = generateUserEmail();
         const userId2 = generateUserId();
@@ -158,7 +164,7 @@ describe("updateManyChatsVisibility", () => {
                 name: "Test User 1",
                 email: email1,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -167,13 +173,13 @@ describe("updateManyChatsVisibility", () => {
                 id: userId1,
                 email: email1,
                 name: "Test User 1",
-                role: "user",
+                role: USER_ROLE.USER,
             },
             {
                 id: userId2,
                 email: email2,
                 name: "Test User 2",
-                role: "user",
+                role: USER_ROLE.USER,
             },
         ]);
 
@@ -182,7 +188,7 @@ describe("updateManyChatsVisibility", () => {
                 id: chatId1,
                 userId: userId1,
                 title: "Test Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -191,7 +197,7 @@ describe("updateManyChatsVisibility", () => {
                 id: chatId2,
                 userId: userId2,
                 title: "Test Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -200,7 +206,7 @@ describe("updateManyChatsVisibility", () => {
 
         const result = await updateManyChatsVisibility({
             chatIds: [chatId1, chatId2],
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result.success).toBe(true);
@@ -217,7 +223,7 @@ describe("updateManyChatsVisibility", () => {
             .eq("id", chatId2)
             .single();
 
-        expect(chat1?.visibility).toBe("public");
-        expect(chat2?.visibility).toBe("private");
+        expect(chat1?.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
+        expect(chat2?.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 });

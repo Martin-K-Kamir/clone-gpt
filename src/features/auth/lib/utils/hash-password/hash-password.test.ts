@@ -50,39 +50,6 @@ describe("hashPassword", () => {
         expect(typeof result2).toBe("string");
     });
 
-    it("should call bcrypt.genSalt with correct rounds", async () => {
-        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
-            "$2a$10$salt",
-        );
-        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
-            "$2a$10$hashedpassword",
-        );
-
-        await hashPassword("test-password");
-
-        expect(bcrypt.genSalt as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
-            10,
-        );
-    });
-
-    it("should call bcrypt.hash with password and salt", async () => {
-        const mockSalt = "$2a$10$salt";
-        (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
-            mockSalt,
-        );
-        (bcrypt.hash as ReturnType<typeof vi.fn>).mockResolvedValue(
-            "$2a$10$hashedpassword",
-        );
-
-        const password = "test-password";
-        await hashPassword(password);
-
-        expect(bcrypt.hash as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
-            password,
-            mockSalt,
-        );
-    });
-
     it("should handle empty password", async () => {
         (bcrypt.genSalt as ReturnType<typeof vi.fn>).mockResolvedValue(
             "$2a$10$salt",

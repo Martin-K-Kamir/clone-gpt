@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
@@ -13,7 +14,7 @@ const publicChatId = "30000000-0000-0000-0000-000000000002" as DBChatId;
 const missingChatId = "30000000-0000-0000-0000-000000000999" as DBChatId;
 
 describe("getUserChatById", () => {
-    it("returns seeded chat for user's own chat", async () => {
+    it("should return seeded chat for user's own chat", async () => {
         const result = await uncachedGetUserChatById({
             chatId: privateChatId,
             userId,
@@ -22,10 +23,12 @@ describe("getUserChatById", () => {
         expect(result).not.toBeNull();
         expect(result?.id).toBe(privateChatId);
         expect(result?.userId).toBe(userId);
-        expect((result as any).isOwner).toBe(true);
+        if (result) {
+            expect(result.isOwner).toBe(true);
+        }
     });
 
-    it("returns chat with correct isOwner when user does not own chat", async () => {
+    it("should return chat with correct isOwner when user does not own chat", async () => {
         const result = await uncachedGetUserChatById({
             chatId: publicChatId,
             userId: otherUserId,
@@ -33,10 +36,12 @@ describe("getUserChatById", () => {
 
         expect(result).not.toBeNull();
         expect(result?.id).toBe(publicChatId);
-        expect((result as any).isOwner).toBe(false);
+        if (result) {
+            expect(result.isOwner).toBe(false);
+        }
     });
 
-    it("returns chat when verifyChatAccess is false", async () => {
+    it("should return chat when verifyChatAccess is false", async () => {
         const result = await uncachedGetUserChatById({
             chatId: privateChatId,
             userId,
@@ -47,7 +52,7 @@ describe("getUserChatById", () => {
         expect(result?.id).toBe(privateChatId);
     });
 
-    it("throws when user does not have access to private chat", async () => {
+    it("should throw when user does not have access to private chat", async () => {
         const user2PrivateChatId =
             "30000000-0000-0000-0000-000000000003" as DBChatId;
 
@@ -59,18 +64,20 @@ describe("getUserChatById", () => {
         ).rejects.toThrow("The chat is not accessible");
     });
 
-    it("allows access to public chat for non-owner", async () => {
+    it("should allow access to public chat for non-owner", async () => {
         const result = await uncachedGetUserChatById({
             chatId: publicChatId,
             userId: otherUserId,
         });
 
         expect(result).not.toBeNull();
-        expect(result?.visibility).toBe("public");
-        expect((result as any).isOwner).toBe(false);
+        expect(result?.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
+        if (result) {
+            expect(result.isOwner).toBe(false);
+        }
     });
 
-    it("throws when chat not found and throwOnNotFound is true", async () => {
+    it("should throw when chat not found and throwOnNotFound is true", async () => {
         await expect(
             uncachedGetUserChatById({
                 chatId: missingChatId,
@@ -81,7 +88,7 @@ describe("getUserChatById", () => {
         ).rejects.toThrow("Chat not found");
     });
 
-    it("returns null when chat not found and throwOnNotFound is false", async () => {
+    it("should return null when chat not found and throwOnNotFound is false", async () => {
         const result = await uncachedGetUserChatById({
             chatId: missingChatId,
             userId,

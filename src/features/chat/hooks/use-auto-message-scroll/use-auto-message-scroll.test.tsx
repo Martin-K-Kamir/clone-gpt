@@ -59,7 +59,7 @@ describe("useAutoMessageScroll", () => {
         });
     });
 
-    it("should return ref for auto scroll state", () => {
+    it("should return auto scroll ref with initial enabled state", () => {
         const { result } = renderHook(() =>
             useAutoMessageScroll({
                 containerRef,

@@ -25,7 +25,7 @@ describe("useClickOutside", () => {
     const createPointerEvent = () =>
         new PointerEvent("pointerdown", { bubbles: true, cancelable: true });
 
-    it("calls callback when clicking outside element", () => {
+    it("should call callback when clicking outside element", () => {
         const callback = vi.fn();
         const outsideElement = document.createElement("div");
         document.body.appendChild(outsideElement);
@@ -40,7 +40,7 @@ describe("useClickOutside", () => {
         document.body.removeChild(outsideElement);
     });
 
-    it("does not call callback when clicking inside element or children", () => {
+    it("should not call callback when clicking inside element or children", () => {
         const callback = vi.fn();
         const childElement = document.createElement("div");
         element.appendChild(childElement);
@@ -53,7 +53,7 @@ describe("useClickOutside", () => {
         expect(callback).not.toHaveBeenCalled();
     });
 
-    it("does not call callback when ref is null", () => {
+    it("should not call callback when ref is null", () => {
         const callback = vi.fn();
         const nullRef = createRef<HTMLDivElement>();
         const outsideElement = document.createElement("div");
@@ -67,7 +67,7 @@ describe("useClickOutside", () => {
         document.body.removeChild(outsideElement);
     });
 
-    it("stops responding to clicks after unmount", () => {
+    it("should stop responding to clicks after unmount", () => {
         const callback = vi.fn();
         const outsideElement = document.createElement("div");
         document.body.appendChild(outsideElement);
@@ -85,7 +85,7 @@ describe("useClickOutside", () => {
         document.body.removeChild(outsideElement);
     });
 
-    it("updates callback when it changes", () => {
+    it("should update callback when it changes", () => {
         const callback1 = vi.fn();
         const callback2 = vi.fn();
         const outsideElement = document.createElement("div");

@@ -7,6 +7,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { updateChatTitle } from "./update-chat-title";
@@ -24,7 +28,7 @@ describe("updateChatTitle", () => {
         vi.clearAllMocks();
     });
 
-    it("updates chat title", async () => {
+    it("should update chat title", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -35,7 +39,7 @@ describe("updateChatTitle", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -43,14 +47,14 @@ describe("updateChatTitle", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Original Title",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -73,7 +77,7 @@ describe("updateChatTitle", () => {
         expect(data?.title).toBe(newTitle);
     });
 
-    it("truncates title longer than 25 characters", async () => {
+    it("should truncate title longer than 25 characters", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -84,7 +88,7 @@ describe("updateChatTitle", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -92,14 +96,14 @@ describe("updateChatTitle", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Original Title",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -124,7 +128,7 @@ describe("updateChatTitle", () => {
         expect(data?.title.length).toBe(28);
     });
 
-    it("does not update chat title if chat is not owned by user", async () => {
+    it("should not update chat title if chat is not owned by user", async () => {
         const userId1 = generateUserId();
         const email1 = generateUserEmail();
         const userId2 = generateUserId();
@@ -137,7 +141,7 @@ describe("updateChatTitle", () => {
                 name: "Test User 1",
                 email: email1,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -146,13 +150,13 @@ describe("updateChatTitle", () => {
                 id: userId1,
                 email: email1,
                 name: "Test User 1",
-                role: "user",
+                role: USER_ROLE.USER,
             },
             {
                 id: userId2,
                 email: email2,
                 name: "Test User 2",
-                role: "user",
+                role: USER_ROLE.USER,
             },
         ]);
 
@@ -160,7 +164,7 @@ describe("updateChatTitle", () => {
             id: chatId,
             userId: userId2,
             title: "Original Title",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -183,7 +187,7 @@ describe("updateChatTitle", () => {
         expect(data?.title).toBe("Original Title");
     });
 
-    it("handles title exactly 25 characters", async () => {
+    it("should handle title exactly 25 characters", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -194,7 +198,7 @@ describe("updateChatTitle", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -202,14 +206,14 @@ describe("updateChatTitle", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Original Title",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),

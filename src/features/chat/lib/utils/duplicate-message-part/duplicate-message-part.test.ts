@@ -1,6 +1,14 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, expectTypeOf, it, vi } from "vitest";
 
-import { CHAT_TOOL, STORAGE_BUCKET } from "@/features/chat/lib/constants";
+import {
+    CHAT_MESSAGE_TYPE,
+    CHAT_TOOL,
+    STORAGE_BUCKET,
+} from "@/features/chat/lib/constants";
 import type { ChatMessagePart, DBChatId } from "@/features/chat/lib/types";
 import { duplicateStorageFile } from "@/features/chat/services/storage";
 
@@ -16,8 +24,8 @@ const mockStorageUrl =
     process.env.SUPABASE_STORAGE_URL || "https://storage.example.com";
 
 describe("duplicateMessagePart", () => {
-    const userId = "user-1" as any;
-    const newChatId = "chat-2" as DBChatId;
+    const userId = generateUserId();
+    const newChatId = generateChatId();
 
     beforeEach(() => {
         vi.clearAllMocks();
@@ -95,7 +103,7 @@ describe("duplicateMessagePart", () => {
         });
 
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/old-document.pdf`,
             name: "old-document.pdf",
             extension: "pdf",
@@ -110,7 +118,7 @@ describe("duplicateMessagePart", () => {
         });
 
         expect(result).toMatchObject({
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/new-document.pdf`,
             name: "old-document.pdf",
             extension: "pdf",
@@ -121,7 +129,7 @@ describe("duplicateMessagePart", () => {
 
     it("should return text part unchanged", async () => {
         const part = {
-            type: "text",
+            type: CHAT_MESSAGE_TYPE.TEXT,
             text: "Hello world",
         } as any;
 
@@ -193,7 +201,7 @@ describe("duplicateMessagePart", () => {
             });
 
             const part = {
-                type: "file",
+                type: CHAT_MESSAGE_TYPE.FILE,
                 url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/old-file.pdf`,
                 name: "old-file.pdf",
                 extension: "pdf",

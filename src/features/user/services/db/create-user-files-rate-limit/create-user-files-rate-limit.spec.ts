@@ -7,7 +7,7 @@ import { createUserFilesRateLimit } from "./create-user-files-rate-limit";
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 
 describe("createUserFilesRateLimit", () => {
-    it("creates rate limit for user", async () => {
+    it("should create rate limit for user", async () => {
         const rate = await createUserFilesRateLimit({ userId });
 
         expect(rate).not.toBeNull();

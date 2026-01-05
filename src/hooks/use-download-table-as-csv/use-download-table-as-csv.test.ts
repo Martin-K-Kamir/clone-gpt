@@ -25,14 +25,14 @@ describe("useDownloadTableAsCSV", () => {
         vi.clearAllMocks();
     });
 
-    it("returns download function", () => {
+    it("should return download function", () => {
         const tableRef = createRef<HTMLTableElement>();
         const { result } = renderHook(() => useDownloadTableAsCSV(tableRef));
 
         expect(typeof result.current.downloadTableAsCSV).toBe("function");
     });
 
-    it("downloads table as CSV successfully", () => {
+    it("should download table as CSV successfully", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -59,7 +59,7 @@ describe("useDownloadTableAsCSV", () => {
         );
     });
 
-    it("returns false when table ref is null", () => {
+    it("should return false when table ref is null", () => {
         const tableRef = createRef<HTMLTableElement>();
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
             null,
@@ -73,7 +73,7 @@ describe("useDownloadTableAsCSV", () => {
         expect(downloadFile).not.toHaveBeenCalled();
     });
 
-    it("uses custom filename", () => {
+    it("should use custom filename", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -98,7 +98,7 @@ describe("useDownloadTableAsCSV", () => {
         );
     });
 
-    it("uses custom delimiter", () => {
+    it("should use custom delimiter", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -127,7 +127,7 @@ describe("useDownloadTableAsCSV", () => {
         );
     });
 
-    it("returns false on error", () => {
+    it("should return false on error", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(
@@ -147,7 +147,7 @@ describe("useDownloadTableAsCSV", () => {
         expect(downloadFile).not.toHaveBeenCalled();
     });
 
-    it("updates when options change", () => {
+    it("should update when options change", () => {
         const tableRef = createRef<HTMLTableElement>();
         tableRef.current = mockTable;
         (validateTableElement as ReturnType<typeof vi.fn>).mockReturnValue(

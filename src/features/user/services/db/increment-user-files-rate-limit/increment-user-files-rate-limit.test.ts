@@ -1,10 +1,9 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { incrementUserFilesRateLimit } from "./increment-user-files-rate-limit";
 
-const userId = "00000000-0000-0000-0000-000000000abc" as DBUserId;
+const userId = generateUserId();
 
 const mocks = vi.hoisted(() => ({
     getUserFilesRateLimit: vi.fn(),
@@ -29,7 +28,7 @@ describe("incrementUserFilesRateLimit", () => {
         vi.clearAllMocks();
     });
 
-    it("throws for invalid userId", async () => {
+    it("should throw for invalid userId", async () => {
         await expect(
             incrementUserFilesRateLimit({
                 userId: "not-a-uuid" as any,
@@ -38,7 +37,7 @@ describe("incrementUserFilesRateLimit", () => {
         ).rejects.toThrow();
     });
 
-    it("increments file count for new user", async () => {
+    it("should increment file count for new user", async () => {
         mocks.getUserFilesRateLimit.mockResolvedValue(null);
         mocks.createUserFilesRateLimit.mockResolvedValue(undefined);
         mocks.updateUserFilesRateLimit.mockResolvedValue(undefined);
@@ -52,7 +51,7 @@ describe("incrementUserFilesRateLimit", () => {
         });
     });
 
-    it("increments file count from existing value", async () => {
+    it("should increment file count from existing value", async () => {
         mocks.getUserFilesRateLimit.mockResolvedValue({
             filesCounter: 5,
         });

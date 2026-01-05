@@ -1,3 +1,8 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -69,24 +74,17 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("GET /api/user-chats/visibility/[chatId]", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
-    const otherUserId = "00000000-0000-0000-0000-000000000002";
-    const chatId = "30000000-0000-0000-0000-000000000001";
+    const userId = generateUserId();
+    const otherUserId = generateUserId();
+    const chatId = generateChatId();
+    const mockSession = createMockSessionWithUser(userId);
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
     });
 
-    it("returns chat visibility successfully when user is owner", async () => {
+    it("should return chat visibility successfully when user is owner", async () => {
         const mockVisibility = {
             userId,
             visibility: "private",
@@ -104,7 +102,7 @@ describe("GET /api/user-chats/visibility/[chatId]", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns not found when chat does not exist", async () => {
+    it("should return not found when chat does not exist", async () => {
         mocks.getChatVisibility.mockResolvedValue(null);
 
         const request = new NextRequest(
@@ -117,7 +115,7 @@ describe("GET /api/user-chats/visibility/[chatId]", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns authorization error when user is not owner", async () => {
+    it("should return authorization error when user is not owner", async () => {
         const mockVisibility = {
             userId: otherUserId,
             visibility: "private",
@@ -135,7 +133,7 @@ describe("GET /api/user-chats/visibility/[chatId]", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const request = new NextRequest(
@@ -148,7 +146,7 @@ describe("GET /api/user-chats/visibility/[chatId]", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when getChatVisibility fails", async () => {
+    it("should return error when getChatVisibility fails", async () => {
         mocks.getChatVisibility.mockRejectedValue(new Error("Database error"));
 
         const request = new NextRequest(

@@ -1,6 +1,7 @@
 import type { TextStreamPart, ToolSet } from "ai";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
+import { CHAT_ROLE } from "@/features/chat/lib/constants";
 import type { AssistantChatMessageMetadata } from "@/features/chat/lib/types";
 
 import { createAssistantMetadata } from "./create-assistant-metadata";
@@ -16,7 +17,7 @@ describe("createAssistantMetadata", () => {
 
         expect(result).toMatchObject({
             model: "gpt-4o",
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             isUpvoted: false,
             isDownvoted: false,
         });

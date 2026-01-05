@@ -17,7 +17,7 @@ describe("uploadToStorage", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("uploads a file to storage and returns public URL", async () => {
+    it("should upload a file to storage and return public URL", async () => {
         const testContent = new Blob(["test file content"], {
             type: "text/plain",
         });
@@ -38,7 +38,7 @@ describe("uploadToStorage", () => {
         expect(result.path).toMatch(/\.txt$/);
     });
 
-    it("uploads different file types correctly", async () => {
+    it("should upload different file types correctly", async () => {
         const imageContent = new Uint8Array([
             0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
         ]);
@@ -57,7 +57,7 @@ describe("uploadToStorage", () => {
         expect(result.path).toMatch(/\.png$/);
     });
 
-    it("generates unique file paths for each upload", async () => {
+    it("should generate unique file paths for each upload", async () => {
         const content = new Blob(["content"], { type: "text/plain" });
         const contentArrayBuffer = await content.arrayBuffer();
 
@@ -85,7 +85,7 @@ describe("uploadToStorage", () => {
         expect(result1.id).not.toBe(result2.id);
     });
 
-    it("throws error when upload fails", async () => {
+    it("should throw error when upload fails", async () => {
         const invalidBucket = "non-existent-bucket" as any;
         const content = new Blob(["content"], { type: "text/plain" });
         const contentArrayBuffer = await content.arrayBuffer();

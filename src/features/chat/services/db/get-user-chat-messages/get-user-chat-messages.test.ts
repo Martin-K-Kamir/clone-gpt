@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
@@ -32,7 +33,7 @@ describe("getUserChatMessages", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             getUserChatMessages({
                 chatId: "not-a-uuid" as any,
@@ -41,7 +42,7 @@ describe("getUserChatMessages", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             getUserChatMessages({
                 chatId,
@@ -50,7 +51,7 @@ describe("getUserChatMessages", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when chat access is denied", async () => {
+    it("should throw when chat access is denied", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: false,
             chatFound: true,
@@ -75,7 +76,7 @@ describe("getUserChatMessages", () => {
         ).rejects.toThrow("The chat is not accessible");
     });
 
-    it("returns messages when user is owner", async () => {
+    it("should return messages when user is owner", async () => {
         const mockMessages = [
             {
                 id: "msg-1",
@@ -122,11 +123,11 @@ describe("getUserChatMessages", () => {
         const result = await uncachedGetUserChatMessages({ chatId, userId });
 
         expect(result.data).toHaveLength(2);
-        expect(result.visibility).toBe("private");
+        expect(result.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
         expect(result.isOwner).toBe(true);
     });
 
-    it("returns messages with metadata reset when user is not owner", async () => {
+    it("should return messages with metadata reset when user is not owner", async () => {
         const mockMessages = [
             {
                 id: "msg-1",
@@ -142,7 +143,7 @@ describe("getUserChatMessages", () => {
 
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
             chatFound: true,
             isOwner: false,
             isPrivate: false,
@@ -165,11 +166,11 @@ describe("getUserChatMessages", () => {
         expect(result.data).toHaveLength(1);
         expect((result.data[0] as any).metadata.isUpvoted).toBe(false);
         expect((result.data[0] as any).metadata.isDownvoted).toBe(false);
-        expect(result.visibility).toBe("public");
+        expect(result.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
         expect(result.isOwner).toBe(false);
     });
 
-    it("returns messages when verifyChatAccess is false", async () => {
+    it("should return messages when verifyChatAccess is false", async () => {
         const mockMessages = [
             {
                 id: "msg-1",
@@ -206,10 +207,10 @@ describe("getUserChatMessages", () => {
         expect(result.isOwner).toBeUndefined();
     });
 
-    it("handles empty messages", async () => {
+    it("should handle empty messages", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             chatFound: true,
             isOwner: true,
             isPrivate: true,
@@ -230,14 +231,14 @@ describe("getUserChatMessages", () => {
         const result = await uncachedGetUserChatMessages({ chatId, userId });
 
         expect(result.data).toHaveLength(0);
-        expect(result.visibility).toBe("private");
+        expect(result.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
         expect(result.isOwner).toBe(true);
     });
 
-    it("throws when fetch fails", async () => {
+    it("should throw when fetch fails", async () => {
         mocks.getChatAccess.mockResolvedValue({
             allowed: true,
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             chatFound: true,
             isOwner: true,
             isPrivate: true,

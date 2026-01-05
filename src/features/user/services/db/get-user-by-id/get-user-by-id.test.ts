@@ -1,10 +1,9 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { getUserById } from "./get-user-by-id";
 
-const userId = "00000000-0000-0000-0000-000000000abc" as DBUserId;
+const userId = generateUserId();
 
 const mocks = vi.hoisted(() => ({
     from: vi.fn(),
@@ -24,13 +23,13 @@ describe("getUserById", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             getUserById({ userId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns user on success", async () => {
+    it("should return user on success", async () => {
         const mockUser = { id: "u1", email: "a@example.com", name: "A" };
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
@@ -48,7 +47,7 @@ describe("getUserById", () => {
         expect(result).toEqual(mockUser);
     });
 
-    it("throws when record does not exist", async () => {
+    it("should throw when record does not exist", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({
@@ -65,7 +64,7 @@ describe("getUserById", () => {
         );
     });
 
-    it("throws on other errors", async () => {
+    it("should throw on other errors", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({

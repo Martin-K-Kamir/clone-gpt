@@ -16,14 +16,14 @@ describe("useSocialShare", () => {
         vi.clearAllMocks();
     });
 
-    it("returns getShareUrl and openSharePopup functions", () => {
+    it("should return getShareUrl and openSharePopup functions", () => {
         const { result } = renderHook(() => useSocialShare());
 
         expect(typeof result.current.getShareUrl).toBe("function");
         expect(typeof result.current.openSharePopup).toBe("function");
     });
 
-    it("generates share URLs for different platforms", () => {
+    it("should generate share URLs for different platforms", () => {
         const { result } = renderHook(() => useSocialShare());
 
         const linkedinUrl = result.current.getShareUrl("linkedin", {
@@ -48,7 +48,7 @@ describe("useSocialShare", () => {
         expect(redditUrl).toContain("url=https%3A%2F%2Fexample.com");
     });
 
-    it("opens popup with default options", () => {
+    it("should open popup with default options", () => {
         const { result } = renderHook(() => useSocialShare());
 
         result.current.openSharePopup("twitter", {
@@ -65,7 +65,7 @@ describe("useSocialShare", () => {
         expect(mockFocus).toHaveBeenCalled();
     });
 
-    it("opens popup with custom options", () => {
+    it("should open popup with custom options", () => {
         const { result } = renderHook(() => useSocialShare());
 
         result.current.openSharePopup(
@@ -87,7 +87,7 @@ describe("useSocialShare", () => {
         );
     });
 
-    it("merges custom options with defaults", () => {
+    it("should merge custom options with defaults", () => {
         const { result } = renderHook(() => useSocialShare());
 
         result.current.openSharePopup(
@@ -108,7 +108,7 @@ describe("useSocialShare", () => {
         );
     });
 
-    it("handles popup blocked scenario", () => {
+    it("should handle popup blocked scenario", () => {
         mockWindowOpen.mockReturnValue(null);
         const { result } = renderHook(() => useSocialShare());
 
@@ -121,7 +121,7 @@ describe("useSocialShare", () => {
         expect(mockFocus).not.toHaveBeenCalled();
     });
 
-    it("handles special characters in share data", () => {
+    it("should handle special characters in share data", () => {
         const { result } = renderHook(() => useSocialShare());
 
         const url = result.current.getShareUrl("twitter", {

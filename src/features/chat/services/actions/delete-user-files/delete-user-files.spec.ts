@@ -8,7 +8,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import { storeUserFile } from "@/features/chat/services/storage/store-user-file/store-user-file";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { supabase } from "@/services/supabase";
 
@@ -30,7 +33,7 @@ describe("deleteUserFiles", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("deletes files and returns success response", async () => {
+    it("should delete files and return success response", async () => {
         const chatId = generateChatId();
 
         (auth as any).mockResolvedValue({
@@ -39,7 +42,7 @@ describe("deleteUserFiles", () => {
                 email,
                 name: "Test User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -47,14 +50,14 @@ describe("deleteUserFiles", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -106,7 +109,7 @@ describe("deleteUserFiles", () => {
         expect(result.success).toBe(true);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         const chatId = generateChatId();
         (auth as any).mockResolvedValue(null);
 

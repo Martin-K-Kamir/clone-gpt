@@ -36,7 +36,7 @@ describe("uploadToStorage", () => {
         });
     });
 
-    it("uploads file and returns public URL", async () => {
+    it("should upload file and return public URL", async () => {
         const testContent = new Uint8Array([1, 2, 3, 4]);
         const testPublicUrl =
             "https://example.com/storage/v1/object/public/user-files/test-path.txt";
@@ -64,7 +64,7 @@ describe("uploadToStorage", () => {
         expect(result.path).toMatch(/\.txt$/);
     });
 
-    it("throws error when upload fails", async () => {
+    it("should throw error when upload fails", async () => {
         const testContent = new Uint8Array([1, 2, 3]);
         const uploadError = { message: "Bucket not found" };
 
@@ -83,7 +83,7 @@ describe("uploadToStorage", () => {
         ).rejects.toThrow("Failed to upload file: Bucket not found");
     });
 
-    it("handles different content types correctly", async () => {
+    it("should handle different content types correctly", async () => {
         const imageContent = new Uint8Array([0x89, 0x50, 0x4e, 0x47]);
         const testPath = "hashedUserId/hashedChatId/test-image-uuid.png";
         const testPublicUrl = `https://example.com/storage/v1/object/public/generated-images/${testPath}`;
@@ -106,7 +106,7 @@ describe("uploadToStorage", () => {
         expect(result.publicUrl).toBe(testPublicUrl);
     });
 
-    it("generates unique file paths with UUID", async () => {
+    it("should generate unique file paths with UUID", async () => {
         const content = new Uint8Array([1, 2, 3]);
 
         mocks.upload.mockResolvedValue({ error: null });
@@ -140,7 +140,7 @@ describe("uploadToStorage", () => {
         expect(result2.path).toContain("same-name");
     });
 
-    it("handles Blob content", async () => {
+    it("should handle Blob content", async () => {
         const blobContent = new Blob(["test"], { type: "text/plain" });
 
         mocks.upload.mockResolvedValue({ error: null });
@@ -161,7 +161,7 @@ describe("uploadToStorage", () => {
         expect(result.publicUrl).toBe("https://example.com/file");
     });
 
-    it("handles File content", async () => {
+    it("should handle File content", async () => {
         const fileContent = new File(["test"], "test.txt", {
             type: "text/plain",
         });

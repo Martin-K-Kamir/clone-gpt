@@ -36,7 +36,7 @@ describe("duplicateStorageFile", () => {
         });
     });
 
-    it("duplicates file and returns new file URL", async () => {
+    it("should duplicate file and return new file URL", async () => {
         const storageUrl = process.env.SUPABASE_STORAGE_URL;
         const sourceUrl = `${storageUrl}/user-files/path/to/file.txt`;
         const newPublicUrl = `${storageUrl}/user-files/new-path/to/file.txt`;
@@ -62,7 +62,7 @@ describe("duplicateStorageFile", () => {
         expect(result).toHaveProperty("fileUrl", newPublicUrl);
     });
 
-    it("throws error when URL does not start with storage URL", async () => {
+    it("should throw error when URL does not start with storage URL", async () => {
         const invalidUrl = "https://other-domain.com/file.txt";
 
         await expect(
@@ -76,7 +76,7 @@ describe("duplicateStorageFile", () => {
         ).rejects.toThrow("Invalid storage URL");
     });
 
-    it("throws error when URL does not contain bucket path", async () => {
+    it("should throw error when URL does not contain bucket path", async () => {
         const storageUrl = process.env.SUPABASE_STORAGE_URL;
         const invalidUrl = `${storageUrl}/`;
 
@@ -91,7 +91,7 @@ describe("duplicateStorageFile", () => {
         ).rejects.toThrow("Failed to extract source path from URL");
     });
 
-    it("throws error when copy fails", async () => {
+    it("should throw error when copy fails", async () => {
         const storageUrl = process.env.SUPABASE_STORAGE_URL;
         const sourceUrl = `${storageUrl}/user-files/path/to/file.txt`;
 
@@ -110,7 +110,7 @@ describe("duplicateStorageFile", () => {
         ).rejects.toThrow("Failed to duplicate file: Source file not found");
     });
 
-    it("handles different buckets", async () => {
+    it("should handle different buckets", async () => {
         const storageUrl = process.env.SUPABASE_STORAGE_URL;
         const sourceUrl = `${storageUrl}/generated-images/path/to/image.png`;
         const newPublicUrl = `${storageUrl}/generated-images/new-path/image.png`;
@@ -131,7 +131,7 @@ describe("duplicateStorageFile", () => {
         expect(result.fileUrl).toBe(newPublicUrl);
     });
 
-    it("handles URL-encoded paths", async () => {
+    it("should handle URL-encoded paths", async () => {
         const storageUrl = process.env.SUPABASE_STORAGE_URL;
         const encodedPath = encodeURIComponent("path with spaces/file.txt");
         const sourceUrl = `${storageUrl}/user-files/${encodedPath}`;

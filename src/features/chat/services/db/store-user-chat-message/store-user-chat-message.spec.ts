@@ -6,12 +6,16 @@ import {
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
+import { CHAT_ROLE, CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { storeUserChatMessage } from "./store-user-chat-message";
 
 describe("storeUserChatMessage", () => {
-    it("stores a message", async () => {
+    it("should store a message", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -21,14 +25,14 @@ describe("storeUserChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -36,7 +40,7 @@ describe("storeUserChatMessage", () => {
 
         const message = {
             id: messageId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             parts: [{ type: "text", text: "Test message" }],
             metadata: {},
         };
@@ -53,11 +57,11 @@ describe("storeUserChatMessage", () => {
         expect(data?.id).toBe(messageId);
         expect(data?.chatId).toBe(chatId);
         expect(data?.userId).toBe(userId);
-        expect(data?.role).toBe("user");
+        expect(data?.role).toBe(CHAT_ROLE.USER);
         expect(data?.content).toBe("Test message");
     });
 
-    it("uses createdAt from metadata when provided", async () => {
+    it("should use createdAt from metadata when provided", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -67,14 +71,14 @@ describe("storeUserChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -83,7 +87,7 @@ describe("storeUserChatMessage", () => {
         const createdAt = "2024-01-01T00:00:00Z";
         const message = {
             id: messageId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             parts: [{ type: "text", text: "Test" }],
             metadata: { createdAt },
         };
@@ -100,7 +104,7 @@ describe("storeUserChatMessage", () => {
         expect(data?.createdAt).toMatch(/^2024-01-01T00:00:00/);
     });
 
-    it("filters out non-text parts when extracting content", async () => {
+    it("should filter out non-text parts when extracting content", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -110,14 +114,14 @@ describe("storeUserChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -125,7 +129,7 @@ describe("storeUserChatMessage", () => {
 
         const message = {
             id: messageId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             parts: [
                 { type: "text", text: "Hello" },
                 { type: "file", fileId: "file-1" },

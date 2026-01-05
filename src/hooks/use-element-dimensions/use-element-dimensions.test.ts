@@ -37,7 +37,7 @@ describe("useElementDimensions", () => {
         document.documentElement.style.removeProperty("--element-height");
     });
 
-    it("returns width, height, updateDimensions, and removeDimensions", () => {
+    it("should return width, height, updateDimensions, and removeDimensions", () => {
         const { result } = renderHook(() => useElementDimensions(ref));
 
         expect(result.current).toHaveProperty("width");
@@ -46,14 +46,14 @@ describe("useElementDimensions", () => {
         expect(result.current).toHaveProperty("removeDimensions");
     });
 
-    it("initializes with zero dimensions when no ref is provided", () => {
+    it("should initialize with zero dimensions when no ref is provided", () => {
         const { result } = renderHook(() => useElementDimensions());
 
         expect(result.current.width).toBe(0);
         expect(result.current.height).toBe(0);
     });
 
-    it("updates dimensions when ref is provided", () => {
+    it("should update dimensions when ref is provided", () => {
         const { result } = renderHook(() => useElementDimensions(ref));
 
         act(() => {
@@ -64,7 +64,7 @@ describe("useElementDimensions", () => {
         expect(result.current.height).toBe(50);
     });
 
-    it("creates CSS variables by default", () => {
+    it("should create CSS variables by default", () => {
         const { result } = renderHook(() => useElementDimensions(ref));
 
         act(() => {
@@ -79,7 +79,7 @@ describe("useElementDimensions", () => {
         ).toBe("50px");
     });
 
-    it("does not create CSS variables when createCssVariables is false", () => {
+    it("should not create CSS variables when createCssVariables is false", () => {
         const { result } = renderHook(() =>
             useElementDimensions(ref, { createCssVariables: false }),
         );
@@ -96,7 +96,7 @@ describe("useElementDimensions", () => {
         ).toBe("");
     });
 
-    it("applies width and height corrections", () => {
+    it("should apply width and height corrections", () => {
         const { result } = renderHook(() =>
             useElementDimensions(ref, {
                 widthCorrection: 10,
@@ -112,7 +112,7 @@ describe("useElementDimensions", () => {
         expect(result.current.height).toBe(55);
     });
 
-    it("uses custom name for CSS variables", () => {
+    it("should use custom name for CSS variables", () => {
         const { result } = renderHook(() =>
             useElementDimensions(ref, { name: "custom" }),
         );
@@ -129,7 +129,7 @@ describe("useElementDimensions", () => {
         ).toBe("50px");
     });
 
-    it("removes CSS variables when element is null", () => {
+    it("should remove CSS variables when element is null", () => {
         const { result } = renderHook(() => useElementDimensions(ref));
 
         act(() => {
@@ -149,7 +149,7 @@ describe("useElementDimensions", () => {
         ).toBe("");
     });
 
-    it("removeDimensions removes CSS variables", () => {
+    it("should remove CSS variables when removeDimensions is called", () => {
         const { result } = renderHook(() => useElementDimensions(ref));
 
         act(() => {
@@ -169,7 +169,7 @@ describe("useElementDimensions", () => {
         ).toBe("");
     });
 
-    it("removeDimensions accepts custom name", () => {
+    it("should accept custom name when removeDimensions is called", () => {
         const { result } = renderHook(() =>
             useElementDimensions(ref, { name: "custom" }),
         );
@@ -191,7 +191,7 @@ describe("useElementDimensions", () => {
         ).toBe("");
     });
 
-    it("updateDimensions returns cleanup function that removes CSS variables", () => {
+    it("should return cleanup function from updateDimensions that removes CSS variables", () => {
         const { result } = renderHook(() => useElementDimensions(ref));
 
         let cleanup: (() => void) | undefined;
@@ -213,7 +213,7 @@ describe("useElementDimensions", () => {
         ).toBe("");
     });
 
-    it("cleanup function does not remove CSS variables when removeCssVariables is false", () => {
+    it("should not remove CSS variables when cleanup function is called and removeCssVariables is false", () => {
         const { result } = renderHook(() =>
             useElementDimensions(ref, { removeCssVariables: false }),
         );
@@ -239,7 +239,7 @@ describe("useElementDimensions", () => {
         ).toBe("100px");
     });
 
-    it("works without ref when called with options only", () => {
+    it("should work without ref when called with options only", () => {
         const { result } = renderHook(() =>
             useElementDimensions({ name: "test" }),
         );
@@ -258,7 +258,7 @@ describe("useElementDimensions", () => {
         ).toBe("100px");
     });
 
-    it("updates dimensions on resize when updateOnResize is true", () => {
+    it("should update dimensions on resize when updateOnResize is true", () => {
         const { result } = renderHook(() =>
             useElementDimensions(ref, { updateOnResize: true }),
         );
@@ -292,7 +292,7 @@ describe("useElementDimensions", () => {
         expect(result.current.height).toBe(100);
     });
 
-    it("removes resize listener on unmount", () => {
+    it("should remove resize listener on unmount", () => {
         const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
 
         const { unmount } = renderHook(() =>
@@ -309,7 +309,7 @@ describe("useElementDimensions", () => {
         removeEventListenerSpy.mockRestore();
     });
 
-    it("removes CSS variables on unmount when removeCssVariables is true", () => {
+    it("should remove CSS variables on unmount when removeCssVariables is true", () => {
         const { result, unmount } = renderHook(() =>
             useElementDimensions(ref, { removeCssVariables: true }),
         );
@@ -329,7 +329,7 @@ describe("useElementDimensions", () => {
         ).toBe("");
     });
 
-    it("does not remove CSS variables on unmount when removeCssVariables is false", () => {
+    it("should not remove CSS variables on unmount when removeCssVariables is false", () => {
         const { result, unmount } = renderHook(() =>
             useElementDimensions(ref, { removeCssVariables: false }),
         );
@@ -349,7 +349,7 @@ describe("useElementDimensions", () => {
         ).toBe("100px");
     });
 
-    it("updates dimensions when ref changes", () => {
+    it("should update dimensions when ref changes", () => {
         const { result, rerender } = renderHook(
             ({ ref }) => useElementDimensions(ref),
             {
@@ -390,7 +390,7 @@ describe("useElementDimensions", () => {
         document.body.removeChild(newElement);
     });
 
-    it("updateDimensions accepts custom options", () => {
+    it("should accept custom options when updateDimensions is called", () => {
         const nullRef = {
             current: null,
         } as unknown as RefObject<HTMLDivElement>;

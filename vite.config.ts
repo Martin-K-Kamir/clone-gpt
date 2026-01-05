@@ -35,6 +35,7 @@ export default defineConfig({
                 "**/*.mocks.ts",
                 "**/*.constants.ts",
                 "src/vitest/**",
+                "src/proxy.ts",
             ],
         },
         projects: [

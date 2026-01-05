@@ -1,18 +1,19 @@
+import { generateMessageId } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
-import { CHAT_MESSAGE_TYPE } from "@/features/chat/lib/constants";
-import type { DBChatMessageId, UIChatMessage } from "@/features/chat/lib/types";
+import { CHAT_MESSAGE_TYPE, CHAT_ROLE } from "@/features/chat/lib/constants";
+import type { UIChatMessage } from "@/features/chat/lib/types";
 
 import { checkForFilesInMessage } from "./check-for-files-in-message";
 
 describe("checkForFilesInMessage", () => {
     it("should return false for message with no file parts", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
             ],
@@ -23,11 +24,11 @@ describe("checkForFilesInMessage", () => {
 
     it("should return true when file part has kind property", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
                 {
@@ -47,15 +48,15 @@ describe("checkForFilesInMessage", () => {
 
     it("should return true when file part has type property", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file1.pdf",
                     mediaType: "application/pdf",
                 } as any,
@@ -67,8 +68,8 @@ describe("checkForFilesInMessage", () => {
 
     it("should return true for image parts with kind property", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
                     kind: CHAT_MESSAGE_TYPE.IMAGE,
@@ -89,8 +90,8 @@ describe("checkForFilesInMessage", () => {
 
     it("should return false for empty parts array", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [],
         } as UIChatMessage;
 
@@ -99,19 +100,19 @@ describe("checkForFilesInMessage", () => {
 
     it("should return false when only text parts exist", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "First text",
                 },
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Second text",
                 },
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Third text",
                 },
             ],
@@ -122,15 +123,15 @@ describe("checkForFilesInMessage", () => {
 
     it("should return true when file part appears after text parts", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello",
                 },
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "World",
                 },
                 {
@@ -150,20 +151,20 @@ describe("checkForFilesInMessage", () => {
 
     it("should return true when file part appears before text parts", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file1.pdf",
                     mediaType: "application/pdf",
                 } as any,
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello",
                 },
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "World",
                 },
             ],
@@ -174,11 +175,11 @@ describe("checkForFilesInMessage", () => {
 
     it("should return true for mixed parts with files", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello",
                 },
                 {
@@ -191,11 +192,11 @@ describe("checkForFilesInMessage", () => {
                     extension: "pdf",
                 } as any,
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "World",
                 },
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file2.pdf",
                     mediaType: "application/pdf",
                 } as any,

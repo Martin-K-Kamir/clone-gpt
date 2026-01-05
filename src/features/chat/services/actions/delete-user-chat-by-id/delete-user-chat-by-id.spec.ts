@@ -9,11 +9,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import { STORAGE_BUCKET } from "@/features/chat/lib/constants/storage";
 import { hashId } from "@/features/chat/services/storage/hash-id/hash-id";
 import { uploadToStorage } from "@/features/chat/services/storage/upload-to-storage";
 
-import type { DBUserId } from "@/features/user/lib/types";
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { supabase } from "@/services/supabase";
 
@@ -42,7 +43,7 @@ describe("deleteUserChatById", () => {
                 email,
                 name: "Test User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -52,13 +53,13 @@ describe("deleteUserChatById", () => {
                     id: userId,
                     email,
                     name: "Test User",
-                    role: "user",
+                    role: USER_ROLE.USER,
                 },
                 {
                     id: otherUserId,
                     email: otherEmail,
                     name: "Other User",
-                    role: "user",
+                    role: USER_ROLE.USER,
                 },
             ],
             { onConflict: "id" },
@@ -72,7 +73,7 @@ describe("deleteUserChatById", () => {
         await supabase.from("users").delete().eq("id", otherUserId);
     });
 
-    it("deletes chat, messages, and storage files", async () => {
+    it("should delete chat, messages, and storage files", async () => {
         const chatId = generateChatId();
         const messageId = generateMessageId();
 
@@ -80,7 +81,7 @@ describe("deleteUserChatById", () => {
             id: chatId,
             userId,
             title: "Test Chat to Delete",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -90,7 +91,7 @@ describe("deleteUserChatById", () => {
             id: messageId,
             chatId,
             userId,
-            role: "user",
+            role: USER_ROLE.USER,
             content: "Test message",
             metadata: {},
             parts: [],
@@ -171,14 +172,14 @@ describe("deleteUserChatById", () => {
         expect(generatedFiles || []).toHaveLength(0);
     });
 
-    it("returns authorization error when user is not owner", async () => {
+    it("should return authorization error when user is not owner", async () => {
         const chatId = generateChatId();
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat to Delete",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -190,7 +191,7 @@ describe("deleteUserChatById", () => {
                 email: otherEmail,
                 name: "Other User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 

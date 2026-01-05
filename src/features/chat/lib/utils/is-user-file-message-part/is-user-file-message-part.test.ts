@@ -1,6 +1,9 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 
-import { STORAGE_BUCKET } from "@/features/chat/lib/constants";
+import {
+    CHAT_MESSAGE_TYPE,
+    STORAGE_BUCKET,
+} from "@/features/chat/lib/constants";
 import type { ChatMessagePart } from "@/features/chat/lib/types";
 
 import { isUserFileMessagePart } from "./is-user-file-message-part";
@@ -12,7 +15,7 @@ const mockStorageUrl = "https://storage.example.com";
 describe("isUserFileMessagePart", () => {
     it("should return true for valid user file message part", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/document.pdf`,
             name: "document.pdf",
             extension: "pdf",
@@ -24,7 +27,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false when url doesn't match prefix", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: "https://other-domain.com/document.pdf",
             name: "document.pdf",
             extension: "pdf",
@@ -36,7 +39,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false when url is missing", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             name: "document.pdf",
             extension: "pdf",
             mediaType: "application/pdf",
@@ -47,7 +50,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false when name is missing", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/document.pdf`,
             extension: "pdf",
             mediaType: "application/pdf",
@@ -58,7 +61,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false when extension is missing", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/document.pdf`,
             name: "document.pdf",
             mediaType: "application/pdf",
@@ -69,7 +72,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false when mediaType is missing", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/document.pdf`,
             name: "document.pdf",
             extension: "pdf",
@@ -80,7 +83,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false when url is not a valid URL", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: "not-a-url",
             name: "document.pdf",
             extension: "pdf",
@@ -92,7 +95,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false for text part", () => {
         const part = {
-            type: "text",
+            type: CHAT_MESSAGE_TYPE.TEXT,
             text: "Hello",
         } as any;
 
@@ -101,7 +104,7 @@ describe("isUserFileMessagePart", () => {
 
     it("should return false when name is empty string", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/document.pdf`,
             name: "",
             extension: "pdf",
@@ -114,7 +117,7 @@ describe("isUserFileMessagePart", () => {
     describe("type narrowing", () => {
         it("should narrow type correctly when true", () => {
             const part: ChatMessagePart = {
-                type: "file",
+                type: CHAT_MESSAGE_TYPE.FILE,
                 url: `${mockStorageUrl}/${STORAGE_BUCKET.USER_FILES}/document.pdf`,
                 name: "document.pdf",
                 extension: "pdf",
@@ -128,7 +131,7 @@ describe("isUserFileMessagePart", () => {
 
         it("should not narrow type when false", () => {
             const part: ChatMessagePart = {
-                type: "text",
+                type: CHAT_MESSAGE_TYPE.TEXT,
                 text: "Hello",
             } as any;
 

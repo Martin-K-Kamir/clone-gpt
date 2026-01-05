@@ -25,7 +25,7 @@ describe("storeUserChatMessage", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             storeUserChatMessage({
                 chatId: "not-a-uuid" as any,
@@ -39,7 +39,7 @@ describe("storeUserChatMessage", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             storeUserChatMessage({
                 chatId,
@@ -53,7 +53,7 @@ describe("storeUserChatMessage", () => {
         ).rejects.toThrow();
     });
 
-    it("stores message with text parts", async () => {
+    it("should store message with text parts", async () => {
         const message = {
             id: messageId,
             role: "user",
@@ -73,7 +73,7 @@ describe("storeUserChatMessage", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("uses createdAt from metadata when provided", async () => {
+    it("should use createdAt from metadata when provided", async () => {
         const createdAt = "2024-01-01T00:00:00Z";
         const message = {
             id: messageId,
@@ -91,7 +91,7 @@ describe("storeUserChatMessage", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("filters out non-text parts when extracting content", async () => {
+    it("should filter out non-text parts when extracting content", async () => {
         const message = {
             id: messageId,
             role: "user",
@@ -112,7 +112,7 @@ describe("storeUserChatMessage", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("throws when storage fails", async () => {
+    it("should throw when storage fails", async () => {
         const message = {
             id: messageId,
             role: "user",

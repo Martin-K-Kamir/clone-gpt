@@ -1,3 +1,5 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -58,26 +60,18 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("GET /api/user-chats/[chatId]", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
-    const chatId = "30000000-0000-0000-0000-000000000001";
+    const mockSession = createMockSessionWithUser();
+    const chatId = generateChatId();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
     });
 
-    it("returns chat successfully", async () => {
+    it("should return chat successfully", async () => {
         const mockChat = {
             id: chatId,
-            userId,
+            userId: mockSession.user.id,
             title: "Test Chat",
             visibility: "private",
         };
@@ -92,7 +86,7 @@ describe("GET /api/user-chats/[chatId]", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns not found when chat does not exist", async () => {
+    it("should return not found when chat does not exist", async () => {
         mocks.getUserChatById.mockResolvedValue(null);
 
         const request = new NextRequest("http://localhost/api/user-chats/test");
@@ -103,7 +97,7 @@ describe("GET /api/user-chats/[chatId]", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const request = new NextRequest("http://localhost/api/user-chats/test");
@@ -114,7 +108,7 @@ describe("GET /api/user-chats/[chatId]", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when getUserChatById fails", async () => {
+    it("should return error when getUserChatById fails", async () => {
         mocks.getUserChatById.mockRejectedValue(new Error("Database error"));
 
         const request = new NextRequest("http://localhost/api/user-chats/test");

@@ -25,19 +25,19 @@ describe("getChatAccess", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             getChatAccess({ chatId: "not-a-uuid" as any, userId }),
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             getChatAccess({ chatId, userId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns access denied when chat not found", async () => {
+    it("should return access denied when chat not found", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -61,7 +61,7 @@ describe("getChatAccess", () => {
         expect(result).not.toHaveProperty("visibility");
     });
 
-    it("returns access allowed when user is owner of private chat", async () => {
+    it("should return access allowed when user is owner of private chat", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -89,7 +89,7 @@ describe("getChatAccess", () => {
         expect(result.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 
-    it("returns access allowed when user is owner of public chat", async () => {
+    it("should return access allowed when user is owner of public chat", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -117,7 +117,7 @@ describe("getChatAccess", () => {
         expect(result.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
-    it("returns access denied when user is not owner of private chat", async () => {
+    it("should return access denied when user is not owner of private chat", async () => {
         const otherUserId = "00000000-0000-0000-0000-000000000def" as DBUserId;
 
         mocks.from.mockReturnValue({
@@ -147,7 +147,7 @@ describe("getChatAccess", () => {
         expect(result.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 
-    it("returns access allowed when user is not owner of public chat", async () => {
+    it("should return access allowed when user is not owner of public chat", async () => {
         const otherUserId = "00000000-0000-0000-0000-000000000def" as DBUserId;
 
         mocks.from.mockReturnValue({

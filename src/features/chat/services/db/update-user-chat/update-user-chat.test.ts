@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import type { DBUserId } from "@/features/user/lib/types";
@@ -24,7 +25,7 @@ describe("updateUserChat", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             updateUserChat({
                 chatId: "not-a-uuid" as any,
@@ -34,7 +35,7 @@ describe("updateUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             updateUserChat({
                 chatId,
@@ -44,7 +45,7 @@ describe("updateUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when data is invalid", async () => {
+    it("should throw when data is invalid", async () => {
         await expect(
             updateUserChat({
                 chatId,
@@ -54,12 +55,12 @@ describe("updateUserChat", () => {
         ).rejects.toThrow();
     });
 
-    it("updates chat title", async () => {
+    it("should update chat title", async () => {
         const updatedChat = {
             id: chatId,
             userId,
             title: "New Title",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             visibleAt: new Date().toISOString(),
@@ -89,12 +90,12 @@ describe("updateUserChat", () => {
         expect(result).toEqual(updatedChat);
     });
 
-    it("updates chat visibility", async () => {
+    it("should update chat visibility", async () => {
         const updatedChat = {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
             visibleAt: new Date().toISOString(),
@@ -118,13 +119,13 @@ describe("updateUserChat", () => {
         const result = await updateUserChat({
             chatId,
             userId,
-            data: { visibility: "public" },
+            data: { visibility: CHAT_VISIBILITY.PUBLIC },
         });
 
         expect(result).toEqual(updatedChat);
     });
 
-    it("throws when update fails", async () => {
+    it("should throw when update fails", async () => {
         mocks.from.mockReturnValue({
             update: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

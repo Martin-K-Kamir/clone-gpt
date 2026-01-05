@@ -2,21 +2,22 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
-import { deleteUserFile } from "./delete-user-file";
+import type { DBChatId } from "@/features/chat/lib/types";
 
-const constants = vi.hoisted(() => ({
-    userId: "00000000-0000-0000-0000-000000000abc",
-    chatId: "30000000-0000-0000-0000-000000000abc",
-    fileId: "550e8400-e29b-41d4-a716-446655440000",
-}));
+import type { DBUserId } from "@/features/user/lib/types";
+
+import { deleteUserFile } from "./delete-user-file";
 
 const mocks = vi.hoisted(() => ({
     deleteUserFile: vi.fn(),
+    userId: "00000000-0000-0000-0000-000000000001" as DBUserId,
+    chatId: "30000000-0000-0000-0000-000000000001" as DBChatId,
+    fileId: "550e8400-e29b-41d4-a716-446655440000",
 }));
 
 vi.mock("@/features/auth/services/auth", () => ({
     auth: vi.fn().mockResolvedValue({
-        user: { id: constants.userId, name: "Test User" },
+        user: { id: mocks.userId, name: "Test User" },
     }),
 }));
 
@@ -45,33 +46,33 @@ vi.mock("@/features/chat/services/storage", () => ({
 describe("deleteUserFile", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: { id: constants.userId, name: "Test User" },
-        });
+        vi.mocked(auth).mockResolvedValue({
+            user: { id: mocks.userId, name: "Test User" },
+        } as any);
     });
 
-    it("deletes file successfully", async () => {
+    it("should delete file successfully", async () => {
         const storedFile = {
-            fileId: constants.fileId,
+            fileId: mocks.fileId,
             name: "test.jpg",
             fileUrl: "https://example.com/test.jpg",
             mediaType: "image/jpeg",
             extension: "jpg",
             size: 1024,
         };
-        mocks.deleteUserFile.mockResolvedValue({ fileId: constants.fileId });
+        mocks.deleteUserFile.mockResolvedValue({ fileId: mocks.fileId });
 
         const result = await deleteUserFile({
             storedFile,
-            chatId: constants.chatId as any,
+            chatId: mocks.chatId,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("returns error when deletion fails", async () => {
+    it("should return error when deletion fails", async () => {
         const storedFile = {
-            fileId: constants.fileId,
+            fileId: mocks.fileId,
             name: "test.jpg",
             fileUrl: "https://example.com/test.jpg",
             mediaType: "image/jpeg",
@@ -82,17 +83,17 @@ describe("deleteUserFile", () => {
 
         const result = await deleteUserFile({
             storedFile,
-            chatId: constants.chatId as any,
+            chatId: mocks.chatId,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when session is missing", async () => {
-        (auth as any).mockResolvedValueOnce(null);
+    it("should return error when session is missing", async () => {
+        vi.mocked(auth).mockResolvedValueOnce(null as any);
 
         const storedFile = {
-            fileId: constants.fileId,
+            fileId: mocks.fileId,
             name: "test.jpg",
             fileUrl: "https://example.com/test.jpg",
             mediaType: "image/jpeg",
@@ -102,24 +103,24 @@ describe("deleteUserFile", () => {
 
         const result = await deleteUserFile({
             storedFile,
-            chatId: constants.chatId as any,
+            chatId: mocks.chatId,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when storedFile is invalid", async () => {
+    it("should return error when storedFile is invalid", async () => {
         const result = await deleteUserFile({
             storedFile: "invalid" as any,
-            chatId: constants.chatId as any,
+            chatId: mocks.chatId,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chatId is invalid", async () => {
+    it("should return error when chatId is invalid", async () => {
         const storedFile = {
-            fileId: constants.fileId,
+            fileId: mocks.fileId,
             name: "test.jpg",
             fileUrl: "https://example.com/test.jpg",
             mediaType: "image/jpeg",

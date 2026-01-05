@@ -8,6 +8,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_ROLE, CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { upvoteChatMessage } from "./upvote-chat-message";
@@ -25,7 +29,7 @@ describe("upvoteChatMessage", () => {
         vi.clearAllMocks();
     });
 
-    it("sets upvote to true when upvoting a message", async () => {
+    it("should set upvote to true when upvoting a message", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -37,7 +41,7 @@ describe("upvoteChatMessage", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -45,14 +49,14 @@ describe("upvoteChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -62,7 +66,7 @@ describe("upvoteChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             content: "Test message for upvote",
             metadata: {},
             parts: [{ type: "text", text: "Test message for upvote" }],
@@ -85,7 +89,7 @@ describe("upvoteChatMessage", () => {
         }
     });
 
-    it("sets upvote to false when removing upvote from a message", async () => {
+    it("should set upvote to false when removing upvote from a message", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -97,7 +101,7 @@ describe("upvoteChatMessage", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -105,14 +109,14 @@ describe("upvoteChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -122,7 +126,7 @@ describe("upvoteChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             content: "Test message for upvote",
             metadata: { isUpvoted: true, isDownvoted: false },
             parts: [{ type: "text", text: "Test message for upvote" }],
@@ -145,7 +149,7 @@ describe("upvoteChatMessage", () => {
         }
     });
 
-    it("preserves existing metadata when updating upvote", async () => {
+    it("should preserve existing metadata when updating upvote", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -157,7 +161,7 @@ describe("upvoteChatMessage", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -165,14 +169,14 @@ describe("upvoteChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -182,7 +186,7 @@ describe("upvoteChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             content: "Test message for upvote",
             metadata: { customField: "value" },
             parts: [{ type: "text", text: "Test message for upvote" }],

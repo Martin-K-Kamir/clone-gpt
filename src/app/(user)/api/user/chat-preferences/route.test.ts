@@ -1,3 +1,5 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
@@ -52,23 +54,15 @@ describe("GET /api/user/chat-preferences", () => {
         vi.clearAllMocks();
     });
 
-    it("returns user chat preferences successfully", async () => {
-        const userId = "00000000-0000-0000-0000-000000000001";
+    it("should return user chat preferences successfully", async () => {
+        const userId = generateUserId();
         const mockPreferences = {
             userId,
             personality: "FRIENDLY",
             nickname: "Test User",
         };
 
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(createMockSessionWithUser(userId));
 
         mocks.getUserChatPreferences.mockResolvedValue(mockPreferences);
 
@@ -77,7 +71,7 @@ describe("GET /api/user/chat-preferences", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const response = await GET();
@@ -85,18 +79,8 @@ describe("GET /api/user/chat-preferences", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when getUserChatPreferences fails", async () => {
-        const userId = "00000000-0000-0000-0000-000000000001";
-
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+    it("should return error when getUserChatPreferences fails", async () => {
+        (auth as any).mockResolvedValue(createMockSessionWithUser());
 
         mocks.getUserChatPreferences.mockRejectedValue(
             new Error("Database error"),

@@ -1,3 +1,4 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -49,22 +50,14 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("GET /api/user-chats/shared", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
+    const mockSession = createMockSessionWithUser();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
     });
 
-    it("returns shared chats successfully without query parameters", async () => {
+    it("should return shared chats successfully without query parameters", async () => {
         const mockChats = {
             chats: [],
             hasNextPage: false,
@@ -80,7 +73,7 @@ describe("GET /api/user-chats/shared", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns shared chats with query parameters", async () => {
+    it("should return shared chats with query parameters", async () => {
         const mockChats = {
             chats: [],
             hasNextPage: false,
@@ -98,7 +91,7 @@ describe("GET /api/user-chats/shared", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("handles invalid query parameters gracefully", async () => {
+    it("should handle invalid query parameters gracefully", async () => {
         const mockChats = {
             chats: [],
             hasNextPage: false,
@@ -116,7 +109,7 @@ describe("GET /api/user-chats/shared", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const url = new URL("http://localhost/api/user-chats/shared");
@@ -127,7 +120,7 @@ describe("GET /api/user-chats/shared", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when getUserSharedChats fails", async () => {
+    it("should return error when getUserSharedChats fails", async () => {
         mocks.getUserSharedChats.mockRejectedValue(new Error("Database error"));
 
         const url = new URL("http://localhost/api/user-chats/shared");

@@ -7,7 +7,7 @@ import { searchUserChats } from "./search-user-chats";
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 
 describe("searchUserChats", () => {
-    it("returns chats matching by title", async () => {
+    it("should return chats matching by title", async () => {
         const result = await searchUserChats({
             userId,
             query: "Seed",
@@ -19,7 +19,7 @@ describe("searchUserChats", () => {
         });
     });
 
-    it("returns chats matching by message content", async () => {
+    it("should return chats matching by message content", async () => {
         const result = await searchUserChats({
             userId,
             query: "Hello",
@@ -30,7 +30,7 @@ describe("searchUserChats", () => {
         }
     });
 
-    it("respects limit parameter", async () => {
+    it("should respect limit parameter", async () => {
         const result = await searchUserChats({
             userId,
             query: "Seed",
@@ -44,7 +44,7 @@ describe("searchUserChats", () => {
         }
     });
 
-    it("returns empty array when no matches found", async () => {
+    it("should return empty array when no matches found", async () => {
         const result = await searchUserChats({
             userId,
             query: "NonexistentQuery12345",
@@ -56,7 +56,7 @@ describe("searchUserChats", () => {
         expect(result.cursor).toBeUndefined();
     });
 
-    it("uses cursor for pagination", async () => {
+    it("should use cursor for pagination", async () => {
         const firstPage = await searchUserChats({
             userId,
             query: "Seed",

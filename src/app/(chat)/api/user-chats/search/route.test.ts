@@ -1,3 +1,5 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -49,22 +51,14 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("GET /api/user-chats/search", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
+    const mockSession = createMockSessionWithUser();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
     });
 
-    it("returns search results successfully without query parameters", async () => {
+    it("should return search results successfully without query parameters", async () => {
         const mockResults = {
             chats: [],
             hasNextPage: false,
@@ -80,7 +74,7 @@ describe("GET /api/user-chats/search", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns search results with query parameter", async () => {
+    it("should return search results with query parameter", async () => {
         const mockResults = {
             chats: [],
             hasNextPage: false,
@@ -97,7 +91,7 @@ describe("GET /api/user-chats/search", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns search results with cursor", async () => {
+    it("should return search results with cursor", async () => {
         const mockResults = {
             chats: [],
             hasNextPage: false,
@@ -108,10 +102,7 @@ describe("GET /api/user-chats/search", () => {
         const url = new URL("http://localhost/api/user-chats/search");
         url.searchParams.set("query", "test");
         url.searchParams.set("cursorDate", "2024-01-01T00:00:00Z");
-        url.searchParams.set(
-            "cursorId",
-            "30000000-0000-0000-0000-000000000001",
-        );
+        url.searchParams.set("cursorId", generateChatId());
         url.searchParams.set("limit", "10");
         const request = new NextRequest(url);
 
@@ -120,7 +111,7 @@ describe("GET /api/user-chats/search", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("handles invalid limit parameter gracefully", async () => {
+    it("should handle invalid limit parameter gracefully", async () => {
         const mockResults = {
             chats: [],
             hasNextPage: false,
@@ -137,7 +128,7 @@ describe("GET /api/user-chats/search", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("handles incomplete cursor parameters", async () => {
+    it("should handle incomplete cursor parameters", async () => {
         const mockResults = {
             chats: [],
             hasNextPage: false,
@@ -154,7 +145,7 @@ describe("GET /api/user-chats/search", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const url = new URL("http://localhost/api/user-chats/search");
@@ -165,7 +156,7 @@ describe("GET /api/user-chats/search", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when searchUserChats fails", async () => {
+    it("should return error when searchUserChats fails", async () => {
         mocks.searchUserChats.mockRejectedValue(new Error("Database error"));
 
         const url = new URL("http://localhost/api/user-chats/search");

@@ -1,11 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createRef } from "react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { useScrollPosition } from "./use-scroll-position";
 
 describe("useScrollPosition", () => {
-    it("returns undefined for isAtBottom and isAtTop initially when no initial value", () => {
+    it("should return undefined for isAtBottom and isAtTop initially when no initial value", () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         element.style.height = "100px";
@@ -21,7 +21,7 @@ describe("useScrollPosition", () => {
         document.body.removeChild(element);
     });
 
-    it("returns initial value for isAtBottom and isAtTop when provided", () => {
+    it("should return initial value for isAtBottom and isAtTop when provided", () => {
         const ref = createRef<HTMLDivElement>();
         const element = document.createElement("div");
         element.style.height = "100px";
@@ -36,7 +36,7 @@ describe("useScrollPosition", () => {
         document.body.removeChild(element);
     });
 
-    it("detects when scrolled to bottom", async () => {
+    it("should detect when scrolled to bottom", async () => {
         vi.useRealTimers();
 
         const ref = createRef<HTMLDivElement>();
@@ -70,7 +70,7 @@ describe("useScrollPosition", () => {
         vi.useFakeTimers();
     });
 
-    it("detects when scrolled to top", async () => {
+    it("should detect when scrolled to top", async () => {
         vi.useRealTimers();
 
         const ref = createRef<HTMLDivElement>();
@@ -115,7 +115,7 @@ describe("useScrollPosition", () => {
         vi.useFakeTimers();
     });
 
-    it("uses threshold when checking bottom position", async () => {
+    it("should use threshold when checking bottom position", async () => {
         vi.useRealTimers();
 
         const ref = createRef<HTMLDivElement>();
@@ -153,7 +153,7 @@ describe("useScrollPosition", () => {
         vi.useFakeTimers();
     });
 
-    it("handles null ref gracefully", () => {
+    it("should handle null ref gracefully", () => {
         const ref = createRef<HTMLDivElement>();
 
         const { result } = renderHook(() => useScrollPosition(ref));
@@ -162,7 +162,7 @@ describe("useScrollPosition", () => {
         expect(result.current.isAtTop).toBeUndefined();
     });
 
-    it("updates when threshold changes", async () => {
+    it("should update when threshold changes", async () => {
         vi.useRealTimers();
 
         const ref = createRef<HTMLDivElement>();

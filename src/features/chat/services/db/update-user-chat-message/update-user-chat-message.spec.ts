@@ -6,12 +6,16 @@ import {
 } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
+import { CHAT_ROLE, CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { updateUserChatMessage } from "./update-user-chat-message";
 
 describe("updateUserChatMessage", () => {
-    it("updates message content", async () => {
+    it("should update message content", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -21,14 +25,14 @@ describe("updateUserChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -38,7 +42,7 @@ describe("updateUserChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             content: "Original content",
             metadata: {},
             parts: [{ type: "text", text: "Original content" }],
@@ -48,7 +52,7 @@ describe("updateUserChatMessage", () => {
         const newContent = "Updated message content";
         const message = {
             id: messageId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             parts: [{ type: "text", text: newContent }],
             metadata: {},
         };
@@ -69,7 +73,7 @@ describe("updateUserChatMessage", () => {
         expect(data?.content).toBe(newContent);
     });
 
-    it("filters out non-text parts when extracting content", async () => {
+    it("should filter out non-text parts when extracting content", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId = generateChatId();
@@ -79,14 +83,14 @@ describe("updateUserChatMessage", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -96,7 +100,7 @@ describe("updateUserChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             content: "Original",
             metadata: {},
             parts: [{ type: "text", text: "Original" }],
@@ -105,7 +109,7 @@ describe("updateUserChatMessage", () => {
 
         const message = {
             id: messageId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             parts: [
                 { type: "text", text: "Hello" },
                 { type: "file", fileId: "file-1" },

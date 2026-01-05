@@ -1,18 +1,19 @@
+import { generateMessageId } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
-import { CHAT_MESSAGE_TYPE } from "@/features/chat/lib/constants";
-import type { DBChatMessageId, UIChatMessage } from "@/features/chat/lib/types";
+import { CHAT_MESSAGE_TYPE, CHAT_ROLE } from "@/features/chat/lib/constants";
+import type { UIChatMessage } from "@/features/chat/lib/types";
 
 import { countFilesInMessage } from "./count-files-in-message";
 
 describe("countFilesInMessage", () => {
     it("should return 0 for message with no file parts", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
             ],
@@ -23,11 +24,11 @@ describe("countFilesInMessage", () => {
 
     it("should count file parts with kind property", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
                 {
@@ -56,15 +57,15 @@ describe("countFilesInMessage", () => {
 
     it("should count file parts with type property", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file1.pdf",
                     mediaType: "application/pdf",
                 } as any,
@@ -76,11 +77,11 @@ describe("countFilesInMessage", () => {
 
     it("should count both kind and type file parts", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
                 {
@@ -93,7 +94,7 @@ describe("countFilesInMessage", () => {
                     extension: "pdf",
                 } as any,
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file2.pdf",
                     mediaType: "application/pdf",
                 } as any,
@@ -105,8 +106,8 @@ describe("countFilesInMessage", () => {
 
     it("should count image parts with kind property", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
                     kind: CHAT_MESSAGE_TYPE.IMAGE,
@@ -127,8 +128,8 @@ describe("countFilesInMessage", () => {
 
     it("should return 0 for empty parts array", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [],
         } as UIChatMessage;
 
@@ -137,19 +138,19 @@ describe("countFilesInMessage", () => {
 
     it("should not count text parts", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "First text",
                 },
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Second text",
                 },
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Third text",
                 },
             ],
@@ -160,11 +161,11 @@ describe("countFilesInMessage", () => {
 
     it("should handle mixed parts correctly", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello",
                 },
                 {
@@ -177,11 +178,11 @@ describe("countFilesInMessage", () => {
                     extension: "pdf",
                 } as any,
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "World",
                 },
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file2.pdf",
                     mediaType: "application/pdf",
                 } as any,

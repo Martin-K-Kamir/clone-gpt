@@ -1,3 +1,5 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
@@ -17,15 +19,6 @@ vi.mock("@/features/user/services/db", () => ({
 }));
 
 const apiSuccess = { success: true as const };
-const mockUser = {
-    id: "00000000-0000-0000-0000-000000000001",
-    email: "test@example.com",
-    name: "Test User",
-    image: null,
-    role: "user",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-};
 
 vi.mock("@/lib/api-response", () => ({
     api: {
@@ -77,22 +70,24 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("GET /api/user", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
+    const userId = generateUserId();
+    const mockSession = createMockSessionWithUser(userId);
+    const mockUser = {
+        id: userId,
+        email: mockSession.user.email,
+        name: mockSession.user.name,
+        image: null,
+        role: mockSession.user.role,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+    };
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
     });
 
-    it("returns user on success", async () => {
+    it("should return user on success", async () => {
         mocks.getUserById.mockResolvedValue(mockUser);
 
         const response = await GET();
@@ -102,7 +97,7 @@ describe("GET /api/user", () => {
         expect(data.success).toBe(true);
     });
 
-    it("returns error when user not found", async () => {
+    it("should return error when user not found", async () => {
         mocks.getUserById.mockResolvedValue(null);
 
         const response = await GET();
@@ -113,7 +108,7 @@ describe("GET /api/user", () => {
         expect(data.success).toBe(false);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const response = await GET();
@@ -121,7 +116,7 @@ describe("GET /api/user", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when fetching user fails", async () => {
+    it("should return error when fetching user fails", async () => {
         mocks.getUserById.mockRejectedValue(new Error("Database error"));
 
         const response = await GET();

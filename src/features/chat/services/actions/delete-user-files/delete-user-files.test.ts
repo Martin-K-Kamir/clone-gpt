@@ -4,6 +4,8 @@ import { auth } from "@/features/auth/services/auth";
 
 import type { DBChatId } from "@/features/chat/lib/types";
 
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { deleteUserFiles } from "./delete-user-files";
 
 const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
@@ -48,18 +50,18 @@ vi.mock("@/lib/api-response", () => {
 describe("deleteUserFiles", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
+        vi.mocked(auth).mockResolvedValue({
             user: {
                 id: userId,
                 email: "test@example.com",
                 name: "Test User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
-        });
+        } as any);
     });
 
-    it("deletes files and returns success response", async () => {
+    it("should delete files and return success response", async () => {
         const storedFiles = [
             {
                 fileId: "550e8400-e29b-41d4-a716-446655440001",
@@ -96,7 +98,7 @@ describe("deleteUserFiles", () => {
         expect(mocks.deleteUserFile).toHaveBeenCalledTimes(2);
     });
 
-    it("handles single file deletion", async () => {
+    it("should handle single file deletion", async () => {
         const storedFiles = [
             {
                 fileId: "550e8400-e29b-41d4-a716-446655440001",
@@ -123,8 +125,8 @@ describe("deleteUserFiles", () => {
         }
     });
 
-    it("returns error when session does not exist", async () => {
-        (auth as any).mockResolvedValue(null);
+    it("should return error when session does not exist", async () => {
+        vi.mocked(auth).mockResolvedValue(null as any);
 
         const storedFiles = [
             {
@@ -145,7 +147,7 @@ describe("deleteUserFiles", () => {
         expect(result.success).toBe(false);
     });
 
-    it("handles storage errors", async () => {
+    it("should handle storage errors", async () => {
         const storedFiles = [
             {
                 fileId: "550e8400-e29b-41d4-a716-446655440001",
@@ -167,7 +169,7 @@ describe("deleteUserFiles", () => {
         expect(result.success).toBe(false);
     });
 
-    it("handles partial failures gracefully", async () => {
+    it("should handle partial failures gracefully", async () => {
         const storedFiles = [
             {
                 fileId: "550e8400-e29b-41d4-a716-446655440001",

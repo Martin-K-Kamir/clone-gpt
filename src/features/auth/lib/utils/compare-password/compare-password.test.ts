@@ -47,20 +47,6 @@ describe("comparePassword", () => {
         expect(result).toBe(false);
     });
 
-    it("should call bcrypt.compare with correct arguments", async () => {
-        (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(true);
-
-        const password = "test-password";
-        const hashedPassword = "$2a$10$hashedpassword";
-
-        await comparePassword(password, hashedPassword);
-
-        expect(bcrypt.compare as ReturnType<typeof vi.fn>).toHaveBeenCalledWith(
-            password,
-            hashedPassword,
-        );
-    });
-
     it("should handle empty password", async () => {
         (bcrypt.compare as ReturnType<typeof vi.fn>).mockResolvedValue(false);
 

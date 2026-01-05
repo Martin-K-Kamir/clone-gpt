@@ -23,7 +23,7 @@ describe("storeGeneratedImage", () => {
         vi.clearAllMocks();
     });
 
-    it("stores image and returns image URL", async () => {
+    it("should store image and return image URL", async () => {
         const generatedImage = {
             uint8Array: new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
             mediaType: "image/png",
@@ -52,7 +52,7 @@ describe("storeGeneratedImage", () => {
         });
     });
 
-    it("handles different image types", async () => {
+    it("should handle different image types", async () => {
         const generatedImage = {
             uint8Array: new Uint8Array([0xff, 0xd8, 0xff]),
             mediaType: "image/jpeg",
@@ -79,7 +79,7 @@ describe("storeGeneratedImage", () => {
         expect(result.name).toBe("photo");
     });
 
-    it("uses GENERATED_IMAGES bucket", async () => {
+    it("should use GENERATED_IMAGES bucket", async () => {
         const generatedImage = {
             uint8Array: new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
             mediaType: "image/png",
@@ -104,7 +104,7 @@ describe("storeGeneratedImage", () => {
         expect(result.imageUrl).toContain(STORAGE_BUCKET.GENERATED_IMAGES);
     });
 
-    it("throws error when upload fails", async () => {
+    it("should throw error when upload fails", async () => {
         const generatedImage = {
             uint8Array: new Uint8Array([0x89, 0x50, 0x4e, 0x47]),
             mediaType: "image/png",

@@ -70,7 +70,7 @@ describe("deleteUserChatById", () => {
         mocks.deleteStorageDirectory.mockResolvedValue(undefined);
     });
 
-    it("deletes chat successfully", async () => {
+    it("should delete chat successfully", async () => {
         const mkDelete = () =>
             ({
                 delete: vi.fn().mockReturnValue({
@@ -89,7 +89,7 @@ describe("deleteUserChatById", () => {
         expect(mocks.deleteStorageDirectory).toHaveBeenCalledTimes(3);
     });
 
-    it("returns authorization error when user is not owner", async () => {
+    it("should return authorization error when user is not owner", async () => {
         mocks.isUserChatOwner.mockResolvedValue(false);
 
         const result = await deleteUserChatById({
@@ -100,7 +100,7 @@ describe("deleteUserChatById", () => {
         expect(mocks.from).not.toHaveBeenCalled();
     });
 
-    it("returns error when message delete fails", async () => {
+    it("should return error when message delete fails", async () => {
         const failingChain = {
             delete: vi.fn().mockReturnValue({
                 eq: vi.fn().mockResolvedValue({ error: { message: "fail" } }),
@@ -116,7 +116,7 @@ describe("deleteUserChatById", () => {
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chat delete fails", async () => {
+    it("should return error when chat delete fails", async () => {
         const mkDelete = (shouldError: boolean) =>
             ({
                 delete: vi.fn().mockReturnValue({
@@ -136,7 +136,7 @@ describe("deleteUserChatById", () => {
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chatId is invalid", async () => {
+    it("should return error when chatId is invalid", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(() => apiError as any);
 
         const result = await deleteUserChatById({

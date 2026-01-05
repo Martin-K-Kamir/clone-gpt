@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { DBChatId } from "@/features/chat/lib/types";
 
 import { getChatVisibility } from "./get-chat-visibility";
@@ -21,16 +22,16 @@ describe("getChatVisibility", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             getChatVisibility({ chatId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns visibility and userId on success", async () => {
+    it("should return visibility and userId on success", async () => {
         const mockData = {
-            visibility: "public",
-            userId: "00000000-0000-0000-0000-000000000abc",
+            visibility: CHAT_VISIBILITY.PUBLIC,
+            userId: "00000000-0000-0000-0000-000000000001",
         };
 
         mocks.from.mockReturnValue({
@@ -47,14 +48,14 @@ describe("getChatVisibility", () => {
         const result = await getChatVisibility({ chatId });
 
         expect(result).not.toBeNull();
-        expect(result?.visibility).toBe("public");
+        expect(result?.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
         expect(result?.userId).toBe(mockData.userId);
     });
 
-    it("returns private visibility", async () => {
+    it("should return private visibility", async () => {
         const mockData = {
-            visibility: "private",
-            userId: "00000000-0000-0000-0000-000000000abc",
+            visibility: CHAT_VISIBILITY.PRIVATE,
+            userId: "00000000-0000-0000-0000-000000000001",
         };
 
         mocks.from.mockReturnValue({
@@ -71,10 +72,10 @@ describe("getChatVisibility", () => {
         const result = await getChatVisibility({ chatId });
 
         expect(result).not.toBeNull();
-        expect(result?.visibility).toBe("private");
+        expect(result?.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 
-    it("throws when fetch fails", async () => {
+    it("should throw when fetch fails", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -91,7 +92,7 @@ describe("getChatVisibility", () => {
         );
     });
 
-    it("throws when chat does not exist", async () => {
+    it("should throw when chat does not exist", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

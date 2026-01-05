@@ -1,10 +1,9 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { incrementUserMessagesRateLimit } from "./increment-user-messages-rate-limit";
 
-const userId = "00000000-0000-0000-0000-000000000abc" as DBUserId;
+const userId = generateUserId();
 
 const mocks = vi.hoisted(() => ({
     getUserMessagesRateLimit: vi.fn(),
@@ -29,7 +28,7 @@ describe("incrementUserMessagesRateLimit", () => {
         vi.clearAllMocks();
     });
 
-    it("throws for invalid userId", async () => {
+    it("should throw for invalid userId", async () => {
         await expect(
             incrementUserMessagesRateLimit({
                 userId: "not-a-uuid" as any,
@@ -38,7 +37,7 @@ describe("incrementUserMessagesRateLimit", () => {
         ).rejects.toThrow();
     });
 
-    it("increments message and token counts for new user", async () => {
+    it("should increment message and token counts for new user", async () => {
         mocks.getUserMessagesRateLimit.mockResolvedValue(null);
         mocks.createUserMessagesRateLimit.mockResolvedValue(undefined);
         mocks.updateUserMessagesRateLimit.mockResolvedValue(undefined);
@@ -57,7 +56,7 @@ describe("incrementUserMessagesRateLimit", () => {
         });
     });
 
-    it("increments message and token counts from existing values", async () => {
+    it("should increment message and token counts from existing values", async () => {
         mocks.getUserMessagesRateLimit.mockResolvedValue({
             messagesCounter: 5,
             tokensCounter: 50,

@@ -1,3 +1,4 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -16,7 +17,7 @@ vi.mock("@/hooks", () => ({
 
 describe("useUserMessagesRateLimit", () => {
     const mockUseRateLimit = vi.mocked(useRateLimit);
-    const userId = "user-123" as DBUserId;
+    const userId = generateUserId();
 
     beforeEach(() => {
         vi.clearAllMocks();

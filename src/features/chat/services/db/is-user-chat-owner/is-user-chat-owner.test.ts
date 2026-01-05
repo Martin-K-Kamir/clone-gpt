@@ -24,19 +24,19 @@ describe("isUserChatOwner", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             isUserChatOwner({ chatId: "not-a-uuid" as any, userId }),
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             isUserChatOwner({ chatId, userId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns true when user is owner", async () => {
+    it("should return true when user is owner", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -55,7 +55,7 @@ describe("isUserChatOwner", () => {
         expect(result).toBe(true);
     });
 
-    it("throws when user is not owner", async () => {
+    it("should throw when user is not owner", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -74,7 +74,7 @@ describe("isUserChatOwner", () => {
         );
     });
 
-    it("throws on other database errors", async () => {
+    it("should throw on other database errors", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

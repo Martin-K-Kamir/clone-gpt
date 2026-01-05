@@ -1,14 +1,16 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { server } from "@/vitest/unit-setup";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { DBChatId, DBChatVisibility } from "@/features/chat/lib/types";
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 
 import { getUserChatVisibility } from "./get-user-chat-visibility";
 
 describe("getUserChatVisibility", () => {
     it("should return private visibility when API returns success", async () => {
-        const mockVisibility: DBChatVisibility = "private";
+        const chatId = generateChatId();
+        const mockVisibility = CHAT_VISIBILITY.PRIVATE;
 
         const mockResponse = {
             success: true,
@@ -20,7 +22,7 @@ describe("getUserChatVisibility", () => {
 
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/chat-123",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.json(mockResponse);
                 },
@@ -28,14 +30,15 @@ describe("getUserChatVisibility", () => {
         );
 
         const result = await getUserChatVisibility({
-            chatId: "chat-123" as DBChatId,
+            chatId,
         });
 
-        expect(result).toBe("private");
+        expect(result).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 
     it("should return public visibility when API returns success", async () => {
-        const mockVisibility: DBChatVisibility = "public";
+        const chatId = generateChatId();
+        const mockVisibility = CHAT_VISIBILITY.PUBLIC;
 
         const mockResponse = {
             success: true,
@@ -47,7 +50,7 @@ describe("getUserChatVisibility", () => {
 
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/chat-456",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.json(mockResponse);
                 },
@@ -55,16 +58,17 @@ describe("getUserChatVisibility", () => {
         );
 
         const result = await getUserChatVisibility({
-            chatId: "chat-456" as DBChatId,
+            chatId,
         });
 
-        expect(result).toBe("public");
+        expect(result).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
     it("should throw error when API returns error response (not ok)", async () => {
+        const chatId = generateChatId();
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/chat-123",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.json(
                         { error: "Unauthorized" },
@@ -74,15 +78,16 @@ describe("getUserChatVisibility", () => {
             ),
         );
 
-        await expect(
-            getUserChatVisibility({ chatId: "chat-123" as DBChatId }),
-        ).rejects.toThrow("Failed to fetch chat visibility");
+        await expect(getUserChatVisibility({ chatId })).rejects.toThrow(
+            "Failed to fetch chat visibility",
+        );
     });
 
     it("should throw error when API returns 404 not found", async () => {
+        const chatId = generateChatId();
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/chat-999",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.json(
                         { error: "Chat not found" },
@@ -92,12 +97,13 @@ describe("getUserChatVisibility", () => {
             ),
         );
 
-        await expect(
-            getUserChatVisibility({ chatId: "chat-999" as DBChatId }),
-        ).rejects.toThrow("Failed to fetch chat visibility");
+        await expect(getUserChatVisibility({ chatId })).rejects.toThrow(
+            "Failed to fetch chat visibility",
+        );
     });
 
     it("should throw error when API response has success: false", async () => {
+        const chatId = generateChatId();
         const mockErrorResponse = {
             success: false,
             message: "Chat not found",
@@ -107,7 +113,7 @@ describe("getUserChatVisibility", () => {
 
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/chat-123",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.json(mockErrorResponse, {
                         status: 200,
@@ -116,30 +122,30 @@ describe("getUserChatVisibility", () => {
             ),
         );
 
-        await expect(
-            getUserChatVisibility({ chatId: "chat-123" as DBChatId }),
-        ).rejects.toThrow("Chat not found");
+        await expect(getUserChatVisibility({ chatId })).rejects.toThrow(
+            "Chat not found",
+        );
     });
 
     it("should throw error on network failure", async () => {
+        const chatId = generateChatId();
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/chat-123",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.error();
                 },
             ),
         );
 
-        await expect(
-            getUserChatVisibility({ chatId: "chat-123" as DBChatId }),
-        ).rejects.toThrow();
+        await expect(getUserChatVisibility({ chatId })).rejects.toThrow();
     });
 
     it("should throw error when API returns server error", async () => {
+        const chatId = generateChatId();
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/chat-123",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.json(
                         { error: "Internal server error" },
@@ -149,13 +155,14 @@ describe("getUserChatVisibility", () => {
             ),
         );
 
-        await expect(
-            getUserChatVisibility({ chatId: "chat-123" as DBChatId }),
-        ).rejects.toThrow("Failed to fetch chat visibility");
+        await expect(getUserChatVisibility({ chatId })).rejects.toThrow(
+            "Failed to fetch chat visibility",
+        );
     });
 
     it("should include chatId in the API request URL", async () => {
-        const mockVisibility: DBChatVisibility = "private";
+        const chatId = generateChatId();
+        const mockVisibility = CHAT_VISIBILITY.PRIVATE;
 
         const mockResponse = {
             success: true,
@@ -167,7 +174,7 @@ describe("getUserChatVisibility", () => {
 
         server.use(
             http.get(
-                "http://localhost/api/user-chats/visibility/specific-chat-id",
+                `http://localhost/api/user-chats/visibility/${chatId}`,
                 () => {
                     return HttpResponse.json(mockResponse);
                 },
@@ -175,9 +182,9 @@ describe("getUserChatVisibility", () => {
         );
 
         const result = await getUserChatVisibility({
-            chatId: "specific-chat-id" as DBChatId,
+            chatId,
         });
 
-        expect(result).toBe("private");
+        expect(result).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 });

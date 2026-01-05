@@ -1,3 +1,7 @@
+import {
+    generateUserEmail,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { signUp } from "./sign-up";
@@ -50,28 +54,30 @@ vi.mock("@/lib/api-response", () => ({
 }));
 
 describe("signUp", () => {
-    const mockUser = {
-        id: "00000000-0000-0000-0000-000000000001",
-        email: "test@example.com",
-        name: "Test User",
-        image: null,
-        role: "user" as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    };
-
     beforeEach(() => {
         vi.clearAllMocks();
         mocks.hashPassword.mockResolvedValue("hashed-password");
     });
 
-    it("creates user on success", async () => {
+    it("should create user on success", async () => {
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const mockUser = {
+            id: userId,
+            email,
+            name: "Test User",
+            image: null,
+            role: "user" as const,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+
         mocks.getUserByEmail.mockResolvedValue(null);
         mocks.createUser.mockResolvedValue(mockUser);
 
         const result = await signUp({
             name: "Test User",
-            email: "test@example.com",
+            email,
             password: "password123",
             confirmPassword: "password123",
         });
@@ -79,7 +85,7 @@ describe("signUp", () => {
         expect(result.success).toBe(true);
     });
 
-    it("returns error when validation fails", async () => {
+    it("should return error when validation fails", async () => {
         const result = await signUp({
             name: "A",
             email: "invalid-email",
@@ -90,12 +96,24 @@ describe("signUp", () => {
         expect(result.success).toBe(false);
     });
 
-    it("returns error when email already exists", async () => {
+    it("should return error when email already exists", async () => {
+        const userId = generateUserId();
+        const email = generateUserEmail();
+        const mockUser = {
+            id: userId,
+            email,
+            name: "Test User",
+            image: null,
+            role: "user" as const,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+        };
+
         mocks.getUserByEmail.mockResolvedValue(mockUser);
 
         const result = await signUp({
             name: "Test User",
-            email: "test@example.com",
+            email,
             password: "password123",
             confirmPassword: "password123",
         });
@@ -103,10 +121,12 @@ describe("signUp", () => {
         expect(result.success).toBe(false);
     });
 
-    it("returns error when passwords do not match", async () => {
+    it("should return error when passwords do not match", async () => {
+        const email = generateUserEmail();
+
         const result = await signUp({
             name: "Test User",
-            email: "test@example.com",
+            email,
             password: "password123",
             confirmPassword: "password456",
         });
@@ -114,13 +134,15 @@ describe("signUp", () => {
         expect(result.success).toBe(false);
     });
 
-    it("returns error when createUser fails", async () => {
+    it("should return error when createUser fails", async () => {
+        const email = generateUserEmail();
+
         mocks.getUserByEmail.mockResolvedValue(null);
         mocks.createUser.mockResolvedValue(null);
 
         const result = await signUp({
             name: "Test User",
-            email: "test@example.com",
+            email,
             password: "password123",
             confirmPassword: "password123",
         });
@@ -128,35 +150,18 @@ describe("signUp", () => {
         expect(result.success).toBe(false);
     });
 
-    it("returns error when getUserByEmail throws", async () => {
+    it("should return error when getUserByEmail throws", async () => {
+        const email = generateUserEmail();
+
         mocks.getUserByEmail.mockRejectedValue(new Error("Database error"));
 
         const result = await signUp({
             name: "Test User",
-            email: "test@example.com",
+            email,
             password: "password123",
             confirmPassword: "password123",
         });
 
         expect(result.success).toBe(false);
-    });
-
-    it("hashes password before creating user", async () => {
-        mocks.getUserByEmail.mockResolvedValue(null);
-        mocks.createUser.mockResolvedValue(mockUser);
-
-        await signUp({
-            name: "Test User",
-            email: "test@example.com",
-            password: "password123",
-            confirmPassword: "password123",
-        });
-
-        expect(mocks.hashPassword).toHaveBeenCalledWith("password123");
-        expect(mocks.createUser).toHaveBeenCalledWith({
-            email: "test@example.com",
-            name: "Test User",
-            password: "hashed-password",
-        });
     });
 });

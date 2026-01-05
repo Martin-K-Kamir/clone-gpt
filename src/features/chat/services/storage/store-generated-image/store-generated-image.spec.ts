@@ -17,7 +17,7 @@ describe("storeGeneratedImage", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("stores image and returns image URL", async () => {
+    it("should store image and return image URL", async () => {
         const content = new Uint8Array([
             0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
         ]);
@@ -42,7 +42,7 @@ describe("storeGeneratedImage", () => {
         expect(result.imageUrl).toContain(STORAGE_BUCKET.GENERATED_IMAGES);
     });
 
-    it("handles different image types", async () => {
+    it("should handle different image types", async () => {
         const content = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
         const generatedImage = {
             uint8Array: content,

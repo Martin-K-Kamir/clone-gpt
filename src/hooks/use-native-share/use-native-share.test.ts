@@ -29,7 +29,7 @@ describe("useNativeShare", () => {
         vi.restoreAllMocks();
     });
 
-    it("detects if native share is available", () => {
+    it("should detect if native share is available", () => {
         const { result } = renderHook(() =>
             useNativeShare({
                 onShare: mockOnShare,
@@ -39,7 +39,7 @@ describe("useNativeShare", () => {
         expect(result.current.canShare).toBe(true);
     });
 
-    it("detects if native share is not available", () => {
+    it("should detect if native share is not available", () => {
         Object.defineProperty(global, "navigator", {
             value: {},
             writable: true,
@@ -55,7 +55,7 @@ describe("useNativeShare", () => {
         expect(result.current.canShare).toBe(false);
     });
 
-    it("returns false and does not call onShare when share is not available", async () => {
+    it("should return false and not call onShare when share is not available", async () => {
         Object.defineProperty(global, "navigator", {
             value: {},
             writable: true,
@@ -74,7 +74,7 @@ describe("useNativeShare", () => {
         expect(mockOnShare).not.toHaveBeenCalled();
     });
 
-    it("calls onSuccess and returns true when share succeeds", async () => {
+    it("should call onSuccess and return true when share succeeds", async () => {
         mockShare.mockResolvedValue(undefined);
 
         const { result } = renderHook(() =>
@@ -90,7 +90,7 @@ describe("useNativeShare", () => {
         expect(mockOnSuccess).toHaveBeenCalledTimes(1);
     });
 
-    it("does not call onError when AbortError occurs", async () => {
+    it("should not call onError when AbortError occurs", async () => {
         const abortError = new Error("User aborted");
         abortError.name = "AbortError";
         mockShare.mockRejectedValue(abortError);
@@ -108,7 +108,7 @@ describe("useNativeShare", () => {
         expect(mockOnError).not.toHaveBeenCalled();
     });
 
-    it("calls onError and returns false when share fails", async () => {
+    it("should call onError and return false when share fails", async () => {
         const error = new Error("Share failed");
         mockShare.mockRejectedValue(error);
 
@@ -125,7 +125,7 @@ describe("useNativeShare", () => {
         expect(mockOnError).toHaveBeenCalledWith(error);
     });
 
-    it("handles share data with partial or empty fields", async () => {
+    it("should handle share data with partial or empty fields", async () => {
         mockShare.mockResolvedValue(undefined);
 
         const partialOnShare = vi.fn(() => ({ title: "Only Title" }));
@@ -141,7 +141,7 @@ describe("useNativeShare", () => {
         expect(await result2.current.share()).toBe(true);
     });
 
-    it("handles SSR when navigator is undefined", () => {
+    it("should handle SSR when navigator is undefined", () => {
         Object.defineProperty(global, "navigator", {
             value: undefined,
             writable: true,

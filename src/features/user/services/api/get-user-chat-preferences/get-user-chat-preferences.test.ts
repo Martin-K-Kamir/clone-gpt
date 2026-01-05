@@ -1,11 +1,11 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { server } from "@/vitest/unit-setup";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type {
-    DBUserChatPreferences,
-    DBUserId,
-} from "@/features/user/lib/types";
+import { AI_PERSONALITIES } from "@/features/chat/lib/constants/ai";
+
+import type { DBUserChatPreferences } from "@/features/user/lib/types";
 
 import { ApiError } from "@/lib/classes";
 
@@ -13,10 +13,11 @@ import { getUserChatPreferences } from "./get-user-chat-preferences";
 
 describe("getUserChatPreferences", () => {
     it("should return user chat preferences when API returns success", async () => {
+        const userId = generateUserId();
         const mockPreferences: DBUserChatPreferences = {
             id: "pref-123",
-            userId: "user-123" as DBUserId,
-            personality: "FRIENDLY",
+            userId,
+            personality: AI_PERSONALITIES.FRIENDLY.id,
             nickname: "Assistant",
             role: "helper",
             characteristics: "Helpful and friendly",
@@ -41,16 +42,17 @@ describe("getUserChatPreferences", () => {
         const result = await getUserChatPreferences();
 
         expect(result).toEqual(mockPreferences);
-        expect(result.userId).toBe("user-123");
-        expect(result.personality).toBe("FRIENDLY");
+        expect(result.userId).toBe(userId);
+        expect(result.personality).toBe(AI_PERSONALITIES.FRIENDLY.id);
         expect(result.nickname).toBe("Assistant");
     });
 
     it("should return user chat preferences with null optional fields", async () => {
+        const userId = generateUserId();
         const mockPreferences: DBUserChatPreferences = {
             id: "pref-456",
-            userId: "user-456" as DBUserId,
-            personality: "PROFESSIONAL",
+            userId,
+            personality: AI_PERSONALITIES.PROFESSIONAL.id,
             nickname: null,
             role: null,
             characteristics: null,
@@ -79,25 +81,26 @@ describe("getUserChatPreferences", () => {
         expect(result.role).toBeNull();
         expect(result.characteristics).toBeNull();
         expect(result.extraInfo).toBeNull();
-        expect(result.personality).toBe("PROFESSIONAL");
+        expect(result.personality).toBe(AI_PERSONALITIES.PROFESSIONAL.id);
     });
 
     it("should return user chat preferences with different personality types", async () => {
+        const userId = generateUserId();
         const personalities = [
-            "FRIENDLY",
-            "CYNICAL",
-            "ROBOT",
-            "LISTENER",
-            "NERD",
-            "YODA",
-            "PROFESSIONAL",
-            "SILLY",
+            AI_PERSONALITIES.FRIENDLY.id,
+            AI_PERSONALITIES.CYNICAL.id,
+            AI_PERSONALITIES.ROBOT.id,
+            AI_PERSONALITIES.LISTENER.id,
+            AI_PERSONALITIES.NERD.id,
+            AI_PERSONALITIES.YODA.id,
+            AI_PERSONALITIES.PROFESSIONAL.id,
+            AI_PERSONALITIES.SILLY.id,
         ] as const;
 
         for (const personality of personalities) {
             const mockPreferences: DBUserChatPreferences = {
                 id: "pref-test",
-                userId: "user-test" as DBUserId,
+                userId,
                 personality,
                 nickname: null,
                 role: null,

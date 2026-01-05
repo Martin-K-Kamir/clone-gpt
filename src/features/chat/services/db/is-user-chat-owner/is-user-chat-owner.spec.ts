@@ -12,19 +12,19 @@ const otherUserChatId = "30000000-0000-0000-0000-000000000003" as DBChatId;
 const missingChatId = "30000000-0000-0000-0000-000000000999" as DBChatId;
 
 describe("isUserChatOwner", () => {
-    it("returns true when user is owner", async () => {
+    it("should return true when user is owner", async () => {
         const result = await isUserChatOwner({ chatId, userId: userId1 });
 
         expect(result).toBe(true);
     });
 
-    it("throws when user is not owner", async () => {
+    it("should throw when user is not owner", async () => {
         await expect(
             isUserChatOwner({ chatId: otherUserChatId, userId: userId1 }),
         ).rejects.toThrow("Failed to check chat ownership");
     });
 
-    it("throws when chat does not exist", async () => {
+    it("should throw when chat does not exist", async () => {
         await expect(
             isUserChatOwner({ chatId: missingChatId, userId: userId1 }),
         ).rejects.toThrow("Failed to check chat ownership");

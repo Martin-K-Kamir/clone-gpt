@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { supabase } from "@/services/supabase";
@@ -21,7 +22,7 @@ describe("updateUserName", () => {
         vi.clearAllMocks();
     });
 
-    it("updates the user name", async () => {
+    it("should update the user name", async () => {
         const userId = generateUserId() as DBUserId;
         const email = generateUserEmail();
 
@@ -31,7 +32,7 @@ describe("updateUserName", () => {
                 email,
                 name: "Old Name",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         } as any);
 
@@ -39,7 +40,7 @@ describe("updateUserName", () => {
             id: userId,
             email,
             name: "Old Name",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         const result = await updateUserName({ newName: "New Name" });

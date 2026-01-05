@@ -25,7 +25,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when messageId is invalid", async () => {
+    it("should throw when messageId is invalid", async () => {
         await expect(
             deleteUserChatMessagesStartingFrom({
                 messageId: "not-a-uuid" as any,
@@ -35,7 +35,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             deleteUserChatMessagesStartingFrom({
                 messageId,
@@ -45,7 +45,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             deleteUserChatMessagesStartingFrom({
                 messageId,
@@ -55,7 +55,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when target message not found", async () => {
+    it("should throw when target message not found", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -78,7 +78,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         ).rejects.toThrow("Target message not found");
     });
 
-    it("succeeds when target message exists and delete works", async () => {
+    it("should succeed when target message exists and delete works", async () => {
         const targetCreatedAt = "2024-01-02T00:00:00Z";
 
         const selectChain = {
@@ -114,7 +114,7 @@ describe("deleteUserChatMessagesStartingFrom", () => {
         ).resolves.not.toThrow();
     });
 
-    it("throws on delete error", async () => {
+    it("should throw on delete error", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

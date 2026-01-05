@@ -19,13 +19,13 @@ describe("useHover", () => {
         document.body.removeChild(element);
     });
 
-    it("returns false initially", () => {
+    it("should return false initially", () => {
         const { result } = renderHook(() => useHover(ref));
 
         expect(result.current).toBe(false);
     });
 
-    it("returns true when hovered and false when not hovered", async () => {
+    it("should return true when hovered and false when not hovered", async () => {
         const { result } = renderHook(() => useHover(ref));
 
         element.dispatchEvent(new MouseEvent("mouseenter", { bubbles: true }));
@@ -39,7 +39,7 @@ describe("useHover", () => {
         });
     });
 
-    it("calls callbacks on hover state changes", async () => {
+    it("should call callbacks on hover state changes", async () => {
         const onEnter = vi.fn();
         const onLeave = vi.fn();
 
@@ -56,14 +56,14 @@ describe("useHover", () => {
         });
     });
 
-    it("handles null ref", () => {
+    it("should handle null ref", () => {
         const nullRef = createRef<HTMLDivElement | null>();
         const { result } = renderHook(() => useHover(nullRef));
 
         expect(result.current).toBe(false);
     });
 
-    it("stops responding to events after unmount", () => {
+    it("should stop responding to events after unmount", () => {
         const onEnter = vi.fn();
         const { unmount } = renderHook(() => useHover(ref, { onEnter }));
 
@@ -77,7 +77,7 @@ describe("useHover", () => {
         expect(onEnter).not.toHaveBeenCalled();
     });
 
-    it("updates callbacks when they change", async () => {
+    it("should update callbacks when they change", async () => {
         const onEnter1 = vi.fn();
         const onEnter2 = vi.fn();
 

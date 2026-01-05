@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { ORDER_BY } from "@/lib/constants";
@@ -23,13 +25,13 @@ describe("getUserChatsByDate", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             getUserChatsByDate({ userId: "not-a-uuid" as any }),
         ).rejects.toThrow();
     });
 
-    it("throws when limit is invalid", async () => {
+    it("should throw when limit is invalid", async () => {
         await expect(
             getUserChatsByDate({
                 userId,
@@ -38,7 +40,7 @@ describe("getUserChatsByDate", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when from is invalid", async () => {
+    it("should throw when from is invalid", async () => {
         await expect(
             getUserChatsByDate({
                 userId,
@@ -47,7 +49,7 @@ describe("getUserChatsByDate", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when to is invalid", async () => {
+    it("should throw when to is invalid", async () => {
         await expect(
             getUserChatsByDate({
                 userId,
@@ -56,13 +58,13 @@ describe("getUserChatsByDate", () => {
         ).rejects.toThrow();
     });
 
-    it("returns chats filtered by date range", async () => {
+    it("should return chats filtered by date range", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -71,7 +73,7 @@ describe("getUserChatsByDate", () => {
                 id: "chat-2",
                 userId,
                 title: "Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-02T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-02T00:00:00Z",
@@ -104,13 +106,13 @@ describe("getUserChatsByDate", () => {
         expect(result[1].id).toBe("chat-2");
     });
 
-    it("returns chats with default to date when not provided", async () => {
+    it("should return chats with default to date when not provided", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -140,13 +142,13 @@ describe("getUserChatsByDate", () => {
         expect(result).toHaveLength(1);
     });
 
-    it("returns chats with default from date when not provided", async () => {
+    it("should return chats with default from date when not provided", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -176,13 +178,13 @@ describe("getUserChatsByDate", () => {
         expect(result).toHaveLength(1);
     });
 
-    it("respects limit parameter", async () => {
+    it("should respect limit parameter", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -211,13 +213,13 @@ describe("getUserChatsByDate", () => {
         expect(result).toHaveLength(1);
     });
 
-    it("uses custom orderBy parameter", async () => {
+    it("should use custom orderBy parameter", async () => {
         const mockChats = [
             {
                 id: "chat-1",
                 userId,
                 title: "Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -249,7 +251,7 @@ describe("getUserChatsByDate", () => {
         expect(result).toHaveLength(1);
     });
 
-    it("handles empty results", async () => {
+    it("should handle empty results", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({
@@ -272,7 +274,7 @@ describe("getUserChatsByDate", () => {
         expect(result).toHaveLength(0);
     });
 
-    it("throws when fetch fails", async () => {
+    it("should throw when fetch fails", async () => {
         mocks.from.mockReturnValue({
             select: vi.fn().mockReturnValue({
                 eq: vi.fn().mockReturnValue({

@@ -10,7 +10,7 @@ describe("useSelectableItems", () => {
             name: `Item ${i}`,
         }));
 
-    it("returns initial items up to maxVisible", () => {
+    it("should return initial items up to maxVisible", () => {
         const items = createItems(10);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -21,14 +21,14 @@ describe("useSelectableItems", () => {
         expect(result.current.canRefresh).toBe(true);
     });
 
-    it("uses default maxVisible of 8", () => {
+    it("should use default maxVisible of 8", () => {
         const items = createItems(10);
         const { result } = renderHook(() => useSelectableItems(items));
 
         expect(result.current.items).toHaveLength(8);
     });
 
-    it("selects item and removes it from available items", async () => {
+    it("should select item and remove it from available items", async () => {
         const items = createItems(10);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -50,7 +50,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("decreases visible count when item is selected", async () => {
+    it("should decrease visible count when item is selected", async () => {
         const items = createItems(10);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -66,7 +66,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("adds selected item to selectedItems array", async () => {
+    it("should add selected item to selectedItems array", async () => {
         const items = createItems(10);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -92,7 +92,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("excludes selected items from available items", async () => {
+    it("should exclude selected items from available items", async () => {
         const items = createItems(10);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 10 }),
@@ -113,7 +113,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("refreshes items and resets visible count", async () => {
+    it("should refresh items and reset visible count", async () => {
         const items = createItems(20);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -146,7 +146,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("excludes selected items when refreshing", async () => {
+    it("should exclude selected items when refreshing", async () => {
         const items = createItems(20);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -169,7 +169,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("returns canRefresh as true when more items available", () => {
+    it("should return canRefresh as true when more items available", () => {
         const items = createItems(20);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -184,7 +184,7 @@ describe("useSelectableItems", () => {
         expect(result.current.canRefresh).toBe(true);
     });
 
-    it("returns canRefresh as false when all items selected or visible", async () => {
+    it("should return canRefresh as false when all items selected or visible", async () => {
         const items = createItems(5);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 3 }),
@@ -200,7 +200,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("allows setting selectedItems directly", async () => {
+    it("should allow setting selectedItems directly", async () => {
         const items = createItems(10);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 5 }),
@@ -230,7 +230,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("updates available items when selectedItems changes", async () => {
+    it("should update available items when selectedItems changes", async () => {
         const items = createItems(10);
         const { result } = renderHook(() =>
             useSelectableItems(items, { maxVisible: 10 }),
@@ -251,7 +251,7 @@ describe("useSelectableItems", () => {
         });
     });
 
-    it("handles empty items array", () => {
+    it("should handle empty items array", () => {
         const { result } = renderHook(() =>
             useSelectableItems([], { maxVisible: 5 }),
         );
@@ -261,7 +261,7 @@ describe("useSelectableItems", () => {
         expect(result.current.canRefresh).toBe(false);
     });
 
-    it("maintains item properties when selecting", async () => {
+    it("should maintain item properties when selecting", async () => {
         const items = [
             { id: "1", name: "Item 1", category: "A" },
             { id: "2", name: "Item 2", category: "B" },

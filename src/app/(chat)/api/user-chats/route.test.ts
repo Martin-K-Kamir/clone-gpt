@@ -1,3 +1,4 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -51,22 +52,14 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("GET /api/user-chats", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
+    const mockSession = createMockSessionWithUser();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
     });
 
-    it("returns user chats successfully without query parameters", async () => {
+    it("should return user chats successfully without query parameters", async () => {
         const mockChats = {
             chats: [],
             hasNextPage: false,
@@ -82,7 +75,7 @@ describe("GET /api/user-chats", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns user chats with query parameters", async () => {
+    it("should return user chats with query parameters", async () => {
         const mockChats = {
             chats: [],
             hasNextPage: false,
@@ -101,7 +94,7 @@ describe("GET /api/user-chats", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns user chats with date range", async () => {
+    it("should return user chats with date range", async () => {
         const mockChats = {
             chats: [],
             hasNextPage: false,
@@ -121,7 +114,7 @@ describe("GET /api/user-chats", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("handles invalid query parameters gracefully", async () => {
+    it("should handle invalid query parameters gracefully", async () => {
         const mockChats = {
             chats: [],
             hasNextPage: false,
@@ -140,7 +133,7 @@ describe("GET /api/user-chats", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const url = new URL("http://localhost/api/user-chats");
@@ -151,7 +144,7 @@ describe("GET /api/user-chats", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when getUserChats fails", async () => {
+    it("should return error when getUserChats fails", async () => {
         mocks.getUserChats.mockRejectedValue(new Error("Database error"));
 
         const url = new URL("http://localhost/api/user-chats");
@@ -162,7 +155,7 @@ describe("GET /api/user-chats", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when getUserChatsByDate fails", async () => {
+    it("should return error when getUserChatsByDate fails", async () => {
         mocks.getUserChatsByDate.mockRejectedValue(new Error("Database error"));
 
         const fromDate = new Date("2024-01-01");

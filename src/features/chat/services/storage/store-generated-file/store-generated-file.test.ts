@@ -23,7 +23,7 @@ describe("storeGeneratedFile", () => {
         vi.clearAllMocks();
     });
 
-    it("stores file and returns file URL", async () => {
+    it("should store file and return file URL", async () => {
         const generatedFile = Buffer.from([1, 2, 3, 4]);
         const fileId = "550e8400-e29b-41d4-a716-446655440000";
         const publicUrl =
@@ -51,7 +51,7 @@ describe("storeGeneratedFile", () => {
         });
     });
 
-    it("handles different file types", async () => {
+    it("should handle different file types", async () => {
         const generatedFile = Buffer.from("test content", "utf8");
         const fileId = "550e8400-e29b-41d4-a716-446655440000";
         const publicUrl =
@@ -77,7 +77,7 @@ describe("storeGeneratedFile", () => {
         expect(result.name).toBe("document");
     });
 
-    it("handles different content types", async () => {
+    it("should handle different content types", async () => {
         const generatedFile = Buffer.from("json data", "utf8");
         const fileId = "550e8400-e29b-41d4-a716-446655440000";
         const publicUrl =
@@ -105,7 +105,7 @@ describe("storeGeneratedFile", () => {
         });
     });
 
-    it("uses GENERATED_FILES bucket", async () => {
+    it("should use GENERATED_FILES bucket", async () => {
         const generatedFile = Buffer.from([1, 2, 3]);
         const fileId = "550e8400-e29b-41d4-a716-446655440000";
         const publicUrl =
@@ -129,7 +129,7 @@ describe("storeGeneratedFile", () => {
         expect(result.fileUrl).toContain(STORAGE_BUCKET.GENERATED_FILES);
     });
 
-    it("throws error when upload fails", async () => {
+    it("should throw error when upload fails", async () => {
         const generatedFile = Buffer.from([1, 2, 3]);
         const uploadError = new Error("Upload failed");
 

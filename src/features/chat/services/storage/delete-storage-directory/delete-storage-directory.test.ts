@@ -39,7 +39,7 @@ describe("deleteStorageDirectory", () => {
         });
     });
 
-    it("deletes all files for a specific chat", async () => {
+    it("should delete all files for a specific chat", async () => {
         mocks.list.mockResolvedValueOnce({
             data: [
                 {
@@ -65,7 +65,7 @@ describe("deleteStorageDirectory", () => {
         expect(result).toEqual({ userId, chatId });
     });
 
-    it("deletes all files for a user when chatId is not provided", async () => {
+    it("should delete all files for a user when chatId is not provided", async () => {
         mocks.list
             .mockResolvedValueOnce({
                 data: [
@@ -96,7 +96,7 @@ describe("deleteStorageDirectory", () => {
         expect(result).toEqual({ userId, chatId: undefined });
     });
 
-    it("handles recursive deletion of nested folders", async () => {
+    it("should handle recursive deletion of nested folders", async () => {
         mocks.list
             .mockResolvedValueOnce({
                 data: [
@@ -132,7 +132,7 @@ describe("deleteStorageDirectory", () => {
         expect(result).toEqual({ userId, chatId });
     });
 
-    it("handles empty directories gracefully", async () => {
+    it("should handle empty directories gracefully", async () => {
         mocks.list.mockResolvedValue({
             data: [],
             error: null,
@@ -147,7 +147,7 @@ describe("deleteStorageDirectory", () => {
         expect(result).toEqual({ userId, chatId });
     });
 
-    it("throws error when list fails", async () => {
+    it("should throw error when list fails", async () => {
         mocks.list.mockResolvedValue({
             data: null,
             error: { message: "Access denied" },
@@ -161,7 +161,7 @@ describe("deleteStorageDirectory", () => {
         ).rejects.toThrow("Failed to list");
     });
 
-    it("throws error when delete fails", async () => {
+    it("should throw error when delete fails", async () => {
         mocks.list.mockResolvedValue({
             data: [
                 {
@@ -185,7 +185,7 @@ describe("deleteStorageDirectory", () => {
         ).rejects.toThrow("Failed to delete files from");
     });
 
-    it("works with different buckets", async () => {
+    it("should work with different buckets", async () => {
         mocks.list.mockResolvedValue({
             data: [],
             error: null,

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { hashId } from "./hash-id";
 
 describe("hashId", () => {
-    it("hashes an ID and returns 16 character hex string", () => {
+    it("should hash an ID and return 16 character hex string", () => {
         const id = "00000000-0000-0000-0000-000000000001";
         const result = hashId(id);
 
@@ -11,7 +11,7 @@ describe("hashId", () => {
         expect(result).toMatch(/^[0-9a-f]{16}$/);
     });
 
-    it("produces same hash for same input", () => {
+    it("should produce same hash for same input", () => {
         const id = "30000000-0000-0000-0000-000000000001";
 
         const result1 = hashId(id);
@@ -20,7 +20,7 @@ describe("hashId", () => {
         expect(result1).toBe(result2);
     });
 
-    it("produces different hash for different inputs", () => {
+    it("should produce different hash for different inputs", () => {
         const id1 = "00000000-0000-0000-0000-000000000001";
         const id2 = "00000000-0000-0000-0000-000000000002";
 
@@ -30,7 +30,7 @@ describe("hashId", () => {
         expect(result1).not.toBe(result2);
     });
 
-    it("handles different ID formats", () => {
+    it("should handle different ID formats", () => {
         const uuid = "550e8400-e29b-41d4-a716-446655440000";
         const simpleId = "user123";
         const longId = "a".repeat(100);

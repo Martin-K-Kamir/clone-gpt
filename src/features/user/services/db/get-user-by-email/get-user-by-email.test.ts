@@ -20,13 +20,13 @@ describe("getUserByEmail", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when email is invalid", async () => {
+    it("should throw when email is invalid", async () => {
         await expect(
             getUserByEmail({ email: "not-an-email" as any }),
         ).rejects.toThrow();
     });
 
-    it("returns user on success", async () => {
+    it("should return user on success", async () => {
         const mockUser = { id: "u1", email: "a@example.com" };
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
@@ -44,7 +44,7 @@ describe("getUserByEmail", () => {
         expect(result).toEqual(mockUser);
     });
 
-    it("returns null when record does not exist", async () => {
+    it("should return null when record does not exist", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({
@@ -61,7 +61,7 @@ describe("getUserByEmail", () => {
         expect(result).toBeNull();
     });
 
-    it("throws on other errors", async () => {
+    it("should throw on other errors", async () => {
         mocks.from.mockReturnValue({
             select: mocks.select.mockReturnValue({
                 eq: mocks.eq.mockReturnValue({

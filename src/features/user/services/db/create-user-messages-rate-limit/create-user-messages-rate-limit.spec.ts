@@ -7,7 +7,7 @@ import { createUserMessagesRateLimit } from "./create-user-messages-rate-limit";
 const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 
 describe("createUserMessagesRateLimit", () => {
-    it("creates rate limit for user", async () => {
+    it("should create rate limit for user", async () => {
         const rate = await createUserMessagesRateLimit({ userId });
 
         expect(rate).not.toBeNull();

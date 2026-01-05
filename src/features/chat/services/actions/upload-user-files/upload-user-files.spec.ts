@@ -9,6 +9,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { auth } from "@/features/auth/services/auth";
 
 import { CHAT_MESSAGE_TYPE } from "@/features/chat/lib/constants";
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { supabase } from "@/services/supabase";
 
@@ -30,7 +33,7 @@ describe("uploadUserFiles", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("uploads files and returns processed files", async () => {
+    it("should upload files and return processed files", async () => {
         const chatId = generateChatId();
 
         (auth as any).mockResolvedValue({
@@ -39,7 +42,7 @@ describe("uploadUserFiles", () => {
                 email,
                 name: "Test User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -47,14 +50,14 @@ describe("uploadUserFiles", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -104,7 +107,7 @@ describe("uploadUserFiles", () => {
         }
     });
 
-    it("handles image files with dimensions", async () => {
+    it("should handle image files with dimensions", async () => {
         const chatId = generateChatId();
 
         (auth as any).mockResolvedValue({
@@ -113,7 +116,7 @@ describe("uploadUserFiles", () => {
                 email,
                 name: "Test User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -121,14 +124,14 @@ describe("uploadUserFiles", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -161,7 +164,7 @@ describe("uploadUserFiles", () => {
         }
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         const chatId = generateChatId();
         (auth as any).mockResolvedValue(null);
 

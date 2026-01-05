@@ -34,7 +34,7 @@ describe("deleteUserFile", () => {
         });
     });
 
-    it("deletes file and returns fileId", async () => {
+    it("should delete file and return fileId", async () => {
         const storedFile = {
             fileId,
             name: "test-file.txt",
@@ -55,7 +55,7 @@ describe("deleteUserFile", () => {
         expect(result).toEqual({ fileId });
     });
 
-    it("throws error when delete fails", async () => {
+    it("should throw error when delete fails", async () => {
         const storedFile = {
             fileId,
             name: "test-file.txt",
@@ -78,7 +78,7 @@ describe("deleteUserFile", () => {
         ).rejects.toThrow("Failed to delete file from storage: File not found");
     });
 
-    it("handles files with different extensions", async () => {
+    it("should handle files with different extensions", async () => {
         const storedFile = {
             fileId,
             name: "image.png",
@@ -99,7 +99,7 @@ describe("deleteUserFile", () => {
         expect(result).toEqual({ fileId });
     });
 
-    it("handles files with multiple dots in name", async () => {
+    it("should handle files with multiple dots in name", async () => {
         const storedFile = {
             fileId,
             name: "my.file.name.pdf",

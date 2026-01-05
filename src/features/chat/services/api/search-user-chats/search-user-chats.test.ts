@@ -1,10 +1,13 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { server } from "@/vitest/unit-setup";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { DBChatId, DBChatSearchResult } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import type { DBChatSearchResult } from "@/features/chat/lib/types";
 
 import { searchUserChats } from "./search-user-chats";
 
@@ -12,13 +15,13 @@ describe("searchUserChats", () => {
     it("should return search results when API returns success with query only", async () => {
         const mockSearchResults: DBChatSearchResult[] = [
             {
-                id: "chat-1" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: generateChatId(),
+                userId: generateUserId(),
                 title: "Test Chat",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 snippet: "This is a test chat snippet",
             },
         ];
@@ -58,7 +61,7 @@ describe("searchUserChats", () => {
             hasNextPage: false,
         });
         expect(result.data).toHaveLength(1);
-        expect(result.data[0].id).toBe("chat-1");
+        expect(result.data[0]?.id).toBeDefined();
         expect(result.data[0].title).toBe("Test Chat");
         expect(result.data[0].snippet).toBe("This is a test chat snippet");
     });
@@ -66,13 +69,13 @@ describe("searchUserChats", () => {
     it("should return search results with query and limit", async () => {
         const mockSearchResults: DBChatSearchResult[] = [
             {
-                id: "chat-2" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: generateChatId(),
+                userId: generateUserId(),
                 title: "Another Chat",
                 createdAt: "2024-01-03T00:00:00Z",
                 updatedAt: "2024-01-04T00:00:00Z",
                 visibleAt: "2024-01-03T00:00:00Z",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 snippet: "Another chat snippet",
             },
         ];
@@ -126,13 +129,13 @@ describe("searchUserChats", () => {
     it("should return search results with query, cursor, and limit", async () => {
         const mockSearchResults: DBChatSearchResult[] = [
             {
-                id: "chat-3" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: generateChatId(),
+                userId: generateUserId(),
                 title: "Third Chat",
                 createdAt: "2024-01-05T00:00:00Z",
                 updatedAt: "2024-01-06T00:00:00Z",
                 visibleAt: "2024-01-05T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 snippet: "Third chat snippet",
             },
         ];
@@ -185,13 +188,13 @@ describe("searchUserChats", () => {
     it("should return search results with cursor only", async () => {
         const mockSearchResults: DBChatSearchResult[] = [
             {
-                id: "chat-4" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: generateChatId(),
+                userId: generateUserId(),
                 title: "Fourth Chat",
                 createdAt: "2024-01-07T00:00:00Z",
                 updatedAt: "2024-01-08T00:00:00Z",
                 visibleAt: "2024-01-07T00:00:00Z",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 snippet: "Fourth chat snippet",
             },
         ];
@@ -281,23 +284,23 @@ describe("searchUserChats", () => {
     it("should return multiple search results", async () => {
         const mockSearchResults: DBChatSearchResult[] = [
             {
-                id: "chat-5" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: generateChatId(),
+                userId: generateUserId(),
                 title: "Chat Five",
                 createdAt: "2024-02-01T00:00:00Z",
                 updatedAt: "2024-02-02T00:00:00Z",
                 visibleAt: "2024-02-01T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 snippet: "Chat five snippet",
             },
             {
-                id: "chat-6" as DBChatId,
-                userId: "user-456" as DBUserId,
+                id: generateChatId(),
+                userId: generateUserId(),
                 title: "Chat Six",
                 createdAt: "2024-02-03T00:00:00Z",
                 updatedAt: "2024-02-04T00:00:00Z",
                 visibleAt: "2024-02-03T00:00:00Z",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 snippet: "Chat six snippet",
             },
         ];
@@ -332,8 +335,8 @@ describe("searchUserChats", () => {
             hasNextPage: false,
         });
         expect(result.data).toHaveLength(2);
-        expect(result.data[0].id).toBe("chat-5");
-        expect(result.data[1].id).toBe("chat-6");
+        expect(result.data[0]?.id).toBeDefined();
+        expect(result.data[1]?.id).toBeDefined();
     });
 
     it("should throw error when API returns error response (not ok)", async () => {

@@ -1,6 +1,5 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import { auth } from "@/features/auth/services/auth";
 
 import { handleApiError } from "@/lib/utils/handle-api-error";
 
@@ -13,6 +12,7 @@ const constants = vi.hoisted(() => ({
 
 const mocks = vi.hoisted(() => ({
     from: vi.fn(),
+    auth: vi.fn(),
 }));
 
 vi.mock("@/services/supabase", () => ({
@@ -22,7 +22,7 @@ vi.mock("@/services/supabase", () => ({
 }));
 
 vi.mock("@/features/auth/services/auth", () => ({
-    auth: vi.fn().mockResolvedValue({ user: { id: constants.userId } }),
+    auth: mocks.auth,
 }));
 
 const apiSuccess = { ok: true };
@@ -62,10 +62,10 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 describe("upsertUserChatPreferences", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({ user: { id: constants.userId } });
+        mocks.auth.mockResolvedValue({ user: { id: constants.userId } } as any);
     });
 
-    it("saves preferences successfully", async () => {
+    it("should save preferences successfully", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiSuccess as any,
         );
@@ -88,7 +88,7 @@ describe("upsertUserChatPreferences", () => {
         expect(result).toBe(apiSuccess);
     });
 
-    it("returns not found when record does not exist", async () => {
+    it("should return not found when record does not exist", async () => {
         vi.mocked(handleApiError).mockImplementationOnce(
             () => apiNotFound as any,
         );
@@ -111,7 +111,7 @@ describe("upsertUserChatPreferences", () => {
         expect(result).toBe(apiNotFound);
     });
 
-    it("returns error when operation fails", async () => {
+    it("should return error when operation fails", async () => {
         mocks.from.mockImplementation(() => ({
             upsert: vi.fn().mockReturnValue({
                 select: vi.fn().mockReturnValue({
@@ -130,8 +130,8 @@ describe("upsertUserChatPreferences", () => {
         expect(result).toBe(apiError);
     });
 
-    it("returns api error when session is missing", async () => {
-        (auth as any).mockResolvedValue(null);
+    it("should return api error when session is missing", async () => {
+        mocks.auth.mockResolvedValue(null as any);
 
         const result = await upsertUserChatPreferences({
             userChatPreferences: constants.prefs as any,
@@ -140,8 +140,8 @@ describe("upsertUserChatPreferences", () => {
         expect(result).toBe(apiError);
     });
 
-    it("returns api error when userId is invalid", async () => {
-        (auth as any).mockResolvedValue({ user: { id: "not-a-uuid" } });
+    it("should return api error when userId is invalid", async () => {
+        mocks.auth.mockResolvedValue({ user: { id: "not-a-uuid" } } as any);
 
         const result = await upsertUserChatPreferences({
             userChatPreferences: constants.prefs as any,
@@ -150,7 +150,7 @@ describe("upsertUserChatPreferences", () => {
         expect(result).toBe(apiError);
     });
 
-    it("returns api error when userChatPreferences validation fails", async () => {
+    it("should return api error when userChatPreferences validation fails", async () => {
         const result = await upsertUserChatPreferences({
             userChatPreferences: {} as any,
         });

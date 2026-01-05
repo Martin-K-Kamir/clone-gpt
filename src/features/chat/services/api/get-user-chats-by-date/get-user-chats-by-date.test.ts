@@ -1,24 +1,29 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { server } from "@/vitest/unit-setup";
 import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
 
-import type { DBChat, DBChatId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import type { DBChat } from "@/features/chat/lib/types";
 
 import { getUserChatsByDate } from "./get-user-chats-by-date";
 
 describe("getUserChatsByDate", () => {
     it("should return chat data array when API returns success with from date", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-1" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId,
+                userId,
                 title: "Chat 1",
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
             },
         ];
 
@@ -45,20 +50,22 @@ describe("getUserChatsByDate", () => {
 
         expect(result).toEqual(mockChats);
         expect(result).toHaveLength(1);
-        expect(result[0].id).toBe("chat-1");
+        expect(result[0].id).toBe(chatId);
         expect(result[0].title).toBe("Chat 1");
     });
 
     it("should return chat data array with from and to dates", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-2" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId,
+                userId,
                 title: "Chat 2",
                 createdAt: "2024-01-15T00:00:00Z",
                 updatedAt: "2024-01-16T00:00:00Z",
                 visibleAt: "2024-01-15T00:00:00Z",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
             },
         ];
 
@@ -91,19 +98,21 @@ describe("getUserChatsByDate", () => {
         });
 
         expect(result).toEqual(mockChats);
-        expect(result[0].visibility).toBe("public");
+        expect(result[0].visibility).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
     it("should return chat data array with from, to, limit, and orderBy", async () => {
+        const chatId = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-3" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId,
+                userId,
                 title: "Chat 3",
                 createdAt: "2024-02-01T00:00:00Z",
                 updatedAt: "2024-02-02T00:00:00Z",
                 visibleAt: "2024-02-01T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
             },
         ];
 
@@ -169,24 +178,27 @@ describe("getUserChatsByDate", () => {
     });
 
     it("should return multiple chats when API returns multiple items", async () => {
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
+        const userId = generateUserId();
         const mockChats: DBChat[] = [
             {
-                id: "chat-4" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId1,
+                userId,
                 title: "Chat 4",
                 createdAt: "2024-04-01T00:00:00Z",
                 updatedAt: "2024-04-02T00:00:00Z",
                 visibleAt: "2024-04-01T00:00:00Z",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
             },
             {
-                id: "chat-5" as DBChatId,
-                userId: "user-123" as DBUserId,
+                id: chatId2,
+                userId,
                 title: "Chat 5",
                 createdAt: "2024-04-02T00:00:00Z",
                 updatedAt: "2024-04-03T00:00:00Z",
                 visibleAt: "2024-04-02T00:00:00Z",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
             },
         ];
 
@@ -213,8 +225,8 @@ describe("getUserChatsByDate", () => {
 
         expect(result).toEqual(mockChats);
         expect(result).toHaveLength(2);
-        expect(result[0].id).toBe("chat-4");
-        expect(result[1].id).toBe("chat-5");
+        expect(result[0].id).toBe(chatId1);
+        expect(result[1].id).toBe(chatId2);
     });
 
     it("should throw error when API returns error response (not ok)", async () => {

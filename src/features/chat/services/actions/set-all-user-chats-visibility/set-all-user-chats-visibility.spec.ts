@@ -7,6 +7,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
+
 import { supabase } from "@/services/supabase";
 
 import { setAllUserChatsVisibility } from "./set-all-user-chats-visibility";
@@ -24,7 +28,7 @@ describe("setAllUserChatsVisibility", () => {
         vi.clearAllMocks();
     });
 
-    it("sets all user chats visibility to public", async () => {
+    it("should set all user chats visibility to public", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId1 = generateChatId();
@@ -37,7 +41,7 @@ describe("setAllUserChatsVisibility", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -45,7 +49,7 @@ describe("setAllUserChatsVisibility", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert([
@@ -53,7 +57,7 @@ describe("setAllUserChatsVisibility", () => {
                 id: chatId1,
                 userId,
                 title: "Test Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -62,7 +66,7 @@ describe("setAllUserChatsVisibility", () => {
                 id: chatId2,
                 userId,
                 title: "Test Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -71,7 +75,7 @@ describe("setAllUserChatsVisibility", () => {
                 id: chatId3,
                 userId,
                 title: "Test Chat 3",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -79,7 +83,7 @@ describe("setAllUserChatsVisibility", () => {
         ]);
 
         const result = await setAllUserChatsVisibility({
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result.success).toBe(true);
@@ -93,7 +97,7 @@ describe("setAllUserChatsVisibility", () => {
         expect(chats?.every(chat => chat.visibility === "public")).toBe(true);
     });
 
-    it("sets all user chats visibility to private", async () => {
+    it("should set all user chats visibility to private", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
         const chatId1 = generateChatId();
@@ -105,7 +109,7 @@ describe("setAllUserChatsVisibility", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -113,7 +117,7 @@ describe("setAllUserChatsVisibility", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         await supabase.from("chats").insert([
@@ -121,7 +125,7 @@ describe("setAllUserChatsVisibility", () => {
                 id: chatId1,
                 userId,
                 title: "Test Chat 1",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -130,7 +134,7 @@ describe("setAllUserChatsVisibility", () => {
                 id: chatId2,
                 userId,
                 title: "Test Chat 2",
-                visibility: "public",
+                visibility: CHAT_VISIBILITY.PUBLIC,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -138,7 +142,7 @@ describe("setAllUserChatsVisibility", () => {
         ]);
 
         const result = await setAllUserChatsVisibility({
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
 
         expect(result.success).toBe(true);
@@ -149,10 +153,12 @@ describe("setAllUserChatsVisibility", () => {
             .eq("userId", userId);
 
         expect(chats).toHaveLength(2);
-        expect(chats?.every(chat => chat.visibility === "private")).toBe(true);
+        expect(
+            chats?.every(chat => chat.visibility === CHAT_VISIBILITY.PRIVATE),
+        ).toBe(true);
     });
 
-    it("only updates chats owned by the authenticated user", async () => {
+    it("should only update chats owned by the authenticated user", async () => {
         const userId1 = generateUserId();
         const email1 = generateUserEmail();
         const userId2 = generateUserId();
@@ -166,7 +172,7 @@ describe("setAllUserChatsVisibility", () => {
                 name: "Test User 1",
                 email: email1,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -175,13 +181,13 @@ describe("setAllUserChatsVisibility", () => {
                 id: userId1,
                 email: email1,
                 name: "Test User 1",
-                role: "user",
+                role: USER_ROLE.USER,
             },
             {
                 id: userId2,
                 email: email2,
                 name: "Test User 2",
-                role: "user",
+                role: USER_ROLE.USER,
             },
         ]);
 
@@ -190,7 +196,7 @@ describe("setAllUserChatsVisibility", () => {
                 id: chatId1,
                 userId: userId1,
                 title: "Test Chat 1",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -199,7 +205,7 @@ describe("setAllUserChatsVisibility", () => {
                 id: chatId2,
                 userId: userId2,
                 title: "Test Chat 2",
-                visibility: "private",
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 visibleAt: new Date().toISOString(),
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
@@ -207,7 +213,7 @@ describe("setAllUserChatsVisibility", () => {
         ]);
 
         const result = await setAllUserChatsVisibility({
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result.success).toBe(true);
@@ -224,11 +230,11 @@ describe("setAllUserChatsVisibility", () => {
             .eq("id", chatId2)
             .single();
 
-        expect(chat1?.visibility).toBe("public");
-        expect(chat2?.visibility).toBe("private");
+        expect(chat1?.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
+        expect(chat2?.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 
-    it("handles user with no chats", async () => {
+    it("should handle user with no chats", async () => {
         const userId = generateUserId();
         const email = generateUserEmail();
 
@@ -238,7 +244,7 @@ describe("setAllUserChatsVisibility", () => {
                 name: "Test User",
                 email,
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
 
@@ -246,11 +252,11 @@ describe("setAllUserChatsVisibility", () => {
             id: userId,
             email,
             name: "Test User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         const result = await setAllUserChatsVisibility({
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result.success).toBe(true);

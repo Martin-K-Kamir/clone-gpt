@@ -25,7 +25,7 @@ describe("updateUserChatMessage", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             updateUserChatMessage({
                 chatId: "not-a-uuid" as any,
@@ -39,7 +39,7 @@ describe("updateUserChatMessage", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             updateUserChatMessage({
                 chatId,
@@ -53,7 +53,7 @@ describe("updateUserChatMessage", () => {
         ).rejects.toThrow();
     });
 
-    it("updates message with text parts", async () => {
+    it("should update message with text parts", async () => {
         const message = {
             id: messageId,
             role: "user",
@@ -76,7 +76,7 @@ describe("updateUserChatMessage", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("filters out non-text parts when extracting content", async () => {
+    it("should filter out non-text parts when extracting content", async () => {
         const message = {
             id: messageId,
             role: "user",
@@ -103,7 +103,7 @@ describe("updateUserChatMessage", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("throws when update fails", async () => {
+    it("should throw when update fails", async () => {
         const message = {
             id: messageId,
             role: "user",

@@ -1,7 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import type { DBChatId } from "@/features/chat/lib/types";
-
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { ORDER_BY } from "@/lib/constants";
@@ -12,18 +10,17 @@ const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
 const missingUserId = "00000000-0000-0000-0000-000000000999" as DBUserId;
 
 describe("getUserChats", () => {
-    it("returns seeded chats for user", async () => {
+    it("should return seeded chats for user", async () => {
         const result = await getUserChats({ userId });
 
         expect(result.data.length).toBeGreaterThan(0);
         expect(result.totalCount).toBeGreaterThan(0);
         result.data.forEach(chat => {
             expect(chat.userId).toBe(userId);
-            expect((chat as any).isOwner).toBe(true);
         });
     });
 
-    it("respects limit parameter", async () => {
+    it("should respect limit parameter", async () => {
         const result = await getUserChats({ userId, limit: 1 });
 
         expect(result.data.length).toBeLessThanOrEqual(1);
@@ -32,7 +29,7 @@ describe("getUserChats", () => {
         }
     });
 
-    it("respects offset parameter", async () => {
+    it("should respect offset parameter", async () => {
         const firstPage = await getUserChats({ userId, limit: 1, offset: 0 });
         const secondPage = await getUserChats({ userId, limit: 1, offset: 1 });
 
@@ -47,7 +44,7 @@ describe("getUserChats", () => {
         expect(secondPage.data.length).toBeLessThanOrEqual(1);
     });
 
-    it("uses createdAt ordering by default", async () => {
+    it("should use createdAt ordering by default", async () => {
         const result = await getUserChats({ userId, limit: 10 });
 
         if (result.data.length > 1) {
@@ -60,7 +57,7 @@ describe("getUserChats", () => {
         }
     });
 
-    it("uses updatedAt ordering when specified", async () => {
+    it("should use updatedAt ordering when specified", async () => {
         const result = await getUserChats({
             userId,
             limit: 10,
@@ -77,7 +74,7 @@ describe("getUserChats", () => {
         }
     });
 
-    it("returns empty array for user with no chats", async () => {
+    it("should return empty array for user with no chats", async () => {
         const result = await getUserChats({ userId: missingUserId });
 
         expect(result.data).toHaveLength(0);

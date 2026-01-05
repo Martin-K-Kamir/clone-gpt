@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { supabase } from "@/services/supabase";
@@ -21,7 +22,7 @@ describe("upsertUserChatPreferences", () => {
         vi.clearAllMocks();
     });
 
-    it("saves preferences and updates existing ones", async () => {
+    it("should save preferences and update existing ones", async () => {
         const userId = generateUserId() as DBUserId;
         const email = generateUserEmail();
 
@@ -31,7 +32,7 @@ describe("upsertUserChatPreferences", () => {
                 email,
                 name: "Prefs User",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         } as any);
 
@@ -39,7 +40,7 @@ describe("upsertUserChatPreferences", () => {
             id: userId,
             email,
             name: "Prefs User",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         const first = await upsertUserChatPreferences({

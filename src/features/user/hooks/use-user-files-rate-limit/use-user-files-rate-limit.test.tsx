@@ -1,7 +1,6 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { tag } from "@/lib/cache-tag";
 import { RATE_LIMIT_REASON } from "@/lib/constants";
@@ -16,7 +15,7 @@ vi.mock("@/hooks", () => ({
 
 describe("useUserFilesRateLimit", () => {
     const mockUseRateLimit = vi.mocked(useRateLimit);
-    const userId = "user-123" as DBUserId;
+    const userId = generateUserId();
 
     beforeEach(() => {
         vi.clearAllMocks();

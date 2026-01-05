@@ -1,17 +1,20 @@
+import { generateMessageId } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
-import type { DBChatMessageId, UIChatMessage } from "@/features/chat/lib/types";
+import { CHAT_MESSAGE_TYPE, CHAT_ROLE } from "@/features/chat/lib/constants";
+import type { UIChatMessage } from "@/features/chat/lib/types";
 
 import { createChatTitleFromMessage } from "./create-chat-title-from-message";
 
 describe("createChatTitleFromMessage", () => {
     it("should return text part content when text is shorter than max length", () => {
+        const messageId = generateMessageId();
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: messageId,
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello world",
                 },
             ],
@@ -23,12 +26,13 @@ describe("createChatTitleFromMessage", () => {
     });
 
     it("should truncate text part content when longer than max length", () => {
+        const messageId = generateMessageId();
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: messageId,
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "This is a very long message that exceeds the maximum title length",
                 },
             ],
@@ -42,11 +46,11 @@ describe("createChatTitleFromMessage", () => {
 
     it("should use default title when no text part exists", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file.pdf",
                     mediaType: "application/pdf",
                 } as any,
@@ -60,8 +64,8 @@ describe("createChatTitleFromMessage", () => {
 
     it("should use default title when parts array is empty", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [],
         } as UIChatMessage;
 
@@ -72,8 +76,8 @@ describe("createChatTitleFromMessage", () => {
 
     it("should use custom default title when provided", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [],
         } as UIChatMessage;
 
@@ -86,11 +90,11 @@ describe("createChatTitleFromMessage", () => {
 
     it("should use custom max title length when provided", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "This is a long message",
                 },
             ],
@@ -106,16 +110,16 @@ describe("createChatTitleFromMessage", () => {
 
     it("should handle text part at different positions", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "file",
+                    type: CHAT_MESSAGE_TYPE.FILE,
                     url: "https://example.com/file.pdf",
                     mediaType: "application/pdf",
                 } as any,
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Hello",
                 },
             ],
@@ -128,15 +132,15 @@ describe("createChatTitleFromMessage", () => {
 
     it("should use first text part when multiple text parts exist", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "First text",
                 },
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "Second text",
                 },
             ],
@@ -149,11 +153,11 @@ describe("createChatTitleFromMessage", () => {
 
     it("should handle text exactly at max length", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "1234567890123456789012345", // 25 characters
                 },
             ],
@@ -167,11 +171,11 @@ describe("createChatTitleFromMessage", () => {
 
     it("should handle text one character over max length", () => {
         const message = {
-            id: "msg-1" as DBChatMessageId,
-            role: "user",
+            id: generateMessageId(),
+            role: CHAT_ROLE.USER,
             parts: [
                 {
-                    type: "text",
+                    type: CHAT_MESSAGE_TYPE.TEXT,
                     text: "12345678901234567890123456", // 26 characters
                 },
             ],

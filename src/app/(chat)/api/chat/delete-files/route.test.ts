@@ -1,3 +1,5 @@
+import { createMockSessionWithUser } from "@/vitest/helpers/create-mock-session";
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -55,23 +57,15 @@ vi.mock("@/lib/utils/handle-api-error", () => ({
 }));
 
 describe("POST /api/chat/delete-files", () => {
-    const userId = "00000000-0000-0000-0000-000000000001";
-    const chatId = "30000000-0000-0000-0000-000000000001";
+    const mockSession = createMockSessionWithUser();
+    const chatId = generateChatId();
 
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
-            user: {
-                id: userId,
-                email: "test@example.com",
-                name: "Test User",
-                image: null,
-                role: "user",
-            },
-        });
+        (auth as any).mockResolvedValue(mockSession);
     });
 
-    it("deletes files successfully", async () => {
+    it("should delete files successfully", async () => {
         const files = [
             {
                 name: "file1.txt",
@@ -101,7 +95,7 @@ describe("POST /api/chat/delete-files", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when files array is empty", async () => {
+    it("should return error when files array is empty", async () => {
         const files: never[] = [];
         const body = { files, chatId };
         const request = new NextRequest(
@@ -117,7 +111,7 @@ describe("POST /api/chat/delete-files", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("deletes single file successfully", async () => {
+    it("should delete single file successfully", async () => {
         const files = [
             {
                 name: "file1.txt",
@@ -142,7 +136,7 @@ describe("POST /api/chat/delete-files", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when session does not exist", async () => {
+    it("should return error when session does not exist", async () => {
         (auth as any).mockResolvedValue(null);
 
         const files = [
@@ -167,7 +161,7 @@ describe("POST /api/chat/delete-files", () => {
         expect(response).toBeInstanceOf(Response);
     });
 
-    it("returns error when deleteUserFile fails", async () => {
+    it("should return error when deleteUserFile fails", async () => {
         const files = [
             {
                 name: "file1.txt",

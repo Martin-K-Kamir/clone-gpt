@@ -22,7 +22,7 @@ describe("deleteStorageDirectory", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("deletes all files for a specific chat", async () => {
+    it("should delete all files for a specific chat", async () => {
         const content1 = new Blob(["file1"], { type: "text/plain" });
         const content2 = new Blob(["file2"], { type: "text/plain" });
 
@@ -78,7 +78,7 @@ describe("deleteStorageDirectory", () => {
         expect(chat2Files || []).toHaveLength(1);
     });
 
-    it("deletes all files for a user when chatId is not provided", async () => {
+    it("should delete all files for a user when chatId is not provided", async () => {
         const content = new Blob(["content"], { type: "text/plain" });
         const buffer = await content.arrayBuffer();
 
@@ -116,7 +116,7 @@ describe("deleteStorageDirectory", () => {
         expect(userFiles || []).toHaveLength(0);
     });
 
-    it("handles empty directories gracefully", async () => {
+    it("should handle empty directories gracefully", async () => {
         await expect(
             deleteStorageDirectory({
                 bucket: STORAGE_BUCKET.USER_FILES,

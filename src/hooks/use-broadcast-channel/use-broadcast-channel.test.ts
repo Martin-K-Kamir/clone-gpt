@@ -34,7 +34,7 @@ describe("useBroadcastChannel", () => {
             .BroadcastChannel;
     });
 
-    it("creates a BroadcastChannel on mount", () => {
+    it("should create a BroadcastChannel on mount", () => {
         renderHook(() =>
             useBroadcastChannel({
                 channelName: "test-channel",
@@ -44,7 +44,7 @@ describe("useBroadcastChannel", () => {
         expect(MockBroadcastChannel).toHaveBeenCalledWith("test-channel");
     });
 
-    it("returns postMessage function and isConnected state", () => {
+    it("should return postMessage function and isConnected state", () => {
         const { result } = renderHook(() =>
             useBroadcastChannel({
                 channelName: "test-channel",
@@ -56,7 +56,7 @@ describe("useBroadcastChannel", () => {
         expect(MockBroadcastChannel).toHaveBeenCalled();
     });
 
-    it("posts message when postMessage is called", () => {
+    it("should post message when postMessage is called", () => {
         const { result } = renderHook(() =>
             useBroadcastChannel({
                 channelName: "test-channel",
@@ -69,7 +69,7 @@ describe("useBroadcastChannel", () => {
         expect(mockBroadcastChannel.postMessage).toHaveBeenCalledWith(message);
     });
 
-    it("calls onMessage callback when message is received", async () => {
+    it("should call onMessage callback when message is received", async () => {
         const onMessage = vi.fn();
 
         renderHook(() =>
@@ -95,7 +95,7 @@ describe("useBroadcastChannel", () => {
         expect(onMessage).toHaveBeenCalledWith(message);
     });
 
-    it("does not call onMessage if callback is not provided", async () => {
+    it("should not call onMessage if callback is not provided", async () => {
         const onMessage = vi.fn();
 
         renderHook(() =>
@@ -119,7 +119,7 @@ describe("useBroadcastChannel", () => {
         expect(onMessage).not.toHaveBeenCalled();
     });
 
-    it("closes BroadcastChannel on unmount", async () => {
+    it("should close BroadcastChannel on unmount", async () => {
         const { unmount } = renderHook(() =>
             useBroadcastChannel({
                 channelName: "test-channel",
@@ -135,7 +135,7 @@ describe("useBroadcastChannel", () => {
         expect(mockBroadcastChannel.close).toHaveBeenCalled();
     });
 
-    it("does not create BroadcastChannel when enabled is false", () => {
+    it("should not create BroadcastChannel when enabled is false", () => {
         renderHook(() =>
             useBroadcastChannel({
                 channelName: "test-channel",
@@ -146,7 +146,7 @@ describe("useBroadcastChannel", () => {
         expect(MockBroadcastChannel).not.toHaveBeenCalled();
     });
 
-    it("returns isConnected false when enabled is false", () => {
+    it("should return isConnected false when enabled is false", () => {
         const { result } = renderHook(() =>
             useBroadcastChannel({
                 channelName: "test-channel",
@@ -157,7 +157,7 @@ describe("useBroadcastChannel", () => {
         expect(result.current.isConnected).toBe(false);
     });
 
-    it("does not post message when enabled is false", () => {
+    it("should not post message when enabled is false", () => {
         const { result } = renderHook(() =>
             useBroadcastChannel({
                 channelName: "test-channel",
@@ -170,7 +170,7 @@ describe("useBroadcastChannel", () => {
         expect(mockBroadcastChannel.postMessage).not.toHaveBeenCalled();
     });
 
-    it("handles multiple messages correctly", async () => {
+    it("should handle multiple messages correctly", async () => {
         const onMessage = vi.fn();
 
         renderHook(() =>
@@ -203,7 +203,7 @@ describe("useBroadcastChannel", () => {
         expect(onMessage).toHaveBeenNthCalledWith(2, message2);
     });
 
-    it("recreates BroadcastChannel when channelName changes", async () => {
+    it("should recreate BroadcastChannel when channelName changes", async () => {
         const { rerender } = renderHook(
             ({ channelName }) =>
                 useBroadcastChannel({
@@ -226,7 +226,7 @@ describe("useBroadcastChannel", () => {
         });
     });
 
-    it("handles errors when creating BroadcastChannel", () => {
+    it("should handle errors when creating BroadcastChannel", () => {
         const consoleErrorSpy = vi
             .spyOn(console, "error")
             .mockImplementation(() => {});

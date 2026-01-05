@@ -1,3 +1,4 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react";
 import { ReactNode } from "react";
@@ -71,10 +72,12 @@ describe("useBatchUserSharedChats", () => {
     });
 
     it("should return success result when batch operation succeeds", async () => {
-        const chatIds: DBChatId[] = ["chat-1", "chat-2"] as DBChatId[];
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
+        const chatIds: DBChatId[] = [chatId1, chatId2];
         const chats: DBChat[] = [
-            { id: "chat-1" } as DBChat,
-            { id: "chat-2" } as DBChat,
+            { id: chatId1 } as DBChat,
+            { id: chatId2 } as DBChat,
         ];
 
         mockUpdateManyChatsVisibility.mockResolvedValue({
@@ -97,7 +100,8 @@ describe("useBatchUserSharedChats", () => {
     });
 
     it("should throw error when batch operation fails", async () => {
-        const chatIds: DBChatId[] = ["chat-1"] as DBChatId[];
+        const chatId = generateChatId();
+        const chatIds: DBChatId[] = [chatId];
         const errorMessage = "Operation failed";
 
         mockUpdateManyChatsVisibility.mockResolvedValue({
@@ -120,9 +124,11 @@ describe("useBatchUserSharedChats", () => {
     });
 
     it("should update visibility and invalidate shared chats on success", () => {
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
         const chats: DBChat[] = [
-            { id: "chat-1" } as DBChat,
-            { id: "chat-2" } as DBChat,
+            { id: chatId1 } as DBChat,
+            { id: chatId2 } as DBChat,
         ];
         const response = {
             success: true,

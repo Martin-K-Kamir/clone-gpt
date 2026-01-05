@@ -9,7 +9,7 @@ import { updateUserFilesRateLimit } from "./update-user-files-rate-limit";
 const userId = "00000000-0000-0000-0000-000000000030" as DBUserId;
 
 describe("updateUserFilesRateLimit", () => {
-    it("updates rate limit status", async () => {
+    it("should update rate limit status", async () => {
         await supabase
             .from("user_files_rate_limits")
             .delete()

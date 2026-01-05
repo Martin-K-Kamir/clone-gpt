@@ -15,18 +15,18 @@ vi.mock("@/hooks", () => ({
 const mockUsePrevious = vi.mocked(usePrevious);
 
 describe("ChatOffsetProvider", () => {
+    const createWrapper = ({ children }: { children: React.ReactNode }) => (
+        <ChatOffsetProvider>{children}</ChatOffsetProvider>
+    );
+
     beforeEach(() => {
         vi.clearAllMocks();
         mockUsePrevious.mockReturnValue(undefined);
     });
 
     it("should provide initial offset of 0", () => {
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatOffsetProvider>{children}</ChatOffsetProvider>
-        );
-
         const { result } = renderHook(() => useChatOffsetContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         expect(result.current.clientOffset).toBe(0);
@@ -39,12 +39,8 @@ describe("ChatOffsetProvider", () => {
     it("should increment offset when incrementOffset is called", () => {
         mockUsePrevious.mockReturnValue(0);
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatOffsetProvider>{children}</ChatOffsetProvider>
-        );
-
         const { result } = renderHook(() => useChatOffsetContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
@@ -57,12 +53,8 @@ describe("ChatOffsetProvider", () => {
     it("should decrement offset when decrementOffset is called", () => {
         mockUsePrevious.mockReturnValue(5);
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatOffsetProvider>{children}</ChatOffsetProvider>
-        );
-
         const { result } = renderHook(() => useChatOffsetContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
@@ -79,12 +71,8 @@ describe("ChatOffsetProvider", () => {
     it("should reset offset to 0 when resetOffset is called", () => {
         mockUsePrevious.mockReturnValue(10);
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatOffsetProvider>{children}</ChatOffsetProvider>
-        );
-
         const { result } = renderHook(() => useChatOffsetContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
@@ -103,12 +91,8 @@ describe("ChatOffsetProvider", () => {
     it("should set offset to specific value when setOffset is called", () => {
         mockUsePrevious.mockReturnValue(0);
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatOffsetProvider>{children}</ChatOffsetProvider>
-        );
-
         const { result } = renderHook(() => useChatOffsetContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
@@ -118,15 +102,11 @@ describe("ChatOffsetProvider", () => {
         expect(result.current.clientOffset).toBe(42);
     });
 
-    it("should return previous offset from usePrevious hook", () => {
+    it("should return previous offset value", () => {
         mockUsePrevious.mockReturnValue(5);
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatOffsetProvider>{children}</ChatOffsetProvider>
-        );
-
         const { result } = renderHook(() => useChatOffsetContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         expect(result.current.prevClientOffset).toBe(5);
@@ -135,12 +115,8 @@ describe("ChatOffsetProvider", () => {
     it("should handle multiple offset changes", () => {
         mockUsePrevious.mockReturnValue(0);
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatOffsetProvider>{children}</ChatOffsetProvider>
-        );
-
         const { result } = renderHook(() => useChatOffsetContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {

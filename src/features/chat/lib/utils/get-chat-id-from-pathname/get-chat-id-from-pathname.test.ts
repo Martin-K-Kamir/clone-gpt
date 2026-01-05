@@ -1,20 +1,23 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
 import { getChatIdFromPathname } from "./get-chat-id-from-pathname";
 
 describe("getChatIdFromPathname", () => {
     it("should extract valid UUID from pathname", () => {
-        const pathname = "/chat/123e4567-e89b-12d3-a456-426614174000";
+        const chatId = generateChatId();
+        const pathname = `/chat/${chatId}`;
         const result = getChatIdFromPathname(pathname);
 
-        expect(result).toBe("123e4567-e89b-12d3-a456-426614174000");
+        expect(result).toBe(chatId);
     });
 
     it("should extract UUID case-insensitively", () => {
-        const pathname = "/chat/123E4567-E89B-12D3-A456-426614174000";
+        const chatId = generateChatId();
+        const pathname = `/chat/${chatId.toUpperCase()}`;
         const result = getChatIdFromPathname(pathname);
 
-        expect(result).toBe("123E4567-E89B-12D3-A456-426614174000");
+        expect(result).toBe(chatId.toUpperCase());
     });
 
     it("should return null when pathname doesn't match pattern", () => {
@@ -25,14 +28,16 @@ describe("getChatIdFromPathname", () => {
     });
 
     it("should return null when pathname doesn't end with chat ID", () => {
-        const pathname = "/chat/123e4567-e89b-12d3-a456-426614174000/extra";
+        const chatId = generateChatId();
+        const pathname = `/chat/${chatId}/extra`;
         const result = getChatIdFromPathname(pathname);
 
         expect(result).toBeNull();
     });
 
     it("should return null when pathname doesn't start with /chat/", () => {
-        const pathname = "/other/123e4567-e89b-12d3-a456-426614174000";
+        const chatId = generateChatId();
+        const pathname = `/other/${chatId}`;
         const result = getChatIdFromPathname(pathname);
 
         expect(result).toBeNull();

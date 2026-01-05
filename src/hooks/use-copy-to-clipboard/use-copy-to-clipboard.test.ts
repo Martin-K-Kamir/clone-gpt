@@ -26,7 +26,7 @@ describe("useCopyToClipboard", () => {
         });
     });
 
-    it("returns initial state", () => {
+    it("should return initial state", () => {
         const { result } = renderHook(() => useCopyToClipboard());
 
         expect(result.current.copied).toBe(false);
@@ -34,7 +34,7 @@ describe("useCopyToClipboard", () => {
         expect(typeof result.current.copy).toBe("function");
     });
 
-    it("copies text to clipboard successfully", async () => {
+    it("should copy text to clipboard successfully", async () => {
         mockWriteText.mockResolvedValue(undefined);
 
         const { result } = renderHook(() => useCopyToClipboard());
@@ -48,7 +48,7 @@ describe("useCopyToClipboard", () => {
         expect(result.current.error).toBeNull();
     });
 
-    it("sets copied to false after delay", async () => {
+    it("should set copied to false after delay", async () => {
         vi.useFakeTimers();
         mockWriteText.mockResolvedValue(undefined);
 
@@ -74,7 +74,7 @@ describe("useCopyToClipboard", () => {
         vi.useRealTimers();
     });
 
-    it("uses default delay of 2000ms", async () => {
+    it("should use default delay of 2000ms", async () => {
         vi.useFakeTimers();
         mockWriteText.mockResolvedValue(undefined);
 
@@ -102,7 +102,7 @@ describe("useCopyToClipboard", () => {
         vi.useRealTimers();
     });
 
-    it("handles clipboard API not available", async () => {
+    it("should handle clipboard API not available", async () => {
         Object.defineProperty(navigator, "clipboard", {
             value: undefined,
             writable: true,
@@ -122,7 +122,7 @@ describe("useCopyToClipboard", () => {
         });
     });
 
-    it("handles copy failure with error message", async () => {
+    it("should handle copy failure with error message", async () => {
         const error = new Error("Permission denied");
         mockWriteText.mockRejectedValue(error);
 
@@ -139,7 +139,7 @@ describe("useCopyToClipboard", () => {
         });
     });
 
-    it("handles copy failure with generic error when no message", async () => {
+    it("should handle copy failure with generic error when no message", async () => {
         mockWriteText.mockRejectedValue({});
 
         const { result } = renderHook(() => useCopyToClipboard());
@@ -153,7 +153,7 @@ describe("useCopyToClipboard", () => {
         });
     });
 
-    it("clears previous error on successful copy", async () => {
+    it("should clear previous error on successful copy", async () => {
         mockWriteText
             .mockRejectedValueOnce(new Error("First error"))
             .mockResolvedValueOnce(undefined);
@@ -172,7 +172,7 @@ describe("useCopyToClipboard", () => {
         });
     });
 
-    it("maintains separate state for multiple hook instances", async () => {
+    it("should maintain separate state for multiple hook instances", async () => {
         mockWriteText.mockResolvedValue(undefined);
 
         const { result: result1 } = renderHook(() => useCopyToClipboard());

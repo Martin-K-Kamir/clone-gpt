@@ -4,13 +4,13 @@ import { describe, expect, it } from "vitest";
 import { usePrevious } from "./use-previous";
 
 describe("usePrevious", () => {
-    it("returns undefined on initial render", () => {
+    it("should return undefined on initial render", () => {
         const { result } = renderHook(() => usePrevious("test"));
 
         expect(result.current).toBeUndefined();
     });
 
-    it("returns previous value after update", () => {
+    it("should return previous value after update", () => {
         const { result, rerender } = renderHook(
             ({ value }) => usePrevious(value),
             {
@@ -27,7 +27,7 @@ describe("usePrevious", () => {
         expect(result.current).toBe("second");
     });
 
-    it("works with different value types", () => {
+    it("should work with different value types", () => {
         const obj1 = { a: 1 };
         const obj2 = { a: 2 };
 
@@ -49,7 +49,7 @@ describe("usePrevious", () => {
         expect(result.current).toBe(obj1);
     });
 
-    it("handles null and undefined", () => {
+    it("should handle null and undefined", () => {
         const { result, rerender } = renderHook(
             ({ value }) => usePrevious(value),
             {
@@ -64,7 +64,7 @@ describe("usePrevious", () => {
         expect(result.current).toBeUndefined();
     });
 
-    it("maintains reference equality when value does not change", () => {
+    it("should maintain reference equality when value does not change", () => {
         const value = { test: "value" };
         const { result, rerender } = renderHook(
             ({ value }) => usePrevious(value),

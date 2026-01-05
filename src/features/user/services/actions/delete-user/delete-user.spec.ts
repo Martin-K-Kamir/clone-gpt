@@ -7,6 +7,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_ROLE } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { supabase } from "@/services/supabase";
@@ -30,7 +33,7 @@ describe("deleteUser", () => {
         vi.clearAllMocks();
     });
 
-    it("removes user and related data", async () => {
+    it("should remove user and related data", async () => {
         const userId = generateUserId() as DBUserId;
         const chatId = generateChatId();
         const messageId = generateMessageId();
@@ -43,7 +46,7 @@ describe("deleteUser", () => {
                 email,
                 name: "Delete Test",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         } as any);
 
@@ -52,7 +55,7 @@ describe("deleteUser", () => {
             id: userId,
             email,
             name: "Delete Test",
-            role: "user",
+            role: USER_ROLE.USER,
         });
 
         // Create user preferences
@@ -102,7 +105,7 @@ describe("deleteUser", () => {
             id: messageId,
             chatId: chat?.id,
             userId,
-            role: "user",
+            role: CHAT_ROLE.USER,
             content: "hello",
             metadata: {},
             parts: [],

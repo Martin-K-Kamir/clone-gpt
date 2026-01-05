@@ -1,3 +1,7 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { describe, expect, it } from "vitest";
 
 import { hashQuery } from "@/lib/utils";
@@ -13,18 +17,18 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userChats(userId);
 
-            expect(result).toBe("user-chats:user-123");
+            expect(result).toBe(`user-chats:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
-            expect(tag.userChats(userId1)).toBe("user-chats:user-abc");
-            expect(tag.userChats(userId2)).toBe("user-chats:user-xyz");
+            expect(tag.userChats(userId1)).toBe(`user-chats:${userId1}`);
+            expect(tag.userChats(userId2)).toBe(`user-chats:${userId2}`);
         });
     });
 
@@ -36,18 +40,18 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with chatId when provided", () => {
-            const chatId = "chat-123" as any;
+            const chatId = generateChatId();
             const result = tag.userChat(chatId);
 
-            expect(result).toBe("user-chat:chat-123");
+            expect(result).toBe(`user-chat:${chatId}`);
         });
 
         it("should handle different chatId values", () => {
-            const chatId1 = "chat-abc" as any;
-            const chatId2 = "chat-xyz" as any;
+            const chatId1 = generateChatId();
+            const chatId2 = generateChatId();
 
-            expect(tag.userChat(chatId1)).toBe("user-chat:chat-abc");
-            expect(tag.userChat(chatId2)).toBe("user-chat:chat-xyz");
+            expect(tag.userChat(chatId1)).toBe(`user-chat:${chatId1}`);
+            expect(tag.userChat(chatId2)).toBe(`user-chat:${chatId2}`);
         });
     });
 
@@ -59,10 +63,10 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when only userId is provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userChatsSearch(userId);
 
-            expect(result).toBe("user-chats-search:user-123");
+            expect(result).toBe(`user-chats-search:${userId}`);
         });
 
         it("should return tag with query hash when only query is provided", () => {
@@ -74,12 +78,12 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId and query hash when both are provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const query = "search term";
             const result = tag.userChatsSearch(userId, query);
 
             const expectedHash = hashQuery(query);
-            expect(result).toBe(`user-chats-search:user-123:${expectedHash}`);
+            expect(result).toBe(`user-chats-search:${userId}:${expectedHash}`);
         });
 
         it("should use consistent hash for same query", () => {
@@ -91,10 +95,10 @@ describe("cache-tag", () => {
         });
 
         it("should not append query hash for empty query string", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userChatsSearch(userId, "");
 
-            expect(result).toBe("user-chats-search:user-123");
+            expect(result).toBe(`user-chats-search:${userId}`);
         });
     });
 
@@ -106,21 +110,21 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userInitialChatsSearch(userId);
 
-            expect(result).toBe("user-initial-chats-search:user-123");
+            expect(result).toBe(`user-initial-chats-search:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
             expect(tag.userInitialChatsSearch(userId1)).toBe(
-                "user-initial-chats-search:user-abc",
+                `user-initial-chats-search:${userId1}`,
             );
             expect(tag.userInitialChatsSearch(userId2)).toBe(
-                "user-initial-chats-search:user-xyz",
+                `user-initial-chats-search:${userId2}`,
             );
         });
     });
@@ -133,18 +137,18 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with chatId when provided", () => {
-            const chatId = "chat-123" as any;
+            const chatId = generateChatId();
             const result = tag.chatMessages(chatId);
 
-            expect(result).toBe("chat-messages:chat-123");
+            expect(result).toBe(`chat-messages:${chatId}`);
         });
 
         it("should handle different chatId values", () => {
-            const chatId1 = "chat-abc" as any;
-            const chatId2 = "chat-xyz" as any;
+            const chatId1 = generateChatId();
+            const chatId2 = generateChatId();
 
-            expect(tag.chatMessages(chatId1)).toBe("chat-messages:chat-abc");
-            expect(tag.chatMessages(chatId2)).toBe("chat-messages:chat-xyz");
+            expect(tag.chatMessages(chatId1)).toBe(`chat-messages:${chatId1}`);
+            expect(tag.chatMessages(chatId2)).toBe(`chat-messages:${chatId2}`);
         });
     });
 
@@ -156,21 +160,21 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with chatId when provided", () => {
-            const chatId = "chat-123" as any;
+            const chatId = generateChatId();
             const result = tag.chatVisibility(chatId);
 
-            expect(result).toBe("chat-visibility:chat-123");
+            expect(result).toBe(`chat-visibility:${chatId}`);
         });
 
         it("should handle different chatId values", () => {
-            const chatId1 = "chat-abc" as any;
-            const chatId2 = "chat-xyz" as any;
+            const chatId1 = generateChatId();
+            const chatId2 = generateChatId();
 
             expect(tag.chatVisibility(chatId1)).toBe(
-                "chat-visibility:chat-abc",
+                `chat-visibility:${chatId1}`,
             );
             expect(tag.chatVisibility(chatId2)).toBe(
-                "chat-visibility:chat-xyz",
+                `chat-visibility:${chatId2}`,
             );
         });
     });
@@ -183,18 +187,18 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userProfile(userId);
 
-            expect(result).toBe("user-profile:user-123");
+            expect(result).toBe(`user-profile:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
-            expect(tag.userProfile(userId1)).toBe("user-profile:user-abc");
-            expect(tag.userProfile(userId2)).toBe("user-profile:user-xyz");
+            expect(tag.userProfile(userId1)).toBe(`user-profile:${userId1}`);
+            expect(tag.userProfile(userId2)).toBe(`user-profile:${userId2}`);
         });
     });
 
@@ -206,18 +210,18 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userName(userId);
 
-            expect(result).toBe("user-name:user-123");
+            expect(result).toBe(`user-name:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
-            expect(tag.userName(userId1)).toBe("user-name:user-abc");
-            expect(tag.userName(userId2)).toBe("user-name:user-xyz");
+            expect(tag.userName(userId1)).toBe(`user-name:${userId1}`);
+            expect(tag.userName(userId2)).toBe(`user-name:${userId2}`);
         });
     });
 
@@ -229,21 +233,21 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userSharedChats(userId);
 
-            expect(result).toBe("user-shared-chats:user-123");
+            expect(result).toBe(`user-shared-chats:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
             expect(tag.userSharedChats(userId1)).toBe(
-                "user-shared-chats:user-abc",
+                `user-shared-chats:${userId1}`,
             );
             expect(tag.userSharedChats(userId2)).toBe(
-                "user-shared-chats:user-xyz",
+                `user-shared-chats:${userId2}`,
             );
         });
     });
@@ -256,18 +260,18 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.user(userId);
 
-            expect(result).toBe("user:user-123");
+            expect(result).toBe(`user:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
-            expect(tag.user(userId1)).toBe("user:user-abc");
-            expect(tag.user(userId2)).toBe("user:user-xyz");
+            expect(tag.user(userId1)).toBe(`user:${userId1}`);
+            expect(tag.user(userId2)).toBe(`user:${userId2}`);
         });
     });
 
@@ -279,21 +283,21 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userChatPreferences(userId);
 
-            expect(result).toBe("user-chat-preferences:user-123");
+            expect(result).toBe(`user-chat-preferences:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
             expect(tag.userChatPreferences(userId1)).toBe(
-                "user-chat-preferences:user-abc",
+                `user-chat-preferences:${userId1}`,
             );
             expect(tag.userChatPreferences(userId2)).toBe(
-                "user-chat-preferences:user-xyz",
+                `user-chat-preferences:${userId2}`,
             );
         });
     });
@@ -306,21 +310,21 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userMessagesRateLimit(userId);
 
-            expect(result).toBe("user-messages-rate-limit:user-123");
+            expect(result).toBe(`user-messages-rate-limit:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
             expect(tag.userMessagesRateLimit(userId1)).toBe(
-                "user-messages-rate-limit:user-abc",
+                `user-messages-rate-limit:${userId1}`,
             );
             expect(tag.userMessagesRateLimit(userId2)).toBe(
-                "user-messages-rate-limit:user-xyz",
+                `user-messages-rate-limit:${userId2}`,
             );
         });
     });
@@ -333,21 +337,21 @@ describe("cache-tag", () => {
         });
 
         it("should return tag with userId when provided", () => {
-            const userId = "user-123" as any;
+            const userId = generateUserId();
             const result = tag.userFilesRateLimit(userId);
 
-            expect(result).toBe("user-files-rate-limit:user-123");
+            expect(result).toBe(`user-files-rate-limit:${userId}`);
         });
 
         it("should handle different userId values", () => {
-            const userId1 = "user-abc" as any;
-            const userId2 = "user-xyz" as any;
+            const userId1 = generateUserId();
+            const userId2 = generateUserId();
 
             expect(tag.userFilesRateLimit(userId1)).toBe(
-                "user-files-rate-limit:user-abc",
+                `user-files-rate-limit:${userId1}`,
             );
             expect(tag.userFilesRateLimit(userId2)).toBe(
-                "user-files-rate-limit:user-xyz",
+                `user-files-rate-limit:${userId2}`,
             );
         });
     });

@@ -3,6 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { supabase } from "@/services/supabase";
@@ -28,19 +31,19 @@ describe("updateChatVisibility", () => {
                 name: "Test User",
                 email: "test@example.com",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
     });
 
-    it("updates visibility to public", async () => {
+    it("should update visibility to public", async () => {
         const chatId = generateChatId();
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -48,11 +51,11 @@ describe("updateChatVisibility", () => {
 
         const result = await updateChatVisibility({
             chatId,
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
         });
 
         expect(result.success).toBe(true);
-        expect(result.data).toBe("public");
+        expect(result.data).toBe(CHAT_VISIBILITY.PUBLIC);
 
         const { data } = await supabase
             .from("chats")
@@ -60,17 +63,17 @@ describe("updateChatVisibility", () => {
             .eq("id", chatId)
             .single();
 
-        expect(data?.visibility).toBe("public");
+        expect(data?.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
-    it("updates visibility to private", async () => {
+    it("should update visibility to private", async () => {
         const chatId = generateChatId();
 
         await supabase.from("chats").insert({
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "public",
+            visibility: CHAT_VISIBILITY.PUBLIC,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -78,11 +81,11 @@ describe("updateChatVisibility", () => {
 
         const result = await updateChatVisibility({
             chatId,
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
         });
 
         expect(result.success).toBe(true);
-        expect(result.data).toBe("private");
+        expect(result.data).toBe(CHAT_VISIBILITY.PRIVATE);
 
         const { data } = await supabase
             .from("chats")
@@ -90,6 +93,6 @@ describe("updateChatVisibility", () => {
             .eq("id", chatId)
             .single();
 
-        expect(data?.visibility).toBe("private");
+        expect(data?.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 });

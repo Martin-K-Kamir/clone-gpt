@@ -1,8 +1,10 @@
+import { generateChatId } from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import type { UIChat } from "@/features/chat/lib/types";
 import { getUserChatsByDate } from "@/features/chat/services/api";
 
@@ -16,6 +18,7 @@ vi.mock("@/features/chat/services/api", () => ({
 
 vi.mock("@/lib/utils", () => ({
     groupByTimePastPeriods: vi.fn(items => items),
+    objectValuesToTuple: vi.fn(obj => Object.values(obj)),
 }));
 
 const mockGetUserChatsByDate = vi.mocked(getUserChatsByDate);
@@ -40,19 +43,21 @@ describe("useUserInitialChatsSearch", () => {
     });
 
     it("should return query result with transformed data", async () => {
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
         const chats: UIChat[] = [
             {
-                id: "chat-1" as any,
+                id: chatId1,
                 title: "Chat 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
             },
             {
-                id: "chat-2" as any,
+                id: chatId2,
                 title: "Chat 2",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -74,11 +79,12 @@ describe("useUserInitialChatsSearch", () => {
     });
 
     it("should add href property to chats", async () => {
+        const chatId = generateChatId();
         const chats: UIChat[] = [
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -97,24 +103,29 @@ describe("useUserInitialChatsSearch", () => {
 
         const transformedData = mockGroupByTimePastPeriods.mock.calls[0]?.[0];
         if (Array.isArray(transformedData) && transformedData.length > 0) {
-            expect(transformedData[0]).toHaveProperty("href", "/chat/chat-1");
+            expect(transformedData[0]).toHaveProperty(
+                "href",
+                `/chat/${chatId}`,
+            );
         }
     });
 
     it("should sort chats by updatedAt in descending order", async () => {
+        const chatId1 = generateChatId();
+        const chatId2 = generateChatId();
         const chats: UIChat[] = [
             {
-                id: "chat-1" as any,
+                id: chatId1,
                 title: "Chat 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-01T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
             },
             {
-                id: "chat-2" as any,
+                id: chatId2,
                 title: "Chat 2",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -133,25 +144,26 @@ describe("useUserInitialChatsSearch", () => {
 
         const sortedData = mockGroupByTimePastPeriods.mock.calls[0]?.[0];
         if (Array.isArray(sortedData) && sortedData.length === 2) {
-            expect((sortedData[0] as any).id).toBe("chat-2");
-            expect((sortedData[1] as any).id).toBe("chat-1");
+            expect((sortedData[0] as any).id).toBe(chatId2);
+            expect((sortedData[1] as any).id).toBe(chatId1);
         }
     });
 
     it("should deduplicate chats by id", async () => {
+        const chatId = generateChatId();
         const chats: UIChat[] = [
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
             },
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1 Duplicate",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-02T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -176,11 +188,12 @@ describe("useUserInitialChatsSearch", () => {
     });
 
     it("should group chats by time periods", async () => {
+        const chatId = generateChatId();
         const chats: UIChat[] = [
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",
@@ -234,11 +247,12 @@ describe("useUserInitialChatsSearch", () => {
     });
 
     it("should use initialData when provided", () => {
+        const chatId = generateChatId();
         const initialData: UIChat[] = [
             {
-                id: "chat-1" as any,
+                id: chatId,
                 title: "Chat 1",
-                visibility: "private" as any,
+                visibility: CHAT_VISIBILITY.PRIVATE,
                 createdAt: "2024-01-01T00:00:00Z",
                 updatedAt: "2024-01-03T00:00:00Z",
                 visibleAt: "2024-01-01T00:00:00Z",

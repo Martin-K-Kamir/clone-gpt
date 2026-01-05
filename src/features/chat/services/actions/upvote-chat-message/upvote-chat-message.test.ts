@@ -2,12 +2,16 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import type { DBChatId, DBChatMessageId } from "@/features/chat/lib/types";
+
+import type { DBUserId } from "@/features/user/lib/types";
+
 import { upvoteChatMessage } from "./upvote-chat-message";
 
 const constants = vi.hoisted(() => ({
-    userId: "00000000-0000-0000-0000-000000000abc",
-    chatId: "30000000-0000-0000-0000-000000000abc",
-    messageId: "40000000-0000-0000-0000-000000000abc",
+    userId: "00000000-0000-0000-0000-000000000001" as DBUserId,
+    chatId: "30000000-0000-0000-0000-000000000001" as DBChatId,
+    messageId: "40000000-0000-0000-0000-000000000001" as DBChatMessageId,
 }));
 
 const mocks = vi.hoisted(() => ({
@@ -47,12 +51,12 @@ vi.mock("@/lib/api-response", () => ({
 describe("upvoteChatMessage", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        (auth as any).mockResolvedValue({
+        vi.mocked(auth).mockResolvedValue({
             user: { id: constants.userId, name: "Test User" },
-        });
+        } as any);
     });
 
-    it("upvotes message successfully", async () => {
+    it("should upvote message successfully", async () => {
         const mockMessage = {
             id: constants.messageId,
             chatId: constants.chatId,
@@ -87,15 +91,15 @@ describe("upvoteChatMessage", () => {
         });
 
         const result = await upvoteChatMessage({
-            messageId: constants.messageId as any,
-            chatId: constants.chatId as any,
+            messageId: constants.messageId,
+            chatId: constants.chatId,
             upvote: true,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("removes upvote successfully", async () => {
+    it("should remove upvote successfully", async () => {
         const mockMessage = {
             id: constants.messageId,
             chatId: constants.chatId,
@@ -130,27 +134,27 @@ describe("upvoteChatMessage", () => {
         });
 
         const result = await upvoteChatMessage({
-            messageId: constants.messageId as any,
-            chatId: constants.chatId as any,
+            messageId: constants.messageId,
+            chatId: constants.chatId,
             upvote: false,
         });
 
         expect(result).toEqual(apiSuccess);
     });
 
-    it("returns error when session is missing", async () => {
-        (auth as any).mockResolvedValueOnce(null);
+    it("should return error when session is missing", async () => {
+        vi.mocked(auth).mockResolvedValueOnce(null as any);
 
         const result = await upvoteChatMessage({
-            messageId: constants.messageId as any,
-            chatId: constants.chatId as any,
+            messageId: constants.messageId,
+            chatId: constants.chatId,
             upvote: true,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when message update fails", async () => {
+    it("should return error when message update fails", async () => {
         const mockMessage = {
             id: constants.messageId,
             chatId: constants.chatId,
@@ -185,15 +189,15 @@ describe("upvoteChatMessage", () => {
         });
 
         const result = await upvoteChatMessage({
-            messageId: constants.messageId as any,
-            chatId: constants.chatId as any,
+            messageId: constants.messageId,
+            chatId: constants.chatId,
             upvote: true,
         });
 
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when messageId is invalid", async () => {
+    it("should return error when messageId is invalid", async () => {
         const result = await upvoteChatMessage({
             messageId: "not-a-uuid" as any,
             chatId: constants.chatId as any,
@@ -203,7 +207,7 @@ describe("upvoteChatMessage", () => {
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when chatId is invalid", async () => {
+    it("should return error when chatId is invalid", async () => {
         const result = await upvoteChatMessage({
             messageId: constants.messageId as any,
             chatId: "not-a-uuid" as any,
@@ -213,10 +217,10 @@ describe("upvoteChatMessage", () => {
         expect(result).toEqual(apiError);
     });
 
-    it("returns error when upvote is invalid", async () => {
+    it("should return error when upvote is invalid", async () => {
         const result = await upvoteChatMessage({
-            messageId: constants.messageId as any,
-            chatId: constants.chatId as any,
+            messageId: constants.messageId,
+            chatId: constants.chatId,
             upvote: "invalid" as any,
         });
 

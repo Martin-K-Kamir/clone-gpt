@@ -20,7 +20,7 @@ describe("deleteUserFile", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("deletes file from storage", async () => {
+    it("should delete file from storage", async () => {
         const content = new Blob(["test content"], { type: "text/plain" });
 
         const uploadResult = await uploadToStorage({
@@ -59,7 +59,7 @@ describe("deleteUserFile", () => {
         expect(fileExists).toBe(false);
     });
 
-    it("handles non-existent file gracefully", async () => {
+    it("should handle non-existent file gracefully", async () => {
         const storedFile = {
             fileId: "00000000-0000-0000-0000-000000000000",
             name: "non-existent.txt",

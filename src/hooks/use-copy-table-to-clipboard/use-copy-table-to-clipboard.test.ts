@@ -54,7 +54,7 @@ describe("useCopyTableToClipboard", () => {
         return table;
     };
 
-    it("returns initial state", () => {
+    it("should return initial state", () => {
         const tableRef = createRef<HTMLTableElement>();
         const { result } = renderHook(() => useCopyTableToClipboard(tableRef));
 
@@ -63,7 +63,7 @@ describe("useCopyTableToClipboard", () => {
         expect(typeof result.current.copyTable).toBe("function");
     });
 
-    it("copies table as HTML and plain text successfully", async () => {
+    it("should copy table as HTML and plain text successfully", async () => {
         mockWrite.mockResolvedValue(undefined);
 
         const table = createTable();
@@ -83,7 +83,7 @@ describe("useCopyTableToClipboard", () => {
         document.body.removeChild(table);
     });
 
-    it("falls back to plain text when HTML copy fails", async () => {
+    it("should fall back to plain text when HTML copy fails", async () => {
         mockWrite.mockRejectedValue(new Error("HTML copy failed"));
         mockWriteText.mockResolvedValue(undefined);
 
@@ -106,7 +106,7 @@ describe("useCopyTableToClipboard", () => {
         document.body.removeChild(table);
     });
 
-    it("handles clipboard API not available", async () => {
+    it("should handle clipboard API not available", async () => {
         const onError = vi.fn();
         Object.defineProperty(navigator, "clipboard", {
             value: undefined,
@@ -129,7 +129,7 @@ describe("useCopyTableToClipboard", () => {
         });
     });
 
-    it("handles both HTML and fallback copy failures", async () => {
+    it("should handle both HTML and fallback copy failures", async () => {
         const error = new Error("Copy failed");
         mockWrite.mockRejectedValue(error);
         mockWriteText.mockRejectedValue(error);
@@ -154,7 +154,7 @@ describe("useCopyTableToClipboard", () => {
         document.body.removeChild(table);
     });
 
-    it("handles error without message in fallback", async () => {
+    it("should handle error without message in fallback", async () => {
         mockWrite.mockRejectedValue(new Error("HTML failed"));
         mockWriteText.mockRejectedValue({});
 
@@ -177,7 +177,7 @@ describe("useCopyTableToClipboard", () => {
         document.body.removeChild(table);
     });
 
-    it("sets copied to false after delay", async () => {
+    it("should set copied to false after delay", async () => {
         vi.useFakeTimers();
         mockWrite.mockResolvedValue(undefined);
 
@@ -208,7 +208,7 @@ describe("useCopyTableToClipboard", () => {
         vi.useRealTimers();
     });
 
-    it("handles null table ref", async () => {
+    it("should handle null table ref", async () => {
         mockWrite.mockRejectedValue(new Error("ClipboardItem failed"));
         mockWriteText.mockResolvedValue(undefined);
 
@@ -224,7 +224,7 @@ describe("useCopyTableToClipboard", () => {
         });
     });
 
-    it("calls onError on copy failure", async () => {
+    it("should call onError on copy failure", async () => {
         const onError = vi.fn();
         const error = new Error("Copy error");
         mockWrite.mockRejectedValue(error);

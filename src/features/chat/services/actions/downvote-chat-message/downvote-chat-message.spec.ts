@@ -6,6 +6,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { auth } from "@/features/auth/services/auth";
 
+import { CHAT_VISIBILITY } from "@/features/chat/lib/constants";
+import { CHAT_ROLE } from "@/features/chat/lib/constants";
+
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 import type { DBUserId } from "@/features/user/lib/types";
 
 import { supabase } from "@/services/supabase";
@@ -31,12 +35,12 @@ describe("downvoteChatMessage", () => {
                 name: "Test User",
                 email: "test@example.com",
                 image: null,
-                role: "user",
+                role: USER_ROLE.USER,
             },
         });
     });
 
-    it("sets downvote to true when downvoting a message", async () => {
+    it("should set downvote to true when downvoting a message", async () => {
         const chatId = generateChatId();
         const messageId = generateMessageId();
 
@@ -44,7 +48,7 @@ describe("downvoteChatMessage", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -54,7 +58,7 @@ describe("downvoteChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             content: "Test message for downvote",
             metadata: {},
             parts: [],
@@ -77,7 +81,7 @@ describe("downvoteChatMessage", () => {
         }
     });
 
-    it("sets downvote to false when removing downvote from a message", async () => {
+    it("should set downvote to false when removing downvote from a message", async () => {
         const chatId = generateChatId();
         const messageId = generateMessageId();
 
@@ -85,7 +89,7 @@ describe("downvoteChatMessage", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -95,7 +99,7 @@ describe("downvoteChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             content: "Test message for downvote",
             metadata: { isDownvoted: true, isUpvoted: false },
             parts: [],
@@ -118,7 +122,7 @@ describe("downvoteChatMessage", () => {
         }
     });
 
-    it("preserves existing metadata when updating downvote", async () => {
+    it("should preserve existing metadata when updating downvote", async () => {
         const chatId = generateChatId();
         const messageId = generateMessageId();
 
@@ -126,7 +130,7 @@ describe("downvoteChatMessage", () => {
             id: chatId,
             userId,
             title: "Test Chat",
-            visibility: "private",
+            visibility: CHAT_VISIBILITY.PRIVATE,
             visibleAt: new Date().toISOString(),
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
@@ -136,7 +140,7 @@ describe("downvoteChatMessage", () => {
             id: messageId,
             chatId,
             userId,
-            role: "assistant",
+            role: CHAT_ROLE.ASSISTANT,
             content: "Test message for downvote",
             metadata: { customField: "value" },
             parts: [],

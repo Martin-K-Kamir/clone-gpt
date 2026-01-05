@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 
-import { CHAT_TOOL } from "@/features/chat/lib/constants";
+import { CHAT_MESSAGE_TYPE, CHAT_TOOL } from "@/features/chat/lib/constants";
 import type { UIAssistantChatMessage } from "@/features/chat/lib/types";
 
 import { isChatTool } from "./is-chat-tool";
@@ -48,7 +48,7 @@ describe("isChatTool", () => {
 
     it("should return false for text part", () => {
         const part = {
-            type: "text",
+            type: CHAT_MESSAGE_TYPE.TEXT,
             text: "Hello world",
         } as any;
 
@@ -57,7 +57,7 @@ describe("isChatTool", () => {
 
     it("should return false for file part", () => {
         const part = {
-            type: "file",
+            type: CHAT_MESSAGE_TYPE.FILE,
             url: "https://example.com/file.pdf",
         } as any;
 
@@ -89,7 +89,7 @@ describe("isChatTool", () => {
 
         it("should not narrow type when false", () => {
             const part: UIAssistantChatMessage["parts"][number] = {
-                type: "text",
+                type: CHAT_MESSAGE_TYPE.TEXT,
                 text: "Hello world",
             } as any;
 

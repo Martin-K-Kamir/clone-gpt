@@ -16,7 +16,7 @@ const otherUserPrivateChatId =
 const missingChatId = "30000000-0000-0000-0000-000000000999" as DBChatId;
 
 describe("getChatAccess", () => {
-    it("returns access allowed when user is owner of private chat", async () => {
+    it("should return access allowed when user is owner of private chat", async () => {
         const result = await getChatAccess({
             chatId: privateChatId,
             userId: userId1,
@@ -30,7 +30,7 @@ describe("getChatAccess", () => {
         expect(result.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 
-    it("returns access allowed when user is owner of public chat", async () => {
+    it("should return access allowed when user is owner of public chat", async () => {
         const result = await getChatAccess({
             chatId: publicChatId,
             userId: userId1,
@@ -44,7 +44,7 @@ describe("getChatAccess", () => {
         expect(result.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
-    it("returns access denied when user is not owner of private chat", async () => {
+    it("should return access denied when user is not owner of private chat", async () => {
         const result = await getChatAccess({
             chatId: otherUserPrivateChatId,
             userId: userId1,
@@ -58,7 +58,7 @@ describe("getChatAccess", () => {
         expect(result.visibility).toBe(CHAT_VISIBILITY.PRIVATE);
     });
 
-    it("returns access allowed when user is not owner of public chat", async () => {
+    it("should return access allowed when user is not owner of public chat", async () => {
         const result = await getChatAccess({
             chatId: publicChatId,
             userId: userId2,
@@ -72,7 +72,7 @@ describe("getChatAccess", () => {
         expect(result.visibility).toBe(CHAT_VISIBILITY.PUBLIC);
     });
 
-    it("returns access denied when chat not found", async () => {
+    it("should return access denied when chat not found", async () => {
         const result = await getChatAccess({
             chatId: missingChatId,
             userId: userId1,
@@ -86,7 +86,7 @@ describe("getChatAccess", () => {
         expect(result).not.toHaveProperty("visibility");
     });
 
-    it("correctly identifies owner status", async () => {
+    it("should correctly identify owner status", async () => {
         const ownerResult = await getChatAccess({
             chatId: privateChatId,
             userId: userId1,

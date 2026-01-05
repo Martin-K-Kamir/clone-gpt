@@ -1,7 +1,8 @@
+import { generateUserId } from "@/vitest/helpers/generate-test-ids";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { entitlementsByUserRole } from "@/features/user/lib/constants/entitlements";
-import type { DBUserId } from "@/features/user/lib/types";
+import { USER_ROLE } from "@/features/user/lib/constants/user-roles";
 
 import { RATE_LIMIT_REASON } from "@/lib/constants";
 
@@ -29,7 +30,7 @@ vi.mock("@/features/user/services/db/update-user-files-rate-limit", () => ({
 
 (entitlementsByUserRole as any).user.maxFiles = 1;
 
-const userId = "00000000-0000-0000-0000-000000000999" as DBUserId;
+const userId = generateUserId();
 const baseRateLimit = {
     filesCounter: 0,
     isOverLimit: false,
@@ -41,26 +42,29 @@ const baseRateLimit = {
 describe("checkUserFilesRateLimit", () => {
     beforeEach(() => {
         vi.clearAllMocks();
-        mocks.mockGetUserById.mockResolvedValue({ id: userId, role: "user" });
+        mocks.mockGetUserById.mockResolvedValue({
+            id: userId,
+            role: USER_ROLE.USER,
+        });
     });
 
     afterEach(() => {
         vi.useRealTimers();
     });
 
-    it("creates a rate limit row when missing", async () => {
+    it("should create a rate limit row when missing", async () => {
         mocks.mockGetUserFilesRateLimit.mockResolvedValue(null);
         mocks.mockCreateUserFilesRateLimit.mockResolvedValue(baseRateLimit);
 
         const result = await checkUserFilesRateLimit({
             userId,
-            userRole: "user",
+            userRole: USER_ROLE.USER,
         });
 
         expect(result.isOverLimit).toBe(false);
     });
 
-    it("returns over-limit with reason when filesCounter >= maxFiles", async () => {
+    it("should return over-limit with reason when filesCounter >= maxFiles", async () => {
         mocks.mockGetUserFilesRateLimit.mockResolvedValue({
             ...baseRateLimit,
             filesCounter: entitlementsByUserRole.user.maxFiles,
@@ -68,7 +72,7 @@ describe("checkUserFilesRateLimit", () => {
 
         const result = await checkUserFilesRateLimit({
             userId,
-            userRole: "user",
+            userRole: USER_ROLE.USER,
         });
 
         expect(result.isOverLimit).toBe(true);
@@ -77,7 +81,7 @@ describe("checkUserFilesRateLimit", () => {
         }
     });
 
-    it("resets counters when more than 24h has passed", async () => {
+    it("should reset counters when more than 24h has passed", async () => {
         const past = new Date(Date.now() - 25 * 60 * 60 * 1000).toISOString();
         mocks.mockGetUserFilesRateLimit.mockResolvedValue({
             ...baseRateLimit,
@@ -87,7 +91,7 @@ describe("checkUserFilesRateLimit", () => {
 
         const result = await checkUserFilesRateLimit({
             userId,
-            userRole: "user",
+            userRole: USER_ROLE.USER,
         });
 
         expect(result.isOverLimit).toBe(false);

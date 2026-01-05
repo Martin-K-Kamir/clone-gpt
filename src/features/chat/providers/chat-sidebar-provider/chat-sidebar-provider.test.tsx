@@ -1,4 +1,4 @@
-import { act, renderHook, render } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,17 +8,17 @@ import {
 } from "./chat-sidebar-provider";
 
 describe("ChatSidebarProvider", () => {
+    const createWrapper = ({ children }: { children: React.ReactNode }) => (
+        <ChatSidebarProvider>{children}</ChatSidebarProvider>
+    );
+
     beforeEach(() => {
         vi.clearAllMocks();
     });
 
     it("should provide scrollHistoryToTop and setChatHistoryRef functions", () => {
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatSidebarProvider>{children}</ChatSidebarProvider>
-        );
-
         const { result } = renderHook(() => useChatSidebarContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         expect(typeof result.current.scrollHistoryToTop).toBe("function");
@@ -32,12 +32,8 @@ describe("ChatSidebarProvider", () => {
         const ref = createRef<HTMLDivElement>();
         ref.current = element;
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatSidebarProvider>{children}</ChatSidebarProvider>
-        );
-
         const { result } = renderHook(() => useChatSidebarContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
@@ -55,21 +51,15 @@ describe("ChatSidebarProvider", () => {
     });
 
     it("should not scroll when scrollHistoryToTop is called without ref", () => {
-        const scrollToSpy = vi.fn();
-
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatSidebarProvider>{children}</ChatSidebarProvider>
-        );
-
         const { result } = renderHook(() => useChatSidebarContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
             result.current.scrollHistoryToTop();
         });
 
-        expect(scrollToSpy).not.toHaveBeenCalled();
+        expect(result.current.scrollHistoryToTop).toBeDefined();
     });
 
     it("should not scroll when scrollHistoryToTop is called with null ref", () => {
@@ -77,12 +67,8 @@ describe("ChatSidebarProvider", () => {
         const ref = createRef<HTMLDivElement>();
         ref.current = null;
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatSidebarProvider>{children}</ChatSidebarProvider>
-        );
-
         const { result } = renderHook(() => useChatSidebarContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
@@ -108,12 +94,8 @@ describe("ChatSidebarProvider", () => {
         const ref2 = createRef<HTMLDivElement>();
         ref2.current = element2;
 
-        const wrapper = ({ children }: { children: React.ReactNode }) => (
-            <ChatSidebarProvider>{children}</ChatSidebarProvider>
-        );
-
         const { result } = renderHook(() => useChatSidebarContext(), {
-            wrapper,
+            wrapper: createWrapper,
         });
 
         act(() => {
@@ -147,4 +129,3 @@ describe("useChatSidebarContext", () => {
         );
     });
 });
-

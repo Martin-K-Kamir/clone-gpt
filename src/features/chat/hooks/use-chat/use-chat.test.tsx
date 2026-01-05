@@ -1,3 +1,8 @@
+import {
+    generateChatId,
+    generateMessageId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { ReactNode } from "react";
@@ -7,11 +12,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useChatFiles } from "@/features/chat/hooks";
 import { CHAT_ROLE, CHAT_VISIBILITY } from "@/features/chat/lib/constants";
 import { chatTextSchema } from "@/features/chat/lib/schemas";
-import type {
-    DBChatId,
-    DBChatMessageId,
-    UIChatMessage,
-} from "@/features/chat/lib/types";
+import type { UIChatMessage } from "@/features/chat/lib/types";
 import {
     createUserMessage,
     findMessageIndex,
@@ -25,7 +26,6 @@ import {
     useChatSidebarContext,
 } from "@/features/chat/providers";
 
-import type { DBUserId } from "@/features/user/lib/types";
 import { getUserChatPreferences } from "@/features/user/services/api";
 
 import { getParseErrors } from "@/lib/utils";
@@ -68,13 +68,10 @@ vi.mock("@/features/chat/lib/schemas", () => ({
     },
 }));
 
-vi.mock("@/lib/utils", async () => {
-    const actual = await vi.importActual("@/lib/utils");
-    return {
-        ...actual,
-        getParseErrors: vi.fn(),
-    };
-});
+vi.mock("@/lib/utils", () => ({
+    getParseErrors: vi.fn(),
+    objectValuesToTuple: vi.fn(obj => Object.values(obj)),
+}));
 
 vi.mock("@/hooks", () => ({
     useUuid: vi.fn(),
@@ -103,8 +100,8 @@ const mockToastError = vi.mocked(toast.error);
 
 describe("useChat", () => {
     let queryClient: QueryClient;
-    const userId = "user-1" as DBUserId;
-    const chatId = "chat-1" as DBChatId;
+    const userId = generateUserId();
+    const chatId = generateChatId();
     let mockRegenerate: ReturnType<typeof vi.fn>;
     let mockSendMessage: ReturnType<typeof vi.fn>;
     let mockStop: ReturnType<typeof vi.fn>;
@@ -161,10 +158,11 @@ describe("useChat", () => {
 
         mockGetUserChatPreferences.mockResolvedValue({} as any);
 
-        mockUseUuid.mockReturnValue(() => "new-chat-id" as DBChatId);
+        const newChatId = generateChatId();
+        mockUseUuid.mockReturnValue(() => newChatId);
 
         mockCreateUserMessage.mockReturnValue({
-            role: "user",
+            role: CHAT_ROLE.USER,
             content: "test",
         } as any);
 
@@ -269,7 +267,7 @@ describe("useChat", () => {
     });
 
     it("should regenerate assistant message when handleAssistantRegenerate is called", () => {
-        const messageId = "msg-1" as DBChatMessageId;
+        const messageId = generateMessageId();
 
         const { result } = renderHook(
             () =>
@@ -295,19 +293,19 @@ describe("useChat", () => {
     });
 
     it("should regenerate user message when handleUserRegenerate is called", () => {
-        const userMessageId = "user-msg-1" as DBChatMessageId;
-        const assistantMessageId = "assistant-msg-1" as DBChatMessageId;
+        const userMessageId = generateMessageId();
+        const assistantMessageId = generateMessageId();
         const newMessage = "updated message";
 
         const messages: UIChatMessage[] = [
             {
                 id: userMessageId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 content: "original",
             } as any,
             {
                 id: assistantMessageId,
-                role: "assistant",
+                role: CHAT_ROLE.ASSISTANT,
                 content: "response",
             } as any,
         ];
@@ -363,11 +361,11 @@ describe("useChat", () => {
     });
 
     it("should not regenerate when handleUserRegenerate is called without next assistant message", () => {
-        const messageId = "msg-1" as DBChatMessageId;
+        const messageId = generateMessageId();
         const messages: UIChatMessage[] = [
             {
                 id: messageId,
-                role: "user",
+                role: CHAT_ROLE.USER,
                 content: "test",
             } as any,
         ];
@@ -609,10 +607,11 @@ describe("useChat", () => {
     });
 
     it("should update messages when initialMessages changes", () => {
+        const messageId = generateMessageId();
         const initialMessages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
+                id: messageId,
+                role: CHAT_ROLE.USER,
                 content: "test",
             } as any,
         ];
@@ -636,10 +635,11 @@ describe("useChat", () => {
     });
 
     it("should not update messages when initialMessages is unchanged", () => {
+        const messageId = generateMessageId();
         const initialMessages: UIChatMessage[] = [
             {
-                id: "msg-1" as DBChatMessageId,
-                role: "user",
+                id: messageId,
+                role: CHAT_ROLE.USER,
                 content: "test",
             } as any,
         ];

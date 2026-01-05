@@ -17,7 +17,7 @@ describe("storeUserFile", () => {
         await cleanupStorageForUser(userId);
     });
 
-    it("stores file and returns file URL", async () => {
+    it("should store file and return file URL", async () => {
         const file = new File(["test file content"], "test-file.txt", {
             type: "text/plain",
         });
@@ -38,7 +38,7 @@ describe("storeUserFile", () => {
         expect(result.mediaType).toBe("text/plain");
     });
 
-    it("handles different file types", async () => {
+    it("should handle different file types", async () => {
         const file = new File(["pdf content"], "document.pdf", {
             type: "application/pdf",
         });

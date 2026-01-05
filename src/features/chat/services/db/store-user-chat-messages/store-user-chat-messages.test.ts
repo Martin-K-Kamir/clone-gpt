@@ -26,7 +26,7 @@ describe("storeUserChatMessages", () => {
         vi.clearAllMocks();
     });
 
-    it("throws when chatId is invalid", async () => {
+    it("should throw when chatId is invalid", async () => {
         await expect(
             storeUserChatMessages({
                 chatId: "not-a-uuid" as any,
@@ -36,7 +36,7 @@ describe("storeUserChatMessages", () => {
         ).rejects.toThrow();
     });
 
-    it("throws when userId is invalid", async () => {
+    it("should throw when userId is invalid", async () => {
         await expect(
             storeUserChatMessages({
                 chatId,
@@ -46,7 +46,7 @@ describe("storeUserChatMessages", () => {
         ).rejects.toThrow();
     });
 
-    it("stores multiple messages", async () => {
+    it("should store multiple messages", async () => {
         const messages = [
             {
                 id: messageId1,
@@ -69,7 +69,7 @@ describe("storeUserChatMessages", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("uses createdAt from message when preserveCreatedAt is true", async () => {
+    it("should use createdAt from message when preserveCreatedAt is true", async () => {
         const createdAt = "2024-01-01T00:00:00Z";
         const messages = [
             {
@@ -94,7 +94,7 @@ describe("storeUserChatMessages", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("uses createdAt from metadata when message createdAt is not provided", async () => {
+    it("should use createdAt from metadata when message createdAt is not provided", async () => {
         const createdAt = "2024-01-01T00:00:00Z";
         const messages = [
             {
@@ -119,7 +119,7 @@ describe("storeUserChatMessages", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("uses generated fallback createdAt when preserveCreatedAt is false", async () => {
+    it("should use generated fallback createdAt when preserveCreatedAt is false", async () => {
         const messages = [
             {
                 id: messageId1,
@@ -142,7 +142,7 @@ describe("storeUserChatMessages", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("filters out non-text parts when extracting content", async () => {
+    it("should filter out non-text parts when extracting content", async () => {
         const messages = [
             {
                 id: messageId1,
@@ -164,7 +164,7 @@ describe("storeUserChatMessages", () => {
         ).resolves.toBeUndefined();
     });
 
-    it("throws on insert error", async () => {
+    it("should throw on insert error", async () => {
         const messages = [
             {
                 id: messageId1,

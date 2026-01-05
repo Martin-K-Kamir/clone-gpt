@@ -1,14 +1,15 @@
+import {
+    generateChatId,
+    generateUserId,
+} from "@/vitest/helpers/generate-test-ids";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { STORAGE_BUCKET } from "@/features/chat/lib/constants/storage";
-import type { DBChatId } from "@/features/chat/lib/types";
-
-import type { DBUserId } from "@/features/user/lib/types";
 
 import { storeUserFile } from "./store-user-file";
 
-const userId = "00000000-0000-0000-0000-000000000001" as DBUserId;
-const chatId = "30000000-0000-0000-0000-000000000001" as DBChatId;
+const userId = generateUserId();
+const chatId = generateChatId();
 
 const mocks = vi.hoisted(() => ({
     uploadToStorage: vi.fn(),
@@ -23,7 +24,7 @@ describe("storeUserFile", () => {
         vi.clearAllMocks();
     });
 
-    it("stores file and returns file URL", async () => {
+    it("should store file and return file URL", async () => {
         const file = new File(["test content"], "test-file.txt", {
             type: "text/plain",
         });
@@ -51,7 +52,7 @@ describe("storeUserFile", () => {
         });
     });
 
-    it("handles different file types", async () => {
+    it("should handle different file types", async () => {
         const file = new File(["pdf content"], "document.pdf", {
             type: "application/pdf",
         });
@@ -77,7 +78,7 @@ describe("storeUserFile", () => {
         expect(result.mediaType).toBe("application/pdf");
     });
 
-    it("uses USER_FILES bucket", async () => {
+    it("should use USER_FILES bucket", async () => {
         const file = new File(["content"], "file.csv", {
             type: "text/csv",
         });
@@ -100,7 +101,7 @@ describe("storeUserFile", () => {
         expect(result.fileUrl).toContain(STORAGE_BUCKET.USER_FILES);
     });
 
-    it("throws error when upload fails", async () => {
+    it("should throw error when upload fails", async () => {
         const file = new File(["content"], "test.txt", {
             type: "text/plain",
         });
