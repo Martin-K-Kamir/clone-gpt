@@ -7,8 +7,6 @@
         "build": "next build",
         "start": "next start",
         "lint": "next lint",
-        "storybook": "storybook dev -p 6006",
-        "build-storybook": "storybook build",
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:watch": "vitest --watch",
@@ -23,10 +21,12 @@
         "test:integration": "vitest --project=integration",
         "test:integration:watch": "vitest --project=integration --watch",
         "test:integration:coverage": "vitest --project=integration --coverage",
-        "supabase:start": "supabase start",
-        "supabase:pull": "supabase db pull",
+        "storybook": "storybook dev -p 6006",
+        "build-storybook": "storybook build",
         "test-storybook": "npx vitest --project=storybook",
-        "chromatic": "npx chromatic --project-token=chpt_982ba57aac6dc46"
+        "chromatic": "npx chromatic --project-token=chpt_982ba57aac6dc46",
+        "supabase:start": "supabase start",
+        "supabase:pull": "supabase db pull"
     },
     "dependencies": {
         "@ai-sdk/openai": "^2.0.22",
