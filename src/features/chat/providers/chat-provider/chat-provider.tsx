@@ -261,28 +261,27 @@ export function ChatProvider({
             filesRateLimitError,
         ],
     );
+
     return (
-        <ChatContext.Provider value={chatContextValue}>
-            <ChatMessagesContext.Provider value={chatMessagesContextValue}>
-                <ChatFilesContext.Provider value={chatFilesContextValue}>
-                    <ChatStatusContext.Provider value={chatStatusContextValue}>
-                        <ChatHandlersContext.Provider
-                            value={chatHandlersContextValue}
-                        >
-                            <ChatMessagesRateLimitContext.Provider
+        <ChatContext value={chatContextValue}>
+            <ChatMessagesContext value={chatMessagesContextValue}>
+                <ChatFilesContext value={chatFilesContextValue}>
+                    <ChatStatusContext value={chatStatusContextValue}>
+                        <ChatHandlersContext value={chatHandlersContextValue}>
+                            <ChatMessagesRateLimitContext
                                 value={chatMessagesRateLimitContextValue}
                             >
-                                <ChatFilesRateLimitContext.Provider
+                                <ChatFilesRateLimitContext
                                     value={chatFilesRateLimitContextValue}
                                 >
                                     {children}
-                                </ChatFilesRateLimitContext.Provider>
-                            </ChatMessagesRateLimitContext.Provider>
-                        </ChatHandlersContext.Provider>
-                    </ChatStatusContext.Provider>
-                </ChatFilesContext.Provider>
-            </ChatMessagesContext.Provider>
-        </ChatContext.Provider>
+                                </ChatFilesRateLimitContext>
+                            </ChatMessagesRateLimitContext>
+                        </ChatHandlersContext>
+                    </ChatStatusContext>
+                </ChatFilesContext>
+            </ChatMessagesContext>
+        </ChatContext>
     );
 }
 
