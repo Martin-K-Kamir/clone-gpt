@@ -27,7 +27,6 @@ export async function createUserChat({
     title,
     throwOnNotFound = true,
 }: CreateUserChatProps) {
-    console.log("[chat db] creating user chat:", chatId, userId, title);
     assertIsDBChatId(chatId);
     assertIsDBUserId(userId);
     assertIsChatTitle(title);
@@ -43,7 +42,6 @@ export async function createUserChat({
         .select("*")
         .single();
 
-    console.log("[chat db] created user chat:", data, error);
     if (error) throw new Error("Chat insert failed");
     if (!data && throwOnNotFound) throw new Error("Chat not found");
     if (!data) return null;

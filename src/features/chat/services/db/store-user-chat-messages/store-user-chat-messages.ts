@@ -32,11 +32,6 @@ export async function storeUserChatMessages({
     assertIsDBChatId(chatId);
     assertIsDBUserId(userId);
 
-    console.log(
-        "[chat db] storing user chat messages --------------:",
-        JSON.stringify(messages, null, 2),
-    );
-
     const { error } = await supabase.from("messages").insert(
         messages.map((message, index) => {
             const fallbackCreatedAt = new Date(
@@ -75,5 +70,4 @@ export async function storeUserChatMessages({
     revalidateTag(tag.chatMessages(chatId), "max");
     revalidateTag(tag.userChat(chatId), "max");
     revalidateTag(tag.userChatsSearch(userId), "max");
-    console.log("[chat db] stored user chat messages:", messages);
 }

@@ -35,10 +35,4 @@ export async function incrementUserMessagesRateLimit({
                 currentRateLimit.tokensCounter + (increments.tokens || 0),
         },
     });
-
-    console.log("[user db] incremented user messages rate limit:", {
-        userId,
-        increments,
-        currentRateLimit,
-    });
 }

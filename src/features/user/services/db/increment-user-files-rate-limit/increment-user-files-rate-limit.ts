@@ -32,9 +32,4 @@ export async function incrementUserFilesRateLimit({
                 currentRateLimit.filesCounter + (increments.files || 0),
         },
     });
-    console.log("[user db] incremented user files rate limit:", {
-        userId,
-        increments,
-        currentRateLimit,
-    });
 }

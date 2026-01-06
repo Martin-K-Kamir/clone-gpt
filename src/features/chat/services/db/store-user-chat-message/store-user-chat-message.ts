@@ -46,5 +46,4 @@ export async function storeUserChatMessage({
     revalidateTag(tag.chatMessages(chatId), "max");
     revalidateTag(tag.userChat(chatId), "max");
     revalidateTag(tag.userChatsSearch(userId), "max");
-    console.log("[chat db] stored user chat message:", message);
 }

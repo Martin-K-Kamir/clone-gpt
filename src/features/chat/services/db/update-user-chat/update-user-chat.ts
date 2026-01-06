@@ -42,6 +42,5 @@ export async function updateUserChat({
     revalidateTag(tag.userChats(userId), "max");
     revalidateTag(tag.userChat(chatId), "max");
 
-    console.log("[chat db] updated user chat:", updatedData);
     return updatedData as DBChat;
 }

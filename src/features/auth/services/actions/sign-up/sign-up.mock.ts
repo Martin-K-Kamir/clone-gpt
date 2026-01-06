@@ -7,7 +7,6 @@ export const signUp = fn(
         password: string;
         confirmPassword: string;
     }) => {
-        console.log("[Storybook Mock] signUp called", data);
         return {
             success: true,
             message: "Account created successfully!",
