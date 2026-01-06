@@ -173,9 +173,3 @@ features/[feature-name]/
 - **Live Demo**: [View Live Application](https://clone-gpt-mkk.vercel.app/)
 - **Storybook**: [View Storybook](https://clone-gpt-storybook-mkk.netlify.app/?path=/docs/app-auth-logout-page--docs)
 - **Personal Website**: [Visit My Website](https://www.martinkamir.dev/)
-
-This is a personal project. All rights reserved.
-
----
-
-Built with ❤️ using Next.js, React, and OpenAI
