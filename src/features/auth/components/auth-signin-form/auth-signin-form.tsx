@@ -45,6 +45,10 @@ export function AuthSignInForm({
     const [isSubmitting, setIsSubmitting] = useState(false);
     const form = useForm<z.infer<typeof signinSchema>>({
         resolver: zodResolver(signinSchema),
+        defaultValues: {
+            email: "",
+            password: "",
+        },
     });
 
     const canLinkToSignup = typeof onSwitchToSignup === "undefined";
@@ -59,20 +63,19 @@ export function AuthSignInForm({
             password: values.password,
         });
 
-        await queryClient.resetQueries();
-
-        setIsSubmitting(false);
-        setIsSigningIn(false);
-
         if (!response.success) {
             toast.error(response.message);
             onError?.(new Error(response.message));
             return;
         }
 
+        queryClient.clear();
         router.push("/");
-        toast.success(response.message);
+        router.refresh();
+        setIsSubmitting(false);
+        setIsSigningIn(false);
         form.reset();
+        toast.success(response.message);
         onSuccess?.(values);
     }
 

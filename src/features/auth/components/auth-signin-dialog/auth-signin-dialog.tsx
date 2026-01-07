@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
     Dialog,
@@ -27,6 +27,14 @@ export function AuthSignInDialog({
 
     const [authView, setAuthView] = useState<"signin" | "signup">("signin");
     const isSigninView = authView === "signin";
+
+    useEffect(() => {
+        if (!open) {
+            setTimeout(() => {
+                setAuthView("signin");
+            }, 300);
+        }
+    }, [open]);
 
     return (
         <Dialog {...props} open={open} onOpenChange={onOpenChange}>

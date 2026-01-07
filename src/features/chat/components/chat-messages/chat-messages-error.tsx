@@ -44,11 +44,11 @@ export function ChatMessagesError({
                     />
                     {title}
                 </span>
-                {error?.message && (
+                {/* {error?.message && (
                     <span className="mt-2 text-pretty text-sm text-rose-50">
                         Reason: {error.message}
                     </span>
-                )}
+                )} */}
             </p>
         </div>
     );

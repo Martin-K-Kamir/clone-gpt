@@ -3,7 +3,7 @@
 import { useChat as useAiChat } from "@ai-sdk/react";
 import { useQuery } from "@tanstack/react-query";
 import { DefaultChatTransport } from "ai";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { useChatFiles } from "@/features/chat/hooks";
@@ -70,6 +70,7 @@ export function useChat({
     const canDuplicateChatRef = useRef(
         !isOwner && visibility === CHAT_VISIBILITY.PUBLIC,
     );
+    const duplicatedChatIdRef = useRef<DBChatId | null>(null);
     const isNewChatRef = useRef(isNewChat);
     const messagesStringified = useRef(JSON.stringify(initialMessages));
     const chatCacheSync = useChatCacheSyncContext();
@@ -104,19 +105,30 @@ export function useChat({
                 body,
                 messageId,
                 trigger,
-            }) => ({
-                body: {
-                    body,
-                    messageId,
-                    trigger,
-                    userChatPreferences,
-                    chatId: id,
-                    message: messages.at(-1),
-                    newChatId: canDuplicateChatRef.current
-                        ? getNewChatId()
-                        : undefined,
-                },
-            }),
+            }) => {
+                const getCurrentChatId = () =>
+                    duplicatedChatIdRef.current ?? (id as DBChatId);
+                const currentChatId = getCurrentChatId();
+                const newChatId = canDuplicateChatRef.current
+                    ? getNewChatId()
+                    : undefined;
+
+                if (newChatId) {
+                    duplicatedChatIdRef.current = newChatId;
+                }
+
+                return {
+                    body: {
+                        body,
+                        messageId,
+                        trigger,
+                        userChatPreferences,
+                        chatId: currentChatId,
+                        message: messages.at(-1),
+                        newChatId,
+                    },
+                };
+            },
         }),
         onFinish: async ({ isError }) => {
             if (isError) {
@@ -127,10 +139,13 @@ export function useChat({
             setIsSubmitted(false);
 
             if (canDuplicateChatRef.current) {
+                const duplicatedChatId =
+                    duplicatedChatIdRef.current ?? getNewChatId();
                 handleNewChatFinish({
                     chatCacheSync,
-                    chatId: getNewChatId(),
+                    chatId: duplicatedChatId,
                 });
+                canDuplicateChatRef.current = false;
                 onDuplicatedChatFinished?.();
                 return;
             }
@@ -140,7 +155,7 @@ export function useChat({
                 handleUpdateChatFinish({
                     chatCacheSync,
                     chatSidebarContext,
-                    chatId: id as DBChatId,
+                    chatId: getCurrentChatId(),
                 });
 
                 onUpdatedChatFinished?.();
@@ -149,11 +164,18 @@ export function useChat({
 
             handleNewChatFinish({
                 chatCacheSync,
-                chatId: id as DBChatId,
+                chatId: getCurrentChatId(),
             });
             onNewChatFinished?.();
         },
     });
+
+    const getCurrentChatId = useCallback(
+        () => (duplicatedChatIdRef.current ?? id) as DBChatId,
+        [id],
+    );
+
+    const currentChatId = useMemo(() => getCurrentChatId(), [getCurrentChatId]);
 
     const {
         selectedFiles,
@@ -162,7 +184,10 @@ export function useChat({
         handleFileSelect,
         handleFileRemove,
         handleClearFiles,
-    } = useChatFiles({ isSubmitted, chatId: id as DBChatId });
+    } = useChatFiles({
+        isSubmitted,
+        chatId: currentChatId,
+    });
 
     // Sync messages when initialMessages changes
     useEffect(() => {
@@ -261,7 +286,7 @@ export function useChat({
         selectedFiles,
         uploadedFiles,
         isUploadingFiles,
-        chatId: id as DBChatId,
+        chatId: currentChatId,
         isStreaming: status === "streaming",
         isSubmitted: status === "submitted",
         isReady: status === "ready",
