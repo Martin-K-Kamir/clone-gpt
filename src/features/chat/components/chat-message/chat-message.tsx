@@ -1,6 +1,5 @@
 import { ChatStatus } from "ai";
-import { motion } from "framer-motion";
-import React, { memo } from "react";
+import React, { memo, useLayoutEffect, useRef, useState } from "react";
 
 import type {
     DBChatId,
@@ -18,7 +17,7 @@ type ChatMessageProps = {
     message: UIChatMessage;
     chatId: DBChatId;
     status: ChatStatus;
-} & Omit<React.ComponentProps<typeof motion.article>, "children">;
+} & React.ComponentProps<"article">;
 
 export const PureChatMessage = ({
     message,
@@ -30,19 +29,20 @@ export const PureChatMessage = ({
     const { role } = message;
     const isUser = role === "user";
     const isAssistant = role === "assistant";
+    const elementRef = useRef<HTMLElement>(null);
 
     if (isAssistant && !message.parts.some(part => part.type === "text")) {
         return null;
     }
 
     return (
-        <motion.article
-            className={cn("last:min-h-96 last:pb-24", className)}
+        <article
+            ref={elementRef}
+            className={cn(
+                "animate-fade-in last:min-h-96 last:pb-24",
+                className,
+            )}
             data-role={role}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
             {...props}
             data-testid="chat-message"
         >
@@ -60,7 +60,7 @@ export const PureChatMessage = ({
                     status={status}
                 />
             )}
-        </motion.article>
+        </article>
     );
 };
 

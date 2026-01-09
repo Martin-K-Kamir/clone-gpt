@@ -161,3 +161,66 @@ html {
         background-position: -200% 0;
     }
 }
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-in-scale {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@layer utilities {
+    .animate-fade-in {
+        animation: fade-in 250ms ease-in-out forwards;
+    }
+
+    .toolbar-animate button,
+    .toolbar-animate [role="button"] {
+        opacity: 0;
+        transform: scale(0.9);
+        animation: fade-in-scale 150ms ease-out both;
+    }
+
+    .toolbar-animate button:nth-of-type(1),
+    .toolbar-animate [role="button"]:nth-of-type(1) {
+        animation-delay: 100ms;
+    }
+
+    .toolbar-animate button:nth-of-type(2),
+    .toolbar-animate [role="button"]:nth-of-type(2) {
+        animation-delay: 200ms;
+    }
+
+    .toolbar-animate button:nth-of-type(3),
+    .toolbar-animate [role="button"]:nth-of-type(3) {
+        animation-delay: 300ms;
+    }
+
+    .toolbar-animate button:nth-of-type(4),
+    .toolbar-animate [role="button"]:nth-of-type(4) {
+        animation-delay: 400ms;
+    }
+
+    .toolbar-animate button:nth-of-type(5),
+    .toolbar-animate [role="button"]:nth-of-type(5) {
+        animation-delay: 500ms;
+    }
+
+    .toolbar-animate button:nth-of-type(6),
+    .toolbar-animate [role="button"]:nth-of-type(6) {
+        animation-delay: 600ms;
+    }
+}

@@ -1,7 +1,6 @@
 "use client";
 
-import { animate, stagger } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 import { ChatMessageActionsAssistant } from "@/features/chat/components/chat-message-actions";
 import { ChatSourceDialog } from "@/features/chat/components/chat-source-dialog";
@@ -52,51 +51,18 @@ export function ChatMessageToolbarAssistant({
     const canShowUpvote = isOwner;
     const canShowDownvote = isOwner;
 
-    useEffect(() => {
-        const buttons = [
-            copyButtonRef.current,
-            regenerateButtonRef.current,
-            upVoteButtonRef.current,
-            downVoteButtonRef.current,
-            resourceTriggerRef.current,
-        ];
-
-        buttons.forEach(button => {
-            if (button) {
-                button.style.opacity = "0";
-                button.style.transform = "scale(0.01)";
-                button.style.transition = "none";
-            }
-        });
-    }, []);
-
-    useEffect(() => {
-        if (!canShowActions || isRateLimitPending) return;
-
-        const buttons = [
-            copyButtonRef.current,
-            regenerateButtonRef.current,
-            upVoteButtonRef.current,
-            downVoteButtonRef.current,
-            resourceTriggerRef.current,
-        ];
-
-        animate(
-            buttons.filter(Boolean),
-            {
-                opacity: 1,
-                scale: 1,
-            },
-            {
-                delay: stagger(0.1, { startDelay: 0.1 }),
-                duration: 0.15,
-                ease: "easeOut",
-            },
-        );
-    }, [canShowActions, isRateLimitPending]);
+    const shouldAnimate = canShowActions && !isRateLimitPending;
 
     return (
-        <div className={cn("flex items-center", className)} {...props}>
+        <div
+            className={cn(
+                "flex items-center",
+                shouldAnimate && "toolbar-animate opacity-100",
+                !shouldAnimate && "opacity-0 [animation-play-state:paused]",
+                className,
+            )}
+            {...props}
+        >
             <ChatMessageActionsAssistant
                 chatId={chatId}
                 messageId={messageId}
